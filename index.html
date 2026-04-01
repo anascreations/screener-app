@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>TradeMatrix — MA / EMA Calculator</title>
-
+<title>TradeMatrix Pro — MA / EMA / Gold Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
-
-<!-- ✅ FIXED -->
-<link rel="stylesheet" href="tradematrix.css" />
+<link rel="stylesheet" href="tradematrix.css"/>
 </head>
 <body>
 
@@ -19,25 +16,29 @@
 <div class="tm-header">
   <div class="tm-logo">
     <div class="tm-logo-dot"></div>
-    TradeMatrix
+    TradeMatrix <span style="color:var(--accent2);font-size:11px;font-weight:600;margin-left:2px">PRO</span>
   </div>
-  <span class="tm-header-sub">Calculators</span>
+  <span class="tm-header-sub">Momentum Strategy Suite</span>
+  <div class="tm-header-right">
+    <div class="tm-clock" id="tm-clock">--:--:-- UTC</div>
+    <div class="tm-session" id="tm-session-badge">— Session</div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════
      TAB BAR
 ══════════════════════════════════════ -->
 <div class="tab-bar">
-  <button class="tab-btn active" data-tab="ma"  onclick="switchTab('ma')">∿ MA Calculator</button>
-  <button class="tab-btn"        data-tab="ema" onclick="switchTab('ema')">≋ EMA Calculator</button>
+  <button class="tab-btn active" data-tab="ma"   onclick="switchTab('ma')">∿ MA Calculator</button>
+  <button class="tab-btn"        data-tab="ema"  onclick="switchTab('ema')">≋ EMA Calculator</button>
+  <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ Gold XAUUSD</button>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════
      MA CALCULATOR PANEL
-═══════════════════════════════════════════════════════════════ -->
+═══════════════════════════════════════════════════════════ -->
 <div class="panel active" id="panel-ma">
 
-  <!-- ── Reference Cards ── -->
   <div class="ref-grid">
     <div class="ref-panel">
       <div class="ref-panel-hdr">F1 — Price vs MA20</div>
@@ -45,7 +46,16 @@
         <div class="ref-row"><span class="ref-range" style="color:var(--green)">≤ 2%</span><span>🎯 Ideal Zone — full position</span></div>
         <div class="ref-row"><span class="ref-range" style="color:var(--accent)">2–5%</span><span>🟢 Acceptable — enter</span></div>
         <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">5–10%</span><span>🟡 Stretched — reduce 50%</span></div>
-        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&gt; 10%</span><span>🔴 Overextended — Skip</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&gt;10%</span><span>🔴 Overextended — Skip</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">ADX Trend Strength</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">≤ 15</span><span>🔴 No Trend — avoid</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">15–25</span><span>🟡 Developing — wait</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">25–50</span><span>✅ Strong Trend — trade</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">&gt;50</span><span>⚡ Very Strong</span></div>
       </div>
     </div>
     <div class="ref-panel">
@@ -68,146 +78,92 @@
     </div>
   </div>
 
-  <!-- ── Input Form ── -->
   <div class="card">
-    <div class="card-hdr"><span class="ci">∿</span> MA 6-Filter Stack</div>
+    <div class="card-hdr"><span class="ci">∿</span> MA 7-Filter Stack <span class="badge-new">+ADX +Supertrend</span></div>
     <div class="card-body">
 
       <div class="sec-label">MA Stack + Price</div>
       <div class="fg" style="margin-bottom:.9rem">
-        <div class="fld">
-          <label>Market Price</label>
-          <input type="number" id="ma-price" step="0.0001" placeholder="1.42" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>MA5</label>
-          <input type="number" id="ma-ma5" step="0.0001" placeholder="1.38" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>MA20</label>
-          <input type="number" id="ma-ma20" step="0.0001" placeholder="1.31" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>MA50</label>
-          <input type="number" id="ma-ma50" step="0.0001" placeholder="1.25" oninput="maCalc()"/>
-        </div>
+        <div class="fld"><label>Market Price</label><input type="number" id="ma-price" step="0.0001" placeholder="1.42" oninput="maCalc()"/></div>
+        <div class="fld"><label>MA5</label><input type="number" id="ma-ma5" step="0.0001" placeholder="1.38" oninput="maCalc()"/></div>
+        <div class="fld"><label>MA20</label><input type="number" id="ma-ma20" step="0.0001" placeholder="1.31" oninput="maCalc()"/></div>
+        <div class="fld"><label>MA50</label><input type="number" id="ma-ma50" step="0.0001" placeholder="1.25" oninput="maCalc()"/></div>
+        <div class="fld"><label>MA200 <span class="opt-tag">opt</span></label><input type="number" id="ma-ma200" step="0.0001" placeholder="1.18" oninput="maCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Trend Strength</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>ADX14 <span class="opt-tag">opt</span></label><input type="number" id="ma-adx" step="0.1" placeholder="28.5" oninput="maCalc()"/></div>
+        <div class="fld"><label>Supertrend Val <span class="opt-tag">opt</span></label><input type="number" id="ma-st" step="0.0001" placeholder="1.28" oninput="maCalc()"/></div>
+        <div class="fld"><label>BB Upper <span class="opt-tag">opt</span></label><input type="number" id="ma-bbu" step="0.0001" placeholder="1.51" oninput="maCalc()"/></div>
+        <div class="fld"><label>BB Lower <span class="opt-tag">opt</span></label><input type="number" id="ma-bbl" step="0.0001" placeholder="1.22" oninput="maCalc()"/></div>
       </div>
 
       <div class="sec-label">KDJ Oscillator (Step 4)</div>
       <div class="fg" style="margin-bottom:.9rem">
-        <div class="fld">
-          <label>K</label>
-          <input type="number" id="ma-k" step="0.001" placeholder="65.3" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>D</label>
-          <input type="number" id="ma-d" step="0.001" placeholder="58.2" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>J</label>
-          <input type="number" id="ma-j" step="0.001" placeholder="79.4" oninput="maCalc()"/>
-        </div>
+        <div class="fld"><label>K</label><input type="number" id="ma-k" step="0.001" placeholder="65.3" oninput="maCalc()"/></div>
+        <div class="fld"><label>D</label><input type="number" id="ma-d" step="0.001" placeholder="58.2" oninput="maCalc()"/></div>
+        <div class="fld"><label>J</label><input type="number" id="ma-j" step="0.001" placeholder="79.4" oninput="maCalc()"/></div>
       </div>
 
       <div class="sec-label">MACD (Step 5)</div>
       <div class="fg" style="margin-bottom:.9rem">
-        <div class="fld">
-          <label>DIF</label>
-          <input type="number" id="ma-dif" step="0.001" placeholder="0.013" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>DEA</label>
-          <input type="number" id="ma-dea" step="0.001" placeholder="0.011" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>Histogram</label>
-          <input type="number" id="ma-hist" step="0.001" placeholder="0.004" oninput="maCalc()"/>
-        </div>
+        <div class="fld"><label>DIF</label><input type="number" id="ma-dif" step="0.001" placeholder="0.013" oninput="maCalc()"/></div>
+        <div class="fld"><label>DEA</label><input type="number" id="ma-dea" step="0.001" placeholder="0.011" oninput="maCalc()"/></div>
+        <div class="fld"><label>Histogram</label><input type="number" id="ma-hist" step="0.001" placeholder="0.004" oninput="maCalc()"/></div>
       </div>
 
-      <div class="sec-label">Volume &amp; Optional</div>
+      <div class="sec-label">Volume &amp; Risk</div>
       <div class="fg">
-        <div class="fld">
-          <label>Volume Ratio</label>
-          <input type="number" id="ma-vol" step="0.01" placeholder="1.99" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>RSI14</label>
-          <input type="number" id="ma-rsi" step="0.1" placeholder="58.5" oninput="maCalc()"/>
-        </div>
-        <div class="fld">
-          <label>ATR14</label>
-          <input type="number" id="ma-atr" step="0.0001" placeholder="0.018" oninput="maCalc()"/>
-        </div>
+        <div class="fld"><label>Volume Ratio</label><input type="number" id="ma-vol" step="0.01" placeholder="1.99" oninput="maCalc()"/></div>
+        <div class="fld"><label>RSI14 <span class="opt-tag">opt</span></label><input type="number" id="ma-rsi" step="0.1" placeholder="58.5" oninput="maCalc()"/></div>
+        <div class="fld"><label>ATR14</label><input type="number" id="ma-atr" step="0.0001" placeholder="0.018" oninput="maCalc()"/></div>
+        <div class="fld"><label>Risk per Trade %</label><input type="number" id="ma-risk-pct" step="0.1" placeholder="1.0" oninput="maCalc()"/></div>
+        <div class="fld"><label>Account Size</label><input type="number" id="ma-account" step="100" placeholder="10000" oninput="maCalc()"/></div>
       </div>
 
       <div class="form-actions">
-        <!-- <button class="btn btn-primary"   onclick="maCalc()">▶ Calculate</button> -->
         <button class="btn btn-secondary" onclick="resetMA()">↺ Clear</button>
       </div>
     </div>
   </div>
 
-  <!-- ── Results ── -->
+  <!-- Results -->
   <div id="ma-result" style="display:none" class="result-area">
-
-    <!-- Decision strip -->
     <div class="decision-strip" id="ma-decision-strip">
       <div class="d-badge" id="ma-d-badge">—</div>
       <span class="risk-pill" id="ma-risk-pill">—</span>
       <span class="grade-badge" id="ma-grade-badge" style="display:none"></span>
       <div id="ma-d-meta" style="font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:.1rem"></div>
     </div>
-
-    <!-- Advice -->
     <div class="advice-box" id="ma-advice"></div>
 
-    <!-- Score dial + pie / filter checklist -->
     <div class="chart-layout">
-
-      <!-- Left: dial + pie -->
       <div class="card">
         <div class="card-hdr"><span class="ci">◎</span> Signal Breakdown</div>
         <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:.9rem">
-
-          <!-- Score gauge -->
           <div class="dial-wrap">
             <svg class="dial-svg" viewBox="0 0 150 90">
               <defs>
                 <linearGradient id="maDialGrad" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%"   stop-color="#f03a4a"/>
-                  <stop offset="50%"  stop-color="#f5c842"/>
-                  <stop offset="100%" stop-color="#00e87a"/>
+                  <stop offset="0%" stop-color="#f03a4a"/><stop offset="50%" stop-color="#f5c842"/><stop offset="100%" stop-color="#00e87a"/>
                 </linearGradient>
               </defs>
-              <!-- Track -->
               <path d="M15 85 A60 60 0 0 1 135 85" fill="none" stroke="var(--border)" stroke-width="12" stroke-linecap="round"/>
-              <!-- Fill arc -->
-              <path id="ma-dial-arc" d="M15 85 A60 60 0 0 1 135 85" fill="none"
-                stroke="url(#maDialGrad)" stroke-width="12" stroke-linecap="round"
-                stroke-dasharray="0 188"/>
-              <!-- Score text -->
-              <text id="ma-dial-score" x="75" y="78" text-anchor="middle"
-                font-family="'Syne',sans-serif" font-size="22" font-weight="800"
-                fill="var(--accent)">0</text>
-              <text x="75" y="90" text-anchor="middle"
-                font-family="'IBM Plex Mono',monospace" font-size="8"
-                fill="var(--muted)">SCORE /100</text>
+              <path id="ma-dial-arc" d="M15 85 A60 60 0 0 1 135 85" fill="none" stroke="url(#maDialGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 188"/>
+              <text id="ma-dial-score" x="75" y="78" text-anchor="middle" font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="var(--accent)">0</text>
+              <text x="75" y="90" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="8" fill="var(--muted)">SCORE /100</text>
             </svg>
           </div>
-
-          <!-- Pie chart -->
           <div class="pie-wrap">
             <svg class="pie-svg" viewBox="0 0 160 160" id="ma-pie"></svg>
             <div class="pie-legend" id="ma-pie-legend"></div>
           </div>
-
         </div>
       </div>
 
-      <!-- Right: filter checklist -->
       <div class="card">
-        <div class="card-hdr"><span class="ci">✓</span> 6-Filter Audit</div>
+        <div class="card-hdr"><span class="ci">✓</span> 7-Filter Audit</div>
         <div class="card-body">
           <div class="check-list" id="ma-checklist"></div>
           <div style="margin-top:.75rem">
@@ -216,50 +172,47 @@
           </div>
         </div>
       </div>
+    </div>
 
-    </div><!-- /chart-layout -->
-
-    <!-- MA Alignment & Distances -->
     <div class="card">
       <div class="card-hdr"><span class="ci">≋</span> MA Alignment &amp; Distances</div>
       <div class="card-body">
         <div class="stat-grid" id="ma-alignment-grid"></div>
         <div style="margin-top:.75rem">
-          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">
-            Price vs MA20 Stretch
-          </div>
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Price vs MA20 Stretch</div>
           <div class="range-track">
-            <div class="range-fill" id="ma-range-fill"
-              style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red))"></div>
+            <div class="range-fill" id="ma-range-fill" style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red))"></div>
             <div class="range-marker" id="ma-range-marker"></div>
           </div>
-          <div class="range-labels">
-            <span>0%</span>
-            <span id="ma-range-label" style="color:var(--accent)">—</span>
-            <span>10%+</span>
+          <div class="range-labels"><span>0%</span><span id="ma-range-label" style="color:var(--accent)">—</span><span>10%+</span></div>
+        </div>
+        <div id="ma-bb-section" style="display:none;margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Bollinger Band Position</div>
+          <div class="range-track">
+            <div class="range-fill" id="ma-bb-fill" style="background:linear-gradient(90deg,var(--red),var(--green),var(--red))"></div>
+            <div class="range-marker" id="ma-bb-marker"></div>
           </div>
+          <div class="range-labels"><span>BB Lower</span><span id="ma-bb-label" style="color:var(--accent)">—</span><span>BB Upper</span></div>
         </div>
       </div>
     </div>
 
-    <!-- Trade Plan (shown only when ATR14 is provided) -->
     <div class="card" id="ma-tradeplan-card" style="display:none">
       <div class="card-hdr"><span class="ci">$</span> Trade Plan</div>
       <div class="card-body">
         <div class="price-block" id="ma-price-block"></div>
+        <div id="ma-kelly-block" style="margin-top:.75rem;display:none"></div>
       </div>
     </div>
-
-  </div><!-- /ma-result -->
+  </div>
 </div><!-- /panel-ma -->
 
 
-<!-- ═══════════════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════
      EMA CALCULATOR PANEL
-═══════════════════════════════════════════════════════════════ -->
+═══════════════════════════════════════════════════════════ -->
 <div class="panel" id="panel-ema">
 
-  <!-- ── Reference Cards ── -->
   <div class="ref-grid">
     <div class="ref-panel">
       <div class="ref-panel-hdr">F1 — Price vs EMA8 (Momentum)</div>
@@ -267,7 +220,7 @@
         <div class="ref-row"><span class="ref-range" style="color:var(--green)">≤ 2%</span><span>🎯 Ideal Zone</span></div>
         <div class="ref-row"><span class="ref-range" style="color:var(--accent)">2–5%</span><span>🟢 Acceptable</span></div>
         <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">5–10%</span><span>🟡 Stretched — reduce</span></div>
-        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&gt; 10%</span><span>🔴 Overextended — Skip</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&gt;10%</span><span>🔴 Overextended — Skip</span></div>
       </div>
     </div>
     <div class="ref-panel">
@@ -282,7 +235,7 @@
       <div class="ref-panel-hdr">F3 — EMA21 vs EMA55 (Trend Maturity)</div>
       <div class="ref-panel-body">
         <div class="ref-row"><span class="ref-range" style="color:var(--red)">Negative</span><span>BEARISH 🔻</span></div>
-        <div class="ref-row"><span class="ref-range" style="color:var(--dim)">0–1%</span><span>FLAT ➡️ — wait</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--dim)">0–1%</span><span>FLAT ➡️</span></div>
         <div class="ref-row"><span class="ref-range" style="color:var(--green)">1–3%</span><span>S++ 🚀 Fresh trend</span></div>
         <div class="ref-row"><span class="ref-range" style="color:var(--accent)">3–5%</span><span>A ✅ Healthy</span></div>
         <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">5–8%</span><span>B ⚠️ Maturing</span></div>
@@ -290,179 +243,122 @@
         <div class="ref-row"><span class="ref-range" style="color:var(--red)">&gt;10%</span><span>X 🛑 Exhausted</span></div>
       </div>
     </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">ADX Trend Strength</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">≤ 15</span><span>🔴 No Trend</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">15–25</span><span>🟡 Developing</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">25–50</span><span>✅ Strong Trend</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">&gt;50</span><span>⚡ Momentum Run</span></div>
+      </div>
+    </div>
   </div>
 
-  <!-- ── Input Form ── -->
   <div class="card">
-    <div class="card-hdr"><span class="ci">≋</span> EMA 5-Filter Stack</div>
+    <div class="card-hdr"><span class="ci">≋</span> EMA 7-Filter Stack <span class="badge-new">+ADX +Ichimoku</span></div>
     <div class="card-body">
 
       <div class="sec-label">EMA Stack + Price</div>
       <div class="fg" style="margin-bottom:.9rem">
-        <div class="fld">
-          <label>Market Price</label>
-          <input type="number" id="ema-price" step="0.0001" placeholder="1.42" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>EMA8</label>
-          <input type="number" id="ema-ema8" step="0.0001" placeholder="1.38" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>EMA21</label>
-          <input type="number" id="ema-ema21" step="0.0001" placeholder="1.31" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>EMA55</label>
-          <input type="number" id="ema-ema55" step="0.0001" placeholder="1.25" oninput="emaCalc()"/>
-        </div>
+        <div class="fld"><label>Market Price</label><input type="number" id="ema-price" step="0.0001" placeholder="1.42" oninput="emaCalc()"/></div>
+        <div class="fld"><label>EMA8</label><input type="number" id="ema-ema8" step="0.0001" placeholder="1.38" oninput="emaCalc()"/></div>
+        <div class="fld"><label>EMA21</label><input type="number" id="ema-ema21" step="0.0001" placeholder="1.31" oninput="emaCalc()"/></div>
+        <div class="fld"><label>EMA55</label><input type="number" id="ema-ema55" step="0.0001" placeholder="1.25" oninput="emaCalc()"/></div>
+        <div class="fld"><label>EMA200 <span class="opt-tag">opt</span></label><input type="number" id="ema-ema200" step="0.0001" placeholder="1.10" oninput="emaCalc()"/></div>
       </div>
 
-      <div class="sec-label">Price Context (Optional)</div>
+      <div class="sec-label">Trend Strength</div>
       <div class="fg" style="margin-bottom:.9rem">
-        <div class="fld">
-          <label>Open</label>
-          <input type="number" id="ema-open" step="0.0001" placeholder="1.38" oninput="emaCalc()"/>
+        <div class="fld"><label>ADX14 <span class="opt-tag">opt</span></label><input type="number" id="ema-adx" step="0.1" placeholder="28.5" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Ichimoku Kumo <span class="opt-tag">opt</span></label>
+          <select id="ema-ichi" onchange="emaCalc()">
+            <option value="">— Not Set —</option>
+            <option value="above">Price Above Cloud</option>
+            <option value="inside">Price Inside Cloud</option>
+            <option value="below">Price Below Cloud</option>
+          </select>
         </div>
-        <div class="fld">
-          <label>Prev Close</label>
-          <input type="number" id="ema-prev" step="0.0001" placeholder="1.40" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>Day High</label>
-          <input type="number" id="ema-high" step="0.0001" placeholder="1.45" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>Day Low</label>
-          <input type="number" id="ema-low" step="0.0001" placeholder="1.35" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>52wk High</label>
-          <input type="number" id="ema-52h" step="0.0001" placeholder="2.00" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>52wk Low</label>
-          <input type="number" id="ema-52l" step="0.0001" placeholder="0.80" oninput="emaCalc()"/>
-        </div>
+        <div class="fld"><label>Supertrend Val <span class="opt-tag">opt</span></label><input type="number" id="ema-st" step="0.0001" placeholder="1.28" oninput="emaCalc()"/></div>
+        <div class="fld"><label>VWAP <span class="opt-tag">opt</span></label><input type="number" id="ema-vwap" step="0.0001" placeholder="1.39" oninput="emaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Price Context</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Open</label><input type="number" id="ema-open" step="0.0001" placeholder="1.38" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Prev Close</label><input type="number" id="ema-prev" step="0.0001" placeholder="1.40" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Day High</label><input type="number" id="ema-high" step="0.0001" placeholder="1.45" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Day Low</label><input type="number" id="ema-low" step="0.0001" placeholder="1.35" oninput="emaCalc()"/></div>
+        <div class="fld"><label>52wk High</label><input type="number" id="ema-52h" step="0.0001" placeholder="2.00" oninput="emaCalc()"/></div>
+        <div class="fld"><label>52wk Low</label><input type="number" id="ema-52l" step="0.0001" placeholder="0.80" oninput="emaCalc()"/></div>
       </div>
 
       <div class="sec-label">KDJ Oscillator</div>
       <div class="fg" style="margin-bottom:.9rem">
-        <div class="fld">
-          <label>K</label>
-          <input type="number" id="ema-k" step="0.001" placeholder="65.3" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>D</label>
-          <input type="number" id="ema-d" step="0.001" placeholder="58.2" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>J</label>
-          <input type="number" id="ema-j" step="0.001" placeholder="79.4" oninput="emaCalc()"/>
-        </div>
+        <div class="fld"><label>K</label><input type="number" id="ema-k" step="0.001" placeholder="65.3" oninput="emaCalc()"/></div>
+        <div class="fld"><label>D</label><input type="number" id="ema-d" step="0.001" placeholder="58.2" oninput="emaCalc()"/></div>
+        <div class="fld"><label>J</label><input type="number" id="ema-j" step="0.001" placeholder="79.4" oninput="emaCalc()"/></div>
       </div>
 
       <div class="sec-label">MACD</div>
       <div class="fg" style="margin-bottom:.9rem">
-        <div class="fld">
-          <label>DIF</label>
-          <input type="number" id="ema-dif" step="0.001" placeholder="0.013" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>DEA</label>
-          <input type="number" id="ema-dea" step="0.001" placeholder="0.011" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>Histogram</label>
-          <input type="number" id="ema-hist" step="0.001" placeholder="0.004" oninput="emaCalc()"/>
-        </div>
+        <div class="fld"><label>DIF</label><input type="number" id="ema-dif" step="0.001" placeholder="0.013" oninput="emaCalc()"/></div>
+        <div class="fld"><label>DEA</label><input type="number" id="ema-dea" step="0.001" placeholder="0.011" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Histogram</label><input type="number" id="ema-hist" step="0.001" placeholder="0.004" oninput="emaCalc()"/></div>
       </div>
 
-      <div class="sec-label">Volume &amp; Optional</div>
+      <div class="sec-label">Volume &amp; Risk</div>
       <div class="fg">
-        <div class="fld">
-          <label>Volume Ratio</label>
-          <input type="number" id="ema-vol" step="0.01" placeholder="1.99" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>RSI14</label>
-          <input type="number" id="ema-rsi" step="0.1" placeholder="58.5" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>ATR14</label>
-          <input type="number" id="ema-atr" step="0.0001" placeholder="0.018" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>Bid/Ask %</label>
-          <input type="number" id="ema-bidask" step="0.01" placeholder="60.5" oninput="emaCalc()"/>
-        </div>
-        <div class="fld">
-          <label>Beta</label>
-          <input type="number" id="ema-beta" step="0.001" placeholder="1.062" oninput="emaCalc()"/>
-        </div>
+        <div class="fld"><label>Volume Ratio</label><input type="number" id="ema-vol" step="0.01" placeholder="1.99" oninput="emaCalc()"/></div>
+        <div class="fld"><label>RSI14 <span class="opt-tag">opt</span></label><input type="number" id="ema-rsi" step="0.1" placeholder="58.5" oninput="emaCalc()"/></div>
+        <div class="fld"><label>ATR14</label><input type="number" id="ema-atr" step="0.0001" placeholder="0.018" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Bid/Ask %</label><input type="number" id="ema-bidask" step="0.01" placeholder="60.5" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Beta</label><input type="number" id="ema-beta" step="0.001" placeholder="1.062" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Risk per Trade %</label><input type="number" id="ema-risk-pct" step="0.1" placeholder="1.0" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Account Size</label><input type="number" id="ema-account" step="100" placeholder="10000" oninput="emaCalc()"/></div>
       </div>
 
       <div class="form-actions">
-        <!-- <button class="btn btn-primary"   onclick="emaCalc()">▶ Calculate</button> -->
         <button class="btn btn-secondary" onclick="resetEMA()">↺ Clear</button>
       </div>
     </div>
   </div>
 
-  <!-- ── Results ── -->
+  <!-- Results -->
   <div id="ema-result" style="display:none" class="result-area">
-
-    <!-- Decision strip -->
     <div class="decision-strip" id="ema-decision-strip">
       <div class="d-badge" id="ema-d-badge">—</div>
       <span class="risk-pill" id="ema-risk-pill">—</span>
       <span class="grade-badge" id="ema-grade-badge" style="display:none"></span>
       <div id="ema-d-meta" style="font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:.1rem"></div>
     </div>
-
-    <!-- Advice -->
     <div class="advice-box" id="ema-advice"></div>
 
-    <!-- Score dial + pie / filter checklist -->
     <div class="chart-layout">
-
-      <!-- Left: dial + pie -->
       <div class="card">
         <div class="card-hdr"><span class="ci">◎</span> Signal Breakdown</div>
         <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:.9rem">
-
           <div class="dial-wrap">
             <svg class="dial-svg" viewBox="0 0 150 90">
               <defs>
                 <linearGradient id="emaDialGrad" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%"   stop-color="#f03a4a"/>
-                  <stop offset="50%"  stop-color="#f5c842"/>
-                  <stop offset="100%" stop-color="#00e87a"/>
+                  <stop offset="0%" stop-color="#f03a4a"/><stop offset="50%" stop-color="#f5c842"/><stop offset="100%" stop-color="#00e87a"/>
                 </linearGradient>
               </defs>
               <path d="M15 85 A60 60 0 0 1 135 85" fill="none" stroke="var(--border)" stroke-width="12" stroke-linecap="round"/>
-              <path id="ema-dial-arc" d="M15 85 A60 60 0 0 1 135 85" fill="none"
-                stroke="url(#emaDialGrad)" stroke-width="12" stroke-linecap="round"
-                stroke-dasharray="0 188"/>
-              <text id="ema-dial-score" x="75" y="78" text-anchor="middle"
-                font-family="'Syne',sans-serif" font-size="22" font-weight="800"
-                fill="var(--accent)">0</text>
-              <text x="75" y="90" text-anchor="middle"
-                font-family="'IBM Plex Mono',monospace" font-size="8"
-                fill="var(--muted)">SCORE /100</text>
+              <path id="ema-dial-arc" d="M15 85 A60 60 0 0 1 135 85" fill="none" stroke="url(#emaDialGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 188"/>
+              <text id="ema-dial-score" x="75" y="78" text-anchor="middle" font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="var(--accent)">0</text>
+              <text x="75" y="90" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="8" fill="var(--muted)">SCORE /100</text>
             </svg>
           </div>
-
           <div class="pie-wrap">
             <svg class="pie-svg" viewBox="0 0 160 160" id="ema-pie"></svg>
             <div class="pie-legend" id="ema-pie-legend"></div>
           </div>
-
         </div>
       </div>
 
-      <!-- Right: filter checklist -->
       <div class="card">
-        <div class="card-hdr"><span class="ci">✓</span> 5-Filter EMA Audit</div>
+        <div class="card-hdr"><span class="ci">✓</span> 7-Filter EMA Audit</div>
         <div class="card-body">
           <div class="check-list" id="ema-checklist"></div>
           <div style="margin-top:.75rem">
@@ -471,47 +367,27 @@
           </div>
         </div>
       </div>
+    </div>
 
-    </div><!-- /chart-layout -->
-
-    <!-- EMA Alignment & Trend Maturity -->
     <div class="card">
       <div class="card-hdr"><span class="ci">≋</span> EMA Alignment &amp; Trend Maturity</div>
       <div class="card-body">
-
         <div class="stat-grid" id="ema-alignment-grid"></div>
-
-        <!-- EMA21 vs EMA55 maturity bar -->
         <div style="margin-top:.75rem">
-          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">
-            EMA21 vs EMA55 Gap (Trend Maturity)
-          </div>
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">EMA21 vs EMA55 Gap (Trend Maturity)</div>
           <div class="range-track">
-            <div class="range-fill" id="ema-range-fill"
-              style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red))"></div>
+            <div class="range-fill" id="ema-range-fill" style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red))"></div>
             <div class="range-marker" id="ema-range-marker"></div>
           </div>
-          <div class="range-labels">
-            <span>0%</span>
-            <span id="ema-range-label" style="color:var(--accent)">—</span>
-            <span>10%+</span>
-          </div>
+          <div class="range-labels"><span>0%</span><span id="ema-range-label" style="color:var(--accent)">—</span><span>10%+</span></div>
         </div>
-
-        <!-- Price context block (hidden until optional fields are filled) -->
         <div id="ema-price-context" style="display:none;margin-top:.75rem">
-          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem">
-            Price Context
-          </div>
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem">Price Context</div>
           <div class="stat-grid" id="ema-ctx-grid"></div>
-
           <div style="margin-top:.65rem">
-            <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">
-              Day Range Position
-            </div>
+            <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Day Range Position</div>
             <div class="range-track">
-              <div class="range-fill" id="ema-day-fill"
-                style="background:linear-gradient(90deg,var(--red),var(--green))"></div>
+              <div class="range-fill" id="ema-day-fill" style="background:linear-gradient(90deg,var(--red),var(--green))"></div>
               <div class="range-marker" id="ema-day-marker"></div>
             </div>
             <div class="range-labels">
@@ -521,23 +397,259 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
-    <!-- Trade Plan (shown only when ATR14 is provided) -->
     <div class="card" id="ema-tradeplan-card" style="display:none">
       <div class="card-hdr"><span class="ci">$</span> Trade Plan</div>
       <div class="card-body">
         <div class="price-block" id="ema-price-block"></div>
+        <div id="ema-kelly-block" style="margin-top:.75rem;display:none"></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /panel-ema -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     GOLD XAUUSD PANEL
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-gold">
+
+  <!-- Gold Header Banner -->
+  <div class="gold-banner">
+    <div class="gold-banner-icon">◈</div>
+    <div class="gold-banner-text">
+      <div class="gold-banner-title">GOLD / USD — XAUUSD</div>
+      <div class="gold-banner-sub">Professional Momentum Strategy with Fibonacci &amp; Session Analysis</div>
+    </div>
+    <div class="gold-session-info">
+      <div class="gold-session-label">TRADING SESSION</div>
+      <div class="gold-session-status" id="gold-session-status">Detecting…</div>
+      <div class="gold-session-time" id="gold-session-time">—</div>
+    </div>
+  </div>
+
+  <!-- Reference Cards — Gold Specific -->
+  <div class="ref-grid">
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">F1 — Price vs EMA21 (Gold Momentum)</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">0–1%</span><span>🎯 Ideal — full position</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">1–3%</span><span>🟢 Good — enter</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">3–5%</span><span>🟡 Stretched — reduce</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&gt;5%</span><span>🔴 Overextended — Skip</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">F5 — RSI14 Momentum Zone</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&lt;40</span><span>🔴 Weak — avoid long</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">40–50</span><span>🟡 Building — watch</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">50–70</span><span>🎯 Sweet Spot — trade</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--orange)">&gt;70</span><span>⚠️ Overbought — take profit</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">F6 — ADX Trend Strength</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">≤ 20</span><span>🔴 Ranging — no entry</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">20–28</span><span>🟡 Developing trend</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">28–45</span><span>✅ Strong trend</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">&gt;45</span><span>🚀 Momentum surge</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">DXY Correlation (Inverse)</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">DXY↓</span><span>🟢 Bullish Gold</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">DXY↔</span><span>🟡 Neutral — watch</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">DXY↑</span><span>🔴 Bearish Gold — caution</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">DXY≈</span><span>💡 Use Fib + EMA only</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="ci gold-ci">◈</span> Gold XAUUSD — 7-Filter System</div>
+    <div class="card-body">
+
+      <div class="sec-label">Price &amp; EMA Stack (Macro → Micro)</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>XAUUSD Price</label><input type="number" id="gold-price" step="0.01" placeholder="2345.50" oninput="goldCalc()"/></div>
+        <div class="fld"><label>EMA21</label><input type="number" id="gold-e21" step="0.01" placeholder="2310.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>EMA55</label><input type="number" id="gold-e55" step="0.01" placeholder="2280.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>EMA200</label><input type="number" id="gold-e200" step="0.01" placeholder="2150.00" oninput="goldCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Momentum Indicators</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>RSI14 <span class="req-tag">req</span></label><input type="number" id="gold-rsi" step="0.1" placeholder="58.5" oninput="goldCalc()"/></div>
+        <div class="fld"><label>ADX14 <span class="req-tag">req</span></label><input type="number" id="gold-adx" step="0.1" placeholder="32.0" oninput="goldCalc()"/></div>
+        <div class="fld"><label>K (KDJ)</label><input type="number" id="gold-k" step="0.001" placeholder="65.3" oninput="goldCalc()"/></div>
+        <div class="fld"><label>D (KDJ)</label><input type="number" id="gold-d" step="0.001" placeholder="58.2" oninput="goldCalc()"/></div>
+        <div class="fld"><label>J (KDJ)</label><input type="number" id="gold-j" step="0.001" placeholder="79.4" oninput="goldCalc()"/></div>
+      </div>
+
+      <div class="sec-label">MACD</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>DIF</label><input type="number" id="gold-dif" step="0.01" placeholder="8.50" oninput="goldCalc()"/></div>
+        <div class="fld"><label>DEA</label><input type="number" id="gold-dea" step="0.01" placeholder="6.20" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Histogram</label><input type="number" id="gold-hist" step="0.01" placeholder="2.30" oninput="goldCalc()"/></div>
+      </div>
+
+      <div class="sec-label">DXY &amp; Correlation</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>DXY Index <span class="opt-tag">opt</span></label><input type="number" id="gold-dxy" step="0.01" placeholder="104.50" oninput="goldCalc()"/></div>
+        <div class="fld"><label>DXY Direction</label>
+          <select id="gold-dxy-dir" onchange="goldCalc()">
+            <option value="">— Not Set —</option>
+            <option value="falling">📉 DXY Falling (Bullish Gold)</option>
+            <option value="flat">➡️ DXY Flat (Neutral)</option>
+            <option value="rising">📈 DXY Rising (Bearish Gold)</option>
+          </select>
+        </div>
+        <div class="fld"><label>Volume Ratio</label><input type="number" id="gold-vol" step="0.01" placeholder="1.50" oninput="goldCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Fibonacci (Swing Points)</div>
+      <div class="fib-note">Enter recent swing High and Low to calculate Fibonacci retracement levels.</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Swing High</label><input type="number" id="gold-fibh" step="0.01" placeholder="2400.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Swing Low</label><input type="number" id="gold-fibl" step="0.01" placeholder="2280.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Fib Trend</label>
+          <select id="gold-fib-dir" onchange="goldCalc()">
+            <option value="retrace">Pullback (Retrace)</option>
+            <option value="extend">Extension Target</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sec-label">Risk Management</div>
+      <div class="fg">
+        <div class="fld"><label>ATR14 (USD)</label><input type="number" id="gold-atr" step="0.01" placeholder="22.50" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Risk per Trade %</label><input type="number" id="gold-risk-pct" step="0.1" placeholder="1.0" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Account Size ($)</label><input type="number" id="gold-account" step="100" placeholder="10000" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Lot Size (oz)</label><input type="number" id="gold-lotsize" step="0.01" placeholder="1.00" oninput="goldCalc()"/></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-gold" onclick="goldCalc()">◈ Analyse Gold</button>
+        <button class="btn btn-secondary" onclick="resetGold()">↺ Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gold Results -->
+  <div id="gold-result" style="display:none" class="result-area">
+
+    <div class="decision-strip" id="gold-decision-strip">
+      <div class="d-badge" id="gold-d-badge">—</div>
+      <span class="risk-pill" id="gold-risk-pill">—</span>
+      <span class="grade-badge" id="gold-grade-badge" style="display:none"></span>
+      <div class="session-chip" id="gold-session-chip" style="display:none"></div>
+      <div id="gold-d-meta" style="font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:.1rem"></div>
+    </div>
+
+    <div class="advice-box" id="gold-advice"></div>
+
+    <div class="chart-layout">
+      <div class="card">
+        <div class="card-hdr"><span class="ci gold-ci">◎</span> Gold Signal Breakdown</div>
+        <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:.9rem">
+          <div class="dial-wrap">
+            <svg class="dial-svg" viewBox="0 0 150 90">
+              <defs>
+                <linearGradient id="goldDialGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#f03a4a"/><stop offset="50%" stop-color="#f5c842"/><stop offset="100%" stop-color="#f5c842"/>
+                  <stop offset="75%" stop-color="#FFD700"/><stop offset="100%" stop-color="#FFD700"/>
+                </linearGradient>
+              </defs>
+              <path d="M15 85 A60 60 0 0 1 135 85" fill="none" stroke="var(--border)" stroke-width="12" stroke-linecap="round"/>
+              <path id="gold-dial-arc" d="M15 85 A60 60 0 0 1 135 85" fill="none" stroke="url(#goldDialGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 188"/>
+              <text id="gold-dial-score" x="75" y="78" text-anchor="middle" font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="#FFD700">0</text>
+              <text x="75" y="90" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="8" fill="var(--muted)">SCORE /100</text>
+            </svg>
+          </div>
+          <div class="pie-wrap">
+            <svg class="pie-svg" viewBox="0 0 160 160" id="gold-pie"></svg>
+            <div class="pie-legend" id="gold-pie-legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="ci gold-ci">✓</span> 7-Filter Gold Audit</div>
+        <div class="card-body">
+          <div class="check-list" id="gold-checklist"></div>
+          <div style="margin-top:.75rem">
+            <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Signal Strength</div>
+            <div class="signal-meter" id="gold-signal-meter"></div>
+          </div>
+        </div>
       </div>
     </div>
 
-  </div><!-- /ema-result -->
-</div><!-- /panel-ema -->
+    <!-- EMA Alignment -->
+    <div class="card">
+      <div class="card-hdr"><span class="ci gold-ci">≋</span> Gold EMA Stack &amp; Alignment</div>
+      <div class="card-body">
+        <div class="stat-grid" id="gold-alignment-grid"></div>
+        <div style="margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Price vs EMA21 Stretch</div>
+          <div class="range-track">
+            <div class="range-fill" id="gold-range-fill" style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red))"></div>
+            <div class="range-marker" id="gold-range-marker" style="background:#FFD700;box-shadow:0 0 8px rgba(255,215,0,.6)"></div>
+          </div>
+          <div class="range-labels"><span>0%</span><span id="gold-range-label" style="color:#FFD700">—</span><span>6%+</span></div>
+        </div>
+      </div>
+    </div>
 
-<!-- ── External JS (load last) ── -->
+    <!-- Fibonacci Levels -->
+    <div class="card" id="gold-fib-card" style="display:none">
+      <div class="card-hdr"><span class="ci gold-ci">φ</span> Fibonacci Levels</div>
+      <div class="card-body">
+        <div class="fib-grid" id="gold-fib-grid"></div>
+        <div style="margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Fibonacci Position of Current Price</div>
+          <div class="range-track">
+            <div class="range-fill" id="gold-fib-fill" style="background:linear-gradient(90deg,var(--red),var(--accent),var(--green))"></div>
+            <div class="range-marker" id="gold-fib-marker" style="background:#FFD700;box-shadow:0 0 8px rgba(255,215,0,.6)"></div>
+          </div>
+          <div class="range-labels"><span id="gold-fib-low-label">Swing Low</span><span id="gold-fib-pos-label" style="color:#FFD700">—</span><span id="gold-fib-high-label">Swing High</span></div>
+        </div>
+        <div id="gold-fib-advice" style="margin-top:.65rem;font-size:11.5px;color:var(--dim);line-height:1.7"></div>
+      </div>
+    </div>
+
+    <!-- Session Quality -->
+    <div class="card" id="gold-session-card">
+      <div class="card-hdr"><span class="ci gold-ci">⏱</span> Session Quality &amp; Timing</div>
+      <div class="card-body">
+        <div class="session-grid" id="gold-session-grid"></div>
+        <div class="session-bar-row" style="margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Session Quality Score</div>
+          <div class="range-track">
+            <div class="range-fill" id="gold-sess-fill" style="background:linear-gradient(90deg,var(--red),var(--yellow),var(--green))"></div>
+            <div class="range-marker" id="gold-sess-marker" style="background:#FFD700"></div>
+          </div>
+          <div class="range-labels"><span>Avoid</span><span id="gold-sess-label" style="color:#FFD700">—</span><span>Prime</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trade Plan -->
+    <div class="card" id="gold-tradeplan-card" style="display:none">
+      <div class="card-hdr"><span class="ci gold-ci">$</span> Gold Trade Plan (ATR-Based)</div>
+      <div class="card-body">
+        <div class="price-block" id="gold-price-block"></div>
+        <div id="gold-kelly-block" style="margin-top:.75rem;display:none"></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /panel-gold -->
+
 <script src="tradematrix.js"></script>
-
 </body>
 </html>
