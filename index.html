@@ -10,6 +10,8 @@
 </head>
 <body>
 
+
+
 <!-- ══════════════════════════════════════
      HEADER
 ══════════════════════════════════════ -->
@@ -22,6 +24,14 @@
   <div class="tm-header-right">
     <div class="tm-clock" id="tm-clock">--:--:-- UTC</div>
     <div class="tm-session" id="tm-session-badge">— Session</div>
+	<!-- <button onclick="toggleTheme()" class="btn">🌗 Theme</button> -->
+  </div>
+  <div style="display:flex;align-items:center;gap:.75rem;">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="t-icon" id="themeIcon">🌙</span>
+      <span id="themeLabel">Theme</span>
+    </button>
+    <span class="live-badge">Live</span>
   </div>
 </div>
 
@@ -31,7 +41,7 @@
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="ma"   onclick="switchTab('ma')">∿ MA Calculator</button>
   <button class="tab-btn"        data-tab="ema"  onclick="switchTab('ema')">≋ EMA Calculator</button>
-  <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ Gold XAUUSD</button>
+  <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAU/USD</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -420,7 +430,7 @@
   <div class="gold-banner">
     <div class="gold-banner-icon">◈</div>
     <div class="gold-banner-text">
-      <div class="gold-banner-title">GOLD / USD — XAUUSD</div>
+      <div class="gold-banner-title">XAU/USD</div>
       <div class="gold-banner-sub">Professional Momentum Strategy with Fibonacci &amp; Session Analysis</div>
     </div>
     <div class="gold-session-info">

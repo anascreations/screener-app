@@ -1308,5 +1308,23 @@ function resetGold() {
   $('gold-result').style.display = 'none';
 }
 
+function toggleTheme() {
+  document.body.classList.toggle("light");
+
+  // Save preference
+  if (document.body.classList.contains("light")) {
+    localStorage.setItem("theme", "light");
+  } else {
+    localStorage.setItem("theme", "dark");
+  }
+}
+// Load theme on page load
+window.onload = function () {
+  const theme = localStorage.getItem("theme");
+  if (theme === "light") {
+    document.body.classList.add("light");
+  }
+};
+
 /* Auto-trigger gold session banner on load */
 updateGoldSessionBanner();
