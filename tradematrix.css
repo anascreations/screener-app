@@ -1,8 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════
-   TradeMatrix Pro — tradematrix.css  (Enhanced Edition)
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ── RESET & ROOT ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -1077,7 +1072,7 @@ input.tip-active, select.tip-active {
 /* ══════════════════════════════════════
    GUIDE TAB BUTTON
 ══════════════════════════════════════ */
-.guide-tab { color: var(--muted) !important; }
+.guide-tab { /* color: var(--muted) !important; */ }
 .guide-tab:hover { color: var(--text) !important; }
 .guide-tab.active { color: var(--yellow) !important; border-bottom-color: var(--yellow) !important; }
 
