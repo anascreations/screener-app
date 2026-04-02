@@ -964,7 +964,7 @@ select {
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .gold-banner { flex-direction: column; align-items: flex-start; }
   .gold-session-info { margin-left: 0; text-align: left; }
-  .tm-clock, .tm-session { display: none; }
+  .tm-session { display: none; }
   .signal-meter { grid-template-columns: repeat(7, 1fr); }
 }
 
