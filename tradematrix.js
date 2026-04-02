@@ -1658,7 +1658,7 @@ const TOOLTIPS = {
 (function initTooltips() {
 	const tip = $('tm-tooltip');
 	if (!tip) return;
-
+	let pinned = false;
 	const COLOR = { green: 'var(--green)', accent: 'var(--accent)', yellow: 'var(--yellow)', red: 'var(--red)', orange: 'var(--orange)' };
 
 	function showTip(el, data) {
@@ -1678,10 +1678,12 @@ const TOOLTIPS = {
 		positionTip(el);
 	}
 
-	function hideTip(el) {
-		tip.style.display = 'none';
-		if (el) el.classList.remove('tip-active');
-	}
+	function hideTip(el, force) {
+	    if (pinned && !force) return;
+	    tip.style.display = 'none';
+	    if (el) el.classList.remove('tip-active');
+	    pinned = false;
+	  }
 
 	function positionTip(el) {
 		const rect = el.getBoundingClientRect();
@@ -1735,7 +1737,7 @@ const TOOLTIPS = {
 					indicator.className = 'tip-indicator';
 					indicator.textContent = 'i';
 					indicator.title = '';
-					indicator.addEventListener('click', e => { e.preventDefault(); showTip(el, data); el.focus(); });
+					indicator.addEventListener('click', e => { e.stopPropagation(); pinned = !pinned; if (pinned) showTip(el, data); else hideTip(el, true); });
 					lbl.appendChild(indicator);
 				}
 			}
@@ -1743,6 +1745,7 @@ const TOOLTIPS = {
 	}
 
 	// Keep tooltip updated on scroll/resize
+	document.addEventListener('click', e => { if (!tip.contains(e.target) && !e.target.classList.contains('tip-indicator')) hideTip(null, true); });
 	window.addEventListener('scroll', () => { if (document.activeElement && TOOLTIPS[document.activeElement.id]) positionTip(document.activeElement); }, { passive: true });
 	window.addEventListener('resize', () => { if (tip.style.display !== 'none') hideTip(null); });
 })();

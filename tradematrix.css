@@ -1038,10 +1038,8 @@ select {
 }
 
 .tip-indicator {
-  position: absolute;
-  right: .5rem;
-  top: 50%;
-  transform: translateY(-50%);
+  position: static;
+  transform: none;
   width: 14px;
   height: 14px;
   border-radius: 50%;
