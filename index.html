@@ -10,8 +10,6 @@
 </head>
 <body>
 
-
-
 <!-- ══════════════════════════════════════
      HEADER
 ══════════════════════════════════════ -->
@@ -24,13 +22,6 @@
   <div class="tm-header-right">
     <div class="tm-clock" id="tm-clock">--:--:-- UTC</div>
     <div class="tm-session" id="tm-session-badge">— Session</div>
-	<!-- <button onclick="toggleTheme()" class="btn">🌗 Theme</button> -->
-  </div>
-  <div style="display:flex;align-items:center;gap:.75rem;">
-    <button class="theme-toggle" onclick="toggleTheme()">
-      <span class="t-icon" id="themeIcon">🌙</span>
-      <span id="themeLabel">Theme</span>
-    </button>
   </div>
 </div>
 
@@ -38,9 +29,11 @@
      TAB BAR
 ══════════════════════════════════════ -->
 <div class="tab-bar">
-  <button class="tab-btn active" data-tab="ma"   onclick="switchTab('ma')">∿ MA Calculator</button>
-  <button class="tab-btn"        data-tab="ema"  onclick="switchTab('ema')">≋ EMA Calculator</button>
-  <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAU/USD</button>
+  <button class="tab-btn active" data-tab="ma"     onclick="switchTab('ma')">∿ MA Calculator</button>
+  <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA Calculator</button>
+  <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ Gold XAUUSD</button>
+  <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 Bursa Gold ETF</button>
+  <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -429,7 +422,7 @@
   <div class="gold-banner">
     <div class="gold-banner-icon">◈</div>
     <div class="gold-banner-text">
-      <div class="gold-banner-title">XAU/USD</div>
+      <div class="gold-banner-title">GOLD / USD — XAUUSD</div>
       <div class="gold-banner-sub">Professional Momentum Strategy with Fibonacci &amp; Session Analysis</div>
     </div>
     <div class="gold-session-info">
@@ -543,7 +536,7 @@
       </div>
 
       <div class="form-actions">
-        <!-- <button class="btn btn-gold" onclick="goldCalc()">◈ Analyse Gold</button> -->
+        <button class="btn btn-gold" onclick="goldCalc()">◈ Analyse Gold</button>
         <button class="btn btn-secondary" onclick="resetGold()">↺ Clear</button>
       </div>
     </div>
@@ -658,6 +651,783 @@
     </div>
   </div>
 </div><!-- /panel-gold -->
+
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BURSA MALAYSIA — GOLD ETF PANEL (0828EA / 0829EA)
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-bursa">
+
+  <div class="bursa-banner">
+    <div class="bursa-banner-left">
+      <div class="bursa-flag">🇲🇾</div>
+      <div>
+        <div class="bursa-banner-title">BURSA GOLD ETF <span class="bursa-code">0828EA · 0829EA</span></div>
+        <div class="bursa-banner-sub">Bursa Malaysia · MYR · Lot Size 100 · Tracks Physical Gold via MYR/USD</div>
+      </div>
+    </div>
+    <div class="bursa-session-block">
+      <div class="bursa-sess-label">BURSA SESSION (MYT)</div>
+      <div class="bursa-sess-status" id="bursa-sess-status">Detecting…</div>
+      <div class="bursa-sess-time"   id="bursa-sess-time">—</div>
+    </div>
+  </div>
+
+  <div class="ref-grid">
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">NAV Premium — Entry Quality</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">–2 to 1%</span><span>🎯 At / Below NAV — ideal buy</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">1 – 2%</span><span>🟢 Small premium — acceptable</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">2 – 3%</span><span>🟡 Elevated — reduce 50% size</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&gt; 3%</span><span>🔴 Overpriced vs NAV — skip</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">Bid/Ask Ratio — Order Flow</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">&gt; +5%</span><span>🟢 Strong buyers — momentum</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">0 – 5%</span><span>✅ Net buyers — bullish</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">–5 – 0%</span><span>⚠️ Slight sell pressure</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&lt; –5%</span><span>🔴 Sellers dominate — avoid</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">Volume Ratio — ETF Liquidity</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">&gt; 2.0×</span><span>⚡ Institutional activity</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">1.2 – 2×</span><span>✅ Good — proceed</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">0.8 – 1.2×</span><span>🟡 Average — use limit orders</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&lt; 0.8×</span><span>🔴 Thin — risk wide spread</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">Bursa Session (MYT = UTC+8)</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">09:00–12:30</span><span>🎯 Morning — prime volume</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">14:30–17:00</span><span>✅ Afternoon — good flow</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">08:30–09:00</span><span>🟡 Pre-open — orders only</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">17:00+</span><span>🔴 Closed — no entry</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="bursa-ci">🇲🇾</span> Gold ETF 8-Filter System <span class="badge-new">NAV + Premium + Bid/Ask + Bursa Session</span></div>
+    <div class="card-body">
+
+      <div class="sec-label">Live Quote (copy directly from your trading app)</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Price (MYR) <span class="req-tag">req</span></label>
+          <input type="number" id="bu-price" step="0.001" placeholder="5.780" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Open</label>
+          <input type="number" id="bu-open"  step="0.001" placeholder="5.920" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Prev Close</label>
+          <input type="number" id="bu-prev"  step="0.001" placeholder="5.890" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Day High</label>
+          <input type="number" id="bu-high"  step="0.001" placeholder="5.930" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Day Low</label>
+          <input type="number" id="bu-low"   step="0.001" placeholder="5.730" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Volume (units)</label>
+          <input type="number" id="bu-vol-units" step="100" placeholder="104200" oninput="bursaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">52-Week &amp; Historical Range</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>52wk High</label>
+          <input type="number" id="bu-52h"  step="0.001" placeholder="6.700" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>52wk Low</label>
+          <input type="number" id="bu-52l"  step="0.001" placeholder="4.120" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Historical High</label>
+          <input type="number" id="bu-allh" step="0.001" placeholder="6.700" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Historical Low</label>
+          <input type="number" id="bu-alll" step="0.001" placeholder="2.700" oninput="bursaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">ETF Valuation Data <span style="font-size:9px;color:var(--dim)">(from stats panel in trading app)</span></div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>NAV (MYR) <span class="req-tag">req</span></label>
+          <input type="number" id="bu-nav"      step="0.001" placeholder="5.635" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Premium % <span class="opt-tag">auto</span></label>
+          <input type="number" id="bu-premium"  step="0.01"  placeholder="2.57"  oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Bid/Ask Ratio %</label>
+          <input type="number" id="bu-bidask"   step="0.01"  placeholder="-6.65" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Volume Ratio</label>
+          <input type="number" id="bu-volratio" step="0.01"  placeholder="5.06"  oninput="bursaCalc()"/></div>
+        <div class="fld"><label>% Turnover</label>
+          <input type="number" id="bu-turnover" step="0.01"  placeholder="0.00"  oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Lot Size</label>
+          <input type="number" id="bu-lotsize"  step="100"   placeholder="100"   oninput="bursaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">MA Stack <span style="font-size:9px;color:var(--dim)">(from charting platform — daily/4H chart)</span></div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>MA5 <span class="req-tag">req</span></label>
+          <input type="number" id="bu-ma5"   step="0.001" placeholder="5.820" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>MA20 <span class="req-tag">req</span></label>
+          <input type="number" id="bu-ma20"  step="0.001" placeholder="5.780" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>MA50</label>
+          <input type="number" id="bu-ma50"  step="0.001" placeholder="5.500" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>MA200 <span class="opt-tag">opt</span></label>
+          <input type="number" id="bu-ma200" step="0.001" placeholder="5.100" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>ATR14 (MYR)</label>
+          <input type="number" id="bu-atr"   step="0.001" placeholder="0.085" oninput="bursaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Momentum Indicators</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>RSI14 <span class="opt-tag">opt</span></label>
+          <input type="number" id="bu-rsi" step="0.1" placeholder="52.0" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>ADX14 <span class="opt-tag">opt</span></label>
+          <input type="number" id="bu-adx" step="0.1" placeholder="28.5" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>K (KDJ)</label>
+          <input type="number" id="bu-k"   step="0.1" placeholder="60.0" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>D (KDJ)</label>
+          <input type="number" id="bu-d"   step="0.1" placeholder="55.0" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>J (KDJ)</label>
+          <input type="number" id="bu-j"   step="0.1" placeholder="70.0" oninput="bursaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">MACD</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>DIF</label>
+          <input type="number" id="bu-dif"  step="0.001" placeholder="0.045" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>DEA</label>
+          <input type="number" id="bu-dea"  step="0.001" placeholder="0.038" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Histogram</label>
+          <input type="number" id="bu-hist" step="0.001" placeholder="0.007" oninput="bursaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Risk Management (MYR)</div>
+      <div class="fg">
+        <div class="fld"><label>Account Size (MYR)</label>
+          <input type="number" id="bu-account" step="100"  placeholder="10000" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Risk per Trade %</label>
+          <input type="number" id="bu-riskpct" step="0.1"  placeholder="1.0"   oninput="bursaCalc()"/></div>
+        <div class="fld"><label>Brokerage Fee % <span class="opt-tag">opt</span></label>
+          <input type="number" id="bu-fee"     step="0.01" placeholder="0.10"  oninput="bursaCalc()"/></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-bursa" onclick="bursaCalc()">🇲🇾 Analyse ETF</button>
+        <button class="btn btn-secondary" onclick="resetBursa()">↺ Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="bursa-result" style="display:none" class="result-area">
+
+    <div class="decision-strip" id="bursa-decision-strip">
+      <div class="d-badge" id="bursa-d-badge">—</div>
+      <span class="risk-pill" id="bursa-risk-pill">—</span>
+      <span class="grade-badge" id="bursa-grade-badge" style="display:none"></span>
+      <span class="session-chip" id="bursa-sess-chip" style="display:none"></span>
+      <div id="bursa-d-meta" style="font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:.1rem;flex:1"></div>
+    </div>
+
+    <div class="advice-box" id="bursa-advice"></div>
+
+    <div class="bursa-ticker" id="bursa-ticker"></div>
+
+    <div class="chart-layout">
+      <div class="card">
+        <div class="card-hdr"><span class="bursa-ci">◎</span> Signal Breakdown</div>
+        <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:.9rem">
+          <div class="dial-wrap">
+            <svg class="dial-svg" viewBox="0 0 150 90">
+              <defs>
+                <linearGradient id="bursaDialGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#f03a4a"/>
+                  <stop offset="50%" stop-color="#f5c842"/>
+                  <stop offset="100%" stop-color="#00e87a"/>
+                </linearGradient>
+              </defs>
+              <path d="M15 85 A60 60 0 0 1 135 85" fill="none" stroke="var(--border)" stroke-width="12" stroke-linecap="round"/>
+              <path id="bursa-dial-arc" d="M15 85 A60 60 0 0 1 135 85" fill="none"
+                stroke="url(#bursaDialGrad)" stroke-width="12" stroke-linecap="round"
+                stroke-dasharray="0 188"/>
+              <text id="bursa-dial-score" x="75" y="78" text-anchor="middle"
+                font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="#cc0001">0</text>
+              <text x="75" y="90" text-anchor="middle"
+                font-family="'IBM Plex Mono',monospace" font-size="8" fill="var(--muted)">SCORE /100</text>
+            </svg>
+          </div>
+          <div class="pie-wrap">
+            <svg class="pie-svg" viewBox="0 0 160 160" id="bursa-pie"></svg>
+            <div class="pie-legend" id="bursa-pie-legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="bursa-ci">✓</span> 8-Filter Audit</div>
+        <div class="card-body">
+          <div class="check-list" id="bursa-checklist"></div>
+          <div style="margin-top:.75rem">
+            <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Signal Strength</div>
+            <div class="signal-meter" id="bursa-signal-meter"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="bursa-nav-card">
+      <div class="card-hdr"><span class="bursa-ci">◈</span> ETF Valuation — NAV &amp; Premium/Discount</div>
+      <div class="card-body">
+        <div class="stat-grid" id="bursa-nav-grid"></div>
+        <div style="margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Premium / Discount to NAV</div>
+          <div class="range-track">
+            <div class="range-fill" id="bursa-prem-fill"
+              style="background:linear-gradient(90deg,var(--green),var(--accent),var(--yellow),var(--red))"></div>
+            <div class="range-marker" id="bursa-prem-marker"
+              style="background:#cc0001;box-shadow:0 0 8px rgba(204,0,1,.4)"></div>
+          </div>
+          <div class="range-labels">
+            <span style="color:var(--green)">Discount –3%</span>
+            <span id="bursa-prem-label" style="color:#cc0001">—</span>
+            <span style="color:var(--red)">Premium +5%</span>
+          </div>
+        </div>
+        <div id="bursa-nav-advice" class="bursa-nav-advice" style="margin-top:.65rem"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><span class="bursa-ci">≋</span> MA Alignment &amp; Distances</div>
+      <div class="card-body">
+        <div class="stat-grid" id="bursa-align-grid"></div>
+        <div style="margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Price vs MA20 Stretch</div>
+          <div class="range-track">
+            <div class="range-fill" id="bursa-ma-fill"
+              style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red))"></div>
+            <div class="range-marker" id="bursa-ma-marker"
+              style="background:#cc0001;box-shadow:0 0 8px rgba(204,0,1,.4)"></div>
+          </div>
+          <div class="range-labels">
+            <span>0%</span><span id="bursa-ma-label" style="color:#cc0001">—</span><span>10%+</span>
+          </div>
+        </div>
+        <div id="bursa-dayrange-section" style="display:none;margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Day Range Position</div>
+          <div class="range-track">
+            <div class="range-fill" id="bursa-day-fill"
+              style="background:linear-gradient(90deg,var(--red),var(--green))"></div>
+            <div class="range-marker" id="bursa-day-marker" style="background:#cc0001"></div>
+          </div>
+          <div class="range-labels">
+            <span id="bursa-day-low">Low</span>
+            <span id="bursa-day-pct" style="color:#cc0001">—</span>
+            <span id="bursa-day-high">High</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><span class="bursa-ci">⏱</span> Bursa Session Quality (MYT UTC+8)</div>
+      <div class="card-body">
+        <div class="session-grid" id="bursa-session-grid"></div>
+        <div style="margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Session Quality Score</div>
+          <div class="range-track">
+            <div class="range-fill" id="bursa-sess-fill"
+              style="background:linear-gradient(90deg,var(--red),var(--yellow),var(--green))"></div>
+            <div class="range-marker" id="bursa-sess-marker" style="background:#cc0001"></div>
+          </div>
+          <div class="range-labels">
+            <span>Closed</span>
+            <span id="bursa-sess-label" style="color:#cc0001">—</span>
+            <span>Prime Open</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="bursa-tradeplan-card" style="display:none">
+      <div class="card-hdr"><span class="bursa-ci">$</span> Bursa Gold ETF Trade Plan (MYR)</div>
+      <div class="card-body">
+        <div class="price-block" id="bursa-price-block"></div>
+        <div id="bursa-kelly-block" style="margin-top:.75rem;display:none"></div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /panel-bursa -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     TRADING GUIDE PANEL
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-guide">
+
+  <div class="guide-hero">
+    <div class="guide-hero-icon">📖</div>
+    <div>
+      <div class="guide-hero-title">Professional Trading Guide</div>
+      <div class="guide-hero-sub">Complete strategy walkthrough for MA, EMA, and Gold XAUUSD momentum trading</div>
+    </div>
+  </div>
+
+  <!-- Guide Sub-Tabs -->
+  <div class="guide-tabs">
+    <button class="guide-tab-btn active" onclick="switchGuide('g-ma')">∿ MA Strategy</button>
+    <button class="guide-tab-btn"        onclick="switchGuide('g-ema')">≋ EMA Strategy</button>
+    <button class="guide-tab-btn"        onclick="switchGuide('g-gold')">◈ Gold XAUUSD</button>
+    <button class="guide-tab-btn"        onclick="switchGuide('g-risk')">⚖️ Risk Rules</button>
+    <button class="guide-tab-btn"        onclick="switchGuide('g-indicators')">📊 Indicators</button>
+  </div>
+
+  <!-- ── MA Strategy Guide ── -->
+  <div class="guide-section active" id="g-ma">
+    <div class="guide-card">
+      <div class="guide-card-hdr">∿ MA Strategy — 7-Filter System Overview</div>
+      <div class="guide-card-body">
+        <div class="guide-intro">The MA (Moving Average) strategy identifies high-probability momentum entries by stacking multiple confirmations. <strong>Never enter on less than 5 of 7 filters passing.</strong> The more filters aligned, the higher your win probability.</div>
+        <div class="guide-flow">
+          <div class="guide-step">
+            <div class="step-num">01</div>
+            <div class="step-body">
+              <div class="step-title">F1 — Price above MA5 (Immediate Momentum)</div>
+              <div class="step-desc">The market price must be <em>above</em> the 5-period MA. This is your fastest momentum filter. If price breaks below MA5, momentum has stalled — exit immediately or reduce position. The closer price is to MA5 (within 1%), the better the entry quality.</div>
+              <div class="step-rule">✅ Pass: Price &gt; MA5 &nbsp;|&nbsp; 🔴 Fail: Price ≤ MA5 → Skip trade</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">02</div>
+            <div class="step-body">
+              <div class="step-title">F2 — MA5 above MA20 (Short-Term Trend)</div>
+              <div class="step-desc">MA5 crossing above MA20 is a "Golden Cross" on the short-term. This confirms that recent momentum is stronger than the 20-day average. The gap between MA5 and MA20 shows trend acceleration — a widening gap is good but &gt;5% means it may reverse soon.</div>
+              <div class="step-rule">✅ Pass: MA5 &gt; MA20 &nbsp;|&nbsp; 🔴 Fail: MA5 ≤ MA20 → Do not enter</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">03</div>
+            <div class="step-body">
+              <div class="step-title">F3 — MA20 above MA50 (Medium-Term Trend)</div>
+              <div class="step-desc">This confirms the intermediate trend direction. MA20 &gt; MA50 means the medium-term trajectory is bullish. The percentage gap reveals trend maturity: 1–3% = fresh trend (S++ grade), 3–5% = healthy (A grade), 5–8% = maturing (B), &gt;10% = exhausted (X grade, reduce or skip).</div>
+              <div class="step-rule">✅ Pass: MA20 &gt; MA50 &nbsp;|&nbsp; 🔴 Fail → Wait for alignment</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">04</div>
+            <div class="step-body">
+              <div class="step-title">F4 — MA200 Macro Filter (Optional but Powerful)</div>
+              <div class="step-desc">The 200-day MA is the institutional benchmark. Funds buy when price is above MA200 — this is your macro tailwind. Trading above MA200 = swimming with the tide. Below MA200 = fighting institutions. Skip this filter only if your timeframe is very short-term.</div>
+              <div class="step-rule">✅ Ideal: Price &gt; MA200 &nbsp;|&nbsp; ⚠️ Optional: adds +8 weight to score</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">05</div>
+            <div class="step-body">
+              <div class="step-title">F5 — KDJ Oscillator (Timing Precision)</div>
+              <div class="step-desc">KDJ identifies overbought/oversold conditions and momentum direction. K&gt;D means fast momentum is above slow momentum — bullish. J&lt;20 = oversold bounce opportunity. J&gt;80 = overbought, reduce size by 50%. J&gt;90 = extreme, skip. Use KDJ to time your exact entry candle within an otherwise valid setup.</div>
+              <div class="step-rule">✅ Best: K&gt;D, J 20–80 &nbsp;|&nbsp; ⚠️ Reduce: J&gt;80 &nbsp;|&nbsp; 🔴 Skip: K&lt;D</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">06</div>
+            <div class="step-body">
+              <div class="step-title">F6 — MACD (DIF &amp; DEA Crossover Momentum)</div>
+              <div class="step-desc">MACD confirms trend momentum strength. DIF&gt;DEA means the fast EMA is accelerating above the slow EMA — bullish. Both above zero line = strongest signal (Strong Bull). DIF ≈ DEA = imminent cross, watch but wait for confirmation. Histogram expanding = momentum building. Histogram shrinking = momentum fading, tighten stop.</div>
+              <div class="step-rule">🚀 Best: DIF&gt;DEA&gt;0 &nbsp;|&nbsp; ✅ Good: DIF&gt;DEA &nbsp;|&nbsp; 🔴 Skip: DIF&lt;DEA</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">07</div>
+            <div class="step-body">
+              <div class="step-title">F7 — Volume Ratio + ADX (Conviction Confirmation)</div>
+              <div class="step-desc">Volume Ratio &gt;1.2 means today's volume exceeds average — smart money is participating. Never trade breakouts on low volume (&lt;0.8×). ADX measures trend strength regardless of direction: ADX &gt;28 = valid trend, ADX &gt;50 = momentum surge. Low ADX (&lt;20) = ranging market — MAs become unreliable. Require BOTH volume and ADX for a high-conviction setup.</div>
+              <div class="step-rule">✅ Vol&gt;1.2× + ADX&gt;28 &nbsp;|&nbsp; 🟡 Vol 0.8-1.2 = caution &nbsp;|&nbsp; 🔴 ADX&lt;20 = skip</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-card">
+      <div class="guide-card-hdr">∿ MA Entry &amp; Exit Checklist</div>
+      <div class="guide-card-body">
+        <div class="checklist-grid">
+          <div class="cl-col">
+            <div class="cl-title green">✅ IDEAL ENTRY CONDITIONS</div>
+            <div class="cl-item">Score ≥ 75/100 on the calculator</div>
+            <div class="cl-item">All 3 MA filters pass (Price&gt;MA5&gt;MA20&gt;MA50)</div>
+            <div class="cl-item">Price within 0–2% above MA20 (ideal zone)</div>
+            <div class="cl-item">KDJ: K&gt;D, J between 40–75</div>
+            <div class="cl-item">MACD: DIF&gt;DEA, histogram expanding</div>
+            <div class="cl-item">Volume ratio &gt;1.2×</div>
+            <div class="cl-item">ADX &gt;28 (confirmed trend)</div>
+            <div class="cl-item">Price above MA200 (macro alignment)</div>
+          </div>
+          <div class="cl-col">
+            <div class="cl-title red">🔴 IMMEDIATE EXIT SIGNALS</div>
+            <div class="cl-item">Price closes below MA5 on high volume</div>
+            <div class="cl-item">MA5 crosses below MA20 (Death Cross short-term)</div>
+            <div class="cl-item">MACD histogram turns negative (DIF&lt;DEA)</div>
+            <div class="cl-item">J-value crashes from &gt;80 to below 50 sharply</div>
+            <div class="cl-item">Volume spike on red candle (&gt;2× average)</div>
+            <div class="cl-item">Stop loss hit (ATR × 1.5 below entry — non-negotiable)</div>
+            <div class="cl-item">Price &gt;12% above MA20 — take partial profit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-card">
+      <div class="guide-card-hdr">∿ MA Trade Execution Workflow</div>
+      <div class="guide-card-body">
+        <div class="workflow">
+          <div class="wf-step"><span class="wf-n">1</span><span>Open calculator → Enter Market Price, MA5, MA20, MA50 from your charting platform</span></div>
+          <div class="wf-step"><span class="wf-n">2</span><span>Add KDJ values (K, D, J) — found in most platforms under "KD" or "Stochastic" indicator</span></div>
+          <div class="wf-step"><span class="wf-n">3</span><span>Add MACD values (DIF=MACD line, DEA=Signal line, Histogram=MACD Histogram bar)</span></div>
+          <div class="wf-step"><span class="wf-n">4</span><span>Enter Volume Ratio (today's volume ÷ 20-day average volume) and ATR14 for stop calculation</span></div>
+          <div class="wf-step"><span class="wf-n">5</span><span>Read the Decision Badge — PROCEED = enter, WATCH = wait, SKIP = no trade</span></div>
+          <div class="wf-step"><span class="wf-n">6</span><span>If PROCEED: use the Trade Plan card. Enter at market, set SL immediately at the shown Stop Loss price</span></div>
+          <div class="wf-step"><span class="wf-n">7</span><span>At TP1: take 40% profit, move Stop Loss to breakeven (entry price). Let rest run to TP2 and TP3</span></div>
+          <div class="wf-step"><span class="wf-n">8</span><span>After TP1, trail your stop by 1× ATR below each new higher high to capture maximum trend move</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /g-ma -->
+
+  <!-- ── EMA Strategy Guide ── -->
+  <div class="guide-section" id="g-ema">
+    <div class="guide-card">
+      <div class="guide-card-hdr">≋ EMA Strategy — Why EMA Over MA?</div>
+      <div class="guide-card-body">
+        <div class="guide-intro">EMA (Exponential Moving Average) gives more weight to <em>recent</em> price action, making it faster and more responsive than simple MA. Professional traders prefer EMA for momentum stocks and volatile instruments. The EMA 8/21/55 stack is the industry-standard momentum framework used by hedge funds.</div>
+        <div class="guide-flow">
+          <div class="guide-step">
+            <div class="step-num">01</div>
+            <div class="step-body">
+              <div class="step-title">F1 — Price above EMA8 (Live Momentum Pulse)</div>
+              <div class="step-desc">EMA8 is the heartbeat of momentum trading. Professional traders will not hold a position if price closes below EMA8. The distance above EMA8 tells you timing: 0–2% = ideal entry, 2–5% = acceptable, 5–10% = stretched (wait for pullback to EMA8), &gt;10% = overextended (skip, wait for pullback). On a valid setup, enter when price dips close to EMA8 and bounces on lower volume.</div>
+              <div class="step-rule">🎯 Ideal: 0–2% above EMA8 &nbsp;|&nbsp; ⚠️ Stretched: &gt;5% → Wait for pullback</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">02</div>
+            <div class="step-body">
+              <div class="step-title">F2 — EMA8 above EMA21 (Short-Term Bull Trend)</div>
+              <div class="step-desc">This is the momentum alignment filter. EMA8 &gt; EMA21 means the 8-day velocity is outpacing the 21-day. This is the minimum condition for an uptrend. The gap percentage tells you phase: 0–1% = just crossed (highest probability zone — fresh breakout), 1–3% = building momentum, &gt;5% = maturing. A gap narrowing from above is a warning sign.</div>
+              <div class="step-rule">✅ Pass: EMA8 &gt; EMA21 &nbsp;|&nbsp; 🚀 Best entry: just crossed (0–2% gap)</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">03</div>
+            <div class="step-body">
+              <div class="step-title">F3 — EMA21 above EMA55 (Trend Maturity &amp; Grade)</div>
+              <div class="step-desc">This is the trend maturity indicator. Use the Grade system: S++ (1–3% gap) = fresh institutional trend just starting — best risk/reward. A grade (3–5%) = healthy trend with room. B (5–8%) = maturing, consider smaller size. C (8–10%) = late stage, use tight trailing stop. X (&gt;10%) = exhausted, do not initiate new longs. When buying a B or C grade, you need a stronger pullback to EMA8 for entry.</div>
+              <div class="step-rule">🚀 S++ Best &nbsp;|&nbsp; ✅ A Good &nbsp;|&nbsp; ⚠️ B–C Reduce size &nbsp;|&nbsp; 🛑 X Skip</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">04</div>
+            <div class="step-body">
+              <div class="step-title">F4 — EMA200 Institutional Macro Filter</div>
+              <div class="step-desc">The 200 EMA is where large funds rebalance. Price above EMA200 = institutional uptrend. Below EMA200 = institutional downtrend. Even if EMA8/21/55 are bullish, fighting the EMA200 trend lowers your win rate significantly. For swing trades, always require price &gt; EMA200. For very short-term momentum scalps, this filter can be reduced in weight.</div>
+              <div class="step-rule">✅ Strong: Price &gt; EMA200 &nbsp;|&nbsp; ⚠️ Caution: Price below EMA200</div>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">05</div>
+            <div class="step-body">
+              <div class="step-title">ADX + Ichimoku + VWAP — Confluence Boosters</div>
+              <div class="step-desc"><strong>ADX:</strong> Trend strength engine. &gt;28 = strong directional move. &lt;20 = ranging market where EMAs give false signals. Always check ADX before entering on EMA alone.<br/><br/><strong>Ichimoku Cloud:</strong> Price above the cloud = strong bullish confluence. Inside cloud = indecision — wait. Below cloud = bearish — do not buy.<br/><br/><strong>VWAP:</strong> The institutional average price of the day. Price above VWAP = intraday bulls in control. Use as an intraday entry trigger: buy the first touch of VWAP from above on a day where all EMAs are bullish.</div>
+              <div class="step-rule">Best combo: ADX&gt;28 + Price above Ichimoku cloud + Price above VWAP = Very high conviction</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-card">
+      <div class="guide-card-hdr">≋ EMA Momentum Trading Playbook</div>
+      <div class="guide-card-body">
+        <div class="playbook-grid">
+          <div class="pb-card">
+            <div class="pb-title" style="color:var(--green)">🚀 Setup A — Fresh Breakout</div>
+            <div class="pb-content">EMA8 just crossed above EMA21 (F2 gap 0–2%), price 0–2% above EMA8, ADX just rising above 25, MACD histogram turning positive. <strong>Highest win rate setup.</strong> Full position. Tight stop at 1× ATR below EMA8.</div>
+          </div>
+          <div class="pb-card">
+            <div class="pb-title" style="color:var(--accent)">📈 Setup B — EMA8 Pullback</div>
+            <div class="pb-content">Trend established (EMA8&gt;21&gt;55), price pulled back to touch EMA8 on low volume, bouncing with KDJ oversold recovery (J rising from &lt;30). <strong>Best risk/reward.</strong> Full position. SL = EMA8 − ATR×1.5.</div>
+          </div>
+          <div class="pb-card">
+            <div class="pb-title" style="color:var(--yellow)">⚠️ Setup C — Momentum Chase</div>
+            <div class="pb-content">All EMAs aligned but price is 5–10% above EMA8. High-risk. If ADX &gt;40 and volume surging, can enter 25–50% size only. Mandatory stop at ATR×1.5. Watch for any candle close below EMA8 — exit immediately.</div>
+          </div>
+          <div class="pb-card">
+            <div class="pb-title" style="color:var(--red)">🔴 Do Not Trade</div>
+            <div class="pb-content">EMA21 below EMA55, price below EMA8, ADX &lt;20 (ranging), KDJ K&lt;D, MACD DIF&lt;DEA, or price below EMA200 in a bear market. These setups have &lt;40% win rate.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /g-ema -->
+
+  <!-- ── Gold Guide ── -->
+  <div class="guide-section" id="g-gold">
+    <div class="guide-card">
+      <div class="guide-card-hdr" style="color:var(--gold)">◈ Gold XAUUSD — Professional Trading Framework</div>
+      <div class="guide-card-body">
+        <div class="guide-intro" style="border-left-color:var(--gold)">Gold is the world's most-traded safe-haven commodity. It has unique drivers: USD strength (inverse), geopolitical risk, real interest rates, and central bank demand. <strong>Never trade gold without checking the DXY direction first.</strong> Gold moves in wider ATR swings than stocks — adjust position size accordingly.</div>
+
+        <div class="gold-drivers">
+          <div class="driver-card">
+            <div class="driver-icon">💵</div>
+            <div class="driver-title">DXY Correlation</div>
+            <div class="driver-desc">Gold and the US Dollar Index move inversely ~80% of the time. DXY falling = Gold bullish. DXY rising = Gold bearish. Always check DXY before entering gold. A falling DXY adds 5 points to your score — it's a significant tailwind.</div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-icon">📊</div>
+            <div class="driver-title">RSI Sweet Spot</div>
+            <div class="driver-desc">Gold's ideal RSI14 entry zone is <strong>50–70</strong>. Below 50 = momentum not confirmed. Above 70 = overbought (reduce size). Above 80 = extreme — only hold existing positions, do not add. The 50 line is the most important for gold — it separates bull trend from weakness.</div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-icon">⏰</div>
+            <div class="driver-title">Session Timing</div>
+            <div class="driver-desc"><strong>London-NY Overlap (13:00–17:00 UTC) = PRIME.</strong> This 4-hour window accounts for ~60% of daily gold volume. Best breakouts happen here. London open (08:00) = second best. Avoid entering new positions in Tokyo/Sydney sessions — spreads widen and moves are thin.</div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-icon">📐</div>
+            <div class="driver-title">Fibonacci Levels</div>
+            <div class="driver-desc">Gold respects Fibonacci levels exceptionally well due to algorithmic trading. <strong>38.2% and 61.8%</strong> are the key support levels in a bull trend pullback. Enter at 38.2% if trend is strong. Enter at 61.8% if you missed the 38.2%. A close below 78.6% warns trend may be reversing.</div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-icon">🏦</div>
+            <div class="driver-title">EMA200 Institutional</div>
+            <div class="driver-desc">Major funds buy gold above EMA200 and sell below it. The EMA200 acts as strong dynamic support. <strong>Do not initiate new gold longs below EMA200.</strong> In a bull market, the EMA200 is the deepest acceptable pullback level — a touch of EMA200 with RSI &lt;35 is the highest risk/reward long entry.</div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-icon">⚡</div>
+            <div class="driver-title">ADX for Gold</div>
+            <div class="driver-desc">Gold needs ADX &gt;28 for reliable EMA signals. In a &lt;20 ADX environment, gold ranges between support and resistance — use range trading instead of momentum. ADX &gt;45 in gold = powerful momentum surge, common during geopolitical events. Use these surges for momentum longs, but tighten stop immediately after.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-card">
+      <div class="guide-card-hdr" style="color:var(--gold)">◈ Gold 7-Filter Entry Protocol</div>
+      <div class="guide-card-body">
+        <div class="guide-flow">
+          <div class="guide-step gold-step">
+            <div class="step-num" style="background:rgba(255,215,0,.1);color:var(--gold);border-color:rgba(255,215,0,.3)">01</div>
+            <div class="step-body">
+              <div class="step-title">Macro Check — EMA200 + DXY</div>
+              <div class="step-desc">Before anything else: Is XAUUSD above EMA200? Is DXY falling or flat? If NO to both = do not trade long today. If yes to both = proceed to session check. This takes 30 seconds but saves enormous losses from counter-trend trades.</div>
+            </div>
+          </div>
+          <div class="guide-step gold-step">
+            <div class="step-num" style="background:rgba(255,215,0,.1);color:var(--gold);border-color:rgba(255,215,0,.3)">02</div>
+            <div class="step-body">
+              <div class="step-title">Session Quality — Are you in London or NY hours?</div>
+              <div class="step-desc">Check the session badge in the top right. London-NY overlap (13:00–17:00 UTC) = green light. Outside prime hours = reduce size by 50% or wait. Thin sessions create whipsaw moves that trigger stops unfairly.</div>
+            </div>
+          </div>
+          <div class="guide-step gold-step">
+            <div class="step-num" style="background:rgba(255,215,0,.1);color:var(--gold);border-color:rgba(255,215,0,.3)">03</div>
+            <div class="step-body">
+              <div class="step-title">EMA Stack — EMA21 &gt; EMA55 &gt; EMA200</div>
+              <div class="step-desc">Enter the three EMA values. All must be in descending order (price &gt; EMA21 &gt; EMA55 &gt; EMA200) for a full bull stack. The EMA21/55 gap tells trend maturity. 1–3% gap = fresh trend (best). The trend maturity grade (S++ to X) determines your position size.</div>
+            </div>
+          </div>
+          <div class="guide-step gold-step">
+            <div class="step-num" style="background:rgba(255,215,0,.1);color:var(--gold);border-color:rgba(255,215,0,.3)">04</div>
+            <div class="step-body">
+              <div class="step-title">RSI14 + ADX — Momentum Dual Confirmation</div>
+              <div class="step-desc">RSI must be between 50–70 (sweet spot). ADX must be above 28. Both conditions required. RSI 50–70 = trend momentum without being overbought. ADX &gt;28 = directional move (not ranging). These two together confirm a genuine trend, not just noise.</div>
+            </div>
+          </div>
+          <div class="guide-step gold-step">
+            <div class="step-num" style="background:rgba(255,215,0,.1);color:var(--gold);border-color:rgba(255,215,0,.3)">05</div>
+            <div class="step-body">
+              <div class="step-title">Fibonacci — Where is price in the swing?</div>
+              <div class="step-desc">Enter your swing high and swing low. Ideal entry: price pulling back to 38.2% or 61.8% Fibonacci support in a bull trend. The calculator will highlight the nearest level. A bounce from 38.2%/61.8% with RSI &gt;50 and ADX &gt;28 is the gold standard gold entry.</div>
+            </div>
+          </div>
+          <div class="guide-step gold-step">
+            <div class="step-num" style="background:rgba(255,215,0,.1);color:var(--gold);border-color:rgba(255,215,0,.3)">06</div>
+            <div class="step-body">
+              <div class="step-title">Execute — Enter with ATR-Based Stop Loss</div>
+              <div class="step-desc">Gold uses ATR × 1.8 for stops (wider than stocks due to volatility). Never use a fixed pip stop for gold. Enter on the candle that closes above EMA21 after a pullback. Set stop immediately. Risk maximum 1% of account. Use the Kelly calculator to determine exact position size in oz or lots.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-card">
+      <div class="guide-card-hdr" style="color:var(--gold)">◈ Gold Key Levels &amp; Patterns</div>
+      <div class="guide-card-body">
+        <div class="tip-grid">
+          <div class="tip-card"><div class="tip-icon">🎯</div><div><strong>Round Numbers Matter:</strong> $2000, $2100, $2200, $2300 etc. are psychological levels where gold pauses. Expect resistance at round numbers and always target levels just before them (e.g., TP at $2295, not $2300).</div></div>
+          <div class="tip-card"><div class="tip-icon">📅</div><div><strong>NFP Day (1st Friday of month):</strong> Extreme volatility. Do not hold gold positions into NFP release. Close before 12:30 UTC or accept very wide stops.</div></div>
+          <div class="tip-card"><div class="tip-icon">🏦</div><div><strong>Fed Decisions:</strong> Hawkish Fed (rate hikes) = bearish gold. Dovish Fed (rate cuts) = very bullish gold. Avoid new entries 24h before Fed meetings.</div></div>
+          <div class="tip-card"><div class="tip-icon">🌍</div><div><strong>Geopolitical Spikes:</strong> Gold spikes 1–3% on war/crisis news. These are momentum trades — enter after the first pullback, not on the initial spike (spreads are terrible on spike candles).</div></div>
+          <div class="tip-card"><div class="tip-icon">🕐</div><div><strong>Best Entry Times:</strong> 08:30 UTC (London momentum kick-off) and 13:30 UTC (NY open — highest volume). Avoid 00:00–07:00 UTC (low volume Asia session).</div></div>
+          <div class="tip-card"><div class="tip-icon">📊</div><div><strong>Position Sizing for Gold:</strong> Gold moves $15–40 per day (ATR). At 1 troy oz position with $20 ATR, your 1× ATR stop = $20 per oz. With $10,000 account at 1% risk = max 5 oz position. The risk calculator in the Gold tab does this math for you.</div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /g-gold -->
+
+  <!-- ── Risk Management Guide ── -->
+  <div class="guide-section" id="g-risk">
+    <div class="guide-card">
+      <div class="guide-card-hdr">⚖️ Professional Risk Management — The Rules That Protect Your Capital</div>
+      <div class="guide-card-body">
+        <div class="guide-intro" style="border-left-color:var(--red)">Risk management is the difference between consistent profitability and account blow-up. <strong>A trader with a 45% win rate but 3:1 reward-to-risk is far more profitable than one with 65% win rate and 1:1 RR.</strong> Master these rules before you trade live.</div>
+
+        <div class="rules-grid">
+          <div class="rule-card critical">
+            <div class="rule-num">Rule 1</div>
+            <div class="rule-title">The 1% Rule — Maximum Risk Per Trade</div>
+            <div class="rule-body">Never risk more than 1% of your total account on a single trade. With a $10,000 account, max loss per trade = $100. This allows 100 losing trades in a row before you're wiped out — mentally and mathematically sustainable. Enter your Account Size and Risk % in the calculator to get exact position sizing.</div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-num">Rule 2</div>
+            <div class="rule-title">ATR-Based Stop Loss — Never Fixed Pips</div>
+            <div class="rule-body">Use ATR × 1.5 for stocks, ATR × 1.8 for gold. ATR adapts to current volatility — tight in calm markets, wider in volatile ones. A fixed 50-pip stop gets triggered randomly. An ATR stop lets the trade breathe naturally. Enter ATR14 in the calculator and use the generated Trade Plan.</div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-num">Rule 3</div>
+            <div class="rule-title">Minimum 1.5:1 Reward-to-Risk Ratio</div>
+            <div class="rule-body">Only take trades where TP1 ≥ 1.5× your stop distance. The calculator's TP1 is set at ATR×1.5 (1:1 RR). TP2 is 3× ATR (2:1 RR). TP3 is 5× ATR (3.3:1 RR). Splitting your position across TP1/TP2/TP3 achieves an average RR &gt;2:1 even on partial wins.</div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-num">Rule 4</div>
+            <div class="rule-title">Breakeven Stop After TP1</div>
+            <div class="rule-body">The moment TP1 is hit (taking 40% of position off), immediately move your Stop Loss to your entry price (breakeven). This makes the remaining trade a "free" trade — it can only make money from this point. This single rule dramatically improves profitability and reduces emotional pressure.</div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-num">Rule 5</div>
+            <div class="rule-title">Maximum 3 Open Positions (Correlated Assets)</div>
+            <div class="rule-body">Don't hold 5 tech stocks simultaneously — they're 80% correlated. If the sector sells off, all 5 stop out at once. Diversify across sectors or asset classes. Gold + Tech + Commodity is better than 3 tech stocks. Each open position should ideally have &lt;0.5 correlation with others.</div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-num">Rule 6</div>
+            <div class="rule-title">Daily Loss Limit — Stop Trading After -3%</div>
+            <div class="rule-body">If you lose 3% of account in a single day, stop trading. Log out. Return tomorrow with fresh eyes. Revenge trading after a loss is where accounts die. The market will be there tomorrow — your capital may not be if you keep trading emotionally.</div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-num">Rule 7</div>
+            <div class="rule-title">Half-Kelly Position Sizing</div>
+            <div class="rule-body">Kelly Criterion calculates the mathematically optimal position size. But full Kelly is too aggressive for real markets. Use <strong>Half-Kelly</strong> (shown in the trade plan). With a 55% win rate and 1.8 RR, full Kelly ≈ 25% of account — far too risky. Half-Kelly ≈ 12.5%, which compounds well while surviving drawdowns.</div>
+          </div>
+          <div class="rule-card">
+            <div class="rule-num">Rule 8</div>
+            <div class="rule-title">Only Trade When Score ≥ 70/100</div>
+            <div class="rule-body">The calculator's score reflects filter confluence. Score 70+ = at least 5 of 7 major filters aligned. Score 50–70 = marginal setup, reduce size by 50%. Score &lt;50 = do not trade regardless of "feeling" or market FOMO. Patience between high-probability setups is a skill — practice it.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-card">
+      <div class="guide-card-hdr">⚖️ Position Sizing Calculator — How to Use</div>
+      <div class="guide-card-body">
+        <div class="guide-flow">
+          <div class="guide-step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Enter your Account Size</div><div class="step-desc">Total trading capital in your brokerage account. This is the base for all risk calculations. Update this every month as your account grows.</div></div></div>
+          <div class="guide-step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Set Risk % (recommended: 0.5%–1.0%)</div><div class="step-desc">Beginners: 0.5%. Intermediate: 1%. Advanced: 1.5% max. Higher is not better — higher volatility means more frequent stops = faster drawdown.</div></div></div>
+          <div class="guide-step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Enter ATR14</div><div class="step-desc">The calculator uses ATR to determine your stop distance. Risk Amount ÷ (ATR × 1.5) = maximum shares/units to buy. This auto-scales to each asset's volatility.</div></div></div>
+          <div class="guide-step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Use the Suggested Units figure</div><div class="step-desc">The "Suggested Units/Shares" shown in the Trade Plan is the mathematically correct position size for your risk parameters. Do not round up. Round down if anything.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /g-risk -->
+
+  <!-- ── Indicators Guide ── -->
+  <div class="guide-section" id="g-indicators">
+    <div class="guide-card">
+      <div class="guide-card-hdr">📊 Indicators Reference — What Each Value Means</div>
+      <div class="guide-card-body">
+        <div class="ind-grid">
+
+          <div class="ind-card">
+            <div class="ind-title">📈 MA / EMA Values</div>
+            <div class="ind-rows">
+              <div class="ind-row"><span class="ind-name">Market Price</span><span class="ind-desc">The current live price of the asset. Use the last traded price or bid price from your broker platform.</span></div>
+              <div class="ind-row"><span class="ind-name">MA5 / EMA8</span><span class="ind-desc">Fast average. Represents immediate 5–8 day momentum. Found in any charting platform under "MA(5)" or "EMA(8)". Use closing prices.</span></div>
+              <div class="ind-row"><span class="ind-name">MA20 / EMA21</span><span class="ind-desc">The monthly average (~20 trading days). Core reference for intermediate momentum. This is the most important MA level.</span></div>
+              <div class="ind-row"><span class="ind-name">MA50 / EMA55</span><span class="ind-desc">Quarterly average (~50 days). Institutional buying/selling level. Used by most fund managers as a key decision level.</span></div>
+              <div class="ind-row"><span class="ind-name">MA200 / EMA200</span><span class="ind-desc">Annual average. The most important macro trend indicator. Above = bull market. Below = bear market. Respected by all major institutions.</span></div>
+            </div>
+          </div>
+
+          <div class="ind-card">
+            <div class="ind-title">📉 KDJ Oscillator</div>
+            <div class="ind-rows">
+              <div class="ind-row"><span class="ind-name">K value</span><span class="ind-desc">Fast stochastic line (typically 9-period). Range 0–100. Similar to %K in traditional stochastics. Above 50 = bullish momentum.</span></div>
+              <div class="ind-row"><span class="ind-name">D value</span><span class="ind-desc">Slow signal line (3-period MA of K). K crossing above D = buy signal. K crossing below D = sell signal.</span></div>
+              <div class="ind-row"><span class="ind-name">J value</span><span class="ind-desc">The most sensitive line: J = 3K − 2D. Range can exceed 0–100. J&lt;20 = oversold bounce signal. J&gt;80 = overbought, reduce size. J&gt;100 = extreme overbought — exit.</span></div>
+            </div>
+          </div>
+
+          <div class="ind-card">
+            <div class="ind-title">📊 MACD Values</div>
+            <div class="ind-rows">
+              <div class="ind-row"><span class="ind-name">DIF (MACD Line)</span><span class="ind-desc">The difference between EMA12 and EMA26. Also called the "MACD line" or "fast line". Positive = short-term average above long-term = bullish. Find as "MACD" in most platforms.</span></div>
+              <div class="ind-row"><span class="ind-name">DEA (Signal Line)</span><span class="ind-desc">9-period EMA of the DIF. Also called "Signal" or "DEA". DIF crossing above DEA = bullish crossover. Find as "Signal" in MACD indicator settings.</span></div>
+              <div class="ind-row"><span class="ind-name">Histogram (MACD Bar)</span><span class="ind-desc">The bar chart shown under MACD. = DIF − DEA. Growing bars = momentum building. Shrinking bars = momentum fading (possible reversal warning). Use for timing: enter when histogram turns from negative to positive.</span></div>
+            </div>
+          </div>
+
+          <div class="ind-card">
+            <div class="ind-title">⚡ ADX (Average Directional Index)</div>
+            <div class="ind-rows">
+              <div class="ind-row"><span class="ind-name">ADX14</span><span class="ind-desc">Measures trend strength (0–100), NOT direction. &lt;20 = no trend (ranging). 20–28 = developing. 28–50 = strong trend. &gt;50 = very strong/unusual. Find in platform as "ADX(14)" or "Average Directional Movement".</span></div>
+              <div class="ind-row"><span class="ind-name">How to use</span><span class="ind-desc">MA/EMA signals are only reliable when ADX &gt;20. In ranging markets (ADX &lt;20), moving averages give false crossover signals. Always check ADX before acting on any MA crossover.</span></div>
+            </div>
+          </div>
+
+          <div class="ind-card">
+            <div class="ind-title">🎯 ATR (Average True Range)</div>
+            <div class="ind-rows">
+              <div class="ind-row"><span class="ind-name">ATR14</span><span class="ind-desc">The average daily price range over 14 periods. Shows current volatility. Higher ATR = wider price swings = need wider stops. For stocks: ATR14 might be $0.02–$0.50. For gold: ATR14 typically $15–$40 per troy oz.</span></div>
+              <div class="ind-row"><span class="ind-name">How to find</span><span class="ind-desc">In TradingView: search "ATR" indicator, use 14-period. In MetaTrader: Average True Range(14). The current value shown at the bottom of the indicator panel is what you enter here.</span></div>
+              <div class="ind-row"><span class="ind-name">Stop formula</span><span class="ind-desc">Stop Loss = Entry Price − (ATR14 × 1.5). For gold use × 1.8. This is calculated automatically in the Trade Plan card once you enter ATR14 and Market Price.</span></div>
+            </div>
+          </div>
+
+          <div class="ind-card">
+            <div class="ind-title">📏 RSI (Relative Strength Index)</div>
+            <div class="ind-rows">
+              <div class="ind-row"><span class="ind-name">RSI14</span><span class="ind-desc">Momentum oscillator 0–100. For gold, ideal zone is 50–70. &lt;30 = oversold (potential bounce). &gt;70 = overbought (potential reversal). Find in any charting platform as "RSI(14)".</span></div>
+              <div class="ind-row"><span class="ind-name">The 50 Rule</span><span class="ind-desc">RSI above 50 = net bullish momentum. RSI below 50 = net bearish momentum. Use 50 as the bull/bear dividing line. Best entries: RSI just crossed above 50 and heading toward 65.</span></div>
+            </div>
+          </div>
+
+          <div class="ind-card">
+            <div class="ind-title">☁️ Ichimoku Cloud (EMA tab)</div>
+            <div class="ind-rows">
+              <div class="ind-row"><span class="ind-name">Above Cloud</span><span class="ind-desc">Price is above the Kumo (cloud). Strong bullish signal — institutional buyers in control. The cloud itself acts as support. Bullish confirmation.</span></div>
+              <div class="ind-row"><span class="ind-name">Inside Cloud</span><span class="ind-desc">Price is inside the cloud. Indecision zone. Wait for clear breakout above cloud before entering long. Avoid trading inside the cloud.</span></div>
+              <div class="ind-row"><span class="ind-name">Below Cloud</span><span class="ind-desc">Price below cloud. Bearish — do not buy. The cloud acts as overhead resistance. Only acceptable in very short-term momentum scalps if all other indicators are extremely bullish.</span></div>
+            </div>
+          </div>
+
+          <div class="ind-card">
+            <div class="ind-title">📊 Volume Ratio</div>
+            <div class="ind-rows">
+              <div class="ind-row"><span class="ind-name">How to calculate</span><span class="ind-desc">Volume Ratio = Today's Volume ÷ 20-Day Average Volume. E.g., if today volume = 2M and avg = 1M, ratio = 2.0. Many platforms show this directly as "Relative Volume" or "Vol/Avg".</span></div>
+              <div class="ind-row"><span class="ind-name">Interpretation</span><span class="ind-desc">&gt;1.5× = strong conviction move. 1.0–1.5× = normal. &lt;0.8× = low conviction — avoid breakout entries. Never buy a breakout on below-average volume — it will likely fail.</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div><!-- /g-indicators -->
+
+</div><!-- /panel-guide -->
+
+<!-- ── Global Tooltip Overlay ── -->
+<div id="tm-tooltip" class="tm-tooltip" style="display:none"></div>
 
 <script src="tradematrix.js"></script>
 </body>
