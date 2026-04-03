@@ -32,6 +32,7 @@
   <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA Calculator</button>
   <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAUUSD</button>
   <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 ETF</button>
+  <button class="tab-btn swing-tab" data-tab="swing" onclick="switchTab('swing')">🔄 Swing Reversal</button>
   <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
 </div>
 
@@ -203,6 +204,8 @@
       <div class="card-body">
         <div class="price-block" id="ma-price-block"></div>
         <div id="ma-kelly-block" style="margin-top:.75rem;display:none"></div>
+        <!-- Query Price Planner -->
+        <div id="ma-qpp" style="display:none;margin-top:.9rem"></div>
       </div>
     </div>
   </div>
@@ -406,6 +409,8 @@
       <div class="card-body">
         <div class="price-block" id="ema-price-block"></div>
         <div id="ema-kelly-block" style="margin-top:.75rem;display:none"></div>
+        <!-- Query Price Planner -->
+        <div id="ema-qpp" style="display:none;margin-top:.9rem"></div>
       </div>
     </div>
   </div>
@@ -513,17 +518,21 @@
         <div class="fld"><label>Volume Ratio</label><input type="number" id="gold-vol" step="0.01" placeholder="1.50" oninput="goldCalc()"/></div>
       </div>
 
-      <div class="sec-label">Fibonacci (Swing Points)</div>
-      <div class="fib-note">Enter recent swing High and Low to calculate Fibonacci retracement levels.</div>
-      <div class="fg" style="margin-bottom:.9rem">
-        <div class="fld"><label>Swing High</label><input type="number" id="gold-fibh" step="0.01" placeholder="2400.00" oninput="goldCalc()"/></div>
-        <div class="fld"><label>Swing Low</label><input type="number" id="gold-fibl" step="0.01" placeholder="2280.00" oninput="goldCalc()"/></div>
-        <div class="fld"><label>Fib Trend</label>
+      <div class="sec-label">Fibonacci Analysis <span class="badge-new">Confluence + Accuracy Score</span></div>
+      <div class="fib-note">Primary swing: required for all analysis. Secondary swing: optional for confluence confluence scoring (highest accuracy when two swings agree).</div>
+      <div class="fg" style="margin-bottom:.6rem">
+        <div class="fld"><label>Primary Swing High <span class="req-tag">req</span></label><input type="number" id="gold-fibh" step="0.01" placeholder="2400.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Primary Swing Low <span class="req-tag">req</span></label><input type="number" id="gold-fibl" step="0.01" placeholder="2280.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Secondary Swing High <span class="opt-tag">opt</span></label><input type="number" id="gold-fibh2" step="0.01" placeholder="2450.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Secondary Swing Low <span class="opt-tag">opt</span></label><input type="number" id="gold-fibl2" step="0.01" placeholder="2320.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Fib Mode</label>
           <select id="gold-fib-dir" onchange="goldCalc()">
             <option value="retrace">Pullback (Retrace)</option>
             <option value="extend">Extension Target</option>
+            <option value="both">Both (Full Analysis)</option>
           </select>
         </div>
+        <div class="fld"><label>Prev Candle Close</label><input type="number" id="gold-prev-close" step="0.01" placeholder="2338.00" oninput="goldCalc()"/></div>
       </div>
 
       <div class="sec-label">Risk Management</div>
@@ -607,19 +616,32 @@
       </div>
     </div>
 
-    <!-- Fibonacci Levels -->
+    <!-- Fibonacci Enhanced -->
     <div class="card" id="gold-fib-card" style="display:none">
-      <div class="card-hdr"><span class="ci gold-ci">φ</span> Fibonacci Levels</div>
+      <div class="card-hdr"><span class="ci gold-ci">φ</span> Fibonacci Analysis &amp; Confluence Accuracy</div>
       <div class="card-body">
+        <!-- Fib accuracy score strip -->
+        <div class="fib-accuracy-strip" id="gold-fib-accuracy-strip" style="display:none"></div>
+        <!-- Confluence zones -->
+        <div id="gold-fib-confluence" style="display:none;margin-bottom:.75rem"></div>
+        <!-- Main fib grid -->
         <div class="fib-grid" id="gold-fib-grid"></div>
+        <!-- Secondary fib grid -->
+        <div id="gold-fib-grid2-wrap" style="display:none;margin-top:.65rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;padding-top:.35rem;border-top:1px solid var(--border)">Secondary Swing Fibonacci Levels</div>
+          <div class="fib-grid" id="gold-fib-grid2"></div>
+        </div>
+        <!-- Position bar -->
         <div style="margin-top:.75rem">
-          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem">Fibonacci Position of Current Price</div>
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Current Price Position in Primary Swing</div>
           <div class="range-track">
             <div class="range-fill" id="gold-fib-fill" style="background:linear-gradient(90deg,var(--red),var(--accent),var(--green))"></div>
             <div class="range-marker" id="gold-fib-marker" style="background:#FFD700;box-shadow:0 0 8px rgba(255,215,0,.6)"></div>
           </div>
           <div class="range-labels"><span id="gold-fib-low-label">Swing Low</span><span id="gold-fib-pos-label" style="color:#FFD700">—</span><span id="gold-fib-high-label">Swing High</span></div>
         </div>
+        <!-- Fib-based entry and TP precision block -->
+        <div id="gold-fib-precision" style="display:none;margin-top:.75rem"></div>
         <div id="gold-fib-advice" style="margin-top:.65rem;font-size:11.5px;color:var(--dim);line-height:1.7"></div>
       </div>
     </div>
@@ -646,6 +668,8 @@
       <div class="card-body">
         <div class="price-block" id="gold-price-block"></div>
         <div id="gold-kelly-block" style="margin-top:.75rem;display:none"></div>
+        <!-- Query Price Planner -->
+        <div id="gold-qpp" style="display:none;margin-top:.9rem"></div>
       </div>
     </div>
   </div>
@@ -951,11 +975,240 @@
       <div class="card-body">
         <div class="price-block" id="bursa-price-block"></div>
         <div id="bursa-kelly-block" style="margin-top:.75rem;display:none"></div>
+        <!-- Query Price Planner -->
+        <div id="bursa-qpp" style="display:none;margin-top:.9rem"></div>
       </div>
     </div>
 
   </div>
 </div><!-- /panel-bursa -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     SWING REVERSAL SCANNER
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-swing">
+
+  <div class="swing-hero">
+    <div class="swing-hero-left">
+      <div class="swing-hero-icon">🔄</div>
+      <div>
+        <div class="swing-hero-title">Swing Reversal Scanner</div>
+        <div class="swing-hero-sub">V-Bottom &amp; Trend Reversal Detection · Supertrend Flip · MA Rebuild · Multi-Level TP</div>
+      </div>
+    </div>
+    <div class="swing-score-display">
+      <div class="swing-score-label">REVERSAL SCORE</div>
+      <div class="swing-score-val" id="sw-score-display">—</div>
+    </div>
+  </div>
+
+  <!-- Reference cards -->
+  <div class="ref-grid">
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">Reversal Candle Patterns</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">Hammer</span><span>🔨 Long wick down, small body top</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">Doji</span><span>✚ Open ≈ Close — indecision</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">Engulf</span><span>📊 Green candle engulfs red body</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">Shooting Star</span><span>⭐ Long wick up — bearish warning</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">Supertrend Flip Signal</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">Flip ↑</span><span>🟢 Dots moved below price — BUY</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">Flip ↓</span><span>🔴 Dots moved above price — SELL</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">Bearish</span><span>⚠️ Dots still above — wait</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">Bullish</span><span>✅ Dots below — trend intact</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">KDJ Reversal Zone</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">J &lt; 10</span><span>🎯 Extreme oversold — prime entry</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">J 10–20</span><span>💡 Oversold bounce zone</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">J 20–30</span><span>🟡 Building — watch for cross</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">K &lt; D</span><span>🔴 Still bearish — not yet</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
+      <div class="ref-panel-hdr">Volume Confirmation</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">&gt; 2.0×</span><span>⚡ Capitulation / exhaustion</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">1.5–2×</span><span>✅ Strong reversal confirmation</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">1.0–1.5×</span><span>🟡 Moderate — caution</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">&lt; 1.0×</span><span>🔴 Weak — may be false signal</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="ci swing-ci">🔄</span> Swing Reversal Inputs — V-Bottom Detection</div>
+    <div class="card-body">
+
+      <div class="sec-label">Reversal Candle (OHLC — Bottom Candle)</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Candle Open <span class="req-tag">req</span></label><input type="number" id="sw-open" step="0.0001" placeholder="1.405" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Candle High <span class="req-tag">req</span></label><input type="number" id="sw-high" step="0.0001" placeholder="1.430" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Candle Low <span class="req-tag">req</span></label><input type="number" id="sw-low" step="0.0001" placeholder="1.395" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Candle Close <span class="req-tag">req</span></label><input type="number" id="sw-close" step="0.0001" placeholder="1.425" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Prev Candle Close</label><input type="number" id="sw-prev-close" step="0.0001" placeholder="1.418" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Current Price</label><input type="number" id="sw-price" step="0.0001" placeholder="1.432" oninput="swingCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Supertrend Indicator</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Prev Supertrend Val</label><input type="number" id="sw-st-prev" step="0.0001" placeholder="1.460" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Current Supertrend Val</label><input type="number" id="sw-st-curr" step="0.0001" placeholder="1.398" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Supertrend Direction</label>
+          <select id="sw-st-dir" onchange="swingCalc()">
+            <option value="">— Not Set —</option>
+            <option value="flipped_bull">🟢 Just Flipped Bullish</option>
+            <option value="bullish">✅ Bullish (dots below)</option>
+            <option value="bearish">🔴 Still Bearish (dots above)</option>
+            <option value="flipped_bear">⬇️ Just Flipped Bearish</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sec-label">MA Stack (Current State)</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Price</label><input type="number" id="sw-ma-price" step="0.0001" placeholder="1.432" oninput="swingCalc()"/></div>
+        <div class="fld"><label>MA5</label><input type="number" id="sw-ma5"  step="0.0001" placeholder="1.420" oninput="swingCalc()"/></div>
+        <div class="fld"><label>MA20</label><input type="number" id="sw-ma20" step="0.0001" placeholder="1.415" oninput="swingCalc()"/></div>
+        <div class="fld"><label>MA50</label><input type="number" id="sw-ma50" step="0.0001" placeholder="1.450" oninput="swingCalc()"/></div>
+        <div class="fld"><label>MA200 <span class="opt-tag">opt</span></label><input type="number" id="sw-ma200" step="0.0001" placeholder="1.480" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Resistance Level 1</label><input type="number" id="sw-res1" step="0.0001" placeholder="1.645" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Resistance Level 2</label><input type="number" id="sw-res2" step="0.0001" placeholder="1.780" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Resistance Level 3 <span class="opt-tag">opt</span></label><input type="number" id="sw-res3" step="0.0001" placeholder="1.890" oninput="swingCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Momentum Confirmation</div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>K (KDJ)</label><input type="number" id="sw-k" step="0.1" placeholder="18.5" oninput="swingCalc()"/></div>
+        <div class="fld"><label>D (KDJ)</label><input type="number" id="sw-d" step="0.1" placeholder="15.2" oninput="swingCalc()"/></div>
+        <div class="fld"><label>J (KDJ)</label><input type="number" id="sw-j" step="0.1" placeholder="8.0" oninput="swingCalc()"/></div>
+        <div class="fld"><label>RSI14</label><input type="number" id="sw-rsi" step="0.1" placeholder="32.5" oninput="swingCalc()"/></div>
+        <div class="fld"><label>MACD DIF</label><input type="number" id="sw-dif" step="0.0001" placeholder="-0.012" oninput="swingCalc()"/></div>
+        <div class="fld"><label>MACD DEA</label><input type="number" id="sw-dea" step="0.0001" placeholder="-0.018" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Volume Ratio</label><input type="number" id="sw-vol" step="0.01" placeholder="2.10" oninput="swingCalc()"/></div>
+        <div class="fld"><label>ADX14 <span class="opt-tag">opt</span></label><input type="number" id="sw-adx" step="0.1" placeholder="28.0" oninput="swingCalc()"/></div>
+      </div>
+
+      <div class="sec-label">Risk Management</div>
+      <div class="fg">
+        <div class="fld"><label>ATR14</label><input type="number" id="sw-atr" step="0.0001" placeholder="0.022" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Account Size</label><input type="number" id="sw-account" step="100" placeholder="10000" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Risk per Trade %</label><input type="number" id="sw-riskpct" step="0.1" placeholder="1.0" oninput="swingCalc()"/></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="resetSwing()">↺ Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="swing-result" style="display:none" class="result-area">
+
+    <div class="decision-strip" id="swing-decision-strip">
+      <div class="d-badge" id="swing-d-badge">—</div>
+      <span class="risk-pill" id="swing-risk-pill">—</span>
+      <span class="grade-badge" id="swing-grade-badge" style="display:none"></span>
+      <div id="swing-d-meta" style="font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:.1rem;flex:1"></div>
+    </div>
+
+    <div class="advice-box" id="swing-advice"></div>
+
+    <div class="chart-layout">
+      <div class="card">
+        <div class="card-hdr"><span class="swing-ci">◎</span> Reversal Score Breakdown</div>
+        <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:.9rem">
+          <div class="dial-wrap">
+            <svg class="dial-svg" viewBox="0 0 150 90">
+              <defs>
+                <linearGradient id="swingDialGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#f03a4a"/>
+                  <stop offset="50%" stop-color="#f5c842"/>
+                  <stop offset="100%" stop-color="#00e87a"/>
+                </linearGradient>
+              </defs>
+              <path d="M15 85 A60 60 0 0 1 135 85" fill="none" stroke="var(--border)" stroke-width="12" stroke-linecap="round"/>
+              <path id="swing-dial-arc" d="M15 85 A60 60 0 0 1 135 85" fill="none"
+                stroke="url(#swingDialGrad)" stroke-width="12" stroke-linecap="round"
+                stroke-dasharray="0 188"/>
+              <text id="swing-dial-score" x="75" y="78" text-anchor="middle"
+                font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="var(--accent)">0</text>
+              <text x="75" y="90" text-anchor="middle"
+                font-family="'IBM Plex Mono',monospace" font-size="8" fill="var(--muted)">REVERSAL /100</text>
+            </svg>
+          </div>
+          <div class="pie-wrap">
+            <svg class="pie-svg" viewBox="0 0 160 160" id="swing-pie"></svg>
+            <div class="pie-legend" id="swing-pie-legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="swing-ci">✓</span> 7-Signal Reversal Audit</div>
+        <div class="card-body">
+          <div class="check-list" id="swing-checklist"></div>
+          <div style="margin-top:.75rem">
+            <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Reversal Strength</div>
+            <div class="signal-meter" id="swing-signal-meter"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Candle Pattern Analysis -->
+    <div class="card">
+      <div class="card-hdr"><span class="swing-ci">🕯️</span> Candle Pattern Analysis</div>
+      <div class="card-body">
+        <div class="stat-grid" id="swing-candle-grid"></div>
+        <div style="margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Candle Body vs Wick Ratio (Higher = Stronger Reversal)</div>
+          <div class="range-track">
+            <div class="range-fill" id="swing-wick-fill" style="background:linear-gradient(90deg,var(--red),var(--yellow),var(--green))"></div>
+            <div class="range-marker" id="swing-wick-marker"></div>
+          </div>
+          <div class="range-labels"><span>Weak</span><span id="swing-wick-label" style="color:var(--accent)">—</span><span>Strong Reversal</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MA Rebuild Tracker -->
+    <div class="card">
+      <div class="card-hdr"><span class="swing-ci">≋</span> MA Stack Rebuild Tracker</div>
+      <div class="card-body">
+        <div class="swing-rebuild-grid" id="swing-rebuild-grid"></div>
+        <div style="margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">MA Rebuild Progress</div>
+          <div class="range-track">
+            <div class="range-fill" id="swing-rebuild-fill" style="background:linear-gradient(90deg,var(--red),var(--yellow),var(--green))"></div>
+            <div class="range-marker" id="swing-rebuild-marker"></div>
+          </div>
+          <div class="range-labels"><span>Broken</span><span id="swing-rebuild-label" style="color:var(--accent)">—</span><span>Full Stack</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-Level Trade Plan -->
+    <div class="card" id="swing-tradeplan-card" style="display:none">
+      <div class="card-hdr"><span class="swing-ci">📐</span> Multi-Level Swing Trade Plan</div>
+      <div class="card-body">
+        <div id="swing-phase-info" class="swing-phase-info"></div>
+        <div class="price-block" id="swing-price-block"></div>
+        <div id="swing-scaling-guide" style="margin-top:.75rem"></div>
+        <div id="swing-kelly-block" style="margin-top:.75rem;display:none"></div>
+        <!-- Query Price Planner -->
+        <div id="swing-qpp" style="display:none;margin-top:.9rem"></div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /panel-swing -->
 
 <!-- ═══════════════════════════════════════════════════════════
      TRADING GUIDE PANEL

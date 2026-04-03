@@ -193,21 +193,85 @@ function getGrade(gap) {
 /* ══════════════════════════════════════
    FIBONACCI CALCULATOR
 ══════════════════════════════════════ */
+/* Full professional Fibonacci suite — retracement + ALL extensions */
 function calcFib(high, low) {
 	if (high == null || low == null || high <= low) return null;
 	const r = high - low;
 	return {
-		ext2: high + r * 1.000,
-		ext1: high + r * 0.618,
-		'0': high,
-		'23.6': high - r * 0.236,
-		'38.2': high - r * 0.382,
-		'50': high - r * 0.500,
-		'61.8': high - r * 0.618,
-		'78.6': high - r * 0.786,
-		'100': low,
+		// Extensions (above swing high)
+		'ext_261': high + r * 1.618,   // 261.8%
+		'ext_200': high + r * 1.000,   // 200%
+		'ext_161': high + r * 0.618,   // 161.8% — Golden extension
+		'ext_141': high + r * 0.414,   // 141.4%
+		'ext_127': high + r * 0.272,   // 127.2%
+		// Retracements (within swing)
+		'0':     high,
+		'23.6':  high - r * 0.236,
+		'38.2':  high - r * 0.382,     // Golden ratio retrace
+		'50':    high - r * 0.500,
+		'61.8':  high - r * 0.618,     // Golden ratio (1/phi)
+		'78.6':  high - r * 0.786,     // sqrt(0.618)
+		'88.6':  high - r * 0.886,     // Deep harmonic
+		'100':   low,
 		range: r,
+		high, low,
 	};
+}
+
+/* Check if two fibonacci levels are within confluence zone (≤0.75% apart) */
+function fibConfluence(fib1, fib2, rangeTolerance) {
+	const levels1 = ['23.6','38.2','50','61.8','78.6'];
+	const levels2 = ['23.6','38.2','50','61.8','78.6'];
+	const zones = [];
+	for (const l1 of levels1) {
+		for (const l2 of levels2) {
+			if (!fib1[l1] || !fib2[l2]) continue;
+			const diff = Math.abs(fib1[l1] - fib2[l2]);
+			const pctDiff = (diff / rangeTolerance) * 100;
+			if (pctDiff <= 1.5) { // within 1.5% of total range
+				zones.push({
+					price: (fib1[l1] + fib2[l2]) / 2,
+					level1: l1, level2: l2,
+					strength: pctDiff < 0.5 ? 'STRONG' : 'MODERATE',
+					diffPct: pctDiff,
+				});
+			}
+		}
+	}
+	return zones.sort((a,b) => a.diffPct - b.diffPct);
+}
+
+/* Fibonacci accuracy score: how close is current price to a key level?
+   Returns 0-100 accuracy where 100 = price exactly on golden ratio level */
+function fibAccuracyScore(price, fib, emaStack) {
+	const KEY_LEVELS = [
+		{ key:'38.2', weight:90, name:'38.2% Golden Retrace' },
+		{ key:'61.8', weight:100, name:'61.8% Golden Ratio' },
+		{ key:'50',   weight:70,  name:'50% Midpoint' },
+		{ key:'23.6', weight:50,  name:'23.6% Minor' },
+		{ key:'78.6', weight:60,  name:'78.6% Deep' },
+		{ key:'88.6', weight:40,  name:'88.6% Harmonic' },
+	];
+	let bestScore = 0, bestLevel = null;
+	for (const lv of KEY_LEVELS) {
+		const lvPrice = fib[lv.key];
+		if (!lvPrice) continue;
+		const distPct = Math.abs(price - lvPrice) / fib.range * 100;
+		// Score: 100% at 0% distance, decays to 0 at 3% distance
+		const proximity = Math.max(0, 1 - distPct / 3);
+		const score = proximity * lv.weight;
+		if (score > bestScore) { bestScore = score; bestLevel = { ...lv, lvPrice, distPct }; }
+	}
+	// EMA confluence bonus: if EMA is also near the fib level (+15%)
+	let emaBonus = 0;
+	if (emaStack && bestLevel) {
+		for (const ema of emaStack) {
+			if (!ema) continue;
+			const emaDist = Math.abs(ema - bestLevel.lvPrice) / fib.range * 100;
+			if (emaDist < 1.0) { emaBonus = 15; break; } // EMA within 1% of fib = confluence
+		}
+	}
+	return { score: Math.min(100, bestScore + emaBonus), level: bestLevel };
 }
 
 function nearestFibLevel(price, fib) {
@@ -1197,64 +1261,159 @@ function goldCalc() {
 
 	updateRange('gold-range-fill', 'gold-range-marker', 'gold-range-label', Math.max(0, f1_stretch), 7);
 
-	/* ── FIBONACCI SECTION ── */
-	const fibCard = $('gold-fib-card');
-	const fib = calcFib(fibH, fibL);
+	/* ══ ENHANCED FIBONACCI — Confluence + Accuracy Score ══ */
+	const fibCard   = $('gold-fib-card');
+	const fibH2     = num('gold-fibh2');
+	const fibL2     = num('gold-fibl2');
+	const fib       = calcFib(fibH, fibL);
+	const fib2      = calcFib(fibH2, fibL2);
 
 	if (fib) {
 		fibCard.style.display = '';
+		const colors = { accent:'var(--accent)', green:'var(--green)', yellow:'var(--yellow)',
+			gold:'#FFD700', orange:'var(--orange)', red:'var(--red)', dim:'var(--dim)' };
+
+		// Accuracy score
+		const emaStack  = [e21, e55, e200].filter(Boolean);
+		const fibAcc    = fibAccuracyScore(price, fib, emaStack);
+		const accStrip  = $('gold-fib-accuracy-strip');
+		if (accStrip) {
+			accStrip.style.display = '';
+			const accColor = fibAcc.score >= 80 ? '#FFD700' : fibAcc.score >= 55 ? 'var(--accent)' : 'var(--dim)';
+			const accLabel = fibAcc.score >= 80 ? '🎯 HIGH ACCURACY — Golden Ratio Confluence'
+				: fibAcc.score >= 55 ? '✅ MODERATE — Near Key Fibonacci Level'
+				: '⚠️ LOW — Price not near key level';
+			accStrip.innerHTML = `<div class="fib-acc-bar">
+				<div class="fib-acc-left">
+					<span class="fib-acc-score" style="color:${accColor}">${Math.round(fibAcc.score)}%</span>
+					<span class="fib-acc-label">${accLabel}</span>
+				</div>
+				${fibAcc.level ? `<span class="fib-acc-level" style="color:${accColor}">Nearest: ${fibAcc.level.name} @ $${fibAcc.level.lvPrice.toFixed(2)} (${fibAcc.level.distPct.toFixed(2)}% away)</span>` : ''}
+			</div>`;
+		}
+
+		// Confluence zones (secondary fib)
+		const confEl = $('gold-fib-confluence');
+		if (fib2 && confEl) {
+			const zones = fibConfluence(fib, fib2, Math.max(fib.range, fib2.range));
+			if (zones.length > 0) {
+				confEl.style.display = '';
+				confEl.innerHTML = `<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;font-weight:700">φ Confluence Zones — Highest Accuracy</div>
+					${zones.slice(0,4).map(z => `<div class="fib-confluence-row">
+						<span class="fib-conf-badge" style="color:${z.strength==='STRONG'?'#FFD700':'var(--accent)'}">${z.strength}</span>
+						<span class="fib-conf-price">$${z.price.toFixed(2)}</span>
+						<span class="fib-conf-desc">${z.level1}% ∩ ${z.level2}% — ${z.diffPct.toFixed(2)}% apart</span>
+						<span class="fib-conf-action">${parseFloat(z.level1)<=61.8?'🎯 Entry':'📐 TP'}</span>
+					</div>`).join('')}`;
+			} else confEl.style.display = 'none';
+		} else if (confEl) confEl.style.display = 'none';
+
+		// Full fibonacci grid
 		const fibLevels = [
-			{ key: 'ext2', label: '200% Extension', tag: 'Target', tagCls: 'accent' },
-			{ key: 'ext1', label: '161.8% Extension', tag: 'Target', tagCls: 'accent' },
-			{ key: '0', label: '0% — Swing High', tag: 'High', tagCls: 'green' },
-			{ key: '23.6', label: '23.6% Retrace', tag: 'Minor', tagCls: 'yellow' },
-			{ key: '38.2', label: '38.2% — Golden', tag: 'Key', tagCls: 'gold' },
-			{ key: '50', label: '50% — Midpoint', tag: 'Key', tagCls: 'yellow' },
-			{ key: '61.8', label: '61.8% — Golden', tag: 'Strong', tagCls: 'accent' },
-			{ key: '78.6', label: '78.6% — Deep', tag: 'Deep', tagCls: 'orange' },
-			{ key: '100', label: '100% — Swing Low', tag: 'Low', tagCls: 'red' },
+			{ key:'ext_261', label:'261.8% Extension', tag:'Far TP',    tagCls:'accent', isExt:true },
+			{ key:'ext_200', label:'200% Extension',   tag:'TP3',       tagCls:'accent', isExt:true },
+			{ key:'ext_161', label:'161.8% ★ Golden',  tag:'TP2',       tagCls:'gold',   isExt:true },
+			{ key:'ext_141', label:'141.4% Extension', tag:'TP1b',      tagCls:'accent', isExt:true },
+			{ key:'ext_127', label:'127.2% Extension', tag:'TP1',       tagCls:'accent', isExt:true },
+			{ key:'0',       label:'0% Swing High',    tag:'Resistance',tagCls:'green'  },
+			{ key:'23.6',    label:'23.6% Retrace',    tag:'Minor',     tagCls:'yellow' },
+			{ key:'38.2',    label:'38.2% ★ Golden',   tag:'Key Entry', tagCls:'gold'   },
+			{ key:'50',      label:'50% Midpoint',     tag:'Key',       tagCls:'yellow' },
+			{ key:'61.8',    label:'61.8% ★ Golden',   tag:'Best Entry',tagCls:'gold'   },
+			{ key:'78.6',    label:'78.6% Deep',       tag:'Deep Entry',tagCls:'orange' },
+			{ key:'88.6',    label:'88.6% Harmonic',   tag:'Last',      tagCls:'red'    },
+			{ key:'100',     label:'100% Swing Low',   tag:'Support',   tagCls:'red'    },
 		];
 
-		const nearest = nearestFibLevel(price, fib);
+		const nearest      = nearestFibLevel(price, fib);
 		const pctPosInRange = ((price - fib['100']) / fib.range) * 100;
-
-		const colors = {
-			accent: 'var(--accent)', green: 'var(--green)', yellow: 'var(--yellow)',
-			gold: '#FFD700', orange: 'var(--orange)', red: 'var(--red)'
-		};
 
 		$('gold-fib-grid').innerHTML = fibLevels.map(lv => {
 			const lvPrice = fib[lv.key];
-			const isCurrent = (nearest.level === lv.key && Math.abs(price - lvPrice) / fib.range < 0.05);
-			const isAbove = price > lvPrice;
+			if (!lvPrice) return '';
+			const distPct  = Math.abs(price - lvPrice) / fib.range * 100;
+			const isCurrent = nearest.level === lv.key && distPct < 3;
+			const isAbove   = price > lvPrice;
 			const c = colors[lv.tagCls] || 'var(--dim)';
-			const currentBadge = isCurrent ? ` <span style="background:rgba(255,215,0,.15);color:var(--gold);font-size:8px;padding:0 .3rem;border-radius:3px;border:1px solid rgba(255,215,0,.3)">← PRICE</span>` : '';
-			return `<div class="fib-row${isCurrent ? ' current' : ''}">
-        <span class="fib-pct" style="color:${c}">${lv.key.includes('ext') ? 'EXT' : lv.key + '%'}</span>
-        <span class="fib-price" style="color:${isAbove ? 'var(--dim)' : 'var(--text)'}">$${lvPrice.toFixed(2)}</span>
-        <span class="fib-label">${lv.label}${currentBadge}</span>
-        <span class="fib-tag" style="background:${c}15;color:${c};border:1px solid ${c}30">${lv.tag}</span>
-      </div>`;
+			const isKey     = ['38.2','61.8','ext_161'].includes(lv.key);
+			const nowBadge  = isCurrent ? ` <span style="background:rgba(255,215,0,.2);color:#FFD700;font-size:8px;padding:.1rem .35rem;border-radius:3px;border:1px solid rgba(255,215,0,.4);font-weight:700">◀ PRICE</span>` : '';
+			const distNote  = distPct < 1.5 && !isCurrent ? ` <span style="color:var(--muted);font-size:9px">${distPct.toFixed(1)}% away</span>` : '';
+			return `<div class="fib-row${isCurrent?' current':''}${isKey?' fib-key-level':''}${lv.isExt?' fib-ext-row':''}">
+				<span class="fib-pct" style="color:${c}">${lv.isExt ? lv.label.split(' ')[0] : lv.key+'%'}</span>
+				<span class="fib-price" style="color:${isAbove?'var(--dim)':'var(--text)'}">$${lvPrice.toFixed(2)}</span>
+				<span class="fib-label">${lv.label}${nowBadge}${distNote}</span>
+				<span class="fib-tag" style="background:${c}18;color:${c};border:1px solid ${c}35">${lv.tag}</span>
+			</div>`;
 		}).join('');
 
-		// Fibonacci position bar (100% = swing high, 0% = swing low)
-		updateRange('gold-fib-fill', 'gold-fib-marker', 'gold-fib-pos-label', Math.max(0, Math.min(100, pctPosInRange)), 100);
-		$('gold-fib-low-label').textContent = `Low $${fibL.toFixed(2)}`;
+		// Secondary fib grid
+		const grid2Wrap = $('gold-fib-grid2-wrap');
+		if (fib2 && grid2Wrap) {
+			grid2Wrap.style.display = '';
+			$('gold-fib-grid2').innerHTML = ['ext_161','0','38.2','50','61.8','78.6','100'].map(k => {
+				const lp = fib2[k]; if (!lp) return '';
+				return `<div class="fib-row fib-sec"><span class="fib-pct" style="color:var(--dim)">${k.startsWith('ext')?'161.8%':k+'%'}</span><span class="fib-price" style="color:${price>lp?'var(--muted)':'var(--dim)'}">$${lp.toFixed(2)}</span><span class="fib-label" style="color:var(--muted)">Secondary</span></div>`;
+			}).join('');
+		} else if (grid2Wrap) grid2Wrap.style.display = 'none';
+
+		// Position bar
+		updateRange('gold-fib-fill','gold-fib-marker','gold-fib-pos-label', Math.max(0,Math.min(100,pctPosInRange)), 100);
+		$('gold-fib-low-label').textContent  = `Low $${fibL.toFixed(2)}`;
 		$('gold-fib-high-label').textContent = `High $${fibH.toFixed(2)}`;
 
-		// Fibonacci advice
-		const fibAdvEl = $('gold-fib-advice');
-		const nearPct = parseFloat(nearest.level);
-		let fibAdvice = '';
-		if (fibDir === 'retrace') {
-			if (nearPct <= 38.2 && nearPct > 0) fibAdvice = `✅ Price near ${nearest.level}% retrace ($${fib[nearest.level].toFixed(2)}) — shallow pullback in bull trend. Good long entry zone. Strong level: 38.2% is the golden retrace.`;
-			else if (nearPct <= 61.8) fibAdvice = `🎯 Price at ${nearest.level}% retrace ($${fib[nearest.level].toFixed(2)}) — 61.8% is the deepest acceptable pullback in a bull trend. High RR entry if trend intact.`;
-			else if (nearPct <= 78.6) fibAdvice = `⚠️ Price at ${nearest.level}% retrace — deep pullback. Wait for reversal confirmation candle before entering.`;
-			else fibAdvice = `🔴 Price at ${nearest.level}% — very deep retrace. Trend may be reversing. Require strong confirmation before longing.`;
-		} else {
-			fibAdvice = `📐 Extension targets: 161.8% = $${fib['ext1'].toFixed(2)} | 200% = $${fib['ext2'].toFixed(2)}. Use as TP levels.`;
+		// Fibonacci-precision entry + TP
+		const precEl = $('gold-fib-precision');
+		if (precEl) {
+			precEl.style.display = '';
+			const retraceLevels = [
+				{key:'23.6',p:3},{key:'38.2',p:5},{key:'50',p:4},{key:'61.8',p:5},{key:'78.6',p:3}
+			];
+			let bestEntry = null;
+			for (const lv of retraceLevels) {
+				const lvP = fib[lv.key];
+				if (lvP && lvP <= price) {
+					const dist = price - lvP;
+					if (!bestEntry || dist < bestEntry.dist) bestEntry = {...lv, price:lvP, dist};
+				}
+			}
+			const idealEntry = bestEntry ? bestEntry.price : price;
+			const idealNote  = bestEntry ? `${bestEntry.key}% Fib ($${idealEntry.toFixed(2)})` : 'current price';
+			precEl.innerHTML = `<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;font-weight:700">📐 Fibonacci Precision Entry &amp; Take-Profit Levels</div>
+				<div class="fib-precision-grid">
+					<div class="fib-prec-row entry"><span class="fib-prec-label">Ideal Entry Zone</span><span class="fib-prec-price" style="color:var(--accent)">$${idealEntry.toFixed(2)}</span><span class="fib-prec-note">Pullback to ${idealNote}</span></div>
+					<div class="fib-prec-row tp"><span class="fib-prec-label">TP1 — 127.2% Ext</span><span class="fib-prec-price" style="color:var(--green)">$${fib.ext_127.toFixed(2)}</span><span class="fib-prec-note">First target — take 40%</span></div>
+					<div class="fib-prec-row tp"><span class="fib-prec-label">TP2 — 161.8% ★ Golden</span><span class="fib-prec-price" style="color:#FFD700">$${fib.ext_161.toFixed(2)}</span><span class="fib-prec-note">Golden extension — take 40%</span></div>
+					<div class="fib-prec-row tp"><span class="fib-prec-label">TP3 — 200%</span><span class="fib-prec-price" style="color:#88ffcc">$${fib.ext_200.toFixed(2)}</span><span class="fib-prec-note">Hold 20% — trail stop</span></div>
+					<div class="fib-prec-row tp"><span class="fib-prec-label">TP4 — 261.8%</span><span class="fib-prec-price" style="color:#aaffee">$${fib.ext_261.toFixed(2)}</span><span class="fib-prec-note">Ultimate — strong bull only</span></div>
+				</div>`;
 		}
+
+		// Advice
+		const fibAdvEl = $('gold-fib-advice');
+		const nearPct  = parseFloat(nearest.level);
+		const inExtZone = price > fib['0'];
+		const accNote   = fibAcc.score >= 80
+			? `🎯 ACCURACY ${Math.round(fibAcc.score)}% — ${fibAcc.level?.name} with ${emaStack.length ? 'EMA confluence' : 'no EMA yet'}.`
+			: fibAcc.score >= 55
+				? `✅ Accuracy ${Math.round(fibAcc.score)}% — near key level.`
+				: `⚠️ Accuracy ${Math.round(fibAcc.score)}% — wait for pullback to 38.2% ($${fib['38.2'].toFixed(2)}) or 61.8% ($${fib['61.8'].toFixed(2)}).`;
+		let fibAdvice;
+		if (inExtZone) {
+			fibAdvice = `📐 Price above swing high. Extensions: 127.2%=$${fib.ext_127.toFixed(2)} | 161.8%★=$${fib.ext_161.toFixed(2)} | 200%=$${fib.ext_200.toFixed(2)} | 261.8%=$${fib.ext_261.toFixed(2)}.`;
+		} else if (nearPct > 0 && nearPct <= 38.2) {
+			fibAdvice = `${accNote} Shallow 38.2% pullback — strong trend. Full position valid. TP targets set above.`;
+		} else if (nearPct <= 61.8) {
+			fibAdvice = `${accNote} ${nearPct===61.8?'GOLDEN RATIO':'Mid'} pullback at ${nearPct}% — best RR entry zone. Require RSI>50 + KDJ cross + volume spike.`;
+		} else if (nearPct <= 78.6) {
+			fibAdvice = `${accNote} Deep retrace. Require strong reversal candle + volume>1.5× before entry. Reduce size 50%.`;
+		} else if (nearPct <= 88.6) {
+			fibAdvice = `⚠️ Very deep 88.6% harmonic level — last valid support. High risk. Tight stop only.`;
+		} else {
+			fibAdvice = `🔴 At/below swing low. Do not enter long until new higher low forms and MAs rebuild.`;
+		}
+		if (fibDir==='extend') fibAdvice = `📐 Extensions: 127.2%=$${fib.ext_127.toFixed(2)} | 161.8%★=$${fib.ext_161.toFixed(2)} | 200%=$${fib.ext_200.toFixed(2)} | 261.8%=$${fib.ext_261.toFixed(2)}.`;
 		fibAdvEl.textContent = fibAdvice;
+
 	} else {
 		fibCard.style.display = 'none';
 	}
@@ -2327,3 +2486,792 @@ Object.assign(TOOLTIPS, {
 	'bu-riskpct': { title: 'Risk per Trade %', body: 'Maximum % of account to risk. For Bursa ETFs: 0.5–1% recommended. 1 lot = 100 units, so smaller account sizes should use minimum 0.5% risk. Formula: Risk Amount ÷ (ATR×1.5×100) = max lots.', where: '📍 Recommended: 0.5% (beginners) or 1.0% (experienced)' },
 	'bu-fee': { title: 'Brokerage Fee %', body: 'Bursa brokerage commission. Typically 0.10%–0.42% + fees (stamp duty, clearing fee). Online brokers (mplus, CIMB Clicks): ~0.10%. Traditional: ~0.42%. Minimum charge may apply. Enter total % per transaction.', where: '📍 Check your broker\'s fee schedule. Common: 0.10% for online, 0.42% for traditional', ranges: [['0.08–0.12%', 'green', 'Low-cost online broker'], ['0.15–0.25%', 'yellow', 'Mid-tier'], ['0.42%+', 'red', 'Traditional — negotiate or switch']] },
 });
+/* ══════════════════════════════════════
+   SWING REVERSAL SCANNER
+   V-Bottom / Trend Reversal Detection
+   7 Signals: Candle Pattern, Supertrend Flip,
+   KDJ Oversold, RSI Bounce, MACD Divergence,
+   Volume Spike, MA Rebuild Progress
+══════════════════════════════════════ */
+
+/* Candle pattern detection from OHLC */
+function detectCandlePattern(o, h, l, c) {
+	if (!o || !h || !l || !c) return null;
+	const body     = Math.abs(c - o);
+	const range    = h - l;
+	const upperWick = h - Math.max(o, c);
+	const lowerWick = Math.min(o, c) - l;
+	const bodyRatio = body / range;
+	const isGreen   = c > o;
+
+	// Hammer: lower wick ≥ 2× body, small upper wick, ideally green
+	if (lowerWick >= body * 2 && upperWick <= body * 0.5 && range > 0) {
+		const strength = lowerWick / range;
+		return { pattern:'Hammer', strength: Math.round(strength * 100),
+			bullish:true, color:'var(--green)',
+			note:`Lower wick ${(lowerWick/range*100).toFixed(0)}% of range — sellers rejected. ${isGreen?'Green body confirms buyers.':'Wait for next green candle.'}` };
+	}
+	// Engulfing: large body (>60% of range), green
+	if (isGreen && bodyRatio >= 0.6) {
+		return { pattern:'Bullish Engulfing', strength: Math.round(bodyRatio * 100),
+			bullish:true, color:'var(--green)',
+			note:`Body is ${(bodyRatio*100).toFixed(0)}% of range — strong buyer candle. High reversal conviction.` };
+	}
+	// Doji: very small body (< 10% of range)
+	if (bodyRatio < 0.1 && range > 0) {
+		return { pattern:'Doji / Indecision', strength: 50,
+			bullish:null, color:'var(--yellow)',
+			note:'Open ≈ Close — indecision. Needs confirmation from next candle direction.' };
+	}
+	// Dragonfly Doji: tiny body at top, long lower wick
+	if (bodyRatio < 0.15 && lowerWick >= range * 0.6) {
+		return { pattern:'Dragonfly Doji', strength: 75,
+			bullish:true, color:'var(--accent)',
+			note:'Long lower wick with tiny body at high — strong bullish reversal signal.' };
+	}
+	// Shooting star (bearish warning)
+	if (upperWick >= body * 2 && lowerWick <= body * 0.3 && range > 0) {
+		return { pattern:'Shooting Star ⚠️', strength: Math.round(upperWick/range*100),
+			bullish:false, color:'var(--red)',
+			note:'Upper wick rejection — bearish. Not a good long entry candle.' };
+	}
+	// Generic green/red candle
+	return { pattern: isGreen ? 'Green Candle' : 'Red Candle', strength: Math.round(bodyRatio * 60),
+		bullish: isGreen ? true : false, color: isGreen ? 'var(--accent)' : 'var(--red)',
+		note: isGreen ? 'Bullish close — moderate reversal signal.' : 'Bearish — wait for next candle.' };
+}
+
+/* MA Rebuild Phase Assessment */
+function maRebuildPhase(price, ma5, ma20, ma50, ma200) {
+	const checks = [
+		{ label:'Price > MA5',   pass: price && ma5   ? price > ma5   : null, weight:25 },
+		{ label:'MA5 > MA20',    pass: ma5   && ma20  ? ma5   > ma20  : null, weight:25 },
+		{ label:'MA20 > MA50',   pass: ma20  && ma50  ? ma20  > ma50  : null, weight:25 },
+		{ label:'Price > MA200', pass: price && ma200 ? price > ma200 : null, weight:25 },
+	];
+	const passed  = checks.filter(c => c.pass === true).length;
+	const total   = checks.filter(c => c.pass !== null).length;
+	const score   = total > 0 ? (passed / total) * 100 : 0;
+	let phase;
+	if (passed === 0)      phase = { label:'Broken — Full Bear Stack',   color:'var(--red)',    n:0 };
+	else if (passed === 1) phase = { label:'Phase 1 — Price crossed MA5', color:'var(--orange)', n:1 };
+	else if (passed === 2) phase = { label:'Phase 2 — MA5 > MA20 Cross',  color:'var(--yellow)', n:2 };
+	else if (passed === 3) phase = { label:'Phase 3 — MA20 > MA50',       color:'var(--accent)', n:3 };
+	else                   phase = { label:'Phase 4 — Full Bull Stack ✅', color:'var(--green)',  n:4 };
+	return { checks, passed, total, score, phase };
+}
+
+function swingCalc() {
+	const o     = num('sw-open');
+	const h     = num('sw-high');
+	const l     = num('sw-low');
+	const c     = num('sw-close');
+
+	if (!o || !h || !l || !c) { $('swing-result').style.display = 'none'; return; }
+	$('swing-result').style.display = '';
+
+	const prevClose = num('sw-prev-close');
+	const price     = num('sw-price') || c;
+	const stPrev    = num('sw-st-prev');
+	const stCurr    = num('sw-st-curr');
+	const stDir     = document.getElementById('sw-st-dir')?.value || '';
+	const maPrice   = num('sw-ma-price') || price;
+	const ma5       = num('sw-ma5');
+	const ma20      = num('sw-ma20');
+	const ma50      = num('sw-ma50');
+	const ma200     = num('sw-ma200');
+	const res1      = num('sw-res1');
+	const res2      = num('sw-res2');
+	const res3      = num('sw-res3');
+	const kVal      = num('sw-k');
+	const dVal      = num('sw-d');
+	const jVal      = num('sw-j');
+	const rsi       = num('sw-rsi');
+	const dif       = num('sw-dif');
+	const dea       = num('sw-dea');
+	const vol       = num('sw-vol');
+	const adxV      = num('sw-adx');
+	const atr       = num('sw-atr');
+	const account   = num('sw-account');
+	const riskPct   = num('sw-riskpct');
+
+	/* ── S1: Candle Pattern ── */
+	const candle    = detectCandlePattern(o, h, l, c);
+	const s1_pass   = candle ? (candle.bullish === true ? true : candle.bullish === null ? 'warn' : false) : null;
+
+	/* ── S2: Supertrend Flip ── */
+	let s2_pass = null, stNote = 'Not provided';
+	if (stDir === 'flipped_bull') { s2_pass = true;  stNote = '🟢 JUST FLIPPED BULLISH — strongest signal'; }
+	else if (stDir === 'bullish') { s2_pass = true;  stNote = '✅ Dots below price — trend bullish'; }
+	else if (stDir === 'bearish') { s2_pass = false; stNote = '🔴 Dots still above — not yet'; }
+	else if (stDir === 'flipped_bear') { s2_pass = false; stNote = '⬇️ Flipped bearish — avoid long'; }
+	// Verify via values if provided
+	if (stPrev != null && stCurr != null && price != null) {
+		const prevAbove = stPrev > price;
+		const currBelow = stCurr < price;
+		if (prevAbove && currBelow && !stDir.includes('bear')) { s2_pass = true; stNote = '🟢 Supertrend confirmed flip: prev above → now below price'; }
+	}
+
+	/* ── S3: KDJ Oversold ── */
+	let s3_pass = null, kdjNote = 'Not provided';
+	if (kVal != null && dVal != null) {
+		const kdj = scoreKDJ(kVal, dVal, jVal);
+		s3_pass = kdj.pass;
+		const jNote = jVal != null ? ` (J=${jVal.toFixed(1)})` : '';
+		kdjNote = `K${kVal.toFixed(1)} D${dVal.toFixed(1)}${jNote} — ${kdj.zone}`;
+		// Extra: oversold bounce = J < 20 turning up
+		if (jVal != null && jVal < 20 && kVal > dVal) { s3_pass = true; kdjNote += ' — OVERSOLD BOUNCE ★'; }
+	}
+
+	/* ── S4: RSI Oversold Bounce ── */
+	let s4_pass = null, rsiNote = 'Not provided';
+	if (rsi != null) {
+		if      (rsi < 30)  { s4_pass = true;  rsiNote = `RSI ${rsi.toFixed(1)} — extreme oversold bounce zone`; }
+		else if (rsi < 40)  { s4_pass = true;  rsiNote = `RSI ${rsi.toFixed(1)} — oversold, bounce likely`; }
+		else if (rsi < 50)  { s4_pass = 'warn'; rsiNote = `RSI ${rsi.toFixed(1)} — building momentum`; }
+		else if (rsi < 70)  { s4_pass = true;  rsiNote = `RSI ${rsi.toFixed(1)} — bullish momentum zone`; }
+		else               { s4_pass = 'warn'; rsiNote = `RSI ${rsi.toFixed(1)} — overbought, caution`; }
+	}
+
+	/* ── S5: MACD Divergence / Crossover ── */
+	let s5_pass = null, macdNote = 'Not provided';
+	if (dif != null && dea != null) {
+		const macd = scoreMACDZone(dif, dea);
+		s5_pass   = macd.pass;
+		macdNote  = `DIF:${dif} DEA:${dea} — ${macd.zone}`;
+		// Bullish divergence: DIF turning up from below DEA (DIF > DEA by small margin)
+		if (dif > dea && Math.abs(dif - dea) / Math.abs(dea || 1) < 0.2) {
+			macdNote += ' — Fresh crossover (high accuracy)';
+			s5_pass = true;
+		}
+	}
+
+	/* ── S6: Volume Spike ── */
+	let s6_pass = null, volNote = 'Not provided';
+	if (vol != null) {
+		const volS = scoreVolume(vol);
+		s6_pass   = volS.pass;
+		volNote   = `${vol}× avg — ${volS.zone}`;
+		if (vol >= 2.0) volNote += ' — Capitulation/Exhaustion spike ★';
+	}
+
+	/* ── S7: MA Rebuild Progress ── */
+	const rebuild = maRebuildPhase(maPrice, ma5, ma20, ma50, ma200);
+	const s7_pass = rebuild.score >= 75 ? true : rebuild.score >= 50 ? 'warn' : rebuild.score > 0 ? 'warn' : false;
+
+	/* ── Score Engine ── */
+	const eng = scoreEngine();
+	eng.add(s1_pass, 18); // Candle pattern
+	eng.add(s2_pass, 22); // Supertrend flip (most important)
+	eng.add(s3_pass, 16); // KDJ oversold
+	eng.add(s4_pass, 12); // RSI bounce
+	eng.add(s5_pass, 12); // MACD
+	eng.add(s6_pass, 12); // Volume
+	eng.add(s7_pass,  8); // MA rebuild
+	const score = eng.result();
+
+	/* ── Decision ── */
+	const criticalPass = s2_pass !== false && s1_pass !== false;
+	let decision, riskLevel;
+	if (!criticalPass || score < 35) {
+		decision = 'SKIP';   riskLevel = 'High Risk';
+	} else if (score >= 72) {
+		decision = 'PROCEED'; riskLevel = 'Low Risk';
+	} else if (score >= 52) {
+		decision = 'PROCEED'; riskLevel = 'Medium Risk';
+	} else {
+		decision = 'WATCH';   riskLevel = 'Medium Risk';
+	}
+
+	/* ── Phase label for grade badge ── */
+	const phaseGrade = { n:0, g:'BEAR',  cls:'grade-x', e:'🔴' };
+	if (rebuild.phase.n >= 3) { phaseGrade.g='BULL'; phaseGrade.cls='grade-spp'; phaseGrade.e='🚀'; }
+	else if (rebuild.phase.n >= 2) { phaseGrade.g='EARLY'; phaseGrade.cls='grade-a'; phaseGrade.e='📈'; }
+	else if (rebuild.phase.n >= 1) { phaseGrade.g='REVERSAL'; phaseGrade.cls='grade-b'; phaseGrade.e='🔄'; }
+
+	/* ── Decision Strip ── */
+	setDecisionStrip('swing', decision, riskLevel, phaseGrade, `
+		<div>Candle: <span style="color:${candle?.color||'var(--dim)'}">${candle?.pattern||'—'}</span>
+		  &nbsp; Supertrend: <span style="color:${s2_pass===true?'var(--green)':s2_pass===false?'var(--red)':'var(--dim)'}">${stDir||'—'}</span>
+		</div>
+		<div>MA Rebuild: <span style="color:${rebuild.phase.color}">${rebuild.phase.label}</span>
+		  &nbsp; Score: <span style="color:var(--accent)">${score.toFixed(0)}/100</span>
+		</div>`
+	);
+
+	/* ── Advice ── */
+	const adv = $('swing-advice');
+	if (decision === 'PROCEED') {
+		const lines = [
+			stDir === 'flipped_bull'
+				? `🟢 SUPERTREND FLIP CONFIRMED — Highest-conviction reversal signal. Enter on this candle close or next open.`
+				: `✅ Reversal conditions met (Score: ${score.toFixed(0)}/100).`,
+			candle ? `🕯️ ${candle.pattern} detected — ${candle.note}` : '',
+			jVal != null && jVal < 20 ? `📊 KDJ J=${jVal.toFixed(1)} — extreme oversold. Historical bounce rate >75% from this level.` : '',
+			rsi != null && rsi < 35 ? `📉 RSI ${rsi.toFixed(1)} — extreme oversold. Mean reversion favors the bull.` : '',
+			vol != null && vol >= 1.5 ? `⚡ Volume ${vol}× — ${vol>=2?'Capitulation spike (sellers exhausted)':'Above average conviction'}.` : '',
+			res1 ? `📐 Next resistance levels: ${res1.toFixed(4)}${res2?' → '+res2.toFixed(4):''}${res3?' → '+res3.toFixed(4):''}` : '',
+			`📦 Entry: ${c.toFixed(4)} | SL: ${atr ? (c - atr*1.5).toFixed(4) + ' (ATR×1.5)' : 'set 1×ATR below candle low'}. Scale in across MA rebuilds.`,
+		].filter(Boolean).join('\n');
+		adv.textContent = lines;
+		adv.className = 'advice-box green';
+	} else if (decision === 'WATCH') {
+		const waiting = [
+			s2_pass !== true && 'Supertrend flip confirmation',
+			s1_pass !== true && 'Stronger reversal candle (hammer/engulfing)',
+			s6_pass !== true && 'Volume spike ≥ 1.5×',
+			rebuild.score < 50 && `MA rebuild to Phase 2+ (currently Phase ${rebuild.phase.n})`,
+		].filter(Boolean);
+		adv.textContent = `⚠️ Partial reversal setup (Score: ${score.toFixed(0)}/100). Waiting for: ${waiting.join(', ')}.`;
+		adv.className = 'advice-box yellow';
+	} else {
+		const failed = [
+			s2_pass === false && stNote,
+			s1_pass === false && `${candle?.pattern} — bearish candle`,
+			score < 35 && `Score too low (${score.toFixed(0)}/100)`,
+		].filter(Boolean);
+		adv.textContent = `🔴 Skip. No valid reversal signal. ${failed.join(' | ')}. Wait for Supertrend flip + hammer candle + volume spike to all appear together.`;
+		adv.className = 'advice-box red';
+	}
+
+	/* ── Dial ── */
+	updateDial('swing-dial-arc', 'swing-dial-score', score);
+
+	/* ── Pie ── */
+	drawPie('swing-pie','swing-pie-legend', [
+		{ label:'Candle',      value: s1_pass===true?1:s1_pass==='warn'?.5:0,           color:'var(--yellow)' },
+		{ label:'Supertrend',  value: s2_pass===true?2:s2_pass==='warn'?1:0,            color:'var(--green)' },
+		{ label:'KDJ',         value: s3_pass===true?1:s3_pass==='warn'?.5:0,           color:'var(--accent)' },
+		{ label:'RSI',         value: s4_pass===true?1:s4_pass==='warn'?.5:0,           color:'var(--accent2)' },
+		{ label:'MACD',        value: s5_pass===true?1:s5_pass==='warn'?.5:0,           color:'var(--orange)' },
+		{ label:'Volume',      value: s6_pass===true?1:s6_pass==='warn'?.5:0,           color:'var(--red)' },
+		{ label:'MA Rebuild',  value: rebuild.score/100,                                color:'var(--green2)' },
+	].filter(s => s.value > 0));
+
+	/* ── Checklist ── */
+	const passArr = [s1_pass,s2_pass,s3_pass,s4_pass,s5_pass,s6_pass,s7_pass].filter(v=>v===true);
+	$('swing-checklist').innerHTML = [
+		buildCheck(`S1 — Candle: ${candle?.pattern||'—'}`, s1_pass, `${candle?.strength||0}% strength`),
+		buildCheck(`S2 — Supertrend: ${stDir||'—'}`, s2_pass, stNote.length>40?stNote.slice(0,40)+'…':stNote),
+		buildCheck(`S3 — KDJ Oversold`, s3_pass, kdjNote),
+		buildCheck(`S4 — RSI Bounce`, s4_pass, rsi ? `RSI: ${rsi.toFixed(1)}` : 'Not provided'),
+		buildCheck(`S5 — MACD ${dif!=null&&dea!=null?(dif>dea?'Bullish':'Bearish'):''}`, s5_pass, macdNote),
+		buildCheck(`S6 — Volume Spike`, s6_pass, volNote),
+		buildCheck(`S7 — MA Rebuild Phase ${rebuild.phase.n}/4`, s7_pass, rebuild.phase.label),
+	].join('');
+	updateMeter('swing-signal-meter', passArr.length, 7);
+
+	/* ── Candle Analysis Grid ── */
+	const range    = h - l;
+	const body     = Math.abs(c - o);
+	const lowerWick = Math.min(o,c) - l;
+	const upperWick = h - Math.max(o,c);
+	const wickScore = range > 0 ? (lowerWick / range) * 100 : 0;
+	$('swing-candle-grid').innerHTML = [
+		{ l:'Pattern',      v: candle?.pattern || '—',    c: candle?.bullish===true?'green':candle?.bullish===false?'red':'yellow' },
+		{ l:'Candle Range', v: range.toFixed(4),           c: 'accent' },
+		{ l:'Body Size',    v: `${(body/range*100).toFixed(0)}%`, c: body/range > 0.5 ? 'green' : 'yellow' },
+		{ l:'Lower Wick',   v: `${wickScore.toFixed(0)}%`, c: wickScore>50?'green':wickScore>30?'accent':'dim' },
+		{ l:'Upper Wick',   v: `${(upperWick/range*100).toFixed(0)}%`, c: upperWick/range>0.3?'red':'green' },
+		{ l:'Candle Close', v: c > o ? '▲ Bullish' : '▼ Bearish', c: c > o ? 'green' : 'red' },
+		prevClose ? { l:'Body vs Prev',  v: `${((c-prevClose)/prevClose*100).toFixed(2)}%`, c: c>prevClose?'green':'red' } : null,
+	].filter(Boolean).map(({l,v,c:col}) =>
+		`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${col}">${v}</div></div>`
+	).join('');
+
+	const fill  = $('swing-wick-fill'), mark = $('swing-wick-marker'), lbl = $('swing-wick-label');
+	if (fill)  fill.style.width  = Math.min(100,wickScore) + '%';
+	if (mark)  mark.style.left   = Math.min(100,wickScore) + '%';
+	if (lbl)   lbl.textContent   = `${wickScore.toFixed(0)}% lower wick ratio`;
+
+	/* ── MA Rebuild Grid ── */
+	$('swing-rebuild-grid').innerHTML = rebuild.checks.map(ch =>
+		`<div class="check-row">
+			<span class="${ch.pass===true?'check-pass':ch.pass===false?'check-fail':'check-neutral'}">${ch.pass===true?'✔':ch.pass===false?'✘':'○'}</span>
+			<span class="check-label">${ch.label}</span>
+			<span class="check-val ${ch.pass===true?'pass':ch.pass===false?'fail':'warn'}">${ch.pass===true?'✅ Done':ch.pass===false?'⏳ Pending':'—'}</span>
+		</div>`
+	).join('');
+
+	const pct = rebuild.score;
+	const rf  = $('swing-rebuild-fill'), rm = $('swing-rebuild-marker'), rl = $('swing-rebuild-label');
+	if (rf) rf.style.width = pct + '%';
+	if (rm) rm.style.left  = pct + '%';
+	if (rl) rl.textContent = `Phase ${rebuild.phase.n}/4 — ${rebuild.phase.label}`;
+
+	/* ── Multi-Level Trade Plan ── */
+	const tpCard = $('swing-tradeplan-card');
+	if (tpCard) {
+		tpCard.style.display = '';
+		// Phase info
+		const phEl = $('swing-phase-info');
+		if (phEl) {
+			phEl.innerHTML = `<div class="swing-phase-banner" style="border-color:${rebuild.phase.color}">
+				<span style="color:${rebuild.phase.color};font-weight:700">${rebuild.phase.e} ${rebuild.phase.label}</span>
+				<span style="color:var(--dim);font-size:10.5px;margin-left:.75rem">${rebuild.phase.n < 4 ? `Next: ${['Price>MA5','MA5>MA20','MA20>MA50','Full stack'][rebuild.phase.n]}` : 'All MAs aligned — ride the trend'}</span>
+			</div>`;
+		}
+
+		const entryPrice = c; // Enter at close of reversal candle
+		const atrVal = atr || (range * 2); // fallback: 2× candle range
+
+		// Build multi-phase TP using resistance levels + ATR
+		const tpLevels = [];
+		if (res1)    tpLevels.push({ label:'Phase 1 TP — Resistance 1', price:res1, pct:'30%', note:'MA cluster / key level — partial exit, move SL to breakeven' });
+		if (res2)    tpLevels.push({ label:'Phase 2 TP — Resistance 2', price:res2, pct:'40%', note:'Next resistance — add at each MA cross above (scale in)' });
+		if (res3)    tpLevels.push({ label:'Phase 3 TP — Resistance 3', price:res3, pct:'30%', note:'Full trend target — trail stop ATR×1.0' });
+		if (!res1) { // Fallback to ATR
+			tpLevels.push({ label:'TP1 (ATR×1.5)', price:entryPrice+atrVal*1.5, pct:'40%', note:'Move SL to breakeven' });
+			tpLevels.push({ label:'TP2 (ATR×3.0)', price:entryPrice+atrVal*3.0, pct:'40%', note:'Trail stop' });
+			tpLevels.push({ label:'TP3 (ATR×5.0)', price:entryPrice+atrVal*5.0, pct:'20%', note:'Hold for trend' });
+		}
+
+		const sl = entryPrice - atrVal * 1.5;
+		const dp = entryPrice > 10 ? 2 : 4;
+
+		let tpHtml = `<div class="prow entry"><span class="prow-label">Entry (Candle Close)</span><span class="prow-val accent">${entryPrice.toFixed(dp)}</span><span class="prow-note">Limit order — enter on close confirmation</span></div>
+			<div class="prow sl"><span class="prow-label">Stop Loss (ATR×1.5)</span><span class="prow-val red">${sl.toFixed(dp)}</span><span class="prow-note">Below candle low ${l.toFixed(dp)} — set immediately</span></div>`;
+		tpLevels.forEach((tp,i) => {
+			const rr = ((tp.price - entryPrice) / (entryPrice - sl)).toFixed(1);
+			const cls = i===0?'tp1':i===1?'tp2':'tp3';
+			tpHtml += `<div class="prow ${cls}"><span class="prow-label">${tp.label} (${tp.pct})</span><span class="prow-val ${i===0?'green':i===1?'g2':'g3'}">${tp.price.toFixed(dp)}</span><span class="prow-note">R:R 1:${rr} — ${tp.note}</span></div>`;
+		});
+		$('swing-price-block').innerHTML = tpHtml;
+
+		// Scaling guide
+		const scEl = $('swing-scaling-guide');
+		if (scEl) {
+			scEl.innerHTML = `<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;font-weight:700">📐 Position Scaling Strategy</div>
+				<div class="wf-step"><span class="wf-n">1</span><span>Initial entry: <strong>33% of planned position</strong> at ${entryPrice.toFixed(dp)} — reversal just confirmed, not full conviction yet</span></div>
+				${ma5 ? `<div class="wf-step"><span class="wf-n">2</span><span>Add <strong>33% more</strong> when Price > MA5 (${ma5.toFixed(dp)}) is confirmed — MA5 crossed = momentum valid</span></div>` : ''}
+				${ma20 ? `<div class="wf-step"><span class="wf-n">3</span><span>Add <strong>final 34%</strong> when MA5 > MA20 (${ma20.toFixed(dp)}) confirmed — full bull signal</span></div>` : ''}
+				<div class="wf-step"><span class="wf-n">4</span><span>At TP1: take 30% profit, move SL to breakeven — trade now "free"</span></div>
+				<div class="wf-step"><span class="wf-n">5</span><span>At TP2: take 40% more, trail remaining 30% using ATR×1.0 below each new high</span></div>`;
+		}
+
+		// Kelly sizing
+		const kellyEl = $('swing-kelly-block');
+		if (account && riskPct && kellyEl) {
+			kellyEl.style.display = '';
+			const riskAmt  = account * (riskPct/100);
+			const riskUnit = Math.abs(entryPrice - sl);
+			const units    = riskUnit > 0 ? Math.floor(riskAmt / riskUnit) : 0;
+			const posVal   = units * entryPrice;
+			kellyEl.innerHTML = `<div class="kelly-block">
+				<div class="kelly-title">⚖️ Reversal Trade Sizing</div>
+				<div class="kelly-row"><span class="kelly-label">Account</span><span class="kelly-val">$${account.toLocaleString()}</span></div>
+				<div class="kelly-row"><span class="kelly-label">Risk (${riskPct}%)</span><span class="kelly-val" style="color:var(--red)">$${riskAmt.toFixed(2)}</span></div>
+				<div class="kelly-row"><span class="kelly-label">Initial Entry (33%)</span><span class="kelly-val green">${Math.floor(units*0.33)} units @ ${entryPrice.toFixed(dp)}</span></div>
+				<div class="kelly-row"><span class="kelly-label">Full Position</span><span class="kelly-val">${units} units = $${posVal.toFixed(2)}</span></div>
+				<div class="kelly-row" style="border-top:1px solid var(--border);padding-top:.3rem;margin-top:.2rem">
+					<span class="kelly-label" style="color:var(--muted);font-size:9.5px">💡 Scale in 33% → 33% → 34% as each MA phase confirms. Never risk full position at reversal entry.</span>
+				</div>
+			</div>`;
+		} else if (kellyEl) kellyEl.style.display = 'none';
+	}
+}
+
+function resetSwing() {
+	['sw-open','sw-high','sw-low','sw-close','sw-prev-close','sw-price',
+	 'sw-st-prev','sw-st-curr','sw-ma-price','sw-ma5','sw-ma20','sw-ma50','sw-ma200',
+	 'sw-res1','sw-res2','sw-res3','sw-k','sw-d','sw-j','sw-rsi',
+	 'sw-dif','sw-dea','sw-vol','sw-adx','sw-atr','sw-account','sw-riskpct',
+	].forEach(id => { const el=$(id); if(el) el.value=''; });
+	const stEl = document.getElementById('sw-st-dir');
+	if (stEl) stEl.value = '';
+	$('swing-result').style.display = 'none';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   QUERY PRICE PLANNER (QPP)
+   Generates Recommended / Conservative / Aggressive /
+   Scalp / Swing / Position trade profiles for any setup.
+   Called after every calculator result is rendered.
+══════════════════════════════════════════════════════════════ */
+
+/* ── Profile Definitions ── */
+const QPP_PROFILES = [
+  {
+    id:       'recommended',
+    label:    '⭐ Recommended',
+    color:    'var(--accent)',
+    border:   'rgba(0,200,240,.35)',
+    bg:       'rgba(0,200,240,.06)',
+    badge:    'STANDARD',
+    badgeCls: 'qpp-badge-accent',
+    slMult:   1.5,
+    tp1Mult:  1.5,
+    tp2Mult:  3.0,
+    tp3Mult:  5.0,
+    sizeRule: (score, stretch) => score >= 75 && stretch <= 3 ? 1.0 : score >= 55 ? 0.5 : 0.25,
+    posLabel: (score, stretch) => score >= 75 && stretch <= 3 ? '100%' : score >= 55 ? '50%' : '25%',
+    note:     'Balanced R:R. ATR×1.5 SL. Scale out 40/40/20 at TP1/2/3. Move SL to breakeven at TP1.',
+    riskPct:  1.0,
+    winRate:  55,
+  },
+  {
+    id:       'conservative',
+    label:    '🛡️ Conservative',
+    color:    'var(--green)',
+    border:   'rgba(0,232,122,.35)',
+    bg:       'rgba(0,232,122,.05)',
+    badge:    'LOW RISK',
+    badgeCls: 'qpp-badge-green',
+    slMult:   1.2,
+    tp1Mult:  1.0,
+    tp2Mult:  2.0,
+    tp3Mult:  3.0,
+    sizeRule: (score) => score >= 75 ? 0.5 : 0.25,
+    posLabel: (score) => score >= 75 ? '50%' : '25%',
+    note:     'Tight SL (ATR×1.2). Quick TP1 at 1×ATR. Prioritises capital protection. Best for uncertain markets.',
+    riskPct:  0.5,
+    winRate:  60,
+  },
+  {
+    id:       'aggressive',
+    label:    '🔥 Aggressive',
+    color:    'var(--red)',
+    border:   'rgba(240,58,74,.35)',
+    bg:       'rgba(240,58,74,.05)',
+    badge:    'HIGH RISK',
+    badgeCls: 'qpp-badge-red',
+    slMult:   2.0,
+    tp1Mult:  2.0,
+    tp2Mult:  4.0,
+    tp3Mult:  8.0,
+    sizeRule: (score) => score >= 72 ? 1.0 : 0.5,
+    posLabel: (score) => score >= 72 ? '100%' : '50%',
+    note:     'Wide SL (ATR×2.0) to survive volatility. Large TP3 target. Only when score ≥ 72 & strong trend.',
+    riskPct:  1.5,
+    winRate:  45,
+  },
+  {
+    id:       'scalp',
+    label:    '⚡ Scalp',
+    color:    'var(--yellow)',
+    border:   'rgba(245,200,66,.35)',
+    bg:       'rgba(245,200,66,.05)',
+    badge:    'SHORT TERM',
+    badgeCls: 'qpp-badge-yellow',
+    slMult:   0.8,
+    tp1Mult:  0.6,
+    tp2Mult:  1.0,
+    tp3Mult:  1.5,
+    sizeRule: () => 1.0,
+    posLabel: () => '100%',
+    note:     'Tight SL (ATR×0.8). Quick exits at TP1/TP2. Best during London/NY overlap. Do not hold overnight.',
+    riskPct:  0.5,
+    winRate:  58,
+  },
+  {
+    id:       'swing',
+    label:    '🔄 Swing',
+    color:    'var(--swing2)',
+    border:   'rgba(168,85,247,.35)',
+    bg:       'rgba(168,85,247,.05)',
+    badge:    'MULTI-DAY',
+    badgeCls: 'qpp-badge-swing',
+    slMult:   2.5,
+    tp1Mult:  3.0,
+    tp2Mult:  6.0,
+    tp3Mult:  10.0,
+    sizeRule: (score) => score >= 70 ? 0.5 : 0.25,
+    posLabel: (score) => score >= 70 ? '50%' : '25%',
+    note:     'Wide SL (ATR×2.5) for multi-day holds. TP3 at 10×ATR. Hold through minor pullbacks. Trail after TP1.',
+    riskPct:  1.0,
+    winRate:  48,
+  },
+  {
+    id:       'position',
+    label:    '🏦 Position',
+    color:    '#FFD700',
+    border:   'rgba(255,215,0,.3)',
+    bg:       'rgba(255,215,0,.04)',
+    badge:    'LONG TERM',
+    badgeCls: 'qpp-badge-gold',
+    slMult:   3.0,
+    tp1Mult:  5.0,
+    tp2Mult:  10.0,
+    tp3Mult:  20.0,
+    sizeRule: (score) => score >= 75 ? 0.33 : 0.15,
+    posLabel: (score) => score >= 75 ? '33%' : '15%',
+    note:     'Maximum SL (ATR×3.0). Weeks to months hold. TP3 = 20×ATR. Only in confirmed macro bull trend.',
+    riskPct:  0.5,
+    winRate:  52,
+  },
+];
+
+/* ── Expected Value Calculator ── */
+function calcEV(winRate, avgWinR, riskAmt) {
+  const w = winRate / 100;
+  const ev = (w * avgWinR - (1 - w) * 1) * riskAmt;
+  return ev;
+}
+
+/* ── Build Expectancy Bar ── */
+function expectancyBar(ev, maxEv) {
+  const pct = Math.min(100, Math.max(0, ((ev + maxEv) / (maxEv * 2)) * 100));
+  const color = ev > 0 ? 'var(--green)' : 'var(--red)';
+  return `<div class="qpp-ev-bar-wrap">
+    <div class="qpp-ev-track">
+      <div class="qpp-ev-fill" style="width:${pct}%;background:${color}"></div>
+      <div class="qpp-ev-marker" style="left:50%"></div>
+    </div>
+    <div class="qpp-ev-labels">
+      <span style="color:var(--red)">–EV</span>
+      <span style="color:${color};font-weight:700">${ev >= 0 ? '+' : ''}$${ev.toFixed(2)}</span>
+      <span style="color:var(--green)">+EV</span>
+    </div>
+  </div>`;
+}
+
+/* ── Main QPP Renderer ── */
+function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
+  const container = $(`${pfx}-qpp`);
+  if (!container || !price || !atr) { if (container) container.style.display = 'none'; return; }
+  container.style.display = '';
+
+  const dp       = context === 'gold' ? 2 : context === 'bursa' ? 3 : 4;
+  const currency = context === 'bursa' ? 'MYR ' : '$';
+  const riskAmt  = accountSize ? accountSize * 0.01 : 100; // default $100 risk
+  const maxEv    = riskAmt * 3;
+
+  // Build profile cards
+  const cards = QPP_PROFILES.map(p => {
+    const sl   = price - atr * p.slMult;
+    const tp1  = price + atr * p.tp1Mult;
+    const tp2  = price + atr * p.tp2Mult;
+    const tp3  = price + atr * p.tp3Mult;
+    const risk = price - sl;
+    const rr1  = risk > 0 ? ((tp1 - price) / risk) : 0;
+    const rr2  = risk > 0 ? ((tp2 - price) / risk) : 0;
+    const rr3  = risk > 0 ? ((tp3 - price) / risk) : 0;
+    const size = p.posLabel(score, stretch || 0);
+
+    // Expected value using composite RR (weighted avg of 3 TPs: 40/40/20)
+    const avgWinR = rr1 * 0.4 + rr2 * 0.4 + rr3 * 0.2;
+    const acctRisk = accountSize ? accountSize * (p.riskPct / 100) : riskAmt;
+    const ev = calcEV(p.winRate, avgWinR, acctRisk);
+
+    // Units/shares
+    const units = accountSize && risk > 0 ? Math.floor((accountSize * p.riskPct / 100) / risk) : null;
+
+    // Viability: is this profile suitable for current score?
+    const viable = p.id === 'scalp'    ? true
+                 : p.id === 'position' ? score >= 70
+                 : p.id === 'aggressive' ? score >= 72
+                 : p.id === 'swing'    ? score >= 60
+                 : score >= 50;
+
+    return { p, sl, tp1, tp2, tp3, risk, rr1, rr2, rr3, size, ev, avgWinR, acctRisk, units, viable };
+  });
+
+  // Find best profile for current conditions
+  const viable = cards.filter(c => c.viable);
+  const best   = viable.sort((a,b) => b.ev - a.ev)[0];
+
+  container.innerHTML = `
+    <div class="qpp-wrap">
+      <div class="qpp-header">
+        <div class="qpp-title">
+          <span class="qpp-title-icon">📋</span>
+          <span>Query Price Planner</span>
+          <span class="qpp-subtitle">Choose a trading style below — all levels auto-calculated</span>
+        </div>
+        ${best ? `<div class="qpp-best-tag">⭐ Best for current setup: <strong style="color:${best.p.color}">${best.p.label}</strong></div>` : ''}
+      </div>
+
+      <div class="qpp-tabs" id="${pfx}-qpp-tabs">
+        ${QPP_PROFILES.map(p =>
+          `<button class="qpp-tab-btn${p.id === 'recommended' ? ' active' : ''}${!cards.find(c=>c.p.id===p.id)?.viable ? ' qpp-dim' : ''}"
+            style="--qpp-c:${p.color}" onclick="qppSwitch('${pfx}','${p.id}')">
+            ${p.label}
+            ${p.id === best?.p.id ? '<span class="qpp-best-dot"></span>' : ''}
+          </button>`
+        ).join('')}
+      </div>
+
+      ${QPP_PROFILES.map(p => {
+        const c = cards.find(x => x.p.id === p.id);
+        const evColor = c.ev >= 0 ? 'var(--green)' : 'var(--red)';
+        return `
+        <div class="qpp-panel${p.id === 'recommended' ? ' active' : ''}" id="${pfx}-qpp-${p.id}">
+          <div class="qpp-note" style="border-color:${p.border};background:${p.bg}">
+            <span class="qpp-badge ${p.badgeCls}">${p.badge}</span>
+            <span style="font-size:10.5px;color:var(--dim)">${p.note}</span>
+            ${!c.viable ? `<span class="qpp-not-viable">⚠️ Score ${score.toFixed(0)}/100 — below threshold for this style</span>` : ''}
+          </div>
+
+          <div class="qpp-levels">
+            <div class="qpp-row qpp-entry">
+              <span class="qpp-row-icon">▶</span>
+              <span class="qpp-row-label">Entry</span>
+              <span class="qpp-row-price" style="color:var(--accent)">${currency}${price.toFixed(dp)}</span>
+              <span class="qpp-row-note">Market price — enter on close confirmation</span>
+            </div>
+            <div class="qpp-row qpp-sl">
+              <span class="qpp-row-icon">🛑</span>
+              <span class="qpp-row-label">Stop Loss <span style="color:var(--muted);font-size:9px">ATR×${p.slMult}</span></span>
+              <span class="qpp-row-price" style="color:var(--red)">${currency}${c.sl.toFixed(dp)}</span>
+              <span class="qpp-row-note">Risk: ${currency}${c.risk.toFixed(dp)} per unit${c.units ? ` · ${c.units} units max` : ''}</span>
+            </div>
+            <div class="qpp-row qpp-tp1">
+              <span class="qpp-row-icon">🎯</span>
+              <span class="qpp-row-label">TP1 <span style="color:var(--muted);font-size:9px">40% off</span></span>
+              <span class="qpp-row-price" style="color:var(--green)">${currency}${c.tp1.toFixed(dp)}</span>
+              <span class="qpp-row-note">R:R 1:${c.rr1.toFixed(2)} · Move SL → breakeven</span>
+            </div>
+            <div class="qpp-row qpp-tp2">
+              <span class="qpp-row-icon">🎯</span>
+              <span class="qpp-row-label">TP2 <span style="color:var(--muted);font-size:9px">40% off</span></span>
+              <span class="qpp-row-price" style="color:#55ffaa">${currency}${c.tp2.toFixed(dp)}</span>
+              <span class="qpp-row-note">R:R 1:${c.rr2.toFixed(2)} · Trail ATR×1.0</span>
+            </div>
+            <div class="qpp-row qpp-tp3">
+              <span class="qpp-row-icon">🚀</span>
+              <span class="qpp-row-label">TP3 <span style="color:var(--muted);font-size:9px">20% off</span></span>
+              <span class="qpp-row-price" style="color:#88ffcc">${currency}${c.tp3.toFixed(dp)}</span>
+              <span class="qpp-row-note">R:R 1:${c.rr3.toFixed(2)} · Trail or hold</span>
+            </div>
+          </div>
+
+          <div class="qpp-stats">
+            <div class="qpp-stat">
+              <div class="qpp-stat-label">Position Size</div>
+              <div class="qpp-stat-val" style="color:${p.color}">${c.size}</div>
+            </div>
+            <div class="qpp-stat">
+              <div class="qpp-stat-label">Avg R:R</div>
+              <div class="qpp-stat-val" style="color:var(--accent)">${c.avgWinR.toFixed(2)}:1</div>
+            </div>
+            <div class="qpp-stat">
+              <div class="qpp-stat-label">Win Rate Est.</div>
+              <div class="qpp-stat-val" style="color:var(--yellow)">${p.winRate}%</div>
+            </div>
+            <div class="qpp-stat">
+              <div class="qpp-stat-label">Risk Amount</div>
+              <div class="qpp-stat-val" style="color:var(--red)">${currency}${c.acctRisk.toFixed(2)}</div>
+            </div>
+            <div class="qpp-stat">
+              <div class="qpp-stat-label">Expected Value</div>
+              <div class="qpp-stat-val" style="color:${evColor}">${c.ev >= 0 ? '+' : ''}${currency}${c.ev.toFixed(2)}</div>
+            </div>
+            ${c.units ? `<div class="qpp-stat">
+              <div class="qpp-stat-label">Max Units</div>
+              <div class="qpp-stat-val" style="color:var(--green)">${c.units}</div>
+            </div>` : ''}
+          </div>
+
+          <div class="qpp-ev-section">
+            <div class="qpp-ev-title">Expected Value per Trade</div>
+            ${expectancyBar(c.ev, maxEv)}
+          </div>
+
+          <div class="qpp-compare">
+            <div class="qpp-compare-title">📊 Profile Comparison</div>
+            <div class="qpp-compare-grid">
+              ${cards.map(cc => `
+                <div class="qpp-compare-row${cc.p.id === p.id ? ' qpp-compare-active' : ''}">
+                  <span class="qpp-compare-name" style="color:${cc.p.color}">${cc.p.label}</span>
+                  <span class="qpp-compare-sl" style="color:var(--red)">SL ${currency}${cc.sl.toFixed(dp)}</span>
+                  <span class="qpp-compare-tp" style="color:var(--green)">TP1 ${currency}${cc.tp1.toFixed(dp)}</span>
+                  <span class="qpp-compare-rr" style="color:var(--accent)">RR ${cc.avgWinR.toFixed(1)}:1</span>
+                  <span class="qpp-compare-ev" style="color:${cc.ev>=0?'var(--green)':'var(--red)'}">${cc.ev>=0?'+':''}${currency}${cc.ev.toFixed(0)}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+/* ── Tab Switcher for QPP ── */
+function qppSwitch(pfx, profileId) {
+  const wrap = $(`${pfx}-qpp`);
+  if (!wrap) return;
+  wrap.querySelectorAll('.qpp-tab-btn').forEach(b => b.classList.remove('active'));
+  wrap.querySelectorAll('.qpp-panel').forEach(p => p.classList.remove('active'));
+  const btn = wrap.querySelector(`.qpp-tab-btn[onclick*="${profileId}"]`);
+  const panel = $(`${pfx}-qpp-${profileId}`);
+  if (btn)   btn.classList.add('active');
+  if (panel) panel.classList.add('active');
+}
+
+/* ── Hook QPP into all calculators ──
+   Call renderQPP after every calc completes */
+const _origMACalc    = typeof maCalc    === 'function' ? maCalc    : null;
+const _origEMACalc   = typeof emaCalc   === 'function' ? emaCalc   : null;
+const _origGoldCalc  = typeof goldCalc  === 'function' ? goldCalc  : null;
+const _origBursaCalc = typeof bursaCalc === 'function' ? bursaCalc : null;
+const _origSwingCalc = typeof swingCalc === 'function' ? swingCalc : null;
+
+/* Patch each calc to call QPP after */
+function patchCalc(fn, pfx, getPriceAtrScore, context) {
+  return function() {
+    fn.apply(this, arguments);
+    // Small defer so DOM is updated first
+    requestAnimationFrame(() => {
+      const res = getPriceAtrScore();
+      if (res) renderQPP(pfx, res.price, res.atr, res.score, res.account, res.stretch, context);
+    });
+  };
+}
+
+if (_origMACalc) {
+  maCalc = patchCalc(_origMACalc, 'ma', () => {
+    const price = num('ma-price'), atr = num('ma-atr'), ma20 = num('ma-ma20');
+    const account = num('ma-account');
+    if (!price || !atr) return null;
+    const dialEl = $('ma-dial-score');
+    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+    const stretch = ma20 ? Math.abs((price - ma20) / ma20 * 100) : 0;
+    return { price, atr, score, account, stretch };
+  }, 'default');
+}
+
+if (_origEMACalc) {
+  emaCalc = patchCalc(_origEMACalc, 'ema', () => {
+    const price = num('ema-price'), atr = num('ema-atr'), e8 = num('ema-ema8');
+    const account = num('ema-account');
+    if (!price || !atr) return null;
+    const dialEl = $('ema-dial-score');
+    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+    const stretch = e8 ? Math.abs((price - e8) / e8 * 100) : 0;
+    return { price, atr, score, account, stretch };
+  }, 'default');
+}
+
+if (_origGoldCalc) {
+  goldCalc = patchCalc(_origGoldCalc, 'gold', () => {
+    const price = num('gold-price'), atr = num('gold-atr'), e21 = num('gold-e21');
+    const account = num('gold-account');
+    if (!price || !atr) return null;
+    const dialEl = $('gold-dial-score');
+    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+    const stretch = e21 ? Math.abs((price - e21) / e21 * 100) : 0;
+    return { price, atr, score, account, stretch };
+  }, 'gold');
+}
+
+if (_origBursaCalc) {
+  bursaCalc = patchCalc(_origBursaCalc, 'bursa', () => {
+    const price = num('bu-price'), atr = num('bu-atr'), ma20 = num('bu-ma20');
+    const account = num('bu-account');
+    if (!price || !atr) return null;
+    const dialEl = $('bursa-dial-score');
+    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+    const stretch = ma20 ? Math.abs((price - ma20) / ma20 * 100) : 0;
+    return { price, atr, score, account, stretch };
+  }, 'bursa');
+}
+
+if (_origSwingCalc) {
+  swingCalc = patchCalc(_origSwingCalc, 'swing', () => {
+    const price = num('sw-close'), atr = num('sw-atr');
+    const account = num('sw-account');
+    if (!price || !atr) return null;
+    const dialEl = $('swing-dial-score');
+    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+    return { price, atr, score, account, stretch: 0 };
+  }, 'default');
+}
