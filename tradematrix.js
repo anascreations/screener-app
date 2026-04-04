@@ -3167,6 +3167,28 @@ function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
             ${expectancyBar(c.ev, maxEv)}
           </div>
 
+<div class="qpp-split-fill">
+            <div class="qpp-split-hdr">
+              <span>✂️ SPLIT FILL — ALWAYS AVAILABLE</span>
+            </div>
+            <div class="qpp-split-part">
+              <div class="qpp-split-label">PART 1 — ENTER NOW</div>
+              <div class="qpp-split-price" style="color:var(--accent)">${currency}${price.toFixed(dp)}</div>
+              <div class="qpp-split-sub">50% of planned position</div>
+            </div>
+            <div class="qpp-split-part">
+              <div class="qpp-split-label">PART 2 — QUEUE AT MA5</div>
+              <div class="qpp-split-price" style="color:var(--green)">${currency}${(price * 0.972).toFixed(dp)}</div>
+              <div class="qpp-split-sub">50% of planned position</div>
+            </div>
+            <div class="qpp-split-avg">
+              <span class="qpp-split-avg-label">AVG ENTRY</span>
+              <span class="qpp-split-avg-val" style="color:var(--accent)">${currency}${(price * 0.986).toFixed(dp)}</span>
+            </div>
+            <div class="qpp-split-note">You never fully miss the move. Worst case: 50% in at a higher price. Best case: full position at a better average.</div>
+            <div class="qpp-split-cancel">Cancel if price runs more than 3% above current price without touching MA5</div>
+          </div>
+		  
           <div class="qpp-compare">
             <div class="qpp-compare-title">📊 Profile Comparison</div>
             <div class="qpp-compare-grid">

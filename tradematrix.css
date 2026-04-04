@@ -2064,6 +2064,36 @@ input.tip-active, select.tip-active {
   font-weight: 600;
 }
 
+.qpp-split-fill {
+  border:1px solid rgba(240,58,74,.3); border-radius:var(--r2);
+  overflow:hidden; background:var(--bg);
+}
+.qpp-split-hdr {
+  padding:.55rem .85rem; background:rgba(240,58,74,.08);
+  border-bottom:1px solid rgba(240,58,74,.2);
+  font-size:11px; font-weight:700; letter-spacing:.08em;
+  color:var(--red); text-transform:uppercase;
+}
+.qpp-split-part {
+  padding:.75rem .85rem; border-bottom:1px solid var(--border);
+}
+.qpp-split-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin-bottom:.25rem; }
+.qpp-split-price { font-family:var(--head); font-size:22px; font-weight:800; }
+.qpp-split-sub   { font-size:11px; color:var(--dim); margin-top:.15rem; }
+.qpp-split-avg   {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.65rem .85rem; border-bottom:1px solid var(--border);
+  background:rgba(0,200,240,.04);
+}
+.qpp-split-avg-label { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
+.qpp-split-avg-val   { font-family:var(--head); font-size:18px; font-weight:800; }
+.qpp-split-note   { padding:.65rem .85rem; font-size:11.5px; color:var(--text); line-height:1.7; border-bottom:1px solid var(--border); }
+.qpp-split-cancel {
+  margin:.65rem; padding:.55rem .75rem; font-size:11px; color:var(--red);
+  background:rgba(240,58,74,.07); border:1px solid rgba(240,58,74,.2);
+  border-radius:var(--r); line-height:1.6;
+}
+
 .qpp-compare-grid { display: flex; flex-direction: column; }
 
 .qpp-compare-row {
