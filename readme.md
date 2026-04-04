@@ -22,9 +22,9 @@ No backend, no frameworks — fast, simple, and deployable anywhere.
 
 ```
 tradematrix-app/
-│── index.html        # Main UI
-│── tradematrix.css   # Styling & theme
-│── tradematrix.js    # Logic & calculations
+│── index.html
+│── tradematrix.css
+│── tradematrix.js
 ```
 
 ---
