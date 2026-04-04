@@ -424,8 +424,8 @@ function drawPie(svgId, legendId, segments) {
 
 	const topSeg = [...segs].sort((a, b) => b.value - a.value)[0];
 	const topPct = ((topSeg.value / total) * 100).toFixed(0);
-	paths += `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-family="'Syne',sans-serif" font-size="16" font-weight="800" fill="${topSeg.color}">${topPct}%</text>`;
-	paths += `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="8" fill="var(--muted)">${topSeg.label.toUpperCase().slice(0, 8)}</text>`;
+	paths += `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="${topSeg.color}">${topPct}%</text>`;
+	paths += `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="var(--text)">${topSeg.label.toUpperCase().slice(0, 8)}</text>`;
 	svg.innerHTML = paths;
 
 	legend.innerHTML = segs.map(s => {
@@ -3098,7 +3098,7 @@ function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
         <div class="qpp-panel${p.id === 'recommended' ? ' active' : ''}" id="${pfx}-qpp-${p.id}">
           <div class="qpp-note" style="border-color:${p.border};background:${p.bg}">
             <span class="qpp-badge ${p.badgeCls}">${p.badge}</span>
-            <span style="font-size:10.5px;color:var(--dim)">${p.note}</span>
+            <span style="font-size:12.5px;color:var(--text)">${p.note}</span>
             ${!c.viable ? `<span class="qpp-not-viable">⚠️ Score ${score.toFixed(0)}/100 — below threshold for this style</span>` : ''}
           </div>
 

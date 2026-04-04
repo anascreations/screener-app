@@ -54,7 +54,7 @@ Use Visual Studio Code:
 ### Option 3 (Local Server)
 
 ```
-C:\\app\\screener-js>python -m http.server 8000
+python -m http.server 8000
 ```
 
 Open:

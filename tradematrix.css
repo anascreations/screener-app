@@ -1703,9 +1703,9 @@ input.tip-active, select.tip-active {
 .swing-hero-left { display:flex; align-items:center; gap:.85rem; }
 .swing-hero-icon { font-size:28px; filter:drop-shadow(0 0 8px rgba(168,85,247,.4)); }
 .swing-hero-title { font-family:var(--head); font-size:17px; font-weight:800; color:var(--swing2); letter-spacing:.04em; }
-.swing-hero-sub   { font-size:10px; color:var(--dim); margin-top:.15rem; }
+.swing-hero-sub   { font-size:10px; color:var(--text); margin-top:.15rem; }
 .swing-score-display { text-align:right; flex-shrink:0; }
-.swing-score-label { font-size:8px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
+.swing-score-label { font-size:8px; letter-spacing:.15em; text-transform:uppercase; color:var(--text); }
 .swing-score-val   { font-family:var(--head); font-size:22px; font-weight:800; color:var(--swing2); }
 
 .btn-swing { background:linear-gradient(135deg, var(--swing), var(--swing3)); color:#fff; font-weight:700; }
@@ -1787,14 +1787,14 @@ input.tip-active, select.tip-active {
 /* Workflow steps (already in guide CSS but ensure available for swing) */
 .wf-step { display:flex; align-items:flex-start; gap:.75rem; padding:.55rem .75rem;
   background:var(--bg); border:1px solid var(--border); border-radius:var(--r);
-  font-size:11px; color:var(--dim); line-height:1.6; }
+  font-size:11px; color:var(--text); line-height:1.6; }
 .wf-n { width:22px; height:22px; background:rgba(124,58,237,.1); border:1px solid rgba(124,58,237,.25);
   border-radius:50%; color:var(--swing2); font-size:10px; font-weight:700;
   display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
 @media (max-width:600px) {
   .fib-prec-row { grid-template-columns:1fr 1fr; }
-  .fib-prec-note { grid-column:1/-1; color:var(--muted); }
+  .fib-prec-note { grid-column:1/-1; color:var(--dim); }
   .swing-hero { flex-direction:column; align-items:flex-start; }
 }
 
@@ -1836,14 +1836,14 @@ input.tip-active, select.tip-active {
 }
 
 .qpp-subtitle {
-  font-size: 10px !important;
+  font-size: 12px !important;
   color: var(--dim) !important;
   font-family: var(--mono) !important;
   font-weight: 400 !important;
 }
 
 .qpp-best-tag {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--dim);
   background: rgba(0,200,240,.06);
   border: 1px solid rgba(0,200,240,.18);
@@ -1956,9 +1956,9 @@ input.tip-active, select.tip-active {
 .qpp-tp3   { border-left: 3px solid #88ffcc; }
 
 .qpp-row-icon  { font-size: 11px; text-align: center; }
-.qpp-row-label { color: var(--dim); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; }
+.qpp-row-label { color:var(--text); font-size:11px; letter-spacing: .07em; text-transform: uppercase; }
 .qpp-row-price { font-family: var(--head); font-size: 13px; font-weight: 700; }
-.qpp-row-note  { font-size: 10px; color: var(--dim); }
+.qpp-row-note  { font-size:11.5px; color:var(--text); }
 
 /* QPP Stats Row */
 .qpp-stats {
@@ -1976,16 +1976,16 @@ input.tip-active, select.tip-active {
 }
 
 .qpp-stat-label {
-  font-size: 8.5px;
+  font-size: 10px;
   letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--dim);
   margin-bottom: .2rem;
 }
 
 .qpp-stat-val {
   font-family: var(--head);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -1998,10 +1998,10 @@ input.tip-active, select.tip-active {
 }
 
 .qpp-ev-title {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--dim);
   margin-bottom: .45rem;
 }
 
@@ -2042,7 +2042,7 @@ input.tip-active, select.tip-active {
   display: flex;
   justify-content: space-between;
   font-size: 10px;
-  color: var(--muted);
+  color: var(--dim);
 }
 
 /* QPP Comparison Table */
