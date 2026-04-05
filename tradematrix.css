@@ -2124,3 +2124,20 @@ input.tip-active, select.tip-active {
   .qpp-tabs { gap: .25rem; }
   .qpp-tab-btn { font-size: 9px; padding: .35rem .6rem; }
 }
+
+/* ══════════════════════════════════════
+   IPO SCANNER
+══════════════════════════════════════ */
+.ipo-tab { color: #b45309 !important; }
+.ipo-tab:hover { color: #f5a623 !important; }
+.ipo-tab.active { color: #f5a623 !important; border-bottom-color: #f5a623 !important; }
+
+.ipo-hero {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(245,166,35,.07), rgba(245,166,35,.03));
+  border: 1px solid rgba(245,166,35,.22); border-radius: var(--r2);
+}
+.ipo-hero-icon  { font-size: 28px; filter: drop-shadow(0 0 8px rgba(245,166,35,.4)); }
+.ipo-hero-title { font-family: var(--head); font-size: 17px; font-weight: 800; color: #f5a623; letter-spacing: .04em; }
+.ipo-hero-sub   { font-size: 10px; color: var(--text); margin-top: .15rem; }

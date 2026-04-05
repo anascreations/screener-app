@@ -3297,3 +3297,311 @@ if (_origSwingCalc) {
     return { price, atr, score, account, stretch: 0 };
   }, 'default');
 }
+
+/* ══════════════════════════════════════
+   IPO SCANNER — Pre-IPO + Listing Day
+══════════════════════════════════════ */
+function ipoSwitch(id) {
+  document.querySelectorAll('#panel-ipo .guide-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('#panel-ipo .guide-tab-btn').forEach(b => b.classList.remove('active'));
+  const sec = $(id); if (sec) sec.classList.add('active');
+  document.querySelectorAll('#panel-ipo .guide-tab-btn').forEach(b => {
+    if (b.getAttribute('onclick') === `ipoSwitch('${id}')`) b.classList.add('active');
+  });
+}
+
+function ipoCalc() {
+  const price   = num('ipo-price');
+  const eps     = num('ipo-eps');
+  const indPE   = num('ipo-ind-pe');
+  if (!price || !eps || !indPE) { $('ipo-pre-result').style.display = 'none'; return; }
+  $('ipo-pre-result').style.display = '';
+
+  const nta        = num('ipo-nta');
+  const mktcap     = num('ipo-mktcap');
+  const revGrowth  = num('ipo-rev-growth');
+  const npm        = num('ipo-npm');
+  const de         = num('ipo-de');
+  const divYield   = num('ipo-div');
+  const floatPct   = num('ipo-float');
+  const corner     = num('ipo-corner');
+  const oversub    = num('ipo-oversub');
+
+  const ipoPE      = eps > 0 ? price / eps : null;
+  const peDisco    = ipoPE  ? ((indPE - ipoPE) / indPE) * 100 : null; // positive = discount
+  const ntaPrem    = nta    ? ((price - nta) / nta) * 100 : null;
+
+  // Scoring
+  const eng = scoreEngine();
+
+  // PE vs Industry
+  let pePass = null;
+  if (peDisco != null) {
+    pePass = peDisco >= 20 ? true : peDisco >= 0 ? true : peDisco >= -15 ? 'warn' : false;
+  }
+  eng.add(pePass, 25);
+
+  // NTA coverage
+  let ntaPass = null;
+  if (ntaPrem != null) {
+    ntaPass = ntaPrem <= 20 ? true : ntaPrem <= 50 ? 'warn' : false;
+  }
+  eng.add(ntaPass, 15);
+
+  // Revenue growth
+  let revPass = null;
+  if (revGrowth != null) {
+    revPass = revGrowth >= 20 ? true : revGrowth >= 5 ? 'warn' : false;
+  }
+  eng.add(revPass, 15);
+
+  // Net profit margin
+  let npmPass = null;
+  if (npm != null) {
+    npmPass = npm >= 15 ? true : npm >= 5 ? 'warn' : false;
+  }
+  eng.add(npmPass, 10);
+
+  // D/E ratio
+  let dePass = null;
+  if (de != null) {
+    dePass = de <= 0.3 ? true : de <= 0.7 ? true : de <= 1.5 ? 'warn' : false;
+  }
+  eng.add(dePass, 10);
+
+  // Free float
+  let floatPass = null;
+  if (floatPct != null) {
+    floatPass = floatPct >= 25 && floatPct <= 40 ? true : floatPct >= 15 ? 'warn' : false;
+  }
+  eng.add(floatPass, 10);
+
+  // Cornerstone
+  let cornerPass = null;
+  if (corner != null) {
+    cornerPass = corner >= 20 ? true : corner >= 10 ? 'warn' : false;
+  }
+  eng.add(cornerPass, 10);
+
+  // Market cap tier
+  let mcPass = null;
+  if (mktcap != null) {
+    mcPass = mktcap >= 300 && mktcap <= 2000 ? true : mktcap >= 100 ? 'warn' : false;
+  }
+  eng.add(mcPass, 5);
+
+  const score = eng.result();
+
+  // Decision
+  let decision, riskLevel;
+  if (score >= 75) { decision = 'SUBSCRIBE'; riskLevel = 'Low Risk'; }
+  else if (score >= 55) { decision = 'NEUTRAL';   riskLevel = 'Medium Risk'; }
+  else                  { decision = 'AVOID';     riskLevel = 'High Risk'; }
+
+  // Decision strip
+  const dClass = decision === 'SUBSCRIBE' ? 'proceed' : decision === 'AVOID' ? 'skip' : 'watch';
+  $('ipo-decision-strip').className = `decision-strip ${dClass}`;
+  const badge = $('ipo-d-badge');
+  badge.className = `d-badge ${dClass}`; badge.textContent = decision;
+  const rp = $('ipo-risk-pill');
+  rp.className = `risk-pill ${riskLevel.includes('Low') ? 'risk-low' : riskLevel.includes('High') ? 'risk-high' : 'risk-medium'}`;
+  rp.textContent = riskLevel;
+  $('ipo-d-meta').innerHTML = `
+    <div>IPO PE: <span style="color:${pePass===true?'var(--green)':'var(--red)'}">
+      ${ipoPE ? ipoPE.toFixed(1)+'×' : '—'}</span>
+      &nbsp; Industry PE: <span style="color:var(--text)">${indPE}×</span>
+      &nbsp; Discount: <span style="color:${peDisco>=0?'var(--green)':'var(--red)'}">
+        ${peDisco != null ? (peDisco>=0?'+':'')+peDisco.toFixed(1)+'%' : '—'}</span>
+    </div>
+    <div>Score: <span style="color:#f5a623">${score.toFixed(0)}/100</span>
+      ${oversub ? `&nbsp; Oversubscribed: <span style="color:var(--green)">${oversub}×</span>` : ''}
+    </div>`;
+
+  // Advice
+  const adv = $('ipo-advice');
+  if (decision === 'SUBSCRIBE') {
+    adv.textContent = `✅ Strong IPO — Score ${score.toFixed(0)}/100. ${peDisco >= 0 ? `Trading at ${peDisco.toFixed(1)}% DISCOUNT to industry PE (${indPE}×). ` : ''}${nta && ntaPrem <= 20 ? `Price only ${ntaPrem.toFixed(1)}% above NTA — low premium. ` : ''}${oversub ? `${oversub}× oversubscribed — strong public demand. ` : ''}Subscribe for listing day gains.`;
+    adv.className = 'advice-box green';
+  } else if (decision === 'NEUTRAL') {
+    adv.textContent = `⚠️ Fairly priced IPO — Score ${score.toFixed(0)}/100. PE ${ipoPE?.toFixed(1)}× vs industry ${indPE}×. Subscribe only if you have strong confidence in sector growth. Watch listing day open carefully.`;
+    adv.className = 'advice-box yellow';
+  } else {
+    const failed = [
+      pePass === false && `Overvalued PE ${ipoPE?.toFixed(1)}× vs industry ${indPE}×`,
+      ntaPass === false && `High NTA premium ${ntaPrem?.toFixed(1)}%`,
+      dePass === false && `High D/E ratio ${de}`,
+      floatPass === false && `Low free float ${floatPct}%`,
+    ].filter(Boolean);
+    adv.textContent = `🔴 Avoid. ${failed.join(' | ')}. Wait for secondary market entry once fundamentals justify the price.`;
+    adv.className = 'advice-box red';
+  }
+
+  // Dial
+  updateDial('ipo-dial-arc', 'ipo-dial-score', score);
+
+  // Checklist
+  $('ipo-checklist').innerHTML = [
+    buildCheck(`PE ${ipoPE?.toFixed(1)}× vs Industry ${indPE}×`, pePass, peDisco != null ? (peDisco>=0?'Discount ':'Premium ')+Math.abs(peDisco).toFixed(1)+'%' : '—'),
+    nta  ? buildCheck(`NTA Premium ${ntaPrem?.toFixed(1)}%`, ntaPass, `Price MYR${price} vs NTA MYR${nta}`) : buildCheck('NTA Coverage', null, 'Not provided'),
+    revGrowth != null ? buildCheck(`Revenue Growth ${revGrowth}% YoY`, revPass, revGrowth >= 20 ? 'Strong growth' : 'Moderate') : buildCheck('Revenue Growth', null, 'Not provided'),
+    npm  != null ? buildCheck(`Net Profit Margin ${npm}%`, npmPass, npm >= 15 ? 'Healthy' : npm >= 5 ? 'Moderate' : 'Thin') : buildCheck('Profit Margin', null, 'Not provided'),
+    de   != null ? buildCheck(`Debt-to-Equity ${de}`, dePass, de <= 0.3 ? 'Low debt ✅' : de <= 0.7 ? 'Moderate' : 'High ⚠️') : buildCheck('Debt-to-Equity', null, 'Not provided'),
+    floatPct != null ? buildCheck(`Free Float ${floatPct}%`, floatPass, floatPct >= 25 ? 'Good liquidity' : 'Low float risk') : buildCheck('Free Float', null, 'Not provided'),
+    corner != null ? buildCheck(`Cornerstone ${corner}%`, cornerPass, corner >= 20 ? 'Institutional confidence ✅' : 'Low institutional backing') : buildCheck('Cornerstone Investors', null, 'Not provided'),
+    mktcap != null ? buildCheck(`Market Cap RM${mktcap}M`, mcPass, mktcap >= 300 ? 'Mid/Large cap' : 'Small cap — volatile') : buildCheck('Market Cap', null, 'Not provided'),
+  ].join('');
+
+  // Valuation grid
+  $('ipo-val-grid').innerHTML = [
+    { l:'IPO PE',       v: ipoPE ? ipoPE.toFixed(1)+'×' : '—',   c: pePass===true?'green':pePass===false?'red':'yellow' },
+    { l:'Industry PE',  v: indPE+'×',                              c: 'dim' },
+    { l:'PE Discount',  v: peDisco != null ? (peDisco>=0?'+':'')+peDisco.toFixed(1)+'%' : '—', c: peDisco >= 0 ? 'green' : 'red' },
+    { l:'NTA Premium',  v: ntaPrem != null ? ntaPrem.toFixed(1)+'%' : '—', c: ntaPrem != null && ntaPrem <= 20 ? 'green' : 'yellow' },
+    { l:'Profit Margin',v: npm != null ? npm.toFixed(1)+'%' : '—', c: npm >= 15 ? 'green' : npm >= 5 ? 'yellow' : 'red' },
+    { l:'D/E Ratio',    v: de  != null ? de.toFixed(2) : '—',     c: de <= 0.3 ? 'green' : de <= 0.7 ? 'accent' : 'red' },
+    { l:'Free Float',   v: floatPct != null ? floatPct+'%' : '—', c: floatPct >= 25 ? 'green' : 'yellow' },
+    { l:'Oversub',      v: oversub != null ? oversub+'×' : '—',   c: oversub >= 10 ? 'green' : oversub >= 3 ? 'accent' : 'dim' },
+  ].map(({l,v,c}) => `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join('');
+}
+
+function listingCalc() {
+  const ipoP  = num('ld-ipo-price');
+  const open  = num('ld-open');
+  const price = num('ld-price');
+  if (!ipoP || !open || !price) { $('ipo-listing-result').style.display = 'none'; return; }
+  $('ipo-listing-result').style.display = '';
+
+  const high    = num('ld-high') || price;
+  const low     = num('ld-low')  || price;
+  const vol     = num('ld-vol');
+  const floatU  = num('ld-float-units');
+  const bidask  = num('ld-bidask');
+  const atr     = num('ld-atr');
+  const rsi     = num('ld-rsi');
+  const k       = num('ld-k');
+  const d       = num('ld-d');
+
+  const gapFromIPO   = ((open - ipoP) / ipoP) * 100;
+  const currentVsIPO = ((price - ipoP) / ipoP) * 100;
+  const volRatio     = (vol && floatU && floatU > 0) ? vol / floatU : null;
+  const range        = high - low;
+  const body         = Math.abs(price - open);
+  const upperWick    = high - Math.max(open, price);
+  const wickRatio    = range > 0 ? (upperWick / range) * 100 : 0;
+
+  // Pump & dump signals
+  const isPump     = gapFromIPO > 50 || (volRatio && volRatio > 5);
+  const isDump     = price < ipoP || (bidask != null && bidask < -10 && price < open);
+  const isRejected = wickRatio > 50;
+  const isBroken   = price < ipoP;
+
+  // Checklist
+  const gapPass    = gapFromIPO >= 5 && gapFromIPO <= 30 ? true : gapFromIPO > 30 ? 'warn' : false;
+  const volPass    = volRatio != null ? (volRatio <= 3 ? true : volRatio <= 5 ? 'warn' : false) : null;
+  const bidPass    = bidask != null ? (bidask >= 5 ? true : bidask >= 0 ? 'warn' : false) : null;
+  const wickPass   = wickRatio < 30 ? true : wickRatio < 50 ? 'warn' : false;
+  const closePass  = price >= open ? true : false;
+  const brokenPass = !isBroken ? true : false;
+
+  // Decision
+  let decision, riskLevel, advice, advCls;
+  if (isBroken) {
+    decision = 'EXIT NOW'; riskLevel = 'High Risk';
+    advice = `💀 BROKEN IPO — Price ${price.toFixed(3)} is BELOW offer price ${ipoP.toFixed(3)}. Exit immediately. Do not average down. Broken IPOs often continue falling.`;
+    advCls = 'red';
+  } else if (isPump && isRejected) {
+    decision = 'PUMP ALERT'; riskLevel = 'High Risk';
+    advice = `🚨 PUMP & DUMP DETECTED — Gap ${gapFromIPO.toFixed(1)}% from IPO price${volRatio ? `, volume ${volRatio.toFixed(1)}× float` : ''}. Upper wick ${wickRatio.toFixed(0)}% = sellers rejecting high prices. Do NOT chase. Wait for price to stabilise below ${(ipoP * 1.15).toFixed(3)} before considering entry.`;
+    advCls = 'red';
+  } else if (isDump) {
+    decision = 'DUMP ALERT'; riskLevel = 'High Risk';
+    advice = `⬇️ DUMP SIGNAL — Price closing below open${bidask < -10 ? `, Bid/Ask ${bidask.toFixed(1)}% — sellers flooding` : ''}. Avoid buying. If holding, exit on any bounce to open price.`;
+    advCls = 'red';
+  } else if (gapPass === true && closePass && (bidPass === true || bidPass === 'warn')) {
+    decision = 'HEALTHY IPO'; riskLevel = 'Low Risk';
+    advice = `✅ Healthy listing — ${gapFromIPO.toFixed(1)}% gap from IPO price. Price closing ${price >= open ? 'above' : 'near'} open = buyers in control. ${bidask >= 5 ? 'Bid/Ask positive — demand intact. ' : ''}Can hold existing position or buy on pullback toward ${(ipoP * 1.05).toFixed(3)} (5% above IPO price).`;
+    advCls = 'green';
+  } else {
+    decision = 'WATCH'; riskLevel = 'Medium Risk';
+    advice = `⚠️ Mixed signals — ${gapFromIPO.toFixed(1)}% gap from IPO price. ${isRejected ? `Upper wick ${wickRatio.toFixed(0)}% suggests sellers at highs. ` : ''}${bidask < 0 ? 'Bid/Ask negative — caution. ' : ''}Wait for cleaner candle before adding.`;
+    advCls = 'yellow';
+  }
+
+  const dClass = ['HEALTHY IPO'].includes(decision) ? 'proceed' : ['EXIT NOW','PUMP ALERT','DUMP ALERT'].includes(decision) ? 'skip' : 'watch';
+  $('ld-decision-strip').className = `decision-strip ${dClass}`;
+  const badge = $('ld-d-badge'); badge.className = `d-badge ${dClass}`; badge.textContent = decision;
+  const rp = $('ld-risk-pill');
+  rp.className = `risk-pill ${riskLevel.includes('Low') ? 'risk-low' : riskLevel.includes('High') ? 'risk-high' : 'risk-medium'}`;
+  rp.textContent = riskLevel;
+  $('ld-d-meta').innerHTML = `
+    <div>Gap from IPO: <span style="color:${gapFromIPO>=0?'var(--green)':'var(--red)'}">
+      ${gapFromIPO>=0?'+':''}${gapFromIPO.toFixed(2)}%</span>
+      &nbsp; Current vs IPO: <span style="color:${currentVsIPO>=0?'var(--green)':'var(--red)'}">
+      ${currentVsIPO>=0?'+':''}${currentVsIPO.toFixed(2)}%</span>
+    </div>
+    <div>${isPump?'🚨 PUMP DETECTED':isDump?'⬇️ DUMP SIGNAL':isBroken?'💀 BROKEN':'✅ Normal'}
+      &nbsp; Upper Wick: <span style="color:${wickRatio>50?'var(--red)':wickRatio>30?'var(--yellow)':'var(--green)'}">
+      ${wickRatio.toFixed(0)}%</span>
+    </div>`;
+
+  $('ld-advice').textContent = advice;
+  $('ld-advice').className = `advice-box ${advCls}`;
+
+  // Stats grid
+  $('ld-stats-grid').innerHTML = [
+    { l:'Gap from IPO',   v: (gapFromIPO>=0?'+':'')+gapFromIPO.toFixed(2)+'%', c: gapFromIPO>=5&&gapFromIPO<=30?'green':gapFromIPO>30?'yellow':'red' },
+    { l:'Open Price',     v: 'MYR '+open.toFixed(3), c: 'accent' },
+    { l:'Current Price',  v: 'MYR '+price.toFixed(3), c: price>=open?'green':'red' },
+    { l:'Upper Wick',     v: wickRatio.toFixed(0)+'%', c: wickRatio<30?'green':wickRatio<50?'yellow':'red' },
+    { l:'Vol vs Float',   v: volRatio ? volRatio.toFixed(2)+'×' : '—', c: volRatio&&volRatio<=3?'green':volRatio&&volRatio<=5?'yellow':'red' },
+    { l:'Bid/Ask',        v: bidask != null ? (bidask>=0?'+':'')+bidask.toFixed(1)+'%' : '—', c: bidask>=5?'green':bidask>=0?'accent':'red' },
+    { l:'IPO Status',     v: isBroken ? '💀 BROKEN' : isPump ? '🚨 PUMP' : '✅ Intact', c: isBroken||isPump ? 'red' : 'green' },
+    { l:'Close vs Open',  v: price >= open ? '▲ Bullish' : '▼ Bearish', c: price >= open ? 'green' : 'red' },
+  ].map(({l,v,c}) => `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join('');
+
+  // Price position bar
+  const fillPct = high > ipoP ? Math.min(100, Math.max(0, (price - ipoP) / (high - ipoP) * 100)) : 50;
+  const pFill = $('ld-price-fill'); if (pFill) pFill.style.width = fillPct + '%';
+  const pMark = $('ld-price-marker'); if (pMark) pMark.style.left = fillPct + '%';
+  const pPos  = $('ld-range-pos'); if (pPos) pPos.textContent = fillPct.toFixed(0) + '% of range';
+  const pLow  = $('ld-range-low'); if (pLow) pLow.textContent = 'IPO MYR' + ipoP.toFixed(3);
+  const pHigh = $('ld-range-high'); if (pHigh) pHigh.textContent = 'High MYR' + high.toFixed(3);
+
+  // Checklist
+  $('ld-checklist').innerHTML = [
+    buildCheck(`Gap from IPO: ${gapFromIPO.toFixed(1)}%`, gapPass, gapFromIPO > 50 ? '🚨 Extreme pump' : gapFromIPO > 30 ? 'High — caution' : 'Healthy range'),
+    buildCheck(`Price vs Open: ${price >= open ? 'Above' : 'Below'}`, closePass, price >= open ? 'Buyers holding ✅' : 'Sellers winning ⚠️'),
+    buildCheck(`Upper Wick Rejection: ${wickRatio.toFixed(0)}%`, wickPass, wickRatio > 50 ? '🚨 Sellers at top' : wickRatio > 30 ? 'Some rejection' : 'Clean close'),
+    volRatio != null ? buildCheck(`Volume: ${volRatio.toFixed(1)}× float`, volPass, volRatio > 5 ? '🚨 Extreme — pump risk' : volRatio > 3 ? 'High volume' : 'Normal') : buildCheck('Volume vs Float', null, 'Enter volume + float'),
+    bidask != null ? buildCheck(`Bid/Ask: ${(bidask>=0?'+':'')+bidask.toFixed(1)}%`, bidPass, bidask < -10 ? '🚨 Sellers dumping' : bidask < 0 ? 'Net sellers' : 'Net buyers') : buildCheck('Bid/Ask Ratio', null, 'Not provided'),
+    buildCheck(`IPO Price Intact: ${isBroken ? 'BROKEN' : 'Yes'}`, brokenPass, isBroken ? `💀 Below offer price MYR${ipoP}` : `✅ Above MYR${ipoP}`),
+  ].join('');
+
+  // Trade plan if ATR available
+  const tpCard = $('ld-tradeplan-card');
+  if (atr && tpCard && !isBroken && !isPump) {
+    tpCard.style.display = '';
+    const sl  = price - atr * 1.5;
+    const tp1 = price + atr * 1.5;
+    const tp2 = price + atr * 3.0;
+    $('ld-price-block').innerHTML = `
+      <div class="prow entry"><span class="prow-label">Entry</span><span class="prow-val accent">MYR ${price.toFixed(3)}</span><span class="prow-note">Limit order — current price</span></div>
+      <div class="prow sl"><span class="prow-label">Stop Loss (ATR×1.5)</span><span class="prow-val red">MYR ${sl.toFixed(3)}</span><span class="prow-note">Hard stop — exit if broken</span></div>
+      <div class="prow tp1"><span class="prow-label">TP1 — Take 50%</span><span class="prow-val green">MYR ${tp1.toFixed(3)}</span><span class="prow-note">Listing day exit — don't be greedy</span></div>
+      <div class="prow tp2"><span class="prow-label">TP2 — Trail 50%</span><span class="prow-val g2">MYR ${tp2.toFixed(3)}</span><span class="prow-note">Only if strong close + no dump signals</span></div>`;
+  } else if (tpCard) { tpCard.style.display = 'none'; }
+}
+
+function resetIPO() {
+  ['ipo-price','ipo-eps','ipo-ind-pe','ipo-nta','ipo-mktcap',
+   'ipo-rev-growth','ipo-npm','ipo-de','ipo-div',
+   'ipo-float','ipo-corner','ipo-oversub'].forEach(id => { const el=$(id); if(el) el.value=''; });
+  ['ipo-shariah','ipo-sector'].forEach(id => { const el=$(id); if(el) el.value=''; });
+  $('ipo-pre-result').style.display = 'none';
+}
+
+function resetListing() {
+  ['ld-ipo-price','ld-open','ld-high','ld-low','ld-price',
+   'ld-vol','ld-float-units','ld-bidask','ld-atr','ld-rsi','ld-k','ld-d'].forEach(id => { const el=$(id); if(el) el.value=''; });
+  $('ipo-listing-result').style.display = 'none';
+}
