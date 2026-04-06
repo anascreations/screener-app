@@ -58,13 +58,6 @@ function switchTab(t) {
    SESSION ANALYSIS
    Forex/Gold optimal trading sessions (UTC)
 ══════════════════════════════════════ */
-const SESSIONS = {
-	sydney: { start: 21, end: 6, label: 'Sydney', cls: 'slow', score: 30 },
-	tokyo: { start: 0, end: 9, label: 'Tokyo', cls: 'slow', score: 40 },
-	london: { start: 8, end: 17, label: 'London', cls: 'good', score: 72 },
-	newyork: { start: 13, end: 22, label: 'New York', cls: 'good', score: 75 },
-	overlap_ln: { start: 13, end: 17, label: 'London-NY Overlap', cls: 'prime', score: 100 },
-};
 
 function getSession() {
 	const h = new Date().getUTCHours();
@@ -327,7 +320,6 @@ function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, c
 
 	const dp = context === 'gold' ? 2 : 4;
 
-	let kellyHtml = '';
 	const kellyId = containerId.replace('price-block', 'kelly-block');
 	const kellyEl = $(kellyId);
 
@@ -582,7 +574,8 @@ function maCalc() {
 	const macd = scoreMACDZone(dif, dea);
 	const volS = scoreVolume(vol);
 	const adxS = scoreADX(adxV);
-	const stS = scoreSupertrend(price, stV);
+	const stS  = scoreSupertrend(price, stV);
+	const rsiS = scoreRSI(num('ma-rsi'));
 
 	/* Weighted Score Engine */
 	const eng = scoreEngine();
@@ -590,36 +583,42 @@ function maCalc() {
 	eng.add(f2_pass, 16);
 	eng.add(f3_pass, 14);
 	eng.add(f4_ma200, 8);
-	eng.add(kdj ? kdj.pass : null, 16);
+	eng.add(kdj  ? kdj.pass  : null, 16);
 	eng.add(macd ? macd.pass : null, 14);
 	eng.add(volS ? volS.pass : null, 8);
-	eng.add(adxS ? adxS.pass : null, 10);
-	eng.add(stS ? stS.pass : null, 6);
+	eng.add(adxS ? adxS.pass : null, 16); // raised from 10 — ADX is strongest momentum confirmer
+	eng.add(stS  ? stS.pass  : null, 6);
+	eng.add(rsiS ? rsiS.pass : null, 10); // RSI now actively scored
 
 	/* Stretch Penalty — price overextended above MA20 */
 	let penalty = 0;
-	if (pAboveMA20 > 12) penalty = -20;
-	else if (pAboveMA20 > 8) penalty = -12;
-	else if (pAboveMA20 > 5) penalty = -6;
+	if (pAboveMA20 > 12) penalty = -30;
+	else if (pAboveMA20 > 8)  penalty = -20;
+	else if (pAboveMA20 > 5)  penalty = -10;
 	const adjScore = Math.max(0, Math.min(100, eng.result() + penalty));
 
-	/* Decision Logic */
+	/* Decision Logic — J>85 blocks extreme overbought entries */
 	const momentumOk = (!kdj || kdj.pass !== false)
 		&& (!macd || macd.pass !== false)
-		&& (!adxS || adxS.pass !== false);
+		&& (!adxS || adxS.pass !== false)
+		&& (!kdj  || !(j != null && j > 85));
 
 	let decision, riskLevel, posSize;
 	if (!f1_pass || !f2_pass || !f3_pass || !momentumOk) {
 		decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
 	} else if (adjScore >= 75) {
 		decision = 'PROCEED'; riskLevel = 'Low Risk'; posSize = pAboveMA20 > 5 ? '50%' : '100%';
-	} else if (adjScore >= 55) {
+	} else if (adjScore >= 65) {
 		decision = 'PROCEED'; riskLevel = 'Medium Risk'; posSize = '50%';
 	} else {
 		decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
 	}
 
 	const grade = getGrade(ma20AboveMA50);
+
+	/* Grade X overrides — overextended MA stack caps position and forces WATCH */
+	if (grade.g === 'X' && posSize === '100%') posSize = '50%';
+	if (grade.g === 'X' && decision === 'PROCEED' && adjScore < 80) decision = 'WATCH';
 
 	/* Decision Strip */
 	setDecisionStrip('ma', decision, riskLevel, grade, `
@@ -675,12 +674,14 @@ function maCalc() {
 		{ label: 'Volume', value: volS ? (volS.pass === true ? 1 : volS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--orange)' },
 		{ label: 'ADX', value: adxS ? (adxS.pass === true ? 1 : adxS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--accent2)' },
 		{ label: 'Supertrend', value: stS ? (stS.pass === true ? 1 : 0) : 0, color: 'var(--green2)' },
+		{ label: 'RSI', value: rsiS ? (rsiS.pass === true ? 1 : rsiS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--red)' },
 	].filter(s => s.value > 0));
 
 	/* Checklist */
 	const passArr = [f1_pass, f2_pass, f3_pass,
 		kdj?.pass === true, macd?.pass === true,
-		volS?.pass === true, adxS?.pass === true
+		volS?.pass === true, adxS?.pass === true,
+		rsiS?.pass === true,
 	].filter(Boolean);
 
 	$('ma-checklist').innerHTML = [
@@ -705,9 +706,12 @@ function maCalc() {
 		stS
 			? buildCheck(`Supertrend ${stS.zone}`, stS.pass, `Price:${fmt(price)} ST:${fmt(stV)}`)
 			: buildCheck('Supertrend', null, 'Not provided'),
+		rsiS
+			? buildCheck(`RSI ${rsiS.zone}`, rsiS.pass === true ? true : rsiS.pass === false ? false : null, `RSI: ${num('ma-rsi')?.toFixed(1)}`)
+			: buildCheck('RSI14', null, 'Not provided'),
 	].join('');
 
-	updateMeter('ma-signal-meter', passArr.length, 7);
+	updateMeter('ma-signal-meter', passArr.length, 8);
 
 	/* Alignment Grid */
 	const alignRows = [
@@ -811,14 +815,10 @@ function emaCalc() {
 	const macd = scoreMACDZone(dif, dea);
 	const volS = scoreVolume(vol);
 	const adxS = scoreADX(adxV);
-	const stS = scoreSupertrend(price, stV);
+	const stS  = scoreSupertrend(price, stV);
 	const ichiS = ichiP ? scoreIchimoku(ichiP) : null;
 	const vwapS = scoreVWAP(price, vwapV);
-
-	/* Acceleration bonus: EMA8 slope proxy via (price - e8) / e8 trend */
-	const acceleration = (pAboveE8 != null && e8AboveE21 != null)
-		? (e8AboveE21 > 0 && pAboveE8 >= 0 && pAboveE8 < 5) // trending but not stretched
-		: null;
+	const rsiS  = scoreRSI(num('ema-rsi'));
 
 	/* Score Engine */
 	const eng = scoreEngine();
@@ -826,38 +826,44 @@ function emaCalc() {
 	eng.add(f2_pass, 18);
 	eng.add(f3_pass, 16);
 	eng.add(f4_e200, 6);
-	eng.add(kdj ? kdj.pass : null, 14);
-	eng.add(macd ? macd.pass : null, 12);
-	eng.add(volS ? volS.pass : null, 8);
-	eng.add(adxS ? adxS.pass : null, 10);
+	eng.add(kdj   ? kdj.pass   : null, 14);
+	eng.add(macd  ? macd.pass  : null, 12);
+	eng.add(volS  ? volS.pass  : null, 8);
+	eng.add(adxS  ? adxS.pass  : null, 16); // raised from 10 — matches maCalc
 	eng.add(ichiS ? ichiS.pass : null, 6);
 	eng.add(vwapS ? vwapS.pass : null, 4);
-	eng.add(stS ? stS.pass : null, 4);
+	eng.add(stS   ? stS.pass   : null, 4);
+	eng.add(rsiS  ? rsiS.pass  : null, 10); // RSI now actively scored
 
 	const stretchPct = Math.abs(pAboveE8 || 0);
 	let penalty = 0;
-	if (stretchPct > 12) penalty = -20;
-	else if (stretchPct > 8) penalty = -12;
-	else if (stretchPct > 5) penalty = -6;
+	if (stretchPct > 12) penalty = -30;
+	else if (stretchPct > 8)  penalty = -20;
+	else if (stretchPct > 5)  penalty = -10;
 	const adjScore = Math.min(100, Math.max(0, eng.result() + penalty));
 
 	const grade = getGrade(e21AboveE55 || 0);
 
-	/* Decision */
+	/* Decision — J>85 blocks extreme overbought entries */
 	const momentumOk = (!kdj || kdj.pass !== false)
 		&& (!macd || macd.pass !== false)
-		&& (!adxS || adxS.pass !== false);
+		&& (!adxS || adxS.pass !== false)
+		&& (!kdj  || !(j != null && j > 85));
 
 	let decision, riskLevel, posSize;
 	if (!f1_pass || !f2_pass || !f3_pass || !momentumOk) {
 		decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
 	} else if (adjScore >= 75) {
 		decision = 'PROCEED'; riskLevel = 'Low Risk'; posSize = stretchPct > 5 ? '50%' : '100%';
-	} else if (adjScore >= 55) {
+	} else if (adjScore >= 65) {
 		decision = 'PROCEED'; riskLevel = 'Medium Risk'; posSize = '50%';
 	} else {
 		decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
 	}
+
+	/* Grade X overrides — overextended EMA stack caps position and forces WATCH */
+	if (grade.g === 'X' && posSize === '100%') posSize = '50%';
+	if (grade.g === 'X' && decision === 'PROCEED' && adjScore < 80) decision = 'WATCH';
 
 	/* Decision Strip */
 	setDecisionStrip('ema', decision, riskLevel, grade, `
@@ -913,12 +919,14 @@ function emaCalc() {
 		{ label: 'ADX', value: adxS ? (adxS.pass === true ? 1 : adxS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--accent2)' },
 		{ label: 'Ichimoku', value: ichiS ? (ichiS.pass === true ? 1 : ichiS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--red)' },
 		{ label: 'VWAP', value: vwapS ? (vwapS.pass === true ? 1 : 0) : 0, color: 'var(--green2)' },
+		{ label: 'RSI', value: rsiS ? (rsiS.pass === true ? 1 : rsiS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--accent)' },
 	].filter(s => s.value > 0));
 
 	/* Checklist */
 	const passArr = [f1_pass, f2_pass, f3_pass,
 		kdj?.pass === true, macd?.pass === true,
 		volS?.pass === true, adxS?.pass === true,
+		rsiS?.pass === true,
 	].filter(Boolean);
 
 	$('ema-checklist').innerHTML = [
@@ -946,9 +954,12 @@ function emaCalc() {
 		vwapS
 			? buildCheck(`VWAP — ${vwapS.zone}`, vwapS.pass === true ? true : vwapS.pass === false ? false : null, `VWAP:${fmt(vwapV)}`)
 			: buildCheck('VWAP', null, 'Not provided'),
+		rsiS
+			? buildCheck(`RSI ${rsiS.zone}`, rsiS.pass === true ? true : rsiS.pass === false ? false : null, `RSI: ${num('ema-rsi')?.toFixed(1)}`)
+			: buildCheck('RSI14', null, 'Not provided'),
 	].join('');
 
-	updateMeter('ema-signal-meter', passArr.length, 7);
+	updateMeter('ema-signal-meter', passArr.length, 8);
 
 	/* Alignment Grid */
 	const alignRows = [
@@ -1061,7 +1072,6 @@ function goldCalc() {
 	const dea = num('gold-dea');
 	const vol = num('gold-vol');
 	const atr = num('gold-atr');
-	const dxyV = num('gold-dxy');
 	const dxyDir = sel('gold-dxy-dir');
 	const fibH = num('gold-fibh');
 	const fibL = num('gold-fibl');
@@ -3322,7 +3332,6 @@ function ipoCalc() {
   const revGrowth  = num('ipo-rev-growth');
   const npm        = num('ipo-npm');
   const de         = num('ipo-de');
-  const divYield   = num('ipo-div');
   const floatPct   = num('ipo-float');
   const corner     = num('ipo-corner');
   const oversub    = num('ipo-oversub');
