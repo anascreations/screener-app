@@ -823,10 +823,51 @@ select {
 /* ══════════════════════════════════════
    REFERENCE PANELS
 ══════════════════════════════════════ */
+/* ── Reference Grid Collapsible ── */
+.ref-grid-wrap {
+  margin-bottom: .7rem;
+}
+
+.ref-grid-toggle {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: .4rem .85rem;
+  cursor: pointer;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .4rem;
+  transition: background .15s;
+}
+.ref-grid-toggle:hover { background: var(--bg); color: var(--text); }
+.ref-grid-toggle .ref-toggle-arrow {
+  margin-left: auto;
+  font-size: 10px;
+  transition: transform .25s;
+}
+.ref-grid-toggle.open .ref-toggle-arrow { transform: rotate(180deg); }
+
 .ref-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: .7rem;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .3s ease, opacity .2s ease;
+  margin-bottom: 0;
+}
+.ref-grid.open {
+  max-height: 400px;
+  opacity: 1;
+  margin-bottom: .7rem;
 }
 
 .ref-panel {

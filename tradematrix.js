@@ -3614,3 +3614,13 @@ function resetListing() {
    'ld-vol','ld-float-units','ld-bidask','ld-atr','ld-rsi','ld-k','ld-d'].forEach(id => { const el=$(id); if(el) el.value=''; });
   $('ipo-listing-result').style.display = 'none';
 }
+
+/* ══════════════════════════════════════
+   REF GRID TOGGLE
+══════════════════════════════════════ */
+function toggleRefGrid(btn) {
+  const grid = btn.nextElementSibling;
+  const isOpen = grid.classList.contains('open');
+  grid.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
