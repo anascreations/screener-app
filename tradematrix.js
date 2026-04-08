@@ -1,13 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════
-   TradeMatrix Pro — tradematrix.js  (Enhanced Professional Edition)
-   Algorithms: MA/EMA Stack, ADX, Supertrend, Bollinger Bands,
-			   Ichimoku, VWAP, Fibonacci, Session Analysis,
-			   Kelly Criterion, Gold XAUUSD Module
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════
-   UTILITIES
-══════════════════════════════════════ */
 const $ = id => document.getElementById(id);
 const num = id => { const v = parseFloat($(id)?.value); return isNaN(v) ? null : v; };
 const sel = id => $(id)?.value || '';
@@ -16,14 +6,9 @@ const fmt = (v, d = 4) => v == null ? '—' : Number(v).toFixed(d);
 const fmt2 = (v, d = 2) => v == null ? '—' : Number(v).toFixed(d) + '%';
 const fmtPrice = (v, d) => {
 	if (v == null) return '—';
-	// Auto-determine decimal places from magnitude
 	d = d ?? (v > 100 ? 2 : v > 1 ? 4 : 6);
 	return Number(v).toFixed(d);
 };
-
-/* ══════════════════════════════════════
-   CLOCK & SESSION TICKER
-══════════════════════════════════════ */
 function updateClock() {
 	const now = new Date();
 	const h = String(now.getUTCHours()).padStart(2, '0');
@@ -40,10 +25,6 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
-
-/* ══════════════════════════════════════
-   TAB SWITCHER
-══════════════════════════════════════ */
 function switchTab(t) {
 	document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 	document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -53,12 +34,6 @@ function switchTab(t) {
 	});
 	if (t === 'gold') updateGoldSessionBanner();
 }
-
-/* ══════════════════════════════════════
-   SESSION ANALYSIS
-   Forex/Gold optimal trading sessions (UTC)
-══════════════════════════════════════ */
-
 function getSession() {
 	const h = new Date().getUTCHours();
 	if (h >= 13 && h < 17) return { label: '🎯 London-NY', cls: 'prime', score: 100, full: 'London-NY Overlap (Prime)', emoji: '🎯' };
@@ -68,7 +43,6 @@ function getSession() {
 	if (h >= 21 || h < 6) return { label: '🟡 Sydney', cls: 'slow', score: 30, full: 'Sydney Session (Low Vol)', emoji: '⚠️' };
 	return { label: '🔴 Off-Hours', cls: 'avoid', score: 20, full: 'Off-Hours', emoji: '🔴' };
 }
-
 function updateGoldSessionBanner() {
 	const sess = getSession();
 	const el = $('gold-session-status');
@@ -84,12 +58,6 @@ function updateGoldSessionBanner() {
 	}
 }
 setInterval(() => { if ($('panel-gold').classList.contains('active')) updateGoldSessionBanner(); }, 30000);
-
-/* ══════════════════════════════════════
-   INDICATOR SCORING FUNCTIONS
-══════════════════════════════════════ */
-
-/** ADX Trend Strength */
 function scoreADX(adx) {
 	if (adx == null) return null;
 	if (adx > 50) return { zone: 'Momentum Surge', pass: true, c: 'var(--accent)', e: '⚡', strength: 'Very Strong' };
@@ -98,8 +66,6 @@ function scoreADX(adx) {
 	if (adx > 15) return { zone: 'Weak Trend', pass: 'warn', c: 'var(--orange)', e: '🟠', strength: 'Weak' };
 	return { zone: 'No Trend/Range', pass: false, c: 'var(--red)', e: '🔴', strength: 'Ranging' };
 }
-
-/** RSI Zone Assessment */
 function scoreRSI(rsi, context = 'default') {
 	if (rsi == null) return null;
 	if (context === 'gold') {
@@ -116,8 +82,6 @@ function scoreRSI(rsi, context = 'default') {
 	if (rsi < 40) return { zone: 'Weak', pass: false, c: 'var(--red)', e: '🔴' };
 	return { zone: 'Neutral', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
 }
-
-/** KDJ Oscillator */
 function scoreKDJ(k, d, j) {
 	if (k == null || d == null) return null;
 	if (k < d) return { zone: 'Bearish', pass: false, c: 'var(--red)', e: '🔴' };
@@ -127,8 +91,6 @@ function scoreKDJ(k, d, j) {
 	if (j != null && j > 50) return { zone: 'Bullish Strong', pass: true, c: 'var(--green)', e: '✅' };
 	return { zone: 'Bullish Building', pass: true, c: 'var(--accent)', e: '🟢' };
 }
-
-/** MACD Zone */
 function scoreMACDZone(dif, dea) {
 	if (dif == null || dea == null) return null;
 	if (dif < dea) return { zone: 'Bearish', pass: false, c: 'var(--red)', e: '🔴' };
@@ -138,23 +100,17 @@ function scoreMACDZone(dif, dea) {
 	if (dif > 0 && dea > 0) return { zone: 'Strong Bull', pass: true, c: 'var(--green)', e: '🚀' };
 	return { zone: 'Bullish', pass: true, c: 'var(--accent)', e: '✅' };
 }
-
-/** Supertrend (price vs supertrend value) */
 function scoreSupertrend(price, st) {
 	if (price == null || st == null) return null;
 	if (price > st) return { zone: 'Bullish', pass: true, c: 'var(--green)', e: '🟢' };
 	return { zone: 'Bearish', pass: false, c: 'var(--red)', e: '🔴' };
 }
-
-/** Ichimoku Cloud */
 function scoreIchimoku(position) {
 	if (!position) return null;
 	if (position === 'above') return { zone: 'Above Cloud', pass: true, c: 'var(--green)', e: '✅' };
 	if (position === 'inside') return { zone: 'Inside Cloud', pass: 'warn', c: 'var(--yellow)', e: '⚠️' };
 	return { zone: 'Below Cloud', pass: false, c: 'var(--red)', e: '🔴' };
 }
-
-/** VWAP */
 function scoreVWAP(price, vwap) {
 	if (price == null || vwap == null) return null;
 	const pctAbove = pct(price, vwap);
@@ -162,8 +118,6 @@ function scoreVWAP(price, vwap) {
 	if (pctAbove >= 0) return { zone: `+${pctAbove.toFixed(2)}% above VWAP`, pass: true, c: 'var(--accent)', e: '🟢' };
 	return { zone: `${pctAbove.toFixed(2)}% below VWAP`, pass: false, c: 'var(--red)', e: '🔴' };
 }
-
-/** Volume */
 function scoreVolume(vol) {
 	if (vol == null) return null;
 	if (vol >= 1.5) return { zone: 'Very Strong', pass: true, c: 'var(--green)', e: '⚡' };
@@ -171,8 +125,6 @@ function scoreVolume(vol) {
 	if (vol >= 0.8) return { zone: 'Moderate', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
 	return { zone: 'Weak', pass: false, c: 'var(--red)', e: '🔴' };
 }
-
-/** MA/EMA Trend Grade */
 function getGrade(gap) {
 	if (gap < 0) return { g: 'BEAR', e: '🔻', cls: 'grade-x', c: 'var(--red)' };
 	if (gap < 1) return { g: 'FLAT', e: '➡️', cls: 'grade-x', c: 'var(--dim)' };
@@ -182,46 +134,37 @@ function getGrade(gap) {
 	if (gap < 10) return { g: 'C', e: '🟡', cls: 'grade-c', c: 'var(--orange)' };
 	return { g: 'X', e: '🛑', cls: 'grade-x', c: 'var(--red)' };
 }
-
-/* ══════════════════════════════════════
-   FIBONACCI CALCULATOR
-══════════════════════════════════════ */
-/* Full professional Fibonacci suite — retracement + ALL extensions */
 function calcFib(high, low) {
 	if (high == null || low == null || high <= low) return null;
 	const r = high - low;
 	return {
-		// Extensions (above swing high)
-		'ext_261': high + r * 1.618,   // 261.8%
-		'ext_200': high + r * 1.000,   // 200%
-		'ext_161': high + r * 0.618,   // 161.8% — Golden extension
-		'ext_141': high + r * 0.414,   // 141.4%
-		'ext_127': high + r * 0.272,   // 127.2%
-		// Retracements (within swing)
-		'0':     high,
-		'23.6':  high - r * 0.236,
-		'38.2':  high - r * 0.382,     // Golden ratio retrace
-		'50':    high - r * 0.500,
-		'61.8':  high - r * 0.618,     // Golden ratio (1/phi)
-		'78.6':  high - r * 0.786,     // sqrt(0.618)
-		'88.6':  high - r * 0.886,     // Deep harmonic
-		'100':   low,
+		'ext_261': high + r * 1.618,
+		'ext_200': high + r * 1.000,
+		'ext_161': high + r * 0.618,
+		'ext_141': high + r * 0.414,
+		'ext_127': high + r * 0.272,
+		'0': high,
+		'23.6': high - r * 0.236,
+		'38.2': high - r * 0.382,
+		'50': high - r * 0.500,
+		'61.8': high - r * 0.618,
+		'78.6': high - r * 0.786,
+		'88.6': high - r * 0.886,
+		'100': low,
 		range: r,
 		high, low,
 	};
 }
-
-/* Check if two fibonacci levels are within confluence zone (≤0.75% apart) */
 function fibConfluence(fib1, fib2, rangeTolerance) {
-	const levels1 = ['23.6','38.2','50','61.8','78.6'];
-	const levels2 = ['23.6','38.2','50','61.8','78.6'];
+	const levels1 = ['23.6', '38.2', '50', '61.8', '78.6'];
+	const levels2 = ['23.6', '38.2', '50', '61.8', '78.6'];
 	const zones = [];
 	for (const l1 of levels1) {
 		for (const l2 of levels2) {
 			if (!fib1[l1] || !fib2[l2]) continue;
 			const diff = Math.abs(fib1[l1] - fib2[l2]);
 			const pctDiff = (diff / rangeTolerance) * 100;
-			if (pctDiff <= 1.5) { // within 1.5% of total range
+			if (pctDiff <= 1.5) {
 				zones.push({
 					price: (fib1[l1] + fib2[l2]) / 2,
 					level1: l1, level2: l2,
@@ -231,42 +174,36 @@ function fibConfluence(fib1, fib2, rangeTolerance) {
 			}
 		}
 	}
-	return zones.sort((a,b) => a.diffPct - b.diffPct);
+	return zones.sort((a, b) => a.diffPct - b.diffPct);
 }
-
-/* Fibonacci accuracy score: how close is current price to a key level?
-   Returns 0-100 accuracy where 100 = price exactly on golden ratio level */
 function fibAccuracyScore(price, fib, emaStack) {
 	const KEY_LEVELS = [
-		{ key:'38.2', weight:90, name:'38.2% Golden Retrace' },
-		{ key:'61.8', weight:100, name:'61.8% Golden Ratio' },
-		{ key:'50',   weight:70,  name:'50% Midpoint' },
-		{ key:'23.6', weight:50,  name:'23.6% Minor' },
-		{ key:'78.6', weight:60,  name:'78.6% Deep' },
-		{ key:'88.6', weight:40,  name:'88.6% Harmonic' },
+		{ key: '38.2', weight: 90, name: '38.2% Golden Retrace' },
+		{ key: '61.8', weight: 100, name: '61.8% Golden Ratio' },
+		{ key: '50', weight: 70, name: '50% Midpoint' },
+		{ key: '23.6', weight: 50, name: '23.6% Minor' },
+		{ key: '78.6', weight: 60, name: '78.6% Deep' },
+		{ key: '88.6', weight: 40, name: '88.6% Harmonic' },
 	];
 	let bestScore = 0, bestLevel = null;
 	for (const lv of KEY_LEVELS) {
 		const lvPrice = fib[lv.key];
 		if (!lvPrice) continue;
 		const distPct = Math.abs(price - lvPrice) / fib.range * 100;
-		// Score: 100% at 0% distance, decays to 0 at 3% distance
 		const proximity = Math.max(0, 1 - distPct / 3);
 		const score = proximity * lv.weight;
 		if (score > bestScore) { bestScore = score; bestLevel = { ...lv, lvPrice, distPct }; }
 	}
-	// EMA confluence bonus: if EMA is also near the fib level (+15%)
 	let emaBonus = 0;
 	if (emaStack && bestLevel) {
 		for (const ema of emaStack) {
 			if (!ema) continue;
 			const emaDist = Math.abs(ema - bestLevel.lvPrice) / fib.range * 100;
-			if (emaDist < 1.0) { emaBonus = 15; break; } // EMA within 1% of fib = confluence
+			if (emaDist < 1.0) { emaBonus = 15; break; }
 		}
 	}
 	return { score: Math.min(100, bestScore + emaBonus), level: bestLevel };
 }
-
 function nearestFibLevel(price, fib) {
 	const levels = ['0', '23.6', '38.2', '50', '61.8', '78.6', '100'];
 	let closest = null, minDist = Infinity;
@@ -277,11 +214,6 @@ function nearestFibLevel(price, fib) {
 	const pctFromLevel = ((price - fib[closest]) / fib.range) * 100;
 	return { level: closest, price: fib[closest], distPct: pctFromLevel };
 }
-
-/* ══════════════════════════════════════
-   KELLY CRITERION POSITION SIZING
-   f* = (p×b − q) / b  →  use half-Kelly for safety
-══════════════════════════════════════ */
 function kellySize(winRate, avgWinR, avgLossR) {
 	if (!winRate || !avgWinR || !avgLossR || avgLossR === 0) return null;
 	const b = avgWinR / avgLossR;
@@ -290,25 +222,18 @@ function kellySize(winRate, avgWinR, avgLossR) {
 	const kelly = (p * b - q) / b;
 	return {
 		full: Math.max(0, Math.min(100, kelly * 100)),
-		half: Math.max(0, Math.min(100, kelly * 50)),  // safer
+		half: Math.max(0, Math.min(100, kelly * 50)),
 	};
 }
-
-/* ══════════════════════════════════════
-   TRADE PLAN BUILDER (ATR-based)
-══════════════════════════════════════ */
 function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, context = 'default') {
 	const card = $(cardId);
 	const box = $(containerId);
 	if (!card || !box || !price || !atr) { if (card) card.style.display = 'none'; return; }
 	card.style.display = '';
-
-	// Gold uses slightly wider ATR multipliers due to higher volatility
 	const slMult = context === 'gold' ? 1.8 : 1.5;
 	const tp1Mult = context === 'gold' ? 1.5 : 1.5;
 	const tp2Mult = context === 'gold' ? 3.0 : 3.0;
 	const tp3Mult = context === 'gold' ? 5.0 : 5.0;
-
 	const sl = price - atr * slMult;
 	const tp1 = price + atr * tp1Mult;
 	const tp2 = price + atr * tp2Mult;
@@ -317,20 +242,15 @@ function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, c
 	const rr1 = (tp1 - price) / risk;
 	const rr2 = (tp2 - price) / risk;
 	const rr3 = (tp3 - price) / risk;
-
 	const dp = context === 'gold' ? 2 : 4;
-
 	const kellyId = containerId.replace('price-block', 'kelly-block');
 	const kellyEl = $(kellyId);
-
 	if (accountSize && riskPct) {
 		const riskAmt = accountSize * (riskPct / 100);
 		const shares = (riskAmt / risk).toFixed(2);
 		const positionVal = (price * parseFloat(shares)).toFixed(2);
-		// Estimated Kelly-inspired sizing (using typical 55% win-rate, 1.8 avg RR)
 		const kelly = kellySize(55, 1.8, 1.0);
 		const kellySz = kelly ? (kelly.half).toFixed(1) : null;
-
 		if (kellyEl) {
 			kellyEl.style.display = '';
 			kellyEl.innerHTML = `
@@ -350,7 +270,6 @@ function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, c
 	} else {
 		if (kellyEl) kellyEl.style.display = 'none';
 	}
-
 	box.innerHTML = `
     <div class="prow entry">
       <span class="prow-label">Ideal Entry</span>
@@ -383,52 +302,37 @@ function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, c
       <span class="prow-note">After TP1 hit: trail using 1× ATR below each higher high</span>
     </div>`;
 }
-
-/* ══════════════════════════════════════
-   PIE CHART RENDERER
-══════════════════════════════════════ */
 function drawPie(svgId, legendId, segments) {
 	const svg = $(svgId);
 	const legend = $(legendId);
 	if (!svg || !legend) return;
-
 	const total = segments.reduce((a, s) => a + Math.max(0, s.value), 0);
 	if (total === 0) { svg.innerHTML = ''; legend.innerHTML = ''; return; }
-
 	const cx = 80, cy = 80, r = 68, inner = 42;
 	let paths = '';
 	let startAngle = -Math.PI / 2;
 	const segs = segments.filter(s => s.value > 0);
-
 	segs.forEach(seg => {
 		const angle = (seg.value / total) * 2 * Math.PI;
 		const endAngle = startAngle + angle;
 		const large = angle > Math.PI ? 1 : 0;
-
 		const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
 		const x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
 		const ix1 = cx + inner * Math.cos(startAngle), iy1 = cy + inner * Math.sin(startAngle);
 		const ix2 = cx + inner * Math.cos(endAngle), iy2 = cy + inner * Math.sin(endAngle);
-
 		paths += `<path d="M${ix1} ${iy1} L${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${ix2} ${iy2} A${inner} ${inner} 0 ${large} 0 ${ix1} ${iy1} Z" fill="${seg.color}" opacity="0.9" stroke="var(--card)" stroke-width="2"><title>${seg.label}: ${((seg.value / total) * 100).toFixed(1)}%</title></path>`;
 		startAngle = endAngle;
 	});
-
 	const topSeg = [...segs].sort((a, b) => b.value - a.value)[0];
 	const topPct = ((topSeg.value / total) * 100).toFixed(0);
 	paths += `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="${topSeg.color}">${topPct}%</text>`;
 	paths += `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="var(--text)">${topSeg.label.toUpperCase().slice(0, 8)}</text>`;
 	svg.innerHTML = paths;
-
 	legend.innerHTML = segs.map(s => {
 		const p = ((s.value / total) * 100).toFixed(1);
 		return `<div class="legend-item"><div class="legend-dot" style="background:${s.color}"></div><span class="legend-label">${s.label}</span><span class="legend-val" style="color:${s.color}">${s.value}</span><span class="legend-pct">${p}%</span></div>`;
 	}).join('');
 }
-
-/* ══════════════════════════════════════
-   DIAL / GAUGE
-══════════════════════════════════════ */
 function updateDial(arcId, scoreId, score, goldMode = false) {
 	const arc = $(arcId);
 	const txt = $(scoreId);
@@ -442,10 +346,6 @@ function updateDial(arcId, scoreId, score, goldMode = false) {
 		: (score >= 75 ? '#00e87a' : score >= 55 ? '#f5c842' : '#f03a4a');
 	txt.setAttribute('fill', color);
 }
-
-/* ══════════════════════════════════════
-   SIGNAL METER
-══════════════════════════════════════ */
 function updateMeter(meterId, passCount, total) {
 	const el = $(meterId);
 	if (!el) return;
@@ -456,10 +356,6 @@ function updateMeter(meterId, passCount, total) {
 		`<div class="signal-seg" style="background:${i < passCount ? color : 'var(--border)'}"></div>`
 	).join('');
 }
-
-/* ══════════════════════════════════════
-   RANGE BAR
-══════════════════════════════════════ */
 function updateRange(fillId, markerId, labelId, val, max) {
 	const pctNum = Math.min(100, Math.max(0, (val / max) * 100));
 	const fill = $(fillId);
@@ -469,31 +365,21 @@ function updateRange(fillId, markerId, labelId, val, max) {
 	if (marker) marker.style.left = pctNum + '%';
 	if (label) label.textContent = fmt2(val);
 }
-
-/* ══════════════════════════════════════
-   CHECKLIST ROW BUILDER
-══════════════════════════════════════ */
 function buildCheck(label, pass, result) {
 	const icon = pass === true ? '✔' : pass === false ? '✘' : '○';
 	const cls = pass === true ? 'check-pass' : pass === false ? 'check-fail' : 'check-neutral';
 	const vcls = pass === true ? 'pass' : pass === false ? 'fail' : 'warn';
 	return `<div class="check-row"><span class="${cls}">${icon}</span><span class="check-label">${label}</span><span class="check-val ${vcls}">${result || ''}</span></div>`;
 }
-
-/* ══════════════════════════════════════
-   DECISION STRIP UPDATER
-══════════════════════════════════════ */
 function setDecisionStrip(pfx, decision, riskLevel, grade, metaHtml, sessionChip = null) {
 	const dClass = decision === 'PROCEED' ? 'proceed' : decision === 'SKIP' ? 'skip' : 'watch';
 	$(`${pfx}-decision-strip`).className = `decision-strip ${dClass}`;
 	const badge = $(`${pfx}-d-badge`);
 	badge.className = `d-badge ${dClass}`;
 	badge.textContent = decision;
-
 	const rp = $(`${pfx}-risk-pill`);
 	rp.className = `risk-pill ${riskLevel.includes('Low') ? 'risk-low' : riskLevel.includes('High') ? 'risk-high' : 'risk-medium'}`;
 	rp.textContent = riskLevel;
-
 	const gb = $(`${pfx}-grade-badge`);
 	if (grade) {
 		gb.className = `grade-badge ${grade.cls}`;
@@ -502,45 +388,31 @@ function setDecisionStrip(pfx, decision, riskLevel, grade, metaHtml, sessionChip
 	} else {
 		gb.style.display = 'none';
 	}
-
 	$(`${pfx}-d-meta`).innerHTML = metaHtml;
-
 	const sc = $(`${pfx}-session-chip`);
 	if (sc) {
 		if (sessionChip) { sc.textContent = sessionChip; sc.style.display = ''; }
 		else sc.style.display = 'none';
 	}
 }
-
-/* ══════════════════════════════════════
-   WEIGHTED SCORE ENGINE
-   Adds pass/warn/fail weights cleanly
-══════════════════════════════════════ */
 function scoreEngine() {
 	let score = 0, total = 0;
 	const add = (pass, w) => {
-		if (pass == null) return; // optional — not counted
+		if (pass == null) return;
 		total += w;
 		if (pass === true) score += w;
 		else if (pass === 'warn') score += w * 0.5;
-		// false = 0 contribution
 	};
 	const result = () => total > 0 ? (score / total) * 100 : 0;
 	return { add, result, getTotal: () => total, getScore: () => score };
 }
-
-/* ══════════════════════════════════════
-   MA CALCULATOR
-══════════════════════════════════════ */
 function maCalc() {
 	const price = num('ma-price');
 	const ma5 = num('ma-ma5');
 	const ma20 = num('ma-ma20');
 	const ma50 = num('ma-ma50');
-
 	if (!price || !ma5 || !ma20 || !ma50) { $('ma-result').style.display = 'none'; return; }
 	$('ma-result').style.display = '';
-
 	const ma200 = num('ma-ma200');
 	const k = num('ma-k');
 	const d = num('ma-d');
@@ -555,8 +427,6 @@ function maCalc() {
 	const bbl = num('ma-bbl');
 	const riskPct = num('ma-risk-pct');
 	const accountSz = num('ma-account');
-
-	/* Distances */
 	const pAboveMA20 = pct(price, ma20);
 	const pAboveMA5 = pct(price, ma5);
 	const pAboveMA50 = pct(price, ma50);
@@ -564,45 +434,36 @@ function maCalc() {
 	const ma5AboveMA20 = pct(ma5, ma20);
 	const ma20AboveMA50 = pct(ma20, ma50);
 	const ma50AbMA200 = ma200 ? pct(ma50, ma200) : null;
-
-	/* Filter evaluations */
 	const f1_pass = price > ma5;
 	const f2_pass = ma5 > ma20;
 	const f3_pass = ma20 > ma50;
-	const f4_ma200 = ma200 ? price > ma200 : null; // Macro trend filter
+	const f4_ma200 = ma200 ? price > ma200 : null;
 	const kdj = scoreKDJ(k, d, j);
 	const macd = scoreMACDZone(dif, dea);
 	const volS = scoreVolume(vol);
 	const adxS = scoreADX(adxV);
-	const stS  = scoreSupertrend(price, stV);
+	const stS = scoreSupertrend(price, stV);
 	const rsiS = scoreRSI(num('ma-rsi'));
-
-	/* Weighted Score Engine */
 	const eng = scoreEngine();
 	eng.add(f1_pass, 18);
 	eng.add(f2_pass, 16);
 	eng.add(f3_pass, 14);
 	eng.add(f4_ma200, 8);
-	eng.add(kdj  ? kdj.pass  : null, 16);
+	eng.add(kdj ? kdj.pass : null, 16);
 	eng.add(macd ? macd.pass : null, 14);
 	eng.add(volS ? volS.pass : null, 8);
-	eng.add(adxS ? adxS.pass : null, 16); // raised from 10 — ADX is strongest momentum confirmer
-	eng.add(stS  ? stS.pass  : null, 6);
-	eng.add(rsiS ? rsiS.pass : null, 10); // RSI now actively scored
-
-	/* Stretch Penalty — price overextended above MA20 */
+	eng.add(adxS ? adxS.pass : null, 16);
+	eng.add(stS ? stS.pass : null, 6);
+	eng.add(rsiS ? rsiS.pass : null, 10);
 	let penalty = 0;
 	if (pAboveMA20 > 12) penalty = -30;
-	else if (pAboveMA20 > 8)  penalty = -20;
-	else if (pAboveMA20 > 5)  penalty = -10;
+	else if (pAboveMA20 > 8) penalty = -20;
+	else if (pAboveMA20 > 5) penalty = -10;
 	const adjScore = Math.max(0, Math.min(100, eng.result() + penalty));
-
-	/* Decision Logic — J>85 blocks extreme overbought entries */
 	const momentumOk = (!kdj || kdj.pass !== false)
 		&& (!macd || macd.pass !== false)
 		&& (!adxS || adxS.pass !== false)
-		&& (!kdj  || !(j != null && j > 85));
-
+		&& (!kdj || !(j != null && j > 85));
 	let decision, riskLevel, posSize;
 	if (!f1_pass || !f2_pass || !f3_pass || !momentumOk) {
 		decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
@@ -613,14 +474,9 @@ function maCalc() {
 	} else {
 		decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
 	}
-
 	const grade = getGrade(ma20AboveMA50);
-
-	/* Grade X overrides — overextended MA stack caps position and forces WATCH */
 	if (grade.g === 'X' && posSize === '100%') posSize = '50%';
 	if (grade.g === 'X' && decision === 'PROCEED' && adjScore < 80) decision = 'WATCH';
-
-	/* Decision Strip */
 	setDecisionStrip('ma', decision, riskLevel, grade, `
     <div>Price: <span style="color:var(--text)">${fmt(price)}</span>
       &nbsp; MA5: <span style="color:var(--text)">${fmt(ma5)}</span>
@@ -632,8 +488,6 @@ function maCalc() {
       ${adxV ? `&nbsp; ADX: <span style="color:${adxS.c}">${adxV.toFixed(1)} ${adxS.strength}</span>` : ''}
     </div>`
 	);
-
-	/* Advice */
 	const adv = $('ma-advice');
 	if (decision === 'PROCEED') {
 		const lines = [
@@ -662,11 +516,7 @@ function maCalc() {
 		adv.textContent = `🔴 Skip — ${missing.length} critical filter${missing.length > 1 ? 's' : ''} failed: ${missing.join(', ')}. Do not force entry against the filter stack.`;
 		adv.className = 'advice-box red';
 	}
-
-	/* Dial */
 	updateDial('ma-dial-arc', 'ma-dial-score', adjScore);
-
-	/* Pie */
 	drawPie('ma-pie', 'ma-pie-legend', [
 		{ label: 'MA Stack', value: (f1_pass ? 1 : 0) + (f2_pass ? 1 : 0) + (f3_pass ? 1 : 0) + (f4_ma200 ? 1 : 0), color: 'var(--accent)' },
 		{ label: 'KDJ', value: kdj ? (kdj.pass === true ? 1 : kdj.pass === 'warn' ? .5 : 0) : 0, color: 'var(--green)' },
@@ -676,14 +526,11 @@ function maCalc() {
 		{ label: 'Supertrend', value: stS ? (stS.pass === true ? 1 : 0) : 0, color: 'var(--green2)' },
 		{ label: 'RSI', value: rsiS ? (rsiS.pass === true ? 1 : rsiS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--red)' },
 	].filter(s => s.value > 0));
-
-	/* Checklist */
 	const passArr = [f1_pass, f2_pass, f3_pass,
 		kdj?.pass === true, macd?.pass === true,
 		volS?.pass === true, adxS?.pass === true,
 		rsiS?.pass === true,
 	].filter(Boolean);
-
 	$('ma-checklist').innerHTML = [
 		buildCheck('F1 — Price > MA5', f1_pass, fmt2(pAboveMA5)),
 		buildCheck('F2 — MA5 > MA20', f2_pass, fmt2(ma5AboveMA20)),
@@ -710,10 +557,7 @@ function maCalc() {
 			? buildCheck(`RSI ${rsiS.zone}`, rsiS.pass === true ? true : rsiS.pass === false ? false : null, `RSI: ${num('ma-rsi')?.toFixed(1)}`)
 			: buildCheck('RSI14', null, 'Not provided'),
 	].join('');
-
 	updateMeter('ma-signal-meter', passArr.length, 8);
-
-	/* Alignment Grid */
 	const alignRows = [
 		['Price vs MA20', pAboveMA20, pAboveMA20 >= 0 && pAboveMA20 <= 2 ? 'green' : pAboveMA20 > 10 ? 'red' : pAboveMA20 > 5 ? 'yellow' : 'accent'],
 		['Price vs MA5', pAboveMA5, pAboveMA5 >= 0 ? 'green' : 'red'],
@@ -725,14 +569,10 @@ function maCalc() {
 		alignRows.push(['Price vs MA200', pAboveMA200, pAboveMA200 >= 0 ? 'green' : 'red']);
 		alignRows.push(['MA50 vs MA200', ma50AbMA200, ma50AbMA200 >= 0 ? 'green' : 'red']);
 	}
-
 	$('ma-alignment-grid').innerHTML = alignRows.map(([l, v, c]) =>
 		`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v != null ? (v >= 0 ? '+' : '') + v.toFixed(2) + '%' : '—'}</div></div>`
 	).join('');
-
 	updateRange('ma-range-fill', 'ma-range-marker', 'ma-range-label', Math.max(0, pAboveMA20 || 0), 12);
-
-	/* Bollinger Band Section */
 	const bbSection = $('ma-bb-section');
 	if (bbu != null && bbl != null && bbl < bbu) {
 		bbSection.style.display = '';
@@ -747,11 +587,8 @@ function maCalc() {
 	} else {
 		bbSection.style.display = 'none';
 	}
-
-	/* Trade Plan */
 	buildTradePlan('ma-price-block', 'ma-tradeplan-card', price, atr, accountSz, riskPct);
 }
-
 function resetMA() {
 	['ma-price', 'ma-ma5', 'ma-ma20', 'ma-ma50', 'ma-ma200',
 		'ma-k', 'ma-d', 'ma-j', 'ma-dif', 'ma-dea', 'ma-hist',
@@ -760,19 +597,13 @@ function resetMA() {
 	].forEach(id => { const el = $(id); if (el) el.value = ''; });
 	$('ma-result').style.display = 'none';
 }
-
-/* ══════════════════════════════════════
-   EMA CALCULATOR
-══════════════════════════════════════ */
 function emaCalc() {
 	const price = num('ema-price');
 	const e8 = num('ema-ema8');
 	const e21 = num('ema-ema21');
 	const e55 = num('ema-ema55');
-
 	if (!price || !e8 || !e21 || !e55) { $('ema-result').style.display = 'none'; return; }
 	$('ema-result').style.display = '';
-
 	const e200 = num('ema-ema200');
 	const k = num('ema-k');
 	const d = num('ema-d');
@@ -795,8 +626,6 @@ function emaCalc() {
 	const w52l = num('ema-52l');
 	const riskPct = num('ema-risk-pct');
 	const accountSz = num('ema-account');
-
-	/* Distances */
 	const pAboveE8 = pct(price, e8);
 	const pAboveE21 = pct(price, e21);
 	const pAboveE55 = pct(price, e55);
@@ -804,8 +633,6 @@ function emaCalc() {
 	const e8AboveE21 = pct(e8, e21);
 	const e21AboveE55 = pct(e21, e55);
 	const e55AbE200 = e200 ? pct(e55, e200) : null;
-
-	/* Filters */
 	const f1_pass = price > e8;
 	const f2_pass = e8 > e21;
 	const f3_pass = e21 > e55;
@@ -815,41 +642,34 @@ function emaCalc() {
 	const macd = scoreMACDZone(dif, dea);
 	const volS = scoreVolume(vol);
 	const adxS = scoreADX(adxV);
-	const stS  = scoreSupertrend(price, stV);
+	const stS = scoreSupertrend(price, stV);
 	const ichiS = ichiP ? scoreIchimoku(ichiP) : null;
 	const vwapS = scoreVWAP(price, vwapV);
-	const rsiS  = scoreRSI(num('ema-rsi'));
-
-	/* Score Engine */
+	const rsiS = scoreRSI(num('ema-rsi'));
 	const eng = scoreEngine();
 	eng.add(f1_pass, 18);
 	eng.add(f2_pass, 18);
 	eng.add(f3_pass, 16);
 	eng.add(f4_e200, 6);
-	eng.add(kdj   ? kdj.pass   : null, 14);
-	eng.add(macd  ? macd.pass  : null, 12);
-	eng.add(volS  ? volS.pass  : null, 8);
-	eng.add(adxS  ? adxS.pass  : null, 16); // raised from 10 — matches maCalc
+	eng.add(kdj ? kdj.pass : null, 14);
+	eng.add(macd ? macd.pass : null, 12);
+	eng.add(volS ? volS.pass : null, 8);
+	eng.add(adxS ? adxS.pass : null, 16);
 	eng.add(ichiS ? ichiS.pass : null, 6);
 	eng.add(vwapS ? vwapS.pass : null, 4);
-	eng.add(stS   ? stS.pass   : null, 4);
-	eng.add(rsiS  ? rsiS.pass  : null, 10); // RSI now actively scored
-
+	eng.add(stS ? stS.pass : null, 4);
+	eng.add(rsiS ? rsiS.pass : null, 10);
 	const stretchPct = Math.abs(pAboveE8 || 0);
 	let penalty = 0;
 	if (stretchPct > 12) penalty = -30;
-	else if (stretchPct > 8)  penalty = -20;
-	else if (stretchPct > 5)  penalty = -10;
+	else if (stretchPct > 8) penalty = -20;
+	else if (stretchPct > 5) penalty = -10;
 	const adjScore = Math.min(100, Math.max(0, eng.result() + penalty));
-
 	const grade = getGrade(e21AboveE55 || 0);
-
-	/* Decision — J>85 blocks extreme overbought entries */
 	const momentumOk = (!kdj || kdj.pass !== false)
 		&& (!macd || macd.pass !== false)
 		&& (!adxS || adxS.pass !== false)
-		&& (!kdj  || !(j != null && j > 85));
-
+		&& (!kdj || !(j != null && j > 85));
 	let decision, riskLevel, posSize;
 	if (!f1_pass || !f2_pass || !f3_pass || !momentumOk) {
 		decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
@@ -860,12 +680,8 @@ function emaCalc() {
 	} else {
 		decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
 	}
-
-	/* Grade X overrides — overextended EMA stack caps position and forces WATCH */
 	if (grade.g === 'X' && posSize === '100%') posSize = '50%';
 	if (grade.g === 'X' && decision === 'PROCEED' && adjScore < 80) decision = 'WATCH';
-
-	/* Decision Strip */
 	setDecisionStrip('ema', decision, riskLevel, grade, `
     <div>Price: <span style="color:var(--text)">${fmt(price)}</span>
       EMA8: <span style="color:var(--text)">${fmt(e8)}</span>
@@ -877,8 +693,6 @@ function emaCalc() {
       ${adxV ? `&nbsp; ADX: <span style="color:${adxS.c}">${adxV.toFixed(1)}</span>` : ''}
     </div>`
 	);
-
-	/* Advice */
 	const adv = $('ema-advice');
 	if (decision === 'PROCEED') {
 		const lines = [
@@ -908,8 +722,6 @@ function emaCalc() {
 		adv.textContent = `🔴 Skip — broken EMA stack. Failed: ${missing.join(', ')}.`;
 		adv.className = 'advice-box red';
 	}
-
-	/* Dial & Pie */
 	updateDial('ema-dial-arc', 'ema-dial-score', adjScore);
 	drawPie('ema-pie', 'ema-pie-legend', [
 		{ label: 'EMA Stack', value: (f1_pass ? 1 : 0) + (f2_pass ? 1 : 0) + (f3_pass ? 1 : 0) + (f4_e200 ? 1 : 0), color: 'var(--accent)' },
@@ -921,14 +733,11 @@ function emaCalc() {
 		{ label: 'VWAP', value: vwapS ? (vwapS.pass === true ? 1 : 0) : 0, color: 'var(--green2)' },
 		{ label: 'RSI', value: rsiS ? (rsiS.pass === true ? 1 : rsiS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--accent)' },
 	].filter(s => s.value > 0));
-
-	/* Checklist */
 	const passArr = [f1_pass, f2_pass, f3_pass,
 		kdj?.pass === true, macd?.pass === true,
 		volS?.pass === true, adxS?.pass === true,
 		rsiS?.pass === true,
 	].filter(Boolean);
-
 	$('ema-checklist').innerHTML = [
 		buildCheck('F1 — Price > EMA8', f1_pass, fmt2(pAboveE8)),
 		buildCheck('F2 — EMA8 > EMA21', f2_pass, fmt2(e8AboveE21)),
@@ -958,10 +767,7 @@ function emaCalc() {
 			? buildCheck(`RSI ${rsiS.zone}`, rsiS.pass === true ? true : rsiS.pass === false ? false : null, `RSI: ${num('ema-rsi')?.toFixed(1)}`)
 			: buildCheck('RSI14', null, 'Not provided'),
 	].join('');
-
 	updateMeter('ema-signal-meter', passArr.length, 8);
-
-	/* Alignment Grid */
 	const alignRows = [
 		['% Above EMA8', pAboveE8, pAboveE8 >= 0 && pAboveE8 <= 2 ? 'green' : pAboveE8 > 10 ? 'red' : pAboveE8 > 5 ? 'yellow' : pAboveE8 >= 0 ? 'accent' : 'red'],
 		['% Above EMA21', pAboveE21, pAboveE21 >= 0 ? 'accent' : 'red'],
@@ -971,19 +777,14 @@ function emaCalc() {
 		['Full Bull Stack', null, fullStack ? 'green' : 'red', fullStack ? '✅ Yes' : '✘ No'],
 	];
 	if (e200) alignRows.push(['% Above EMA200', pAboveE200, pAboveE200 >= 0 ? 'green' : 'red']);
-
 	$('ema-alignment-grid').innerHTML = alignRows.map(([l, v, c, ov]) => {
 		const display = ov || (v != null ? (v >= 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
 		return `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${display}</div></div>`;
 	}).join('');
-
 	updateRange('ema-range-fill', 'ema-range-marker', 'ema-range-label', Math.max(0, e21AboveE55 || 0), 12);
-
-	/* Price Context */
 	const ctx = $('ema-price-context');
 	const hasCtx = (high != null && low != null) || prev != null || (w52h != null && w52l != null) || beta != null || bidask != null;
 	ctx.style.display = hasCtx ? '' : 'none';
-
 	if (hasCtx) {
 		const cells = [];
 		if (prev != null) {
@@ -1008,7 +809,6 @@ function emaCalc() {
 			cells.push(`<div class="stat-cell"><div class="stat-label">Bid/Ask Ratio</div><div class="stat-value ${bc}">${bidask.toFixed(1)}%</div><div class="stat-sub">${bidask >= 60 ? 'Strong demand' : bidask >= 40 ? 'Balanced' : 'Sellers dominate'}</div></div>`);
 		}
 		$('ema-ctx-grid').innerHTML = cells.join('');
-
 		if (high != null && low != null && high > low) {
 			const rng = ((price - low) / (high - low)) * 100;
 			const clamped = Math.min(100, Math.max(0, rng));
@@ -1022,11 +822,8 @@ function emaCalc() {
 			$('ema-day-high').textContent = 'High ' + fmt(high, 4);
 		}
 	}
-
-	/* Trade Plan */
 	buildTradePlan('ema-price-block', 'ema-tradeplan-card', price, atr, accountSz, riskPct);
 }
-
 function resetEMA() {
 	['ema-price', 'ema-ema8', 'ema-ema21', 'ema-ema55', 'ema-ema200',
 		'ema-k', 'ema-d', 'ema-j', 'ema-dif', 'ema-dea', 'ema-hist',
@@ -1038,31 +835,16 @@ function resetEMA() {
 	if (ichiEl) ichiEl.value = '';
 	$('ema-result').style.display = 'none';
 }
-
-/* ══════════════════════════════════════
-   GOLD / XAUUSD CALCULATOR
-   7-Filter Professional System:
-   F1: Price vs EMA21 Proximity
-   F2: EMA21 > EMA55 (Short Trend)
-   F3: EMA55 > EMA200 (Macro Trend)
-   F4: KDJ Oscillator
-   F5: RSI14 Sweet Spot (50-70)
-   F6: ADX14 Trend Strength (>28)
-   F7: MACD Bullish
-   Optional: DXY Correlation, Fibonacci, Session
-══════════════════════════════════════ */
 function goldCalc() {
 	const price = num('gold-price');
 	const e21 = num('gold-e21');
 	const e55 = num('gold-e55');
 	const e200 = num('gold-e200');
-
 	if (!price || !e21 || !e55 || !e200) {
 		$('gold-result').style.display = 'none';
 		return;
 	}
 	$('gold-result').style.display = '';
-
 	const rsi = num('gold-rsi');
 	const adxV = num('gold-adx');
 	const k = num('gold-k');
@@ -1078,74 +860,53 @@ function goldCalc() {
 	const fibDir = sel('gold-fib-dir');
 	const riskPct = num('gold-risk-pct');
 	const accountSz = num('gold-account');
-
-	/* Distances */
 	const pAboveE21 = pct(price, e21);
 	const pAboveE55 = pct(price, e55);
 	const pAboveE200 = pct(price, e200);
 	const e21AboveE55 = pct(e21, e55);
 	const e55AboveE200 = pct(e55, e200);
-
-	/* Filter Evaluations */
-	const f1_proximity = price > e21;  // price above EMA21
+	const f1_proximity = price > e21;
 	const f1_stretch = Math.abs(pAboveE21 || 0);
 	const f2_pass = e21 > e55;
 	const f3_pass = e55 > e200;
-	const macroPass = price > e200; // Absolute macro requirement
-
+	const macroPass = price > e200;
 	const kdj = scoreKDJ(k, d, j);
 	const rsiS = scoreRSI(rsi, 'gold');
 	const adxS = scoreADX(adxV);
 	const macd = scoreMACDZone(dif, dea);
 	const volS = scoreVolume(vol);
-
-	/* DXY Correlation */
 	let dxyPass = null, dxyLabel = '—';
 	if (dxyDir) {
 		if (dxyDir === 'falling') { dxyPass = true; dxyLabel = '📉 Falling (Bullish Gold)'; }
 		if (dxyDir === 'flat') { dxyPass = 'warn'; dxyLabel = '➡️ Flat (Neutral)'; }
 		if (dxyDir === 'rising') { dxyPass = false; dxyLabel = '📈 Rising (Bearish Gold)'; }
 	}
-
-	/* Session Quality */
 	const sess = getSession();
 	const sessPass = sess.score >= 70 ? true : sess.score >= 40 ? 'warn' : false;
-
-	/* Score Engine — Gold Weighted */
 	const eng = scoreEngine();
-	eng.add(f1_proximity, 15);  // F1: Price > EMA21
-	eng.add(f2_pass, 15);  // F2: EMA21 > EMA55
-	eng.add(f3_pass, 15);  // F3: EMA55 > EMA200 (macro)
+	eng.add(f1_proximity, 15);
+	eng.add(f2_pass, 15);
+	eng.add(f3_pass, 15);
 	eng.add(kdj ? kdj.pass : null, 12);
 	eng.add(rsiS ? rsiS.pass : null, 12);
 	eng.add(adxS ? adxS.pass : null, 12);
 	eng.add(macd ? macd.pass : null, 10);
 	eng.add(volS ? volS.pass : null, 6);
 	eng.add(dxyPass, 5);
-	eng.add(sessPass, 3);  // Small weight — timing bonus
-
-	/* Gold Stretch Penalty — gold is more volatile, use tighter threshold */
+	eng.add(sessPass, 3);
 	let penalty = 0;
 	if (f1_stretch > 6) penalty = -18;
 	else if (f1_stretch > 4) penalty = -10;
 	else if (f1_stretch > 2) penalty = -4;
-
-	/* Extra penalty for macro misalignment */
 	if (!macroPass) penalty -= 10;
-
 	const adjScore = Math.max(0, Math.min(100, eng.result() + penalty));
-
-	/* Grade based on EMA21 vs EMA55 gap */
 	const grade = getGrade(e21AboveE55 || 0);
-
-	/* Decision Logic — Gold requires stricter criteria */
 	const macroTrendOk = f3_pass && macroPass;
 	const momentumOk = (!kdj || kdj.pass !== false)
 		&& (!macd || macd.pass !== false)
 		&& (!adxS || adxS.pass !== false)
 		&& (!rsiS || rsiS.pass !== false);
 	const dxyOk = dxyPass !== false;
-
 	let decision, riskLevel, posSize;
 	if (!macroTrendOk || !f1_proximity || !f2_pass || !momentumOk || !dxyOk) {
 		decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
@@ -1157,11 +918,7 @@ function goldCalc() {
 	} else {
 		decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
 	}
-
-	/* Update Session Banner */
 	updateGoldSessionBanner();
-
-	/* Decision Strip */
 	const chipText = `${sess.emoji} ${sess.full}`;
 	setDecisionStrip('gold', decision, riskLevel, grade, `
     <div>XAUUSD: <span style="color:var(--gold);font-weight:700">$${price.toFixed(2)}</span>
@@ -1174,8 +931,6 @@ function goldCalc() {
       &nbsp; Score: <span style="color:var(--gold)">${adjScore.toFixed(0)}/100</span>
     </div>`, chipText
 	);
-
-	/* Advice */
 	const adv = $('gold-advice');
 	if (decision === 'PROCEED') {
 		const lines = [
@@ -1209,11 +964,7 @@ function goldCalc() {
 		adv.textContent = `🔴 Skip gold trade. Critical failures: ${missing.join(' | ')}`;
 		adv.className = 'advice-box red';
 	}
-
-	/* Dial */
 	updateDial('gold-dial-arc', 'gold-dial-score', adjScore, true);
-
-	/* Pie */
 	drawPie('gold-pie', 'gold-pie-legend', [
 		{ label: 'EMA Stack', value: (f1_proximity ? 1 : 0) + (f2_pass ? 1 : 0) + (f3_pass ? 1 : 0), color: '#FFD700' },
 		{ label: 'KDJ', value: kdj ? (kdj.pass === true ? 1 : kdj.pass === 'warn' ? .5 : 0) : 0, color: 'var(--green)' },
@@ -1223,12 +974,9 @@ function goldCalc() {
 		{ label: 'DXY', value: dxyPass === true ? 1 : dxyPass === 'warn' ? .5 : 0, color: 'var(--orange)' },
 		{ label: 'Session', value: sessPass === true ? 1 : sessPass === 'warn' ? .5 : 0, color: 'var(--green2)' },
 	].filter(s => s.value > 0));
-
-	/* Checklist */
 	const passArr = [f1_proximity, f2_pass, f3_pass, macroPass,
 		kdj?.pass === true, rsiS?.pass === true, adxS?.pass === true, macd?.pass === true,
 	].filter(Boolean);
-
 	$('gold-checklist').innerHTML = [
 		buildCheck('F1 — Price > EMA21 (Momentum)', f1_proximity, `${f1_stretch.toFixed(2)}% above | ${f1_stretch <= 2 ? '🎯 Ideal' : f1_stretch <= 4 ? '✅ OK' : '⚠️ Stretched'}`),
 		buildCheck('F2 — EMA21 > EMA55 (Short Trend)', f2_pass, fmt2(e21AboveE55)),
@@ -1251,10 +999,7 @@ function goldCalc() {
 			: buildCheck('DXY Correlation', null, 'Not provided'),
 		buildCheck(`Session — ${sess.full}`, sessPass === true ? true : sessPass === 'warn' ? null : false, `${sess.emoji} Quality: ${sess.score}/100`),
 	].join('');
-
 	updateMeter('gold-signal-meter', passArr.length, 7);
-
-	/* EMA Alignment Grid */
 	$('gold-alignment-grid').innerHTML = [
 		['Price vs EMA21', pAboveE21, pAboveE21 >= 0 && pAboveE21 <= 2 ? 'green' : pAboveE21 > 5 ? 'red' : pAboveE21 > 3 ? 'yellow' : 'accent'],
 		['Price vs EMA55', pAboveE55, pAboveE55 >= 0 ? 'accent' : 'red'],
@@ -1268,31 +1013,27 @@ function goldCalc() {
 		const display = ov || (v != null ? (v >= 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
 		return `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${display}</div></div>`;
 	}).join('');
-
 	updateRange('gold-range-fill', 'gold-range-marker', 'gold-range-label', Math.max(0, f1_stretch), 7);
-
-	/* ══ ENHANCED FIBONACCI — Confluence + Accuracy Score ══ */
-	const fibCard   = $('gold-fib-card');
-	const fibH2     = num('gold-fibh2');
-	const fibL2     = num('gold-fibl2');
-	const fib       = calcFib(fibH, fibL);
-	const fib2      = calcFib(fibH2, fibL2);
-
+	const fibCard = $('gold-fib-card');
+	const fibH2 = num('gold-fibh2');
+	const fibL2 = num('gold-fibl2');
+	const fib = calcFib(fibH, fibL);
+	const fib2 = calcFib(fibH2, fibL2);
 	if (fib) {
 		fibCard.style.display = '';
-		const colors = { accent:'var(--accent)', green:'var(--green)', yellow:'var(--yellow)',
-			gold:'#FFD700', orange:'var(--orange)', red:'var(--red)', dim:'var(--dim)' };
-
-		// Accuracy score
-		const emaStack  = [e21, e55, e200].filter(Boolean);
-		const fibAcc    = fibAccuracyScore(price, fib, emaStack);
-		const accStrip  = $('gold-fib-accuracy-strip');
+		const colors = {
+			accent: 'var(--accent)', green: 'var(--green)', yellow: 'var(--yellow)',
+			gold: '#FFD700', orange: 'var(--orange)', red: 'var(--red)', dim: 'var(--dim)'
+		};
+		const emaStack = [e21, e55, e200].filter(Boolean);
+		const fibAcc = fibAccuracyScore(price, fib, emaStack);
+		const accStrip = $('gold-fib-accuracy-strip');
 		if (accStrip) {
 			accStrip.style.display = '';
 			const accColor = fibAcc.score >= 80 ? '#FFD700' : fibAcc.score >= 55 ? 'var(--accent)' : 'var(--dim)';
 			const accLabel = fibAcc.score >= 80 ? '🎯 HIGH ACCURACY — Golden Ratio Confluence'
 				: fibAcc.score >= 55 ? '✅ MODERATE — Near Key Fibonacci Level'
-				: '⚠️ LOW — Price not near key level';
+					: '⚠️ LOW — Price not near key level';
 			accStrip.innerHTML = `<div class="fib-acc-bar">
 				<div class="fib-acc-left">
 					<span class="fib-acc-score" style="color:${accColor}">${Math.round(fibAcc.score)}%</span>
@@ -1301,93 +1042,81 @@ function goldCalc() {
 				${fibAcc.level ? `<span class="fib-acc-level" style="color:${accColor}">Nearest: ${fibAcc.level.name} @ $${fibAcc.level.lvPrice.toFixed(2)} (${fibAcc.level.distPct.toFixed(2)}% away)</span>` : ''}
 			</div>`;
 		}
-
-		// Confluence zones (secondary fib)
 		const confEl = $('gold-fib-confluence');
 		if (fib2 && confEl) {
 			const zones = fibConfluence(fib, fib2, Math.max(fib.range, fib2.range));
 			if (zones.length > 0) {
 				confEl.style.display = '';
 				confEl.innerHTML = `<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;font-weight:700">φ Confluence Zones — Highest Accuracy</div>
-					${zones.slice(0,4).map(z => `<div class="fib-confluence-row">
-						<span class="fib-conf-badge" style="color:${z.strength==='STRONG'?'#FFD700':'var(--accent)'}">${z.strength}</span>
+					${zones.slice(0, 4).map(z => `<div class="fib-confluence-row">
+						<span class="fib-conf-badge" style="color:${z.strength === 'STRONG' ? '#FFD700' : 'var(--accent)'}">${z.strength}</span>
 						<span class="fib-conf-price">$${z.price.toFixed(2)}</span>
 						<span class="fib-conf-desc">${z.level1}% ∩ ${z.level2}% — ${z.diffPct.toFixed(2)}% apart</span>
-						<span class="fib-conf-action">${parseFloat(z.level1)<=61.8?'🎯 Entry':'📐 TP'}</span>
+						<span class="fib-conf-action">${parseFloat(z.level1) <= 61.8 ? '🎯 Entry' : '📐 TP'}</span>
 					</div>`).join('')}`;
 			} else confEl.style.display = 'none';
 		} else if (confEl) confEl.style.display = 'none';
-
-		// Full fibonacci grid
 		const fibLevels = [
-			{ key:'ext_261', label:'261.8% Extension', tag:'Far TP',    tagCls:'accent', isExt:true },
-			{ key:'ext_200', label:'200% Extension',   tag:'TP3',       tagCls:'accent', isExt:true },
-			{ key:'ext_161', label:'161.8% ★ Golden',  tag:'TP2',       tagCls:'gold',   isExt:true },
-			{ key:'ext_141', label:'141.4% Extension', tag:'TP1b',      tagCls:'accent', isExt:true },
-			{ key:'ext_127', label:'127.2% Extension', tag:'TP1',       tagCls:'accent', isExt:true },
-			{ key:'0',       label:'0% Swing High',    tag:'Resistance',tagCls:'green'  },
-			{ key:'23.6',    label:'23.6% Retrace',    tag:'Minor',     tagCls:'yellow' },
-			{ key:'38.2',    label:'38.2% ★ Golden',   tag:'Key Entry', tagCls:'gold'   },
-			{ key:'50',      label:'50% Midpoint',     tag:'Key',       tagCls:'yellow' },
-			{ key:'61.8',    label:'61.8% ★ Golden',   tag:'Best Entry',tagCls:'gold'   },
-			{ key:'78.6',    label:'78.6% Deep',       tag:'Deep Entry',tagCls:'orange' },
-			{ key:'88.6',    label:'88.6% Harmonic',   tag:'Last',      tagCls:'red'    },
-			{ key:'100',     label:'100% Swing Low',   tag:'Support',   tagCls:'red'    },
+			{ key: 'ext_261', label: '261.8% Extension', tag: 'Far TP', tagCls: 'accent', isExt: true },
+			{ key: 'ext_200', label: '200% Extension', tag: 'TP3', tagCls: 'accent', isExt: true },
+			{ key: 'ext_161', label: '161.8% ★ Golden', tag: 'TP2', tagCls: 'gold', isExt: true },
+			{ key: 'ext_141', label: '141.4% Extension', tag: 'TP1b', tagCls: 'accent', isExt: true },
+			{ key: 'ext_127', label: '127.2% Extension', tag: 'TP1', tagCls: 'accent', isExt: true },
+			{ key: '0', label: '0% Swing High', tag: 'Resistance', tagCls: 'green' },
+			{ key: '23.6', label: '23.6% Retrace', tag: 'Minor', tagCls: 'yellow' },
+			{ key: '38.2', label: '38.2% ★ Golden', tag: 'Key Entry', tagCls: 'gold' },
+			{ key: '50', label: '50% Midpoint', tag: 'Key', tagCls: 'yellow' },
+			{ key: '61.8', label: '61.8% ★ Golden', tag: 'Best Entry', tagCls: 'gold' },
+			{ key: '78.6', label: '78.6% Deep', tag: 'Deep Entry', tagCls: 'orange' },
+			{ key: '88.6', label: '88.6% Harmonic', tag: 'Last', tagCls: 'red' },
+			{ key: '100', label: '100% Swing Low', tag: 'Support', tagCls: 'red' },
 		];
-
-		const nearest      = nearestFibLevel(price, fib);
+		const nearest = nearestFibLevel(price, fib);
 		const pctPosInRange = ((price - fib['100']) / fib.range) * 100;
-
 		$('gold-fib-grid').innerHTML = fibLevels.map(lv => {
 			const lvPrice = fib[lv.key];
 			if (!lvPrice) return '';
-			const distPct  = Math.abs(price - lvPrice) / fib.range * 100;
+			const distPct = Math.abs(price - lvPrice) / fib.range * 100;
 			const isCurrent = nearest.level === lv.key && distPct < 3;
-			const isAbove   = price > lvPrice;
+			const isAbove = price > lvPrice;
 			const c = colors[lv.tagCls] || 'var(--dim)';
-			const isKey     = ['38.2','61.8','ext_161'].includes(lv.key);
-			const nowBadge  = isCurrent ? ` <span style="background:rgba(255,215,0,.2);color:#FFD700;font-size:8px;padding:.1rem .35rem;border-radius:3px;border:1px solid rgba(255,215,0,.4);font-weight:700">◀ PRICE</span>` : '';
-			const distNote  = distPct < 1.5 && !isCurrent ? ` <span style="color:var(--muted);font-size:9px">${distPct.toFixed(1)}% away</span>` : '';
-			return `<div class="fib-row${isCurrent?' current':''}${isKey?' fib-key-level':''}${lv.isExt?' fib-ext-row':''}">
-				<span class="fib-pct" style="color:${c}">${lv.isExt ? lv.label.split(' ')[0] : lv.key+'%'}</span>
-				<span class="fib-price" style="color:${isAbove?'var(--dim)':'var(--text)'}">$${lvPrice.toFixed(2)}</span>
+			const isKey = ['38.2', '61.8', 'ext_161'].includes(lv.key);
+			const nowBadge = isCurrent ? ` <span style="background:rgba(255,215,0,.2);color:#FFD700;font-size:8px;padding:.1rem .35rem;border-radius:3px;border:1px solid rgba(255,215,0,.4);font-weight:700">◀ PRICE</span>` : '';
+			const distNote = distPct < 1.5 && !isCurrent ? ` <span style="color:var(--muted);font-size:9px">${distPct.toFixed(1)}% away</span>` : '';
+			return `<div class="fib-row${isCurrent ? ' current' : ''}${isKey ? ' fib-key-level' : ''}${lv.isExt ? ' fib-ext-row' : ''}">
+				<span class="fib-pct" style="color:${c}">${lv.isExt ? lv.label.split(' ')[0] : lv.key + '%'}</span>
+				<span class="fib-price" style="color:${isAbove ? 'var(--dim)' : 'var(--text)'}">$${lvPrice.toFixed(2)}</span>
 				<span class="fib-label">${lv.label}${nowBadge}${distNote}</span>
 				<span class="fib-tag" style="background:${c}18;color:${c};border:1px solid ${c}35">${lv.tag}</span>
 			</div>`;
 		}).join('');
-
-		// Secondary fib grid
 		const grid2Wrap = $('gold-fib-grid2-wrap');
 		if (fib2 && grid2Wrap) {
 			grid2Wrap.style.display = '';
-			$('gold-fib-grid2').innerHTML = ['ext_161','0','38.2','50','61.8','78.6','100'].map(k => {
+			$('gold-fib-grid2').innerHTML = ['ext_161', '0', '38.2', '50', '61.8', '78.6', '100'].map(k => {
 				const lp = fib2[k]; if (!lp) return '';
-				return `<div class="fib-row fib-sec"><span class="fib-pct" style="color:var(--dim)">${k.startsWith('ext')?'161.8%':k+'%'}</span><span class="fib-price" style="color:${price>lp?'var(--muted)':'var(--dim)'}">$${lp.toFixed(2)}</span><span class="fib-label" style="color:var(--muted)">Secondary</span></div>`;
+				return `<div class="fib-row fib-sec"><span class="fib-pct" style="color:var(--dim)">${k.startsWith('ext') ? '161.8%' : k + '%'}</span><span class="fib-price" style="color:${price > lp ? 'var(--muted)' : 'var(--dim)'}">$${lp.toFixed(2)}</span><span class="fib-label" style="color:var(--muted)">Secondary</span></div>`;
 			}).join('');
 		} else if (grid2Wrap) grid2Wrap.style.display = 'none';
-
-		// Position bar
-		updateRange('gold-fib-fill','gold-fib-marker','gold-fib-pos-label', Math.max(0,Math.min(100,pctPosInRange)), 100);
-		$('gold-fib-low-label').textContent  = `Low $${fibL.toFixed(2)}`;
+		updateRange('gold-fib-fill', 'gold-fib-marker', 'gold-fib-pos-label', Math.max(0, Math.min(100, pctPosInRange)), 100);
+		$('gold-fib-low-label').textContent = `Low $${fibL.toFixed(2)}`;
 		$('gold-fib-high-label').textContent = `High $${fibH.toFixed(2)}`;
-
-		// Fibonacci-precision entry + TP
 		const precEl = $('gold-fib-precision');
 		if (precEl) {
 			precEl.style.display = '';
 			const retraceLevels = [
-				{key:'23.6',p:3},{key:'38.2',p:5},{key:'50',p:4},{key:'61.8',p:5},{key:'78.6',p:3}
+				{ key: '23.6', p: 3 }, { key: '38.2', p: 5 }, { key: '50', p: 4 }, { key: '61.8', p: 5 }, { key: '78.6', p: 3 }
 			];
 			let bestEntry = null;
 			for (const lv of retraceLevels) {
 				const lvP = fib[lv.key];
 				if (lvP && lvP <= price) {
 					const dist = price - lvP;
-					if (!bestEntry || dist < bestEntry.dist) bestEntry = {...lv, price:lvP, dist};
+					if (!bestEntry || dist < bestEntry.dist) bestEntry = { ...lv, price: lvP, dist };
 				}
 			}
 			const idealEntry = bestEntry ? bestEntry.price : price;
-			const idealNote  = bestEntry ? `${bestEntry.key}% Fib ($${idealEntry.toFixed(2)})` : 'current price';
+			const idealNote = bestEntry ? `${bestEntry.key}% Fib ($${idealEntry.toFixed(2)})` : 'current price';
 			precEl.innerHTML = `<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;font-weight:700">📐 Fibonacci Precision Entry &amp; Take-Profit Levels</div>
 				<div class="fib-precision-grid">
 					<div class="fib-prec-row entry"><span class="fib-prec-label">Ideal Entry Zone</span><span class="fib-prec-price" style="color:var(--accent)">$${idealEntry.toFixed(2)}</span><span class="fib-prec-note">Pullback to ${idealNote}</span></div>
@@ -1397,12 +1126,10 @@ function goldCalc() {
 					<div class="fib-prec-row tp"><span class="fib-prec-label">TP4 — 261.8%</span><span class="fib-prec-price" style="color:#aaffee">$${fib.ext_261.toFixed(2)}</span><span class="fib-prec-note">Ultimate — strong bull only</span></div>
 				</div>`;
 		}
-
-		// Advice
 		const fibAdvEl = $('gold-fib-advice');
-		const nearPct  = parseFloat(nearest.level);
+		const nearPct = parseFloat(nearest.level);
 		const inExtZone = price > fib['0'];
-		const accNote   = fibAcc.score >= 80
+		const accNote = fibAcc.score >= 80
 			? `🎯 ACCURACY ${Math.round(fibAcc.score)}% — ${fibAcc.level?.name} with ${emaStack.length ? 'EMA confluence' : 'no EMA yet'}.`
 			: fibAcc.score >= 55
 				? `✅ Accuracy ${Math.round(fibAcc.score)}% — near key level.`
@@ -1413,7 +1140,7 @@ function goldCalc() {
 		} else if (nearPct > 0 && nearPct <= 38.2) {
 			fibAdvice = `${accNote} Shallow 38.2% pullback — strong trend. Full position valid. TP targets set above.`;
 		} else if (nearPct <= 61.8) {
-			fibAdvice = `${accNote} ${nearPct===61.8?'GOLDEN RATIO':'Mid'} pullback at ${nearPct}% — best RR entry zone. Require RSI>50 + KDJ cross + volume spike.`;
+			fibAdvice = `${accNote} ${nearPct === 61.8 ? 'GOLDEN RATIO' : 'Mid'} pullback at ${nearPct}% — best RR entry zone. Require RSI>50 + KDJ cross + volume spike.`;
 		} else if (nearPct <= 78.6) {
 			fibAdvice = `${accNote} Deep retrace. Require strong reversal candle + volume>1.5× before entry. Reduce size 50%.`;
 		} else if (nearPct <= 88.6) {
@@ -1421,28 +1148,22 @@ function goldCalc() {
 		} else {
 			fibAdvice = `🔴 At/below swing low. Do not enter long until new higher low forms and MAs rebuild.`;
 		}
-		if (fibDir==='extend') fibAdvice = `📐 Extensions: 127.2%=$${fib.ext_127.toFixed(2)} | 161.8%★=$${fib.ext_161.toFixed(2)} | 200%=$${fib.ext_200.toFixed(2)} | 261.8%=$${fib.ext_261.toFixed(2)}.`;
+		if (fibDir === 'extend') fibAdvice = `📐 Extensions: 127.2%=$${fib.ext_127.toFixed(2)} | 161.8%★=$${fib.ext_161.toFixed(2)} | 200%=$${fib.ext_200.toFixed(2)} | 261.8%=$${fib.ext_261.toFixed(2)}.`;
 		fibAdvEl.textContent = fibAdvice;
-
 	} else {
 		fibCard.style.display = 'none';
 	}
-
-	/* ── SESSION QUALITY SECTION ── */
 	const sessCard = $('gold-session-card');
 	const sessGrid = $('gold-session-grid');
 	const sessFill = $('gold-sess-fill');
 	const sessMark = $('gold-sess-marker');
 	const sessLabel = $('gold-sess-label');
 	const sessChip = $('gold-session-chip');
-
 	sessCard.style.display = '';
 	if (sessChip) { sessChip.textContent = `${sess.emoji} ${sess.full}`; sessChip.style.display = ''; }
-
 	if (sessFill) sessFill.style.width = sess.score + '%';
 	if (sessMark) sessMark.style.left = sess.score + '%';
 	if (sessLabel) sessLabel.textContent = `${sess.score}/100 — ${sess.full}`;
-
 	const sessData = [
 		{ name: 'London-NY Overlap', time: '13:00–17:00', note: 'Prime — max liquidity', active: sess.score === 100, quality: '#00e87a' },
 		{ name: 'NY Session', time: '13:00–22:00', note: 'High volume gold moves', active: sess.score >= 70 && sess.score < 100, quality: 'var(--accent)' },
@@ -1450,7 +1171,6 @@ function goldCalc() {
 		{ name: 'Tokyo Session', time: '00:00–09:00', note: 'Low vol — avoid entry', active: sess.score === 40, quality: 'var(--yellow)' },
 		{ name: 'Off-Hours', time: '22:00–08:00', note: 'Thin liquidity — skip', active: sess.score < 40, quality: 'var(--red)' },
 	];
-
 	sessGrid.innerHTML = sessData.map(s =>
 		`<div class="session-cell${s.active ? ' active-sess' : ''}">
       <div class="session-name">${s.name}</div>
@@ -1459,11 +1179,8 @@ function goldCalc() {
       <div style="font-size:9px;color:var(--muted);margin-top:.1rem">${s.note}</div>
     </div>`
 	).join('');
-
-	/* Trade Plan */
 	buildTradePlan('gold-price-block', 'gold-tradeplan-card', price, atr, accountSz, riskPct, 'gold');
 }
-
 function resetGold() {
 	['gold-price', 'gold-e21', 'gold-e55', 'gold-e200',
 		'gold-rsi', 'gold-adx', 'gold-k', 'gold-d', 'gold-j',
@@ -1478,14 +1195,7 @@ function resetGold() {
 	if (fibDirEl) fibDirEl.value = 'retrace';
 	$('gold-result').style.display = 'none';
 }
-
-
-/* Auto-trigger gold session banner on load */
 updateGoldSessionBanner();
-
-/* ══════════════════════════════════════
-   GUIDE SUB-TAB SWITCHER
-══════════════════════════════════════ */
 function switchGuide(id) {
 	document.querySelectorAll('.guide-tab-btn').forEach(b => b.classList.remove('active'));
 	document.querySelectorAll('.guide-section').forEach(s => s.classList.remove('active'));
@@ -1495,14 +1205,7 @@ function switchGuide(id) {
 		if (b.getAttribute('onclick') === `switchGuide('${id}')`) b.classList.add('active');
 	});
 }
-
-/* ══════════════════════════════════════
-   TOOLTIP DATA MAP
-   Keyed by input/select element ID
-══════════════════════════════════════ */
 const TOOLTIPS = {
-
-	/* ─── MA CALCULATOR ─── */
 	'ma-price': {
 		title: 'Market Price',
 		body: 'The current live trading price of the asset. Use the last traded price shown on your broker platform or charting tool.',
@@ -1608,8 +1311,6 @@ const TOOLTIPS = {
 		body: 'Your total trading capital available in your brokerage account. Used to calculate the exact number of units/shares you should buy to stay within your risk limit. Update monthly as account grows.',
 		where: '📍 Your brokerage account balance in USD'
 	},
-
-	/* ─── EMA CALCULATOR ─── */
 	'ema-price': {
 		title: 'Market Price',
 		body: 'Current live price of the asset. For EMA trading, the entry quality is measured by how close price is to EMA8. Ideal: within 0–2% of EMA8.',
@@ -1720,8 +1421,6 @@ const TOOLTIPS = {
 	},
 	'ema-risk-pct': { title: 'Risk per Trade %', body: 'Max % of account to risk per trade. Recommended 0.5–1.0%. Drives the position sizing calculation in the Trade Plan card.', where: '📍 Your risk preference: 0.5% (conservative) to 1.5% (aggressive max)' },
 	'ema-account': { title: 'Account Size ($)', body: 'Total trading capital. Combined with Risk%, ATR, and entry price → calculates exact units to buy. Update this regularly as your account changes.', where: '📍 Your current brokerage account balance' },
-
-	/* ─── GOLD CALCULATOR ─── */
 	'gold-price': {
 		title: 'XAUUSD Current Price',
 		body: 'The current live gold price in USD per troy ounce. Use the mid-price or last traded price from your broker. Gold typically trades in $0.01–$0.10 increments.',
@@ -1819,17 +1518,11 @@ const TOOLTIPS = {
 		where: '📍 Your broker contract specifications for XAUUSD'
 	},
 };
-
-/* ══════════════════════════════════════
-   TOOLTIP ENGINE
-   Smart positioning, avoids viewport overflow
-══════════════════════════════════════ */
 (function initTooltips() {
 	const tip = $('tm-tooltip');
 	if (!tip) return;
 	let pinned = false;
 	const COLOR = { green: 'var(--green)', accent: 'var(--accent)', yellow: 'var(--yellow)', red: 'var(--red)', orange: 'var(--orange)' };
-
 	function showTip(el, data) {
 		if (!data) return;
 		let html = `<div class="tip-title">${data.title}</div><div class="tip-body">${data.body}</div>`;
@@ -1846,14 +1539,12 @@ const TOOLTIPS = {
 		el.classList.add('tip-active');
 		positionTip(el);
 	}
-
 	function hideTip(el, force) {
-	    if (pinned && !force) return;
-	    tip.style.display = 'none';
-	    if (el) el.classList.remove('tip-active');
-	    pinned = false;
-	  }
-
+		if (pinned && !force) return;
+		tip.style.display = 'none';
+		if (el) el.classList.remove('tip-active');
+		pinned = false;
+	}
 	function positionTip(el) {
 		const rect = el.getBoundingClientRect();
 		const tw = 300;
@@ -1861,43 +1552,27 @@ const TOOLTIPS = {
 		const vw = window.innerWidth;
 		const vh = window.innerHeight;
 		const pad = 8;
-
 		let left = rect.left;
 		let top = rect.bottom + pad;
-
-		// Flip left if overflows right
 		if (left + tw > vw - pad) left = rect.right - tw;
 		if (left < pad) left = pad;
-
-		// Flip up if overflows bottom
 		if (top + th > vh - pad) top = rect.top - th - pad;
 		if (top < pad) top = pad;
-
 		tip.style.left = left + 'px';
 		tip.style.top = top + 'px';
 		tip.style.width = Math.min(tw, vw - pad * 2) + 'px';
 	}
-
-	// Attach events to all tracked inputs/selects
 	document.addEventListener('DOMContentLoaded', attachAll);
-	// Also try immediately (in case DOM is already ready)
 	if (document.readyState !== 'loading') attachAll();
-
 	function attachAll() {
 		Object.keys(TOOLTIPS).forEach(id => {
 			const el = $(id);
 			if (!el) return;
 			const data = TOOLTIPS[id];
-
-			// Hover
 			el.addEventListener('mouseenter', () => showTip(el, data));
 			el.addEventListener('mouseleave', () => hideTip(el));
-
-			// Focus (keyboard / tap)
 			el.addEventListener('focus', () => showTip(el, data));
 			el.addEventListener('blur', () => hideTip(el));
-
-			// Add ⓘ indicator to the label
 			const fld = el.closest('.fld');
 			if (fld) {
 				const lbl = fld.querySelector('label');
@@ -1912,50 +1587,35 @@ const TOOLTIPS = {
 			}
 		});
 	}
-
-	// Keep tooltip updated on scroll/resize
 	document.addEventListener('click', e => { if (!tip.contains(e.target) && !e.target.classList.contains('tip-indicator')) hideTip(null, true); });
 	window.addEventListener('scroll', () => { if (document.activeElement && TOOLTIPS[document.activeElement.id]) positionTip(document.activeElement); }, { passive: true });
 	window.addEventListener('resize', () => { if (tip.style.display !== 'none') hideTip(null); });
 })();
-
-/* ══════════════════════════════════════
-   BURSA SESSION ANALYSER
-   MYT = UTC+8 (no DST in Malaysia)
-══════════════════════════════════════ */
 function getBursaSession() {
 	const now = new Date();
-	const myt = new Date(now.getTime() + 8 * 3600000); // UTC+8
+	const myt = new Date(now.getTime() + 8 * 3600000);
 	const h = myt.getUTCHours();
 	const m = myt.getUTCMinutes();
 	const hm = h * 60 + m;
-	const dow = myt.getUTCDay(); // 0=Sun, 6=Sat
-
+	const dow = myt.getUTCDay();
 	const isWeekend = dow === 0 || dow === 6;
 	if (isWeekend) return { label: '🔴 Closed (Weekend)', cls: 'avoid', score: 0, quality: 'Weekend — Closed', emoji: '🔴', open: false };
-
-	// Pre-open: 08:30–09:00 = 510–540
 	if (hm >= 510 && hm < 540) return { label: '🟡 Pre-Open', cls: 'slow', score: 30, quality: 'Pre-Open Auction 08:30–09:00', emoji: '🟡', open: false };
-	// Morning: 09:00–12:30 = 540–750
 	if (hm >= 540 && hm < 750) {
-		const prime = hm < 600; // 09:00–10:00 = highest momentum
+		const prime = hm < 600;
 		return prime
 			? { label: '🎯 Morning Prime', cls: 'prime', score: 100, quality: 'Prime Window 09:00–10:00 MYT', emoji: '🎯', open: true }
 			: { label: '🟢 Morning', cls: 'good', score: 80, quality: 'Morning Session 09:00–12:30 MYT', emoji: '✅', open: true };
 	}
-	// Lunch break: 12:30–14:30 = 750–870
 	if (hm >= 750 && hm < 870) return { label: '🟡 Lunch Break', cls: 'slow', score: 10, quality: 'Lunch Break 12:30–14:30 — No Trading', emoji: '🟡', open: false };
-	// Afternoon: 14:30–17:00 = 870–1020
 	if (hm >= 870 && hm < 1020) {
-		const prime = hm >= 930 && hm < 990; // 15:30–16:30 = closing pressure
+		const prime = hm >= 930 && hm < 990;
 		return prime
 			? { label: '🟢 Afternoon Prime', cls: 'good', score: 85, quality: 'Afternoon Prime 15:30–16:30 MYT', emoji: '✅', open: true }
 			: { label: '🟢 Afternoon', cls: 'good', score: 72, quality: 'Afternoon Session 14:30–17:00 MYT', emoji: '✅', open: true };
 	}
-	// Closed
 	return { label: '🔴 Closed', cls: 'avoid', score: 0, quality: 'Market Closed (after 17:00 MYT)', emoji: '🔴', open: false };
 }
-
 function updateBursaSessionBanner() {
 	const sess = getBursaSession();
 	const now = new Date();
@@ -1968,29 +1628,13 @@ function updateBursaSessionBanner() {
 	if (timeEl) timeEl.textContent = hStr;
 }
 setInterval(() => { if ($('panel-bursa')?.classList.contains('active')) updateBursaSessionBanner(); }, 15000);
-
-/* ══════════════════════════════════════
-   BURSA GOLD ETF — 8-FILTER CALCULATOR
-   F1: Price > MA5 > MA20 > MA50 (MA Stack)
-   F2: MA200 macro alignment (optional)
-   F3: NAV Premium ≤ 2% (ETF valuation)
-   F4: Bid/Ask Ratio ≥ 0% (order flow)
-   F5: Volume Ratio ≥ 1.0 (liquidity)
-   F6: KDJ momentum
-   F7: MACD confirmation
-   F8: Bursa session quality
-══════════════════════════════════════ */
 function bursaCalc() {
 	const price = num('bu-price');
 	const ma5 = num('bu-ma5');
 	const ma20 = num('bu-ma20');
-
 	if (!price || !ma5 || !ma20) { $('bursa-result').style.display = 'none'; return; }
 	$('bursa-result').style.display = '';
-
 	updateBursaSessionBanner();
-
-	// Optional fields
 	const ma50 = num('bu-ma50');
 	const ma200 = num('bu-ma200');
 	const atr = num('bu-atr');
@@ -2019,99 +1663,71 @@ function bursaCalc() {
 	const account = num('bu-account');
 	const riskPct = num('bu-riskpct');
 	const feePct = num('bu-fee') || 0.10;
-
-	/* ── Distances ── */
 	const pAboveMA5 = pct(price, ma5);
 	const pAboveMA20 = pct(price, ma20);
 	const pAboveMA50 = ma50 ? pct(price, ma50) : null;
 	const pAboveMA200 = ma200 ? pct(price, ma200) : null;
 	const ma5AboveMA20 = pct(ma5, ma20);
 	const ma20AbMA50 = ma50 ? pct(ma20, ma50) : null;
-
-	// Auto-calculate NAV premium if both price and nav available
 	const calcPremium = nav ? ((price - nav) / nav * 100) : null;
 	const usePremium = calcPremium ?? premium;
-
-	/* ── Daily change ── */
 	const dayChg = prev ? ((price - prev) / prev * 100) : null;
 	const gapFromOpen = open ? ((price - open) / open * 100) : null;
 	const from52h = w52h ? ((price - w52h) / w52h * 100) : null;
 	const from52l = w52l ? ((price - w52l) / w52l * 100) : null;
 	const fromAllH = allh ? ((price - allh) / allh * 100) : null;
 	const fromAllL = alll ? ((price - alll) / alll * 100) : null;
-
-	/* ── Session ── */
 	const sess = getBursaSession();
 	const sessPass = sess.score >= 70 ? true : sess.score >= 30 ? 'warn' : false;
-
-	/* ── Filter evaluations ── */
 	const f1_pass = price > ma5;
 	const f2_pass = ma5 > ma20;
-	const f3_pass = ma50 ? ma20 > ma50 : null; // optional if ma50 provided
+	const f3_pass = ma50 ? ma20 > ma50 : null;
 	const f4_mac = ma200 ? price > ma200 : null;
-
-	// NAV Premium filter: ≤2% = pass, 2–3% = warn, >3% = fail
 	let navPass = null;
 	if (usePremium != null) {
 		if (usePremium <= 1.0) navPass = true;
-		else if (usePremium <= 2.0) navPass = true;    // acceptable
+		else if (usePremium <= 2.0) navPass = true;
 		else if (usePremium <= 3.0) navPass = 'warn';
-		else navPass = false;   // overpriced
+		else navPass = false;
 	}
-
-	// Bid/Ask: ≥0% = pass, -5 to 0 = warn, <-5 = fail
 	let bidaskPass = null;
 	if (bidask != null) {
 		if (bidask >= 0) bidaskPass = true;
 		else if (bidask >= -5) bidaskPass = 'warn';
 		else bidaskPass = false;
 	}
-
-	// Volume ratio: ≥1.2 = pass, 0.8–1.2 = warn, <0.8 = fail
 	const volS = scoreVolume(volRatio);
 	const kdj = scoreKDJ(k, d, j);
 	const macd = scoreMACDZone(dif, dea);
 	const adxS = scoreADX(adxV);
-	const rsiS = scoreRSI(rsi, 'gold'); // Gold ETF uses gold RSI thresholds
-
-	/* ── Weighted Score ── */
+	const rsiS = scoreRSI(rsi, 'gold');
 	const eng = scoreEngine();
-	eng.add(f1_pass, 16);  // Price > MA5
-	eng.add(f2_pass, 14);  // MA5 > MA20
-	eng.add(f3_pass, 10);  // MA20 > MA50
-	eng.add(f4_mac, 6);  // Price > MA200
-	eng.add(navPass, 18);  // NAV premium (ETF-specific)
-	eng.add(bidaskPass, 10);  // Order flow
-	eng.add(volS ? volS.pass : null, 8);   // Liquidity
-	eng.add(kdj ? kdj.pass : null, 10);   // KDJ
-	eng.add(macd ? macd.pass : null, 8);   // MACD
-	eng.add(sessPass, 5);  // Session bonus
-	eng.add(rsiS ? rsiS.pass : null, 5);   // RSI
-
-	// Stretch penalty for ETF (same as MA strategy)
+	eng.add(f1_pass, 16);
+	eng.add(f2_pass, 14);
+	eng.add(f3_pass, 10);
+	eng.add(f4_mac, 6);
+	eng.add(navPass, 18);
+	eng.add(bidaskPass, 10);
+	eng.add(volS ? volS.pass : null, 8);
+	eng.add(kdj ? kdj.pass : null, 10);
+	eng.add(macd ? macd.pass : null, 8);
+	eng.add(sessPass, 5);
+	eng.add(rsiS ? rsiS.pass : null, 5);
 	let penalty = 0;
 	const stretchAbs = Math.abs(pAboveMA20 || 0);
 	if (stretchAbs > 10) penalty = -18;
 	else if (stretchAbs > 6) penalty = -10;
 	else if (stretchAbs > 3) penalty = -5;
-	// Additional penalty for high NAV premium
 	if (usePremium != null && usePremium > 3) penalty -= 10;
-	// Penalty if market is closed
 	if (!sess.open && sess.score < 30) penalty -= 8;
-
 	const adjScore = Math.max(0, Math.min(100, eng.result() + penalty));
-
-	/* ── Grade ── */
 	const grade = getGrade(ma20AbMA50 ?? 0);
-
-	/* ── Decision ── */
 	const maOk = f1_pass && f2_pass;
 	const etfOk = navPass !== false;
 	const orderOk = bidaskPass !== false;
 	const momentumOk = (!kdj || kdj.pass !== false)
 		&& (!macd || macd.pass !== false);
-	const sessionOk = sess.open; // Must be during Bursa hours for new entry
-
+	const sessionOk = sess.open;
 	let decision, riskLevel, posSize;
 	if (!maOk || !etfOk || !momentumOk) {
 		decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0 lots';
@@ -2123,12 +1739,8 @@ function bursaCalc() {
 	} else {
 		decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25 lots';
 	}
-
-	/* ── Session Chip ── */
 	const chip = $('bursa-sess-chip');
 	if (chip) { chip.textContent = `${sess.emoji} ${sess.label}`; chip.style.display = ''; }
-
-	/* ── Decision Strip ── */
 	setDecisionStrip('bursa', decision, riskLevel, grade, `
     <div>0828EA: <span style="color:var(--bursa);font-weight:700">MYR ${price.toFixed(3)}</span>
       ${dayChg != null ? `<span style="color:${dayChg >= 0 ? 'var(--green)' : 'var(--red)'};margin-left:.5rem">${dayChg >= 0 ? '+' : ''}${dayChg.toFixed(2)}%</span>` : ''}
@@ -2140,8 +1752,6 @@ function bursaCalc() {
       &nbsp; Size: <span style="color:${posSize.startsWith('100') ? 'var(--green)' : 'var(--yellow)'}">${posSize}</span>
     </div>`
 	);
-
-	/* ── Advice ── */
 	const adv = $('bursa-advice');
 	if (decision === 'PROCEED') {
 		const lines = [
@@ -2176,8 +1786,6 @@ function bursaCalc() {
 		adv.textContent = `🔴 Skip Bursa Gold ETF. Critical failures: ${missing.join(' | ')}`;
 		adv.className = 'advice-box red';
 	}
-
-	/* ── Dial ── */
 	const arc = $('bursa-dial-arc');
 	const txt = $('bursa-dial-score');
 	if (arc && txt) {
@@ -2188,8 +1796,6 @@ function bursaCalc() {
 		const c = adjScore >= 75 ? '#00e87a' : adjScore >= 55 ? '#f5c842' : '#f03a4a';
 		txt.setAttribute('fill', c);
 	}
-
-	/* ── Pie ── */
 	drawPie('bursa-pie', 'bursa-pie-legend', [
 		{ label: 'MA Stack', value: (f1_pass ? 1 : 0) + (f2_pass ? 1 : 0) + (f3_pass ? 1 : 0) + (f4_mac ? 1 : 0), color: 'var(--bursa)' },
 		{ label: 'NAV', value: navPass === true ? 1 : navPass === 'warn' ? .5 : 0, color: '#FFD700' },
@@ -2199,13 +1805,10 @@ function bursaCalc() {
 		{ label: 'MACD', value: macd ? (macd.pass === true ? 1 : macd.pass === 'warn' ? .5 : 0) : 0, color: 'var(--orange)' },
 		{ label: 'Session', value: sessPass === true ? 1 : sessPass === 'warn' ? .5 : 0, color: 'var(--green2)' },
 	].filter(s => s.value > 0));
-
-	/* ── Checklist ── */
 	const passArr = [f1_pass, f2_pass, f3_pass, f4_mac,
 		navPass === true, bidaskPass === true,
 		volS?.pass === true, kdj?.pass === true, macd?.pass === true,
 	].filter(Boolean);
-
 	$('bursa-checklist').innerHTML = [
 		buildCheck('F1 — Price > MA5 (Momentum)', f1_pass, pAboveMA5 != null ? (pAboveMA5 >= 0 ? '+' : '') + pAboveMA5.toFixed(2) + '%' : '—'),
 		buildCheck('F2 — MA5 > MA20 (Short Trend)', f2_pass, ma5AboveMA20 != null ? (ma5AboveMA20 >= 0 ? '+' : '') + ma5AboveMA20.toFixed(2) + '%' : '—'),
@@ -2234,10 +1837,7 @@ function bursaCalc() {
 			: buildCheck('MACD Signal', null, 'Not provided'),
 		buildCheck(`Session — ${sess.label}`, sessPass === true ? true : sessPass === false ? false : null, `${sess.emoji} Score:${sess.score}/100`),
 	].join('');
-
 	updateMeter('bursa-signal-meter', passArr.length, 8);
-
-	/* ── Ticker Strip ── */
 	const tickCells = [];
 	if (prev != null) tickCells.push(['Daily Chg', `${dayChg >= 0 ? '+' : ''}${dayChg?.toFixed(2)}%`, dayChg >= 0 ? 'var(--green)' : 'var(--red)', '']);
 	if (open != null) tickCells.push(['vs Open', `${gapFromOpen >= 0 ? '+' : ''}${gapFromOpen?.toFixed(2)}%`, gapFromOpen >= 0 ? 'var(--green)' : 'var(--red)', '']);
@@ -2247,7 +1847,6 @@ function bursaCalc() {
 	if (w52l != null) tickCells.push(['52wk Low', `MYR ${w52l.toFixed(3)}`, 'var(--dim)', from52l != null ? `+${from52l.toFixed(1)}% up` : '']);
 	if (volUnits != null) tickCells.push(['Volume', volUnits >= 1e6 ? `${(volUnits / 1e6).toFixed(2)}M` : `${(volUnits / 1000).toFixed(1)}K`, 'var(--accent)', 'units traded']);
 	if (turnover != null) tickCells.push(['% Turnover', `${turnover.toFixed(2)}%`, 'var(--dim)', '']);
-
 	$('bursa-ticker').innerHTML = tickCells.map(([l, v, c, s]) =>
 		`<div class="bursa-tick-cell">
       <div class="bursa-tick-label">${l}</div>
@@ -2255,8 +1854,6 @@ function bursaCalc() {
       ${s ? `<div class="bursa-tick-sub">${s}</div>` : ''}
     </div>`
 	).join('');
-
-	/* ── NAV Valuation Grid ── */
 	const navCard = $('bursa-nav-card');
 	navCard.style.display = nav ? '' : 'none';
 	if (nav) {
@@ -2280,7 +1877,6 @@ function bursaCalc() {
 		];
 		if (allh) navCells.push({ l: 'All-Time High', v: `MYR ${allh.toFixed(3)}`, c: fromAllH != null && fromAllH >= -5 ? 'green' : 'dim', s: fromAllH != null ? `${fromAllH.toFixed(1)}% from ATH` : '' });
 		if (alll) navCells.push({ l: 'All-Time Low', v: `MYR ${alll.toFixed(3)}`, c: 'dim', s: fromAllL != null ? `+${fromAllL.toFixed(1)}% recovery` : '' });
-
 		$('bursa-nav-grid').innerHTML = navCells.map(({ l, v, c, s }) =>
 			`<div class="stat-cell">
         <div class="stat-label">${l}</div>
@@ -2288,8 +1884,6 @@ function bursaCalc() {
         ${s ? `<div class="stat-sub">${s}</div>` : ''}
       </div>`
 		).join('');
-
-		// Premium bar: map from -3% to +5% → 0–100%
 		const premPct = Math.min(100, Math.max(0, ((usePremium ?? 0) + 3) / 8 * 100));
 		const premFill = $('bursa-prem-fill');
 		const premMark = $('bursa-prem-marker');
@@ -2297,8 +1891,6 @@ function bursaCalc() {
 		if (premFill) premFill.style.width = premPct + '%';
 		if (premMark) premMark.style.left = premPct + '%';
 		if (premLabel) premLabel.textContent = usePremium != null ? `${usePremium.toFixed(2)}% Premium` : '—';
-
-		// NAV advice
 		const navAdvEl = $('bursa-nav-advice');
 		if (navAdvEl) {
 			if (usePremium <= 0) navAdvEl.textContent = `🎯 Trading BELOW NAV by ${Math.abs(usePremium).toFixed(2)}% — rare and excellent opportunity. Gold ETF at a discount to fair value.`;
@@ -2307,8 +1899,6 @@ function bursaCalc() {
 			else navAdvEl.textContent = `🔴 Premium ${usePremium.toFixed(2)}% — significantly overpriced vs NAV. Wait for premium to compress below 2% before entering. ETF demand has pushed price far above underlying gold value.`;
 		}
 	}
-
-	/* ── MA Alignment Grid ── */
 	const alignRows = [
 		['Price vs MA5', pAboveMA5, pAboveMA5 >= 0 && pAboveMA5 <= 2 ? 'green' : pAboveMA5 > 8 ? 'red' : pAboveMA5 > 4 ? 'yellow' : 'accent'],
 		['Price vs MA20', pAboveMA20, pAboveMA20 >= 0 && pAboveMA20 <= 2 ? 'green' : pAboveMA20 > 8 ? 'red' : pAboveMA20 > 4 ? 'yellow' : 'accent'],
@@ -2318,11 +1908,9 @@ function bursaCalc() {
 	if (ma50) alignRows.push(['MA20 vs MA50', ma20AbMA50, ma20AbMA50 != null && ma20AbMA50 > 0 ? 'green' : 'red']);
 	if (ma200) alignRows.push(['Price vs MA200', pAboveMA200, pAboveMA200 >= 0 ? 'green' : 'red']);
 	if (prev) alignRows.push(['Daily Change', dayChg, dayChg >= 0 ? 'green' : 'red']);
-
 	$('bursa-align-grid').innerHTML = alignRows.map(([l, v, c]) =>
 		`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v != null ? (v >= 0 ? '+' : '') + v.toFixed(2) + '%' : '—'}</div></div>`
 	).join('');
-
 	const maStretch = Math.abs(pAboveMA20 ?? 0);
 	const maFill = $('bursa-ma-fill');
 	const maMark = $('bursa-ma-marker');
@@ -2331,8 +1919,6 @@ function bursaCalc() {
 	if (maFill) maFill.style.width = maPct + '%';
 	if (maMark) maMark.style.left = maPct + '%';
 	if (maLabel) maLabel.textContent = `${maStretch.toFixed(2)}%`;
-
-	// Day range bar
 	const drSec = $('bursa-dayrange-section');
 	if (high != null && low != null && high > low) {
 		drSec.style.display = '';
@@ -2347,8 +1933,6 @@ function bursaCalc() {
 	} else {
 		drSec.style.display = 'none';
 	}
-
-	/* ── Session Grid ── */
 	const sessData = [
 		{ name: 'Pre-Open Auction', time: '08:30–09:00', note: 'Set limit orders only', q: '30', active: sess.score === 30 },
 		{ name: 'Morning Prime', time: '09:00–10:00', note: 'Highest momentum window', q: '100', active: sess.score === 100 },
@@ -2358,7 +1942,6 @@ function bursaCalc() {
 		{ name: 'Afternoon', time: '14:30–17:00', note: 'Steady volume, watch close', q: '72', active: sess.score === 72 },
 		{ name: 'Closed', time: '17:00–08:30', note: 'No trading', q: '0', active: sess.score === 0 },
 	];
-
 	$('bursa-session-grid').innerHTML = sessData.map(s =>
 		`<div class="session-cell${s.active ? ' active-sess' : ''}">
       <div class="session-name">${s.name}</div>
@@ -2367,19 +1950,15 @@ function bursaCalc() {
       <div style="font-size:9px;color:var(--muted);margin-top:.1rem">${s.note}</div>
     </div>`
 	).join('');
-
 	const sessFill = $('bursa-sess-fill');
 	const sessMark = $('bursa-sess-marker');
 	const sessLabel = $('bursa-sess-label');
 	if (sessFill) sessFill.style.width = sess.score + '%';
 	if (sessMark) sessMark.style.left = sess.score + '%';
 	if (sessLabel) sessLabel.textContent = `${sess.score}/100 — ${sess.quality}`;
-
-	/* ── Trade Plan (MYR) ── */
 	const tpCard = $('bursa-tradeplan-card');
 	const tpBox = $('bursa-price-block');
 	const kellyEl = $('bursa-kelly-block');
-
 	if (atr && tpCard && tpBox) {
 		tpCard.style.display = '';
 		const sl = price - atr * 1.5;
@@ -2391,7 +1970,6 @@ function bursaCalc() {
 		const rr2 = (tp2 - price) / risk;
 		const rr3 = (tp3 - price) / risk;
 		const dp = 3;
-
 		tpBox.innerHTML = `
       <div class="prow entry">
         <span class="prow-label">Ideal Entry</span>
@@ -2418,8 +1996,6 @@ function bursaCalc() {
         <span class="prow-val g3">MYR ${tp3.toFixed(dp)}</span>
         <span class="prow-note">R:R 1:${rr3.toFixed(1)} — trail or hold</span>
       </div>`;
-
-		// Kelly / position sizing in MYR
 		if (account && riskPct && kellyEl) {
 			kellyEl.style.display = '';
 			const riskAmt = account * (riskPct / 100);
@@ -2427,7 +2003,6 @@ function bursaCalc() {
 			const feeCost = price * lotSize * (feePct / 100);
 			const maxLots = riskPerLot > 0 ? Math.floor((riskAmt - feeCost * 2) / riskPerLot) : 0;
 			const posVal = maxLots * lotSize * price;
-
 			kellyEl.innerHTML = `
         <div class="kelly-block">
           <div class="kelly-title">⚖️ Bursa ETF Position Sizing (MYR)</div>
@@ -2448,7 +2023,6 @@ function bursaCalc() {
 		tpCard.style.display = 'none';
 	}
 }
-
 function resetBursa() {
 	['bu-price', 'bu-open', 'bu-prev', 'bu-high', 'bu-low', 'bu-vol-units',
 		'bu-52h', 'bu-52l', 'bu-allh', 'bu-alll',
@@ -2460,8 +2034,6 @@ function resetBursa() {
 	].forEach(id => { const el = $(id); if (el) el.value = ''; });
 	$('bursa-result').style.display = 'none';
 }
-
-/* ── Bursa Tooltips ── */
 Object.assign(TOOLTIPS, {
 	'bu-price': { title: 'Market Price (MYR)', body: 'Current live price of 0828EA/0829EA on Bursa Malaysia. Read directly from your trading app quote screen. The screenshot shows MYR 5.780.', where: '📍 Trading app: Quote screen → Last Price', ranges: [['< MA5', 'red', 'Below momentum line'], ['MA5 level', 'green', 'Best entry zone'], ['> MA20 + 5%', 'yellow', 'Stretched — wait']] },
 	'bu-open': { title: 'Opening Price Today', body: 'The price at which the ETF opened this morning (09:00 MYT). Compare to current price — gap up = bullish morning momentum, gap down = weakness.', where: '📍 Trading app: Quote screen → Open' },
@@ -2496,133 +2068,117 @@ Object.assign(TOOLTIPS, {
 	'bu-riskpct': { title: 'Risk per Trade %', body: 'Maximum % of account to risk. For Bursa ETFs: 0.5–1% recommended. 1 lot = 100 units, so smaller account sizes should use minimum 0.5% risk. Formula: Risk Amount ÷ (ATR×1.5×100) = max lots.', where: '📍 Recommended: 0.5% (beginners) or 1.0% (experienced)' },
 	'bu-fee': { title: 'Brokerage Fee %', body: 'Bursa brokerage commission. Typically 0.10%–0.42% + fees (stamp duty, clearing fee). Online brokers (mplus, CIMB Clicks): ~0.10%. Traditional: ~0.42%. Minimum charge may apply. Enter total % per transaction.', where: '📍 Check your broker\'s fee schedule. Common: 0.10% for online, 0.42% for traditional', ranges: [['0.08–0.12%', 'green', 'Low-cost online broker'], ['0.15–0.25%', 'yellow', 'Mid-tier'], ['0.42%+', 'red', 'Traditional — negotiate or switch']] },
 });
-/* ══════════════════════════════════════
-   SWING REVERSAL SCANNER
-   V-Bottom / Trend Reversal Detection
-   7 Signals: Candle Pattern, Supertrend Flip,
-   KDJ Oversold, RSI Bounce, MACD Divergence,
-   Volume Spike, MA Rebuild Progress
-══════════════════════════════════════ */
-
-/* Candle pattern detection from OHLC */
 function detectCandlePattern(o, h, l, c) {
 	if (!o || !h || !l || !c) return null;
-	const body     = Math.abs(c - o);
-	const range    = h - l;
+	const body = Math.abs(c - o);
+	const range = h - l;
 	const upperWick = h - Math.max(o, c);
 	const lowerWick = Math.min(o, c) - l;
 	const bodyRatio = body / range;
-	const isGreen   = c > o;
-
-	// Hammer: lower wick ≥ 2× body, small upper wick, ideally green
+	const isGreen = c > o;
 	if (lowerWick >= body * 2 && upperWick <= body * 0.5 && range > 0) {
 		const strength = lowerWick / range;
-		return { pattern:'Hammer', strength: Math.round(strength * 100),
-			bullish:true, color:'var(--green)',
-			note:`Lower wick ${(lowerWick/range*100).toFixed(0)}% of range — sellers rejected. ${isGreen?'Green body confirms buyers.':'Wait for next green candle.'}` };
+		return {
+			pattern: 'Hammer', strength: Math.round(strength * 100),
+			bullish: true, color: 'var(--green)',
+			note: `Lower wick ${(lowerWick / range * 100).toFixed(0)}% of range — sellers rejected. ${isGreen ? 'Green body confirms buyers.' : 'Wait for next green candle.'}`
+		};
 	}
-	// Engulfing: large body (>60% of range), green
 	if (isGreen && bodyRatio >= 0.6) {
-		return { pattern:'Bullish Engulfing', strength: Math.round(bodyRatio * 100),
-			bullish:true, color:'var(--green)',
-			note:`Body is ${(bodyRatio*100).toFixed(0)}% of range — strong buyer candle. High reversal conviction.` };
+		return {
+			pattern: 'Bullish Engulfing', strength: Math.round(bodyRatio * 100),
+			bullish: true, color: 'var(--green)',
+			note: `Body is ${(bodyRatio * 100).toFixed(0)}% of range — strong buyer candle. High reversal conviction.`
+		};
 	}
-	// Doji: very small body (< 10% of range)
 	if (bodyRatio < 0.1 && range > 0) {
-		return { pattern:'Doji / Indecision', strength: 50,
-			bullish:null, color:'var(--yellow)',
-			note:'Open ≈ Close — indecision. Needs confirmation from next candle direction.' };
+		return {
+			pattern: 'Doji / Indecision', strength: 50,
+			bullish: null, color: 'var(--yellow)',
+			note: 'Open ≈ Close — indecision. Needs confirmation from next candle direction.'
+		};
 	}
-	// Dragonfly Doji: tiny body at top, long lower wick
 	if (bodyRatio < 0.15 && lowerWick >= range * 0.6) {
-		return { pattern:'Dragonfly Doji', strength: 75,
-			bullish:true, color:'var(--accent)',
-			note:'Long lower wick with tiny body at high — strong bullish reversal signal.' };
+		return {
+			pattern: 'Dragonfly Doji', strength: 75,
+			bullish: true, color: 'var(--accent)',
+			note: 'Long lower wick with tiny body at high — strong bullish reversal signal.'
+		};
 	}
-	// Shooting star (bearish warning)
 	if (upperWick >= body * 2 && lowerWick <= body * 0.3 && range > 0) {
-		return { pattern:'Shooting Star ⚠️', strength: Math.round(upperWick/range*100),
-			bullish:false, color:'var(--red)',
-			note:'Upper wick rejection — bearish. Not a good long entry candle.' };
+		return {
+			pattern: 'Shooting Star ⚠️', strength: Math.round(upperWick / range * 100),
+			bullish: false, color: 'var(--red)',
+			note: 'Upper wick rejection — bearish. Not a good long entry candle.'
+		};
 	}
-	// Generic green/red candle
-	return { pattern: isGreen ? 'Green Candle' : 'Red Candle', strength: Math.round(bodyRatio * 60),
+	return {
+		pattern: isGreen ? 'Green Candle' : 'Red Candle', strength: Math.round(bodyRatio * 60),
 		bullish: isGreen ? true : false, color: isGreen ? 'var(--accent)' : 'var(--red)',
-		note: isGreen ? 'Bullish close — moderate reversal signal.' : 'Bearish — wait for next candle.' };
+		note: isGreen ? 'Bullish close — moderate reversal signal.' : 'Bearish — wait for next candle.'
+	};
 }
-
-/* MA Rebuild Phase Assessment */
 function maRebuildPhase(price, ma5, ma20, ma50, ma200) {
 	const checks = [
-		{ label:'Price > MA5',   pass: price && ma5   ? price > ma5   : null, weight:25 },
-		{ label:'MA5 > MA20',    pass: ma5   && ma20  ? ma5   > ma20  : null, weight:25 },
-		{ label:'MA20 > MA50',   pass: ma20  && ma50  ? ma20  > ma50  : null, weight:25 },
-		{ label:'Price > MA200', pass: price && ma200 ? price > ma200 : null, weight:25 },
+		{ label: 'Price > MA5', pass: price && ma5 ? price > ma5 : null, weight: 25 },
+		{ label: 'MA5 > MA20', pass: ma5 && ma20 ? ma5 > ma20 : null, weight: 25 },
+		{ label: 'MA20 > MA50', pass: ma20 && ma50 ? ma20 > ma50 : null, weight: 25 },
+		{ label: 'Price > MA200', pass: price && ma200 ? price > ma200 : null, weight: 25 },
 	];
-	const passed  = checks.filter(c => c.pass === true).length;
-	const total   = checks.filter(c => c.pass !== null).length;
-	const score   = total > 0 ? (passed / total) * 100 : 0;
+	const passed = checks.filter(c => c.pass === true).length;
+	const total = checks.filter(c => c.pass !== null).length;
+	const score = total > 0 ? (passed / total) * 100 : 0;
 	let phase;
-	if (passed === 0)      phase = { label:'Broken — Full Bear Stack',   color:'var(--red)',    n:0 };
-	else if (passed === 1) phase = { label:'Phase 1 — Price crossed MA5', color:'var(--orange)', n:1 };
-	else if (passed === 2) phase = { label:'Phase 2 — MA5 > MA20 Cross',  color:'var(--yellow)', n:2 };
-	else if (passed === 3) phase = { label:'Phase 3 — MA20 > MA50',       color:'var(--accent)', n:3 };
-	else                   phase = { label:'Phase 4 — Full Bull Stack ✅', color:'var(--green)',  n:4 };
+	if (passed === 0) phase = { label: 'Broken — Full Bear Stack', color: 'var(--red)', n: 0 };
+	else if (passed === 1) phase = { label: 'Phase 1 — Price crossed MA5', color: 'var(--orange)', n: 1 };
+	else if (passed === 2) phase = { label: 'Phase 2 — MA5 > MA20 Cross', color: 'var(--yellow)', n: 2 };
+	else if (passed === 3) phase = { label: 'Phase 3 — MA20 > MA50', color: 'var(--accent)', n: 3 };
+	else phase = { label: 'Phase 4 — Full Bull Stack ✅', color: 'var(--green)', n: 4 };
 	return { checks, passed, total, score, phase };
 }
-
 function swingCalc() {
-	const o     = num('sw-open');
-	const h     = num('sw-high');
-	const l     = num('sw-low');
-	const c     = num('sw-close');
-
+	const o = num('sw-open');
+	const h = num('sw-high');
+	const l = num('sw-low');
+	const c = num('sw-close');
 	if (!o || !h || !l || !c) { $('swing-result').style.display = 'none'; return; }
 	$('swing-result').style.display = '';
-
 	const prevClose = num('sw-prev-close');
-	const price     = num('sw-price') || c;
-	const stPrev    = num('sw-st-prev');
-	const stCurr    = num('sw-st-curr');
-	const stDir     = document.getElementById('sw-st-dir')?.value || '';
-	const maPrice   = num('sw-ma-price') || price;
-	const ma5       = num('sw-ma5');
-	const ma20      = num('sw-ma20');
-	const ma50      = num('sw-ma50');
-	const ma200     = num('sw-ma200');
-	const res1      = num('sw-res1');
-	const res2      = num('sw-res2');
-	const res3      = num('sw-res3');
-	const kVal      = num('sw-k');
-	const dVal      = num('sw-d');
-	const jVal      = num('sw-j');
-	const rsi       = num('sw-rsi');
-	const dif       = num('sw-dif');
-	const dea       = num('sw-dea');
-	const vol       = num('sw-vol');
-	const adxV      = num('sw-adx');
-	const atr       = num('sw-atr');
-	const account   = num('sw-account');
-	const riskPct   = num('sw-riskpct');
-
-	/* ── S1: Candle Pattern ── */
-	const candle    = detectCandlePattern(o, h, l, c);
-	const s1_pass   = candle ? (candle.bullish === true ? true : candle.bullish === null ? 'warn' : false) : null;
-
-	/* ── S2: Supertrend Flip ── */
+	const price = num('sw-price') || c;
+	const stPrev = num('sw-st-prev');
+	const stCurr = num('sw-st-curr');
+	const stDir = document.getElementById('sw-st-dir')?.value || '';
+	const maPrice = num('sw-ma-price') || price;
+	const ma5 = num('sw-ma5');
+	const ma20 = num('sw-ma20');
+	const ma50 = num('sw-ma50');
+	const ma200 = num('sw-ma200');
+	const res1 = num('sw-res1');
+	const res2 = num('sw-res2');
+	const res3 = num('sw-res3');
+	const kVal = num('sw-k');
+	const dVal = num('sw-d');
+	const jVal = num('sw-j');
+	const rsi = num('sw-rsi');
+	const dif = num('sw-dif');
+	const dea = num('sw-dea');
+	const vol = num('sw-vol');
+	const adxV = num('sw-adx');
+	const atr = num('sw-atr');
+	const account = num('sw-account');
+	const riskPct = num('sw-riskpct');
+	const candle = detectCandlePattern(o, h, l, c);
+	const s1_pass = candle ? (candle.bullish === true ? true : candle.bullish === null ? 'warn' : false) : null;
 	let s2_pass = null, stNote = 'Not provided';
-	if (stDir === 'flipped_bull') { s2_pass = true;  stNote = '🟢 JUST FLIPPED BULLISH — strongest signal'; }
-	else if (stDir === 'bullish') { s2_pass = true;  stNote = '✅ Dots below price — trend bullish'; }
+	if (stDir === 'flipped_bull') { s2_pass = true; stNote = '🟢 JUST FLIPPED BULLISH — strongest signal'; }
+	else if (stDir === 'bullish') { s2_pass = true; stNote = '✅ Dots below price — trend bullish'; }
 	else if (stDir === 'bearish') { s2_pass = false; stNote = '🔴 Dots still above — not yet'; }
 	else if (stDir === 'flipped_bear') { s2_pass = false; stNote = '⬇️ Flipped bearish — avoid long'; }
-	// Verify via values if provided
 	if (stPrev != null && stCurr != null && price != null) {
 		const prevAbove = stPrev > price;
 		const currBelow = stCurr < price;
 		if (prevAbove && currBelow && !stDir.includes('bear')) { s2_pass = true; stNote = '🟢 Supertrend confirmed flip: prev above → now below price'; }
 	}
-
-	/* ── S3: KDJ Oversold ── */
 	let s3_pass = null, kdjNote = 'Not provided';
 	if (kVal != null && dVal != null) {
 		const kdj = scoreKDJ(kVal, dVal, jVal);
@@ -2632,84 +2188,65 @@ function swingCalc() {
 		// Extra: oversold bounce = J < 20 turning up
 		if (jVal != null && jVal < 20 && kVal > dVal) { s3_pass = true; kdjNote += ' — OVERSOLD BOUNCE ★'; }
 	}
-
-	/* ── S4: RSI Oversold Bounce ── */
 	let s4_pass = null, rsiNote = 'Not provided';
 	if (rsi != null) {
-		if      (rsi < 30)  { s4_pass = true;  rsiNote = `RSI ${rsi.toFixed(1)} — extreme oversold bounce zone`; }
-		else if (rsi < 40)  { s4_pass = true;  rsiNote = `RSI ${rsi.toFixed(1)} — oversold, bounce likely`; }
-		else if (rsi < 50)  { s4_pass = 'warn'; rsiNote = `RSI ${rsi.toFixed(1)} — building momentum`; }
-		else if (rsi < 70)  { s4_pass = true;  rsiNote = `RSI ${rsi.toFixed(1)} — bullish momentum zone`; }
-		else               { s4_pass = 'warn'; rsiNote = `RSI ${rsi.toFixed(1)} — overbought, caution`; }
+		if (rsi < 30) { s4_pass = true; rsiNote = `RSI ${rsi.toFixed(1)} — extreme oversold bounce zone`; }
+		else if (rsi < 40) { s4_pass = true; rsiNote = `RSI ${rsi.toFixed(1)} — oversold, bounce likely`; }
+		else if (rsi < 50) { s4_pass = 'warn'; rsiNote = `RSI ${rsi.toFixed(1)} — building momentum`; }
+		else if (rsi < 70) { s4_pass = true; rsiNote = `RSI ${rsi.toFixed(1)} — bullish momentum zone`; }
+		else { s4_pass = 'warn'; rsiNote = `RSI ${rsi.toFixed(1)} — overbought, caution`; }
 	}
-
-	/* ── S5: MACD Divergence / Crossover ── */
 	let s5_pass = null, macdNote = 'Not provided';
 	if (dif != null && dea != null) {
 		const macd = scoreMACDZone(dif, dea);
-		s5_pass   = macd.pass;
-		macdNote  = `DIF:${dif} DEA:${dea} — ${macd.zone}`;
-		// Bullish divergence: DIF turning up from below DEA (DIF > DEA by small margin)
+		s5_pass = macd.pass;
+		macdNote = `DIF:${dif} DEA:${dea} — ${macd.zone}`;
 		if (dif > dea && Math.abs(dif - dea) / Math.abs(dea || 1) < 0.2) {
 			macdNote += ' — Fresh crossover (high accuracy)';
 			s5_pass = true;
 		}
 	}
-
-	/* ── S6: Volume Spike ── */
 	let s6_pass = null, volNote = 'Not provided';
 	if (vol != null) {
 		const volS = scoreVolume(vol);
-		s6_pass   = volS.pass;
-		volNote   = `${vol}× avg — ${volS.zone}`;
+		s6_pass = volS.pass;
+		volNote = `${vol}× avg — ${volS.zone}`;
 		if (vol >= 2.0) volNote += ' — Capitulation/Exhaustion spike ★';
 	}
-
-	/* ── S7: MA Rebuild Progress ── */
 	const rebuild = maRebuildPhase(maPrice, ma5, ma20, ma50, ma200);
 	const s7_pass = rebuild.score >= 75 ? true : rebuild.score >= 50 ? 'warn' : rebuild.score > 0 ? 'warn' : false;
-
-	/* ── Score Engine ── */
 	const eng = scoreEngine();
-	eng.add(s1_pass, 18); // Candle pattern
-	eng.add(s2_pass, 22); // Supertrend flip (most important)
-	eng.add(s3_pass, 16); // KDJ oversold
-	eng.add(s4_pass, 12); // RSI bounce
-	eng.add(s5_pass, 12); // MACD
-	eng.add(s6_pass, 12); // Volume
-	eng.add(s7_pass,  8); // MA rebuild
+	eng.add(s1_pass, 18);
+	eng.add(s2_pass, 22);
+	eng.add(s3_pass, 16);
+	eng.add(s4_pass, 12);
+	eng.add(s5_pass, 12);
+	eng.add(s6_pass, 12);
+	eng.add(s7_pass, 8);
 	const score = eng.result();
-
-	/* ── Decision ── */
 	const criticalPass = s2_pass !== false && s1_pass !== false;
 	let decision, riskLevel;
 	if (!criticalPass || score < 35) {
-		decision = 'SKIP';   riskLevel = 'High Risk';
+		decision = 'SKIP'; riskLevel = 'High Risk';
 	} else if (score >= 72) {
 		decision = 'PROCEED'; riskLevel = 'Low Risk';
 	} else if (score >= 52) {
 		decision = 'PROCEED'; riskLevel = 'Medium Risk';
 	} else {
-		decision = 'WATCH';   riskLevel = 'Medium Risk';
+		decision = 'WATCH'; riskLevel = 'Medium Risk';
 	}
-
-	/* ── Phase label for grade badge ── */
-	const phaseGrade = { n:0, g:'BEAR',  cls:'grade-x', e:'🔴' };
-	if (rebuild.phase.n >= 3) { phaseGrade.g='BULL'; phaseGrade.cls='grade-spp'; phaseGrade.e='🚀'; }
-	else if (rebuild.phase.n >= 2) { phaseGrade.g='EARLY'; phaseGrade.cls='grade-a'; phaseGrade.e='📈'; }
-	else if (rebuild.phase.n >= 1) { phaseGrade.g='REVERSAL'; phaseGrade.cls='grade-b'; phaseGrade.e='🔄'; }
-
-	/* ── Decision Strip ── */
+	const phaseGrade = { n: 0, g: 'BEAR', cls: 'grade-x', e: '🔴' };
+	if (rebuild.phase.n >= 3) { phaseGrade.g = 'BULL'; phaseGrade.cls = 'grade-spp'; phaseGrade.e = '🚀'; }
+	else if (rebuild.phase.n >= 2) { phaseGrade.g = 'EARLY'; phaseGrade.cls = 'grade-a'; phaseGrade.e = '📈'; }
+	else if (rebuild.phase.n >= 1) { phaseGrade.g = 'REVERSAL'; phaseGrade.cls = 'grade-b'; phaseGrade.e = '🔄'; }
 	setDecisionStrip('swing', decision, riskLevel, phaseGrade, `
-		<div>Candle: <span style="color:${candle?.color||'var(--dim)'}">${candle?.pattern||'—'}</span>
-		  &nbsp; Supertrend: <span style="color:${s2_pass===true?'var(--green)':s2_pass===false?'var(--red)':'var(--dim)'}">${stDir||'—'}</span>
+		<div>Candle: <span style="color:${candle?.color || 'var(--dim)'}">${candle?.pattern || '—'}</span>
+		  &nbsp; Supertrend: <span style="color:${s2_pass === true ? 'var(--green)' : s2_pass === false ? 'var(--red)' : 'var(--dim)'}">${stDir || '—'}</span>
 		</div>
 		<div>MA Rebuild: <span style="color:${rebuild.phase.color}">${rebuild.phase.label}</span>
 		  &nbsp; Score: <span style="color:var(--accent)">${score.toFixed(0)}/100</span>
 		</div>`
 	);
-
-	/* ── Advice ── */
 	const adv = $('swing-advice');
 	if (decision === 'PROCEED') {
 		const lines = [
@@ -2719,9 +2256,9 @@ function swingCalc() {
 			candle ? `🕯️ ${candle.pattern} detected — ${candle.note}` : '',
 			jVal != null && jVal < 20 ? `📊 KDJ J=${jVal.toFixed(1)} — extreme oversold. Historical bounce rate >75% from this level.` : '',
 			rsi != null && rsi < 35 ? `📉 RSI ${rsi.toFixed(1)} — extreme oversold. Mean reversion favors the bull.` : '',
-			vol != null && vol >= 1.5 ? `⚡ Volume ${vol}× — ${vol>=2?'Capitulation spike (sellers exhausted)':'Above average conviction'}.` : '',
-			res1 ? `📐 Next resistance levels: ${res1.toFixed(4)}${res2?' → '+res2.toFixed(4):''}${res3?' → '+res3.toFixed(4):''}` : '',
-			`📦 Entry: ${c.toFixed(4)} | SL: ${atr ? (c - atr*1.5).toFixed(4) + ' (ATR×1.5)' : 'set 1×ATR below candle low'}. Scale in across MA rebuilds.`,
+			vol != null && vol >= 1.5 ? `⚡ Volume ${vol}× — ${vol >= 2 ? 'Capitulation spike (sellers exhausted)' : 'Above average conviction'}.` : '',
+			res1 ? `📐 Next resistance levels: ${res1.toFixed(4)}${res2 ? ' → ' + res2.toFixed(4) : ''}${res3 ? ' → ' + res3.toFixed(4) : ''}` : '',
+			`📦 Entry: ${c.toFixed(4)} | SL: ${atr ? (c - atr * 1.5).toFixed(4) + ' (ATR×1.5)' : 'set 1×ATR below candle low'}. Scale in across MA rebuilds.`,
 		].filter(Boolean).join('\n');
 		adv.textContent = lines;
 		adv.className = 'advice-box green';
@@ -2743,112 +2280,90 @@ function swingCalc() {
 		adv.textContent = `🔴 Skip. No valid reversal signal. ${failed.join(' | ')}. Wait for Supertrend flip + hammer candle + volume spike to all appear together.`;
 		adv.className = 'advice-box red';
 	}
-
-	/* ── Dial ── */
 	updateDial('swing-dial-arc', 'swing-dial-score', score);
-
-	/* ── Pie ── */
-	drawPie('swing-pie','swing-pie-legend', [
-		{ label:'Candle',      value: s1_pass===true?1:s1_pass==='warn'?.5:0,           color:'var(--yellow)' },
-		{ label:'Supertrend',  value: s2_pass===true?2:s2_pass==='warn'?1:0,            color:'var(--green)' },
-		{ label:'KDJ',         value: s3_pass===true?1:s3_pass==='warn'?.5:0,           color:'var(--accent)' },
-		{ label:'RSI',         value: s4_pass===true?1:s4_pass==='warn'?.5:0,           color:'var(--accent2)' },
-		{ label:'MACD',        value: s5_pass===true?1:s5_pass==='warn'?.5:0,           color:'var(--orange)' },
-		{ label:'Volume',      value: s6_pass===true?1:s6_pass==='warn'?.5:0,           color:'var(--red)' },
-		{ label:'MA Rebuild',  value: rebuild.score/100,                                color:'var(--green2)' },
+	drawPie('swing-pie', 'swing-pie-legend', [
+		{ label: 'Candle', value: s1_pass === true ? 1 : s1_pass === 'warn' ? .5 : 0, color: 'var(--yellow)' },
+		{ label: 'Supertrend', value: s2_pass === true ? 2 : s2_pass === 'warn' ? 1 : 0, color: 'var(--green)' },
+		{ label: 'KDJ', value: s3_pass === true ? 1 : s3_pass === 'warn' ? .5 : 0, color: 'var(--accent)' },
+		{ label: 'RSI', value: s4_pass === true ? 1 : s4_pass === 'warn' ? .5 : 0, color: 'var(--accent2)' },
+		{ label: 'MACD', value: s5_pass === true ? 1 : s5_pass === 'warn' ? .5 : 0, color: 'var(--orange)' },
+		{ label: 'Volume', value: s6_pass === true ? 1 : s6_pass === 'warn' ? .5 : 0, color: 'var(--red)' },
+		{ label: 'MA Rebuild', value: rebuild.score / 100, color: 'var(--green2)' },
 	].filter(s => s.value > 0));
-
-	/* ── Checklist ── */
-	const passArr = [s1_pass,s2_pass,s3_pass,s4_pass,s5_pass,s6_pass,s7_pass].filter(v=>v===true);
+	const passArr = [s1_pass, s2_pass, s3_pass, s4_pass, s5_pass, s6_pass, s7_pass].filter(v => v === true);
 	$('swing-checklist').innerHTML = [
-		buildCheck(`S1 — Candle: ${candle?.pattern||'—'}`, s1_pass, `${candle?.strength||0}% strength`),
-		buildCheck(`S2 — Supertrend: ${stDir||'—'}`, s2_pass, stNote.length>40?stNote.slice(0,40)+'…':stNote),
+		buildCheck(`S1 — Candle: ${candle?.pattern || '—'}`, s1_pass, `${candle?.strength || 0}% strength`),
+		buildCheck(`S2 — Supertrend: ${stDir || '—'}`, s2_pass, stNote.length > 40 ? stNote.slice(0, 40) + '…' : stNote),
 		buildCheck(`S3 — KDJ Oversold`, s3_pass, kdjNote),
 		buildCheck(`S4 — RSI Bounce`, s4_pass, rsi ? `RSI: ${rsi.toFixed(1)}` : 'Not provided'),
-		buildCheck(`S5 — MACD ${dif!=null&&dea!=null?(dif>dea?'Bullish':'Bearish'):''}`, s5_pass, macdNote),
+		buildCheck(`S5 — MACD ${dif != null && dea != null ? (dif > dea ? 'Bullish' : 'Bearish') : ''}`, s5_pass, macdNote),
 		buildCheck(`S6 — Volume Spike`, s6_pass, volNote),
 		buildCheck(`S7 — MA Rebuild Phase ${rebuild.phase.n}/4`, s7_pass, rebuild.phase.label),
 	].join('');
 	updateMeter('swing-signal-meter', passArr.length, 7);
-
-	/* ── Candle Analysis Grid ── */
-	const range    = h - l;
-	const body     = Math.abs(c - o);
-	const lowerWick = Math.min(o,c) - l;
-	const upperWick = h - Math.max(o,c);
+	const range = h - l;
+	const body = Math.abs(c - o);
+	const lowerWick = Math.min(o, c) - l;
+	const upperWick = h - Math.max(o, c);
 	const wickScore = range > 0 ? (lowerWick / range) * 100 : 0;
 	$('swing-candle-grid').innerHTML = [
-		{ l:'Pattern',      v: candle?.pattern || '—',    c: candle?.bullish===true?'green':candle?.bullish===false?'red':'yellow' },
-		{ l:'Candle Range', v: range.toFixed(4),           c: 'accent' },
-		{ l:'Body Size',    v: `${(body/range*100).toFixed(0)}%`, c: body/range > 0.5 ? 'green' : 'yellow' },
-		{ l:'Lower Wick',   v: `${wickScore.toFixed(0)}%`, c: wickScore>50?'green':wickScore>30?'accent':'dim' },
-		{ l:'Upper Wick',   v: `${(upperWick/range*100).toFixed(0)}%`, c: upperWick/range>0.3?'red':'green' },
-		{ l:'Candle Close', v: c > o ? '▲ Bullish' : '▼ Bearish', c: c > o ? 'green' : 'red' },
-		prevClose ? { l:'Body vs Prev',  v: `${((c-prevClose)/prevClose*100).toFixed(2)}%`, c: c>prevClose?'green':'red' } : null,
-	].filter(Boolean).map(({l,v,c:col}) =>
+		{ l: 'Pattern', v: candle?.pattern || '—', c: candle?.bullish === true ? 'green' : candle?.bullish === false ? 'red' : 'yellow' },
+		{ l: 'Candle Range', v: range.toFixed(4), c: 'accent' },
+		{ l: 'Body Size', v: `${(body / range * 100).toFixed(0)}%`, c: body / range > 0.5 ? 'green' : 'yellow' },
+		{ l: 'Lower Wick', v: `${wickScore.toFixed(0)}%`, c: wickScore > 50 ? 'green' : wickScore > 30 ? 'accent' : 'dim' },
+		{ l: 'Upper Wick', v: `${(upperWick / range * 100).toFixed(0)}%`, c: upperWick / range > 0.3 ? 'red' : 'green' },
+		{ l: 'Candle Close', v: c > o ? '▲ Bullish' : '▼ Bearish', c: c > o ? 'green' : 'red' },
+		prevClose ? { l: 'Body vs Prev', v: `${((c - prevClose) / prevClose * 100).toFixed(2)}%`, c: c > prevClose ? 'green' : 'red' } : null,
+	].filter(Boolean).map(({ l, v, c: col }) =>
 		`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${col}">${v}</div></div>`
 	).join('');
-
-	const fill  = $('swing-wick-fill'), mark = $('swing-wick-marker'), lbl = $('swing-wick-label');
-	if (fill)  fill.style.width  = Math.min(100,wickScore) + '%';
-	if (mark)  mark.style.left   = Math.min(100,wickScore) + '%';
-	if (lbl)   lbl.textContent   = `${wickScore.toFixed(0)}% lower wick ratio`;
-
-	/* ── MA Rebuild Grid ── */
+	const fill = $('swing-wick-fill'), mark = $('swing-wick-marker'), lbl = $('swing-wick-label');
+	if (fill) fill.style.width = Math.min(100, wickScore) + '%';
+	if (mark) mark.style.left = Math.min(100, wickScore) + '%';
+	if (lbl) lbl.textContent = `${wickScore.toFixed(0)}% lower wick ratio`;
 	$('swing-rebuild-grid').innerHTML = rebuild.checks.map(ch =>
 		`<div class="check-row">
-			<span class="${ch.pass===true?'check-pass':ch.pass===false?'check-fail':'check-neutral'}">${ch.pass===true?'✔':ch.pass===false?'✘':'○'}</span>
+			<span class="${ch.pass === true ? 'check-pass' : ch.pass === false ? 'check-fail' : 'check-neutral'}">${ch.pass === true ? '✔' : ch.pass === false ? '✘' : '○'}</span>
 			<span class="check-label">${ch.label}</span>
-			<span class="check-val ${ch.pass===true?'pass':ch.pass===false?'fail':'warn'}">${ch.pass===true?'✅ Done':ch.pass===false?'⏳ Pending':'—'}</span>
+			<span class="check-val ${ch.pass === true ? 'pass' : ch.pass === false ? 'fail' : 'warn'}">${ch.pass === true ? '✅ Done' : ch.pass === false ? '⏳ Pending' : '—'}</span>
 		</div>`
 	).join('');
-
 	const pct = rebuild.score;
-	const rf  = $('swing-rebuild-fill'), rm = $('swing-rebuild-marker'), rl = $('swing-rebuild-label');
+	const rf = $('swing-rebuild-fill'), rm = $('swing-rebuild-marker'), rl = $('swing-rebuild-label');
 	if (rf) rf.style.width = pct + '%';
-	if (rm) rm.style.left  = pct + '%';
+	if (rm) rm.style.left = pct + '%';
 	if (rl) rl.textContent = `Phase ${rebuild.phase.n}/4 — ${rebuild.phase.label}`;
-
-	/* ── Multi-Level Trade Plan ── */
 	const tpCard = $('swing-tradeplan-card');
 	if (tpCard) {
 		tpCard.style.display = '';
-		// Phase info
 		const phEl = $('swing-phase-info');
 		if (phEl) {
 			phEl.innerHTML = `<div class="swing-phase-banner" style="border-color:${rebuild.phase.color}">
 				<span style="color:${rebuild.phase.color};font-weight:700">${rebuild.phase.e} ${rebuild.phase.label}</span>
-				<span style="color:var(--dim);font-size:10.5px;margin-left:.75rem">${rebuild.phase.n < 4 ? `Next: ${['Price>MA5','MA5>MA20','MA20>MA50','Full stack'][rebuild.phase.n]}` : 'All MAs aligned — ride the trend'}</span>
+				<span style="color:var(--dim);font-size:10.5px;margin-left:.75rem">${rebuild.phase.n < 4 ? `Next: ${['Price>MA5', 'MA5>MA20', 'MA20>MA50', 'Full stack'][rebuild.phase.n]}` : 'All MAs aligned — ride the trend'}</span>
 			</div>`;
 		}
-
-		const entryPrice = c; // Enter at close of reversal candle
-		const atrVal = atr || (range * 2); // fallback: 2× candle range
-
-		// Build multi-phase TP using resistance levels + ATR
+		const entryPrice = c;
+		const atrVal = atr || (range * 2);
 		const tpLevels = [];
-		if (res1)    tpLevels.push({ label:'Phase 1 TP — Resistance 1', price:res1, pct:'30%', note:'MA cluster / key level — partial exit, move SL to breakeven' });
-		if (res2)    tpLevels.push({ label:'Phase 2 TP — Resistance 2', price:res2, pct:'40%', note:'Next resistance — add at each MA cross above (scale in)' });
-		if (res3)    tpLevels.push({ label:'Phase 3 TP — Resistance 3', price:res3, pct:'30%', note:'Full trend target — trail stop ATR×1.0' });
-		if (!res1) { // Fallback to ATR
-			tpLevels.push({ label:'TP1 (ATR×1.5)', price:entryPrice+atrVal*1.5, pct:'40%', note:'Move SL to breakeven' });
-			tpLevels.push({ label:'TP2 (ATR×3.0)', price:entryPrice+atrVal*3.0, pct:'40%', note:'Trail stop' });
-			tpLevels.push({ label:'TP3 (ATR×5.0)', price:entryPrice+atrVal*5.0, pct:'20%', note:'Hold for trend' });
+		if (res1) tpLevels.push({ label: 'Phase 1 TP — Resistance 1', price: res1, pct: '30%', note: 'MA cluster / key level — partial exit, move SL to breakeven' });
+		if (res2) tpLevels.push({ label: 'Phase 2 TP — Resistance 2', price: res2, pct: '40%', note: 'Next resistance — add at each MA cross above (scale in)' });
+		if (res3) tpLevels.push({ label: 'Phase 3 TP — Resistance 3', price: res3, pct: '30%', note: 'Full trend target — trail stop ATR×1.0' });
+		if (!res1) {
+			tpLevels.push({ label: 'TP1 (ATR×1.5)', price: entryPrice + atrVal * 1.5, pct: '40%', note: 'Move SL to breakeven' });
+			tpLevels.push({ label: 'TP2 (ATR×3.0)', price: entryPrice + atrVal * 3.0, pct: '40%', note: 'Trail stop' });
+			tpLevels.push({ label: 'TP3 (ATR×5.0)', price: entryPrice + atrVal * 5.0, pct: '20%', note: 'Hold for trend' });
 		}
-
 		const sl = entryPrice - atrVal * 1.5;
 		const dp = entryPrice > 10 ? 2 : 4;
-
 		let tpHtml = `<div class="prow entry"><span class="prow-label">Entry (Candle Close)</span><span class="prow-val accent">${entryPrice.toFixed(dp)}</span><span class="prow-note">Limit order — enter on close confirmation</span></div>
 			<div class="prow sl"><span class="prow-label">Stop Loss (ATR×1.5)</span><span class="prow-val red">${sl.toFixed(dp)}</span><span class="prow-note">Below candle low ${l.toFixed(dp)} — set immediately</span></div>`;
-		tpLevels.forEach((tp,i) => {
+		tpLevels.forEach((tp, i) => {
 			const rr = ((tp.price - entryPrice) / (entryPrice - sl)).toFixed(1);
-			const cls = i===0?'tp1':i===1?'tp2':'tp3';
-			tpHtml += `<div class="prow ${cls}"><span class="prow-label">${tp.label} (${tp.pct})</span><span class="prow-val ${i===0?'green':i===1?'g2':'g3'}">${tp.price.toFixed(dp)}</span><span class="prow-note">R:R 1:${rr} — ${tp.note}</span></div>`;
+			const cls = i === 0 ? 'tp1' : i === 1 ? 'tp2' : 'tp3';
+			tpHtml += `<div class="prow ${cls}"><span class="prow-label">${tp.label} (${tp.pct})</span><span class="prow-val ${i === 0 ? 'green' : i === 1 ? 'g2' : 'g3'}">${tp.price.toFixed(dp)}</span><span class="prow-note">R:R 1:${rr} — ${tp.note}</span></div>`;
 		});
 		$('swing-price-block').innerHTML = tpHtml;
-
-		// Scaling guide
 		const scEl = $('swing-scaling-guide');
 		if (scEl) {
 			scEl.innerHTML = `<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;font-weight:700">📐 Position Scaling Strategy</div>
@@ -2858,20 +2373,18 @@ function swingCalc() {
 				<div class="wf-step"><span class="wf-n">4</span><span>At TP1: take 30% profit, move SL to breakeven — trade now "free"</span></div>
 				<div class="wf-step"><span class="wf-n">5</span><span>At TP2: take 40% more, trail remaining 30% using ATR×1.0 below each new high</span></div>`;
 		}
-
-		// Kelly sizing
 		const kellyEl = $('swing-kelly-block');
 		if (account && riskPct && kellyEl) {
 			kellyEl.style.display = '';
-			const riskAmt  = account * (riskPct/100);
+			const riskAmt = account * (riskPct / 100);
 			const riskUnit = Math.abs(entryPrice - sl);
-			const units    = riskUnit > 0 ? Math.floor(riskAmt / riskUnit) : 0;
-			const posVal   = units * entryPrice;
+			const units = riskUnit > 0 ? Math.floor(riskAmt / riskUnit) : 0;
+			const posVal = units * entryPrice;
 			kellyEl.innerHTML = `<div class="kelly-block">
 				<div class="kelly-title">⚖️ Reversal Trade Sizing</div>
 				<div class="kelly-row"><span class="kelly-label">Account</span><span class="kelly-val">$${account.toLocaleString()}</span></div>
 				<div class="kelly-row"><span class="kelly-label">Risk (${riskPct}%)</span><span class="kelly-val" style="color:var(--red)">$${riskAmt.toFixed(2)}</span></div>
-				<div class="kelly-row"><span class="kelly-label">Initial Entry (33%)</span><span class="kelly-val green">${Math.floor(units*0.33)} units @ ${entryPrice.toFixed(dp)}</span></div>
+				<div class="kelly-row"><span class="kelly-label">Initial Entry (33%)</span><span class="kelly-val green">${Math.floor(units * 0.33)} units @ ${entryPrice.toFixed(dp)}</span></div>
 				<div class="kelly-row"><span class="kelly-label">Full Position</span><span class="kelly-val">${units} units = $${posVal.toFixed(2)}</span></div>
 				<div class="kelly-row" style="border-top:1px solid var(--border);padding-top:.3rem;margin-top:.2rem">
 					<span class="kelly-label" style="color:var(--muted);font-size:9.5px">💡 Scale in 33% → 33% → 34% as each MA phase confirms. Never risk full position at reversal entry.</span>
@@ -2880,149 +2393,135 @@ function swingCalc() {
 		} else if (kellyEl) kellyEl.style.display = 'none';
 	}
 }
-
 function resetSwing() {
-	['sw-open','sw-high','sw-low','sw-close','sw-prev-close','sw-price',
-	 'sw-st-prev','sw-st-curr','sw-ma-price','sw-ma5','sw-ma20','sw-ma50','sw-ma200',
-	 'sw-res1','sw-res2','sw-res3','sw-k','sw-d','sw-j','sw-rsi',
-	 'sw-dif','sw-dea','sw-vol','sw-adx','sw-atr','sw-account','sw-riskpct',
-	].forEach(id => { const el=$(id); if(el) el.value=''; });
+	['sw-open', 'sw-high', 'sw-low', 'sw-close', 'sw-prev-close', 'sw-price',
+		'sw-st-prev', 'sw-st-curr', 'sw-ma-price', 'sw-ma5', 'sw-ma20', 'sw-ma50', 'sw-ma200',
+		'sw-res1', 'sw-res2', 'sw-res3', 'sw-k', 'sw-d', 'sw-j', 'sw-rsi',
+		'sw-dif', 'sw-dea', 'sw-vol', 'sw-adx', 'sw-atr', 'sw-account', 'sw-riskpct',
+	].forEach(id => { const el = $(id); if (el) el.value = ''; });
 	const stEl = document.getElementById('sw-st-dir');
 	if (stEl) stEl.value = '';
 	$('swing-result').style.display = 'none';
 }
-
-/* ══════════════════════════════════════════════════════════════
-   QUERY PRICE PLANNER (QPP)
-   Generates Recommended / Conservative / Aggressive /
-   Scalp / Swing / Position trade profiles for any setup.
-   Called after every calculator result is rendered.
-══════════════════════════════════════════════════════════════ */
-
-/* ── Profile Definitions ── */
 const QPP_PROFILES = [
-  {
-    id:       'recommended',
-    label:    '⭐ Recommended',
-    color:    'var(--accent)',
-    border:   'rgba(0,200,240,.35)',
-    bg:       'rgba(0,200,240,.06)',
-    badge:    'STANDARD',
-    badgeCls: 'qpp-badge-accent',
-    slMult:   1.5,
-    tp1Mult:  1.5,
-    tp2Mult:  3.0,
-    tp3Mult:  5.0,
-    sizeRule: (score, stretch) => score >= 75 && stretch <= 3 ? 1.0 : score >= 55 ? 0.5 : 0.25,
-    posLabel: (score, stretch) => score >= 75 && stretch <= 3 ? '100%' : score >= 55 ? '50%' : '25%',
-    note:     'Balanced R:R. ATR×1.5 SL. Scale out 40/40/20 at TP1/2/3. Move SL to breakeven at TP1.',
-    riskPct:  1.0,
-    winRate:  55,
-  },
-  {
-    id:       'conservative',
-    label:    '🛡️ Conservative',
-    color:    'var(--green)',
-    border:   'rgba(0,232,122,.35)',
-    bg:       'rgba(0,232,122,.05)',
-    badge:    'LOW RISK',
-    badgeCls: 'qpp-badge-green',
-    slMult:   1.2,
-    tp1Mult:  1.0,
-    tp2Mult:  2.0,
-    tp3Mult:  3.0,
-    sizeRule: (score) => score >= 75 ? 0.5 : 0.25,
-    posLabel: (score) => score >= 75 ? '50%' : '25%',
-    note:     'Tight SL (ATR×1.2). Quick TP1 at 1×ATR. Prioritises capital protection. Best for uncertain markets.',
-    riskPct:  0.5,
-    winRate:  60,
-  },
-  {
-    id:       'aggressive',
-    label:    '🔥 Aggressive',
-    color:    'var(--red)',
-    border:   'rgba(240,58,74,.35)',
-    bg:       'rgba(240,58,74,.05)',
-    badge:    'HIGH RISK',
-    badgeCls: 'qpp-badge-red',
-    slMult:   2.0,
-    tp1Mult:  2.0,
-    tp2Mult:  4.0,
-    tp3Mult:  8.0,
-    sizeRule: (score) => score >= 72 ? 1.0 : 0.5,
-    posLabel: (score) => score >= 72 ? '100%' : '50%',
-    note:     'Wide SL (ATR×2.0) to survive volatility. Large TP3 target. Only when score ≥ 72 & strong trend.',
-    riskPct:  1.5,
-    winRate:  45,
-  },
-  {
-    id:       'scalp',
-    label:    '⚡ Scalp',
-    color:    'var(--yellow)',
-    border:   'rgba(245,200,66,.35)',
-    bg:       'rgba(245,200,66,.05)',
-    badge:    'SHORT TERM',
-    badgeCls: 'qpp-badge-yellow',
-    slMult:   0.8,
-    tp1Mult:  0.6,
-    tp2Mult:  1.0,
-    tp3Mult:  1.5,
-    sizeRule: () => 1.0,
-    posLabel: () => '100%',
-    note:     'Tight SL (ATR×0.8). Quick exits at TP1/TP2. Best during London/NY overlap. Do not hold overnight.',
-    riskPct:  0.5,
-    winRate:  58,
-  },
-  {
-    id:       'swing',
-    label:    '🔄 Swing',
-    color:    'var(--swing2)',
-    border:   'rgba(168,85,247,.35)',
-    bg:       'rgba(168,85,247,.05)',
-    badge:    'MULTI-DAY',
-    badgeCls: 'qpp-badge-swing',
-    slMult:   2.5,
-    tp1Mult:  3.0,
-    tp2Mult:  6.0,
-    tp3Mult:  10.0,
-    sizeRule: (score) => score >= 70 ? 0.5 : 0.25,
-    posLabel: (score) => score >= 70 ? '50%' : '25%',
-    note:     'Wide SL (ATR×2.5) for multi-day holds. TP3 at 10×ATR. Hold through minor pullbacks. Trail after TP1.',
-    riskPct:  1.0,
-    winRate:  48,
-  },
-  {
-    id:       'position',
-    label:    '🏦 Position',
-    color:    '#FFD700',
-    border:   'rgba(255,215,0,.3)',
-    bg:       'rgba(255,215,0,.04)',
-    badge:    'LONG TERM',
-    badgeCls: 'qpp-badge-gold',
-    slMult:   3.0,
-    tp1Mult:  5.0,
-    tp2Mult:  10.0,
-    tp3Mult:  20.0,
-    sizeRule: (score) => score >= 75 ? 0.33 : 0.15,
-    posLabel: (score) => score >= 75 ? '33%' : '15%',
-    note:     'Maximum SL (ATR×3.0). Weeks to months hold. TP3 = 20×ATR. Only in confirmed macro bull trend.',
-    riskPct:  0.5,
-    winRate:  52,
-  },
+	{
+		id: 'recommended',
+		label: '⭐ Recommended',
+		color: 'var(--accent)',
+		border: 'rgba(0,200,240,.35)',
+		bg: 'rgba(0,200,240,.06)',
+		badge: 'STANDARD',
+		badgeCls: 'qpp-badge-accent',
+		slMult: 1.5,
+		tp1Mult: 1.5,
+		tp2Mult: 3.0,
+		tp3Mult: 5.0,
+		sizeRule: (score, stretch) => score >= 75 && stretch <= 3 ? 1.0 : score >= 55 ? 0.5 : 0.25,
+		posLabel: (score, stretch) => score >= 75 && stretch <= 3 ? '100%' : score >= 55 ? '50%' : '25%',
+		note: 'Balanced R:R. ATR×1.5 SL. Scale out 40/40/20 at TP1/2/3. Move SL to breakeven at TP1.',
+		riskPct: 1.0,
+		winRate: 55,
+	},
+	{
+		id: 'conservative',
+		label: '🛡️ Conservative',
+		color: 'var(--green)',
+		border: 'rgba(0,232,122,.35)',
+		bg: 'rgba(0,232,122,.05)',
+		badge: 'LOW RISK',
+		badgeCls: 'qpp-badge-green',
+		slMult: 1.2,
+		tp1Mult: 1.0,
+		tp2Mult: 2.0,
+		tp3Mult: 3.0,
+		sizeRule: (score) => score >= 75 ? 0.5 : 0.25,
+		posLabel: (score) => score >= 75 ? '50%' : '25%',
+		note: 'Tight SL (ATR×1.2). Quick TP1 at 1×ATR. Prioritises capital protection. Best for uncertain markets.',
+		riskPct: 0.5,
+		winRate: 60,
+	},
+	{
+		id: 'aggressive',
+		label: '🔥 Aggressive',
+		color: 'var(--red)',
+		border: 'rgba(240,58,74,.35)',
+		bg: 'rgba(240,58,74,.05)',
+		badge: 'HIGH RISK',
+		badgeCls: 'qpp-badge-red',
+		slMult: 2.0,
+		tp1Mult: 2.0,
+		tp2Mult: 4.0,
+		tp3Mult: 8.0,
+		sizeRule: (score) => score >= 72 ? 1.0 : 0.5,
+		posLabel: (score) => score >= 72 ? '100%' : '50%',
+		note: 'Wide SL (ATR×2.0) to survive volatility. Large TP3 target. Only when score ≥ 72 & strong trend.',
+		riskPct: 1.5,
+		winRate: 45,
+	},
+	{
+		id: 'scalp',
+		label: '⚡ Scalp',
+		color: 'var(--yellow)',
+		border: 'rgba(245,200,66,.35)',
+		bg: 'rgba(245,200,66,.05)',
+		badge: 'SHORT TERM',
+		badgeCls: 'qpp-badge-yellow',
+		slMult: 0.8,
+		tp1Mult: 0.6,
+		tp2Mult: 1.0,
+		tp3Mult: 1.5,
+		sizeRule: () => 1.0,
+		posLabel: () => '100%',
+		note: 'Tight SL (ATR×0.8). Quick exits at TP1/TP2. Best during London/NY overlap. Do not hold overnight.',
+		riskPct: 0.5,
+		winRate: 58,
+	},
+	{
+		id: 'swing',
+		label: '🔄 Swing',
+		color: 'var(--swing2)',
+		border: 'rgba(168,85,247,.35)',
+		bg: 'rgba(168,85,247,.05)',
+		badge: 'MULTI-DAY',
+		badgeCls: 'qpp-badge-swing',
+		slMult: 2.5,
+		tp1Mult: 3.0,
+		tp2Mult: 6.0,
+		tp3Mult: 10.0,
+		sizeRule: (score) => score >= 70 ? 0.5 : 0.25,
+		posLabel: (score) => score >= 70 ? '50%' : '25%',
+		note: 'Wide SL (ATR×2.5) for multi-day holds. TP3 at 10×ATR. Hold through minor pullbacks. Trail after TP1.',
+		riskPct: 1.0,
+		winRate: 48,
+	},
+	{
+		id: 'position',
+		label: '🏦 Position',
+		color: '#FFD700',
+		border: 'rgba(255,215,0,.3)',
+		bg: 'rgba(255,215,0,.04)',
+		badge: 'LONG TERM',
+		badgeCls: 'qpp-badge-gold',
+		slMult: 3.0,
+		tp1Mult: 5.0,
+		tp2Mult: 10.0,
+		tp3Mult: 20.0,
+		sizeRule: (score) => score >= 75 ? 0.33 : 0.15,
+		posLabel: (score) => score >= 75 ? '33%' : '15%',
+		note: 'Maximum SL (ATR×3.0). Weeks to months hold. TP3 = 20×ATR. Only in confirmed macro bull trend.',
+		riskPct: 0.5,
+		winRate: 52,
+	},
 ];
-
-/* ── Expected Value Calculator ── */
 function calcEV(winRate, avgWinR, riskAmt) {
-  const w = winRate / 100;
-  const ev = (w * avgWinR - (1 - w) * 1) * riskAmt;
-  return ev;
+	const w = winRate / 100;
+	const ev = (w * avgWinR - (1 - w) * 1) * riskAmt;
+	return ev;
 }
-
-/* ── Build Expectancy Bar ── */
 function expectancyBar(ev, maxEv) {
-  const pct = Math.min(100, Math.max(0, ((ev + maxEv) / (maxEv * 2)) * 100));
-  const color = ev > 0 ? 'var(--green)' : 'var(--red)';
-  return `<div class="qpp-ev-bar-wrap">
+	const pct = Math.min(100, Math.max(0, ((ev + maxEv) / (maxEv * 2)) * 100));
+	const color = ev > 0 ? 'var(--green)' : 'var(--red)';
+	return `<div class="qpp-ev-bar-wrap">
     <div class="qpp-ev-track">
       <div class="qpp-ev-fill" style="width:${pct}%;background:${color}"></div>
       <div class="qpp-ev-marker" style="left:50%"></div>
@@ -3034,53 +2533,38 @@ function expectancyBar(ev, maxEv) {
     </div>
   </div>`;
 }
-
-/* ── Main QPP Renderer ── */
 function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
-  const container = $(`${pfx}-qpp`);
-  if (!container || !price || !atr) { if (container) container.style.display = 'none'; return; }
-  container.style.display = '';
-
-  const dp       = context === 'gold' ? 2 : context === 'bursa' ? 3 : 4;
-  const currency = context === 'bursa' ? 'MYR ' : '$';
-  const riskAmt  = accountSize ? accountSize * 0.01 : 100; // default $100 risk
-  const maxEv    = riskAmt * 3;
-
-  // Build profile cards
-  const cards = QPP_PROFILES.map(p => {
-    const sl   = price - atr * p.slMult;
-    const tp1  = price + atr * p.tp1Mult;
-    const tp2  = price + atr * p.tp2Mult;
-    const tp3  = price + atr * p.tp3Mult;
-    const risk = price - sl;
-    const rr1  = risk > 0 ? ((tp1 - price) / risk) : 0;
-    const rr2  = risk > 0 ? ((tp2 - price) / risk) : 0;
-    const rr3  = risk > 0 ? ((tp3 - price) / risk) : 0;
-    const size = p.posLabel(score, stretch || 0);
-
-    // Expected value using composite RR (weighted avg of 3 TPs: 40/40/20)
-    const avgWinR = rr1 * 0.4 + rr2 * 0.4 + rr3 * 0.2;
-    const acctRisk = accountSize ? accountSize * (p.riskPct / 100) : riskAmt;
-    const ev = calcEV(p.winRate, avgWinR, acctRisk);
-
-    // Units/shares
-    const units = accountSize && risk > 0 ? Math.floor((accountSize * p.riskPct / 100) / risk) : null;
-
-    // Viability: is this profile suitable for current score?
-    const viable = p.id === 'scalp'    ? true
-                 : p.id === 'position' ? score >= 70
-                 : p.id === 'aggressive' ? score >= 72
-                 : p.id === 'swing'    ? score >= 60
-                 : score >= 50;
-
-    return { p, sl, tp1, tp2, tp3, risk, rr1, rr2, rr3, size, ev, avgWinR, acctRisk, units, viable };
-  });
-
-  // Find best profile for current conditions
-  const viable = cards.filter(c => c.viable);
-  const best   = viable.sort((a,b) => b.ev - a.ev)[0];
-
-  container.innerHTML = `
+	const container = $(`${pfx}-qpp`);
+	if (!container || !price || !atr) { if (container) container.style.display = 'none'; return; }
+	container.style.display = '';
+	const dp = context === 'gold' ? 2 : context === 'bursa' ? 3 : 4;
+	const currency = context === 'bursa' ? 'MYR ' : '$';
+	const riskAmt = accountSize ? accountSize * 0.01 : 100;
+	const maxEv = riskAmt * 3;
+	const cards = QPP_PROFILES.map(p => {
+		const sl = price - atr * p.slMult;
+		const tp1 = price + atr * p.tp1Mult;
+		const tp2 = price + atr * p.tp2Mult;
+		const tp3 = price + atr * p.tp3Mult;
+		const risk = price - sl;
+		const rr1 = risk > 0 ? ((tp1 - price) / risk) : 0;
+		const rr2 = risk > 0 ? ((tp2 - price) / risk) : 0;
+		const rr3 = risk > 0 ? ((tp3 - price) / risk) : 0;
+		const size = p.posLabel(score, stretch || 0);
+		const avgWinR = rr1 * 0.4 + rr2 * 0.4 + rr3 * 0.2;
+		const acctRisk = accountSize ? accountSize * (p.riskPct / 100) : riskAmt;
+		const ev = calcEV(p.winRate, avgWinR, acctRisk);
+		const units = accountSize && risk > 0 ? Math.floor((accountSize * p.riskPct / 100) / risk) : null;
+		const viable = p.id === 'scalp' ? true
+			: p.id === 'position' ? score >= 70
+				: p.id === 'aggressive' ? score >= 72
+					: p.id === 'swing' ? score >= 60
+						: score >= 50;
+		return { p, sl, tp1, tp2, tp3, risk, rr1, rr2, rr3, size, ev, avgWinR, acctRisk, units, viable };
+	});
+	const viable = cards.filter(c => c.viable);
+	const best = viable.sort((a, b) => b.ev - a.ev)[0];
+	container.innerHTML = `
     <div class="qpp-wrap">
       <div class="qpp-header">
         <div class="qpp-title">
@@ -3090,28 +2574,25 @@ function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
         </div>
         ${best ? `<div class="qpp-best-tag">⭐ Best for current setup: <strong style="color:${best.p.color}">${best.p.label}</strong></div>` : ''}
       </div>
-
       <div class="qpp-tabs" id="${pfx}-qpp-tabs">
         ${QPP_PROFILES.map(p =>
-          `<button class="qpp-tab-btn${p.id === 'recommended' ? ' active' : ''}${!cards.find(c=>c.p.id===p.id)?.viable ? ' qpp-dim' : ''}"
+		`<button class="qpp-tab-btn${p.id === 'recommended' ? ' active' : ''}${!cards.find(c => c.p.id === p.id)?.viable ? ' qpp-dim' : ''}"
             style="--qpp-c:${p.color}" onclick="qppSwitch('${pfx}','${p.id}')">
             ${p.label}
             ${p.id === best?.p.id ? '<span class="qpp-best-dot"></span>' : ''}
           </button>`
-        ).join('')}
+	).join('')}
       </div>
-
       ${QPP_PROFILES.map(p => {
-        const c = cards.find(x => x.p.id === p.id);
-        const evColor = c.ev >= 0 ? 'var(--green)' : 'var(--red)';
-        return `
+		const c = cards.find(x => x.p.id === p.id);
+		const evColor = c.ev >= 0 ? 'var(--green)' : 'var(--red)';
+		return `
         <div class="qpp-panel${p.id === 'recommended' ? ' active' : ''}" id="${pfx}-qpp-${p.id}">
           <div class="qpp-note" style="border-color:${p.border};background:${p.bg}">
             <span class="qpp-badge ${p.badgeCls}">${p.badge}</span>
             <span style="font-size:12.5px;color:var(--text)">${p.note}</span>
             ${!c.viable ? `<span class="qpp-not-viable">⚠️ Score ${score.toFixed(0)}/100 — below threshold for this style</span>` : ''}
           </div>
-
           <div class="qpp-levels">
             <div class="qpp-row qpp-entry">
               <span class="qpp-row-icon">▶</span>
@@ -3144,7 +2625,6 @@ function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
               <span class="qpp-row-note">R:R 1:${c.rr3.toFixed(2)} · Trail or hold</span>
             </div>
           </div>
-
           <div class="qpp-stats">
             <div class="qpp-stat">
               <div class="qpp-stat-label">Position Size</div>
@@ -3171,12 +2651,10 @@ function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
               <div class="qpp-stat-val" style="color:var(--green)">${c.units}</div>
             </div>` : ''}
           </div>
-
           <div class="qpp-ev-section">
             <div class="qpp-ev-title">Expected Value per Trade</div>
             ${expectancyBar(c.ev, maxEv)}
           </div>
-
 <div class="qpp-split-fill">
             <div class="qpp-split-hdr">
               <span>✂️ SPLIT FILL — ALWAYS AVAILABLE</span>
@@ -3198,7 +2676,6 @@ function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
             <div class="qpp-split-note">You never fully miss the move. Worst case: 50% in at a higher price. Best case: full position at a better average.</div>
             <div class="qpp-split-cancel">Cancel if price runs more than 3% above current price without touching MA5</div>
           </div>
-		  
           <div class="qpp-compare">
             <div class="qpp-compare-title">📊 Profile Comparison</div>
             <div class="qpp-compare-grid">
@@ -3208,419 +2685,343 @@ function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
                   <span class="qpp-compare-sl" style="color:var(--red)">SL ${currency}${cc.sl.toFixed(dp)}</span>
                   <span class="qpp-compare-tp" style="color:var(--green)">TP1 ${currency}${cc.tp1.toFixed(dp)}</span>
                   <span class="qpp-compare-rr" style="color:var(--accent)">RR ${cc.avgWinR.toFixed(1)}:1</span>
-                  <span class="qpp-compare-ev" style="color:${cc.ev>=0?'var(--green)':'var(--red)'}">${cc.ev>=0?'+':''}${currency}${cc.ev.toFixed(0)}</span>
+                  <span class="qpp-compare-ev" style="color:${cc.ev >= 0 ? 'var(--green)' : 'var(--red)'}">${cc.ev >= 0 ? '+' : ''}${currency}${cc.ev.toFixed(0)}</span>
                 </div>`).join('')}
             </div>
           </div>
         </div>`;
-      }).join('')}
+	}).join('')}
     </div>`;
 }
-
-/* ── Tab Switcher for QPP ── */
 function qppSwitch(pfx, profileId) {
-  const wrap = $(`${pfx}-qpp`);
-  if (!wrap) return;
-  wrap.querySelectorAll('.qpp-tab-btn').forEach(b => b.classList.remove('active'));
-  wrap.querySelectorAll('.qpp-panel').forEach(p => p.classList.remove('active'));
-  const btn = wrap.querySelector(`.qpp-tab-btn[onclick*="${profileId}"]`);
-  const panel = $(`${pfx}-qpp-${profileId}`);
-  if (btn)   btn.classList.add('active');
-  if (panel) panel.classList.add('active');
+	const wrap = $(`${pfx}-qpp`);
+	if (!wrap) return;
+	wrap.querySelectorAll('.qpp-tab-btn').forEach(b => b.classList.remove('active'));
+	wrap.querySelectorAll('.qpp-panel').forEach(p => p.classList.remove('active'));
+	const btn = wrap.querySelector(`.qpp-tab-btn[onclick*="${profileId}"]`);
+	const panel = $(`${pfx}-qpp-${profileId}`);
+	if (btn) btn.classList.add('active');
+	if (panel) panel.classList.add('active');
 }
-
-/* ── Hook QPP into all calculators ──
-   Call renderQPP after every calc completes */
-const _origMACalc    = typeof maCalc    === 'function' ? maCalc    : null;
-const _origEMACalc   = typeof emaCalc   === 'function' ? emaCalc   : null;
-const _origGoldCalc  = typeof goldCalc  === 'function' ? goldCalc  : null;
+const _origMACalc = typeof maCalc === 'function' ? maCalc : null;
+const _origEMACalc = typeof emaCalc === 'function' ? emaCalc : null;
+const _origGoldCalc = typeof goldCalc === 'function' ? goldCalc : null;
 const _origBursaCalc = typeof bursaCalc === 'function' ? bursaCalc : null;
 const _origSwingCalc = typeof swingCalc === 'function' ? swingCalc : null;
-
-/* Patch each calc to call QPP after */
 function patchCalc(fn, pfx, getPriceAtrScore, context) {
-  return function() {
-    fn.apply(this, arguments);
-    // Small defer so DOM is updated first
-    requestAnimationFrame(() => {
-      const res = getPriceAtrScore();
-      if (res) renderQPP(pfx, res.price, res.atr, res.score, res.account, res.stretch, context);
-    });
-  };
+	return function() {
+		fn.apply(this, arguments);
+		requestAnimationFrame(() => {
+			const res = getPriceAtrScore();
+			if (res) renderQPP(pfx, res.price, res.atr, res.score, res.account, res.stretch, context);
+		});
+	};
 }
-
 if (_origMACalc) {
-  maCalc = patchCalc(_origMACalc, 'ma', () => {
-    const price = num('ma-price'), atr = num('ma-atr'), ma20 = num('ma-ma20');
-    const account = num('ma-account');
-    if (!price || !atr) return null;
-    const dialEl = $('ma-dial-score');
-    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
-    const stretch = ma20 ? Math.abs((price - ma20) / ma20 * 100) : 0;
-    return { price, atr, score, account, stretch };
-  }, 'default');
+	maCalc = patchCalc(_origMACalc, 'ma', () => {
+		const price = num('ma-price'), atr = num('ma-atr'), ma20 = num('ma-ma20');
+		const account = num('ma-account');
+		if (!price || !atr) return null;
+		const dialEl = $('ma-dial-score');
+		const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+		const stretch = ma20 ? Math.abs((price - ma20) / ma20 * 100) : 0;
+		return { price, atr, score, account, stretch };
+	}, 'default');
 }
-
 if (_origEMACalc) {
-  emaCalc = patchCalc(_origEMACalc, 'ema', () => {
-    const price = num('ema-price'), atr = num('ema-atr'), e8 = num('ema-ema8');
-    const account = num('ema-account');
-    if (!price || !atr) return null;
-    const dialEl = $('ema-dial-score');
-    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
-    const stretch = e8 ? Math.abs((price - e8) / e8 * 100) : 0;
-    return { price, atr, score, account, stretch };
-  }, 'default');
+	emaCalc = patchCalc(_origEMACalc, 'ema', () => {
+		const price = num('ema-price'), atr = num('ema-atr'), e8 = num('ema-ema8');
+		const account = num('ema-account');
+		if (!price || !atr) return null;
+		const dialEl = $('ema-dial-score');
+		const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+		const stretch = e8 ? Math.abs((price - e8) / e8 * 100) : 0;
+		return { price, atr, score, account, stretch };
+	}, 'default');
 }
-
 if (_origGoldCalc) {
-  goldCalc = patchCalc(_origGoldCalc, 'gold', () => {
-    const price = num('gold-price'), atr = num('gold-atr'), e21 = num('gold-e21');
-    const account = num('gold-account');
-    if (!price || !atr) return null;
-    const dialEl = $('gold-dial-score');
-    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
-    const stretch = e21 ? Math.abs((price - e21) / e21 * 100) : 0;
-    return { price, atr, score, account, stretch };
-  }, 'gold');
+	goldCalc = patchCalc(_origGoldCalc, 'gold', () => {
+		const price = num('gold-price'), atr = num('gold-atr'), e21 = num('gold-e21');
+		const account = num('gold-account');
+		if (!price || !atr) return null;
+		const dialEl = $('gold-dial-score');
+		const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+		const stretch = e21 ? Math.abs((price - e21) / e21 * 100) : 0;
+		return { price, atr, score, account, stretch };
+	}, 'gold');
 }
-
 if (_origBursaCalc) {
-  bursaCalc = patchCalc(_origBursaCalc, 'bursa', () => {
-    const price = num('bu-price'), atr = num('bu-atr'), ma20 = num('bu-ma20');
-    const account = num('bu-account');
-    if (!price || !atr) return null;
-    const dialEl = $('bursa-dial-score');
-    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
-    const stretch = ma20 ? Math.abs((price - ma20) / ma20 * 100) : 0;
-    return { price, atr, score, account, stretch };
-  }, 'bursa');
+	bursaCalc = patchCalc(_origBursaCalc, 'bursa', () => {
+		const price = num('bu-price'), atr = num('bu-atr'), ma20 = num('bu-ma20');
+		const account = num('bu-account');
+		if (!price || !atr) return null;
+		const dialEl = $('bursa-dial-score');
+		const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+		const stretch = ma20 ? Math.abs((price - ma20) / ma20 * 100) : 0;
+		return { price, atr, score, account, stretch };
+	}, 'bursa');
 }
-
 if (_origSwingCalc) {
-  swingCalc = patchCalc(_origSwingCalc, 'swing', () => {
-    const price = num('sw-close'), atr = num('sw-atr');
-    const account = num('sw-account');
-    if (!price || !atr) return null;
-    const dialEl = $('swing-dial-score');
-    const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
-    return { price, atr, score, account, stretch: 0 };
-  }, 'default');
+	swingCalc = patchCalc(_origSwingCalc, 'swing', () => {
+		const price = num('sw-close'), atr = num('sw-atr');
+		const account = num('sw-account');
+		if (!price || !atr) return null;
+		const dialEl = $('swing-dial-score');
+		const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+		return { price, atr, score, account, stretch: 0 };
+	}, 'default');
 }
-
-/* ══════════════════════════════════════
-   IPO SCANNER — Pre-IPO + Listing Day
-══════════════════════════════════════ */
 function ipoSwitch(id) {
-  document.querySelectorAll('#panel-ipo .guide-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('#panel-ipo .guide-tab-btn').forEach(b => b.classList.remove('active'));
-  const sec = $(id); if (sec) sec.classList.add('active');
-  document.querySelectorAll('#panel-ipo .guide-tab-btn').forEach(b => {
-    if (b.getAttribute('onclick') === `ipoSwitch('${id}')`) b.classList.add('active');
-  });
+	document.querySelectorAll('#panel-ipo .guide-section').forEach(s => s.classList.remove('active'));
+	document.querySelectorAll('#panel-ipo .guide-tab-btn').forEach(b => b.classList.remove('active'));
+	const sec = $(id); if (sec) sec.classList.add('active');
+	document.querySelectorAll('#panel-ipo .guide-tab-btn').forEach(b => {
+		if (b.getAttribute('onclick') === `ipoSwitch('${id}')`) b.classList.add('active');
+	});
 }
-
 function ipoCalc() {
-  const price   = num('ipo-price');
-  const eps     = num('ipo-eps');
-  const indPE   = num('ipo-ind-pe');
-  if (!price || !eps || !indPE) { $('ipo-pre-result').style.display = 'none'; return; }
-  $('ipo-pre-result').style.display = '';
-
-  const nta        = num('ipo-nta');
-  const mktcap     = num('ipo-mktcap');
-  const revGrowth  = num('ipo-rev-growth');
-  const npm        = num('ipo-npm');
-  const de         = num('ipo-de');
-  const floatPct   = num('ipo-float');
-  const corner     = num('ipo-corner');
-  const oversub    = num('ipo-oversub');
-
-  const ipoPE      = eps > 0 ? price / eps : null;
-  const peDisco    = ipoPE  ? ((indPE - ipoPE) / indPE) * 100 : null; // positive = discount
-  const ntaPrem    = nta    ? ((price - nta) / nta) * 100 : null;
-
-  // Scoring
-  const eng = scoreEngine();
-
-  // PE vs Industry
-  let pePass = null;
-  if (peDisco != null) {
-    pePass = peDisco >= 20 ? true : peDisco >= 0 ? true : peDisco >= -15 ? 'warn' : false;
-  }
-  eng.add(pePass, 25);
-
-  // NTA coverage
-  let ntaPass = null;
-  if (ntaPrem != null) {
-    ntaPass = ntaPrem <= 20 ? true : ntaPrem <= 50 ? 'warn' : false;
-  }
-  eng.add(ntaPass, 15);
-
-  // Revenue growth
-  let revPass = null;
-  if (revGrowth != null) {
-    revPass = revGrowth >= 20 ? true : revGrowth >= 5 ? 'warn' : false;
-  }
-  eng.add(revPass, 15);
-
-  // Net profit margin
-  let npmPass = null;
-  if (npm != null) {
-    npmPass = npm >= 15 ? true : npm >= 5 ? 'warn' : false;
-  }
-  eng.add(npmPass, 10);
-
-  // D/E ratio
-  let dePass = null;
-  if (de != null) {
-    dePass = de <= 0.3 ? true : de <= 0.7 ? true : de <= 1.5 ? 'warn' : false;
-  }
-  eng.add(dePass, 10);
-
-  // Free float
-  let floatPass = null;
-  if (floatPct != null) {
-    floatPass = floatPct >= 25 && floatPct <= 40 ? true : floatPct >= 15 ? 'warn' : false;
-  }
-  eng.add(floatPass, 10);
-
-  // Cornerstone
-  let cornerPass = null;
-  if (corner != null) {
-    cornerPass = corner >= 20 ? true : corner >= 10 ? 'warn' : false;
-  }
-  eng.add(cornerPass, 10);
-
-  // Market cap tier
-  let mcPass = null;
-  if (mktcap != null) {
-    mcPass = mktcap >= 300 && mktcap <= 2000 ? true : mktcap >= 100 ? 'warn' : false;
-  }
-  eng.add(mcPass, 5);
-
-  const score = eng.result();
-
-  // Decision
-  let decision, riskLevel;
-  if (score >= 75) { decision = 'SUBSCRIBE'; riskLevel = 'Low Risk'; }
-  else if (score >= 55) { decision = 'NEUTRAL';   riskLevel = 'Medium Risk'; }
-  else                  { decision = 'AVOID';     riskLevel = 'High Risk'; }
-
-  // Decision strip
-  const dClass = decision === 'SUBSCRIBE' ? 'proceed' : decision === 'AVOID' ? 'skip' : 'watch';
-  $('ipo-decision-strip').className = `decision-strip ${dClass}`;
-  const badge = $('ipo-d-badge');
-  badge.className = `d-badge ${dClass}`; badge.textContent = decision;
-  const rp = $('ipo-risk-pill');
-  rp.className = `risk-pill ${riskLevel.includes('Low') ? 'risk-low' : riskLevel.includes('High') ? 'risk-high' : 'risk-medium'}`;
-  rp.textContent = riskLevel;
-  $('ipo-d-meta').innerHTML = `
-    <div>IPO PE: <span style="color:${pePass===true?'var(--green)':'var(--red)'}">
-      ${ipoPE ? ipoPE.toFixed(1)+'×' : '—'}</span>
+	const price = num('ipo-price');
+	const eps = num('ipo-eps');
+	const indPE = num('ipo-ind-pe');
+	if (!price || !eps || !indPE) { $('ipo-pre-result').style.display = 'none'; return; }
+	$('ipo-pre-result').style.display = '';
+	const nta = num('ipo-nta');
+	const mktcap = num('ipo-mktcap');
+	const revGrowth = num('ipo-rev-growth');
+	const npm = num('ipo-npm');
+	const de = num('ipo-de');
+	const floatPct = num('ipo-float');
+	const corner = num('ipo-corner');
+	const oversub = num('ipo-oversub');
+	const ipoPE = eps > 0 ? price / eps : null;
+	const peDisco = ipoPE ? ((indPE - ipoPE) / indPE) * 100 : null; // positive = discount
+	const ntaPrem = nta ? ((price - nta) / nta) * 100 : null;
+	const eng = scoreEngine();
+	let pePass = null;
+	if (peDisco != null) {
+		pePass = peDisco >= 20 ? true : peDisco >= 0 ? true : peDisco >= -15 ? 'warn' : false;
+	}
+	eng.add(pePass, 25);
+	let ntaPass = null;
+	if (ntaPrem != null) {
+		ntaPass = ntaPrem <= 20 ? true : ntaPrem <= 50 ? 'warn' : false;
+	}
+	eng.add(ntaPass, 15);
+	let revPass = null;
+	if (revGrowth != null) {
+		revPass = revGrowth >= 20 ? true : revGrowth >= 5 ? 'warn' : false;
+	}
+	eng.add(revPass, 15);
+	let npmPass = null;
+	if (npm != null) {
+		npmPass = npm >= 15 ? true : npm >= 5 ? 'warn' : false;
+	}
+	eng.add(npmPass, 10);
+	let dePass = null;
+	if (de != null) {
+		dePass = de <= 0.3 ? true : de <= 0.7 ? true : de <= 1.5 ? 'warn' : false;
+	}
+	eng.add(dePass, 10);
+	let floatPass = null;
+	if (floatPct != null) {
+		floatPass = floatPct >= 25 && floatPct <= 40 ? true : floatPct >= 15 ? 'warn' : false;
+	}
+	eng.add(floatPass, 10);
+	let cornerPass = null;
+	if (corner != null) {
+		cornerPass = corner >= 20 ? true : corner >= 10 ? 'warn' : false;
+	}
+	eng.add(cornerPass, 10);
+	let mcPass = null;
+	if (mktcap != null) {
+		mcPass = mktcap >= 300 && mktcap <= 2000 ? true : mktcap >= 100 ? 'warn' : false;
+	}
+	eng.add(mcPass, 5);
+	const score = eng.result();
+	let decision, riskLevel;
+	if (score >= 75) { decision = 'SUBSCRIBE'; riskLevel = 'Low Risk'; }
+	else if (score >= 55) { decision = 'NEUTRAL'; riskLevel = 'Medium Risk'; }
+	else { decision = 'AVOID'; riskLevel = 'High Risk'; }
+	const dClass = decision === 'SUBSCRIBE' ? 'proceed' : decision === 'AVOID' ? 'skip' : 'watch';
+	$('ipo-decision-strip').className = `decision-strip ${dClass}`;
+	const badge = $('ipo-d-badge');
+	badge.className = `d-badge ${dClass}`; badge.textContent = decision;
+	const rp = $('ipo-risk-pill');
+	rp.className = `risk-pill ${riskLevel.includes('Low') ? 'risk-low' : riskLevel.includes('High') ? 'risk-high' : 'risk-medium'}`;
+	rp.textContent = riskLevel;
+	$('ipo-d-meta').innerHTML = `
+    <div>IPO PE: <span style="color:${pePass === true ? 'var(--green)' : 'var(--red)'}">
+      ${ipoPE ? ipoPE.toFixed(1) + '×' : '—'}</span>
       &nbsp; Industry PE: <span style="color:var(--text)">${indPE}×</span>
-      &nbsp; Discount: <span style="color:${peDisco>=0?'var(--green)':'var(--red)'}">
-        ${peDisco != null ? (peDisco>=0?'+':'')+peDisco.toFixed(1)+'%' : '—'}</span>
+      &nbsp; Discount: <span style="color:${peDisco >= 0 ? 'var(--green)' : 'var(--red)'}">
+        ${peDisco != null ? (peDisco >= 0 ? '+' : '') + peDisco.toFixed(1) + '%' : '—'}</span>
     </div>
     <div>Score: <span style="color:#f5a623">${score.toFixed(0)}/100</span>
       ${oversub ? `&nbsp; Oversubscribed: <span style="color:var(--green)">${oversub}×</span>` : ''}
     </div>`;
-
-  // Advice
-  const adv = $('ipo-advice');
-  if (decision === 'SUBSCRIBE') {
-    adv.textContent = `✅ Strong IPO — Score ${score.toFixed(0)}/100. ${peDisco >= 0 ? `Trading at ${peDisco.toFixed(1)}% DISCOUNT to industry PE (${indPE}×). ` : ''}${nta && ntaPrem <= 20 ? `Price only ${ntaPrem.toFixed(1)}% above NTA — low premium. ` : ''}${oversub ? `${oversub}× oversubscribed — strong public demand. ` : ''}Subscribe for listing day gains.`;
-    adv.className = 'advice-box green';
-  } else if (decision === 'NEUTRAL') {
-    adv.textContent = `⚠️ Fairly priced IPO — Score ${score.toFixed(0)}/100. PE ${ipoPE?.toFixed(1)}× vs industry ${indPE}×. Subscribe only if you have strong confidence in sector growth. Watch listing day open carefully.`;
-    adv.className = 'advice-box yellow';
-  } else {
-    const failed = [
-      pePass === false && `Overvalued PE ${ipoPE?.toFixed(1)}× vs industry ${indPE}×`,
-      ntaPass === false && `High NTA premium ${ntaPrem?.toFixed(1)}%`,
-      dePass === false && `High D/E ratio ${de}`,
-      floatPass === false && `Low free float ${floatPct}%`,
-    ].filter(Boolean);
-    adv.textContent = `🔴 Avoid. ${failed.join(' | ')}. Wait for secondary market entry once fundamentals justify the price.`;
-    adv.className = 'advice-box red';
-  }
-
-  // Dial
-  updateDial('ipo-dial-arc', 'ipo-dial-score', score);
-
-  // Checklist
-  $('ipo-checklist').innerHTML = [
-    buildCheck(`PE ${ipoPE?.toFixed(1)}× vs Industry ${indPE}×`, pePass, peDisco != null ? (peDisco>=0?'Discount ':'Premium ')+Math.abs(peDisco).toFixed(1)+'%' : '—'),
-    nta  ? buildCheck(`NTA Premium ${ntaPrem?.toFixed(1)}%`, ntaPass, `Price MYR${price} vs NTA MYR${nta}`) : buildCheck('NTA Coverage', null, 'Not provided'),
-    revGrowth != null ? buildCheck(`Revenue Growth ${revGrowth}% YoY`, revPass, revGrowth >= 20 ? 'Strong growth' : 'Moderate') : buildCheck('Revenue Growth', null, 'Not provided'),
-    npm  != null ? buildCheck(`Net Profit Margin ${npm}%`, npmPass, npm >= 15 ? 'Healthy' : npm >= 5 ? 'Moderate' : 'Thin') : buildCheck('Profit Margin', null, 'Not provided'),
-    de   != null ? buildCheck(`Debt-to-Equity ${de}`, dePass, de <= 0.3 ? 'Low debt ✅' : de <= 0.7 ? 'Moderate' : 'High ⚠️') : buildCheck('Debt-to-Equity', null, 'Not provided'),
-    floatPct != null ? buildCheck(`Free Float ${floatPct}%`, floatPass, floatPct >= 25 ? 'Good liquidity' : 'Low float risk') : buildCheck('Free Float', null, 'Not provided'),
-    corner != null ? buildCheck(`Cornerstone ${corner}%`, cornerPass, corner >= 20 ? 'Institutional confidence ✅' : 'Low institutional backing') : buildCheck('Cornerstone Investors', null, 'Not provided'),
-    mktcap != null ? buildCheck(`Market Cap RM${mktcap}M`, mcPass, mktcap >= 300 ? 'Mid/Large cap' : 'Small cap — volatile') : buildCheck('Market Cap', null, 'Not provided'),
-  ].join('');
-
-  // Valuation grid
-  $('ipo-val-grid').innerHTML = [
-    { l:'IPO PE',       v: ipoPE ? ipoPE.toFixed(1)+'×' : '—',   c: pePass===true?'green':pePass===false?'red':'yellow' },
-    { l:'Industry PE',  v: indPE+'×',                              c: 'dim' },
-    { l:'PE Discount',  v: peDisco != null ? (peDisco>=0?'+':'')+peDisco.toFixed(1)+'%' : '—', c: peDisco >= 0 ? 'green' : 'red' },
-    { l:'NTA Premium',  v: ntaPrem != null ? ntaPrem.toFixed(1)+'%' : '—', c: ntaPrem != null && ntaPrem <= 20 ? 'green' : 'yellow' },
-    { l:'Profit Margin',v: npm != null ? npm.toFixed(1)+'%' : '—', c: npm >= 15 ? 'green' : npm >= 5 ? 'yellow' : 'red' },
-    { l:'D/E Ratio',    v: de  != null ? de.toFixed(2) : '—',     c: de <= 0.3 ? 'green' : de <= 0.7 ? 'accent' : 'red' },
-    { l:'Free Float',   v: floatPct != null ? floatPct+'%' : '—', c: floatPct >= 25 ? 'green' : 'yellow' },
-    { l:'Oversub',      v: oversub != null ? oversub+'×' : '—',   c: oversub >= 10 ? 'green' : oversub >= 3 ? 'accent' : 'dim' },
-  ].map(({l,v,c}) => `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join('');
+	const adv = $('ipo-advice');
+	if (decision === 'SUBSCRIBE') {
+		adv.textContent = `✅ Strong IPO — Score ${score.toFixed(0)}/100. ${peDisco >= 0 ? `Trading at ${peDisco.toFixed(1)}% DISCOUNT to industry PE (${indPE}×). ` : ''}${nta && ntaPrem <= 20 ? `Price only ${ntaPrem.toFixed(1)}% above NTA — low premium. ` : ''}${oversub ? `${oversub}× oversubscribed — strong public demand. ` : ''}Subscribe for listing day gains.`;
+		adv.className = 'advice-box green';
+	} else if (decision === 'NEUTRAL') {
+		adv.textContent = `⚠️ Fairly priced IPO — Score ${score.toFixed(0)}/100. PE ${ipoPE?.toFixed(1)}× vs industry ${indPE}×. Subscribe only if you have strong confidence in sector growth. Watch listing day open carefully.`;
+		adv.className = 'advice-box yellow';
+	} else {
+		const failed = [
+			pePass === false && `Overvalued PE ${ipoPE?.toFixed(1)}× vs industry ${indPE}×`,
+			ntaPass === false && `High NTA premium ${ntaPrem?.toFixed(1)}%`,
+			dePass === false && `High D/E ratio ${de}`,
+			floatPass === false && `Low free float ${floatPct}%`,
+		].filter(Boolean);
+		adv.textContent = `🔴 Avoid. ${failed.join(' | ')}. Wait for secondary market entry once fundamentals justify the price.`;
+		adv.className = 'advice-box red';
+	}
+	updateDial('ipo-dial-arc', 'ipo-dial-score', score);
+	$('ipo-checklist').innerHTML = [
+		buildCheck(`PE ${ipoPE?.toFixed(1)}× vs Industry ${indPE}×`, pePass, peDisco != null ? (peDisco >= 0 ? 'Discount ' : 'Premium ') + Math.abs(peDisco).toFixed(1) + '%' : '—'),
+		nta ? buildCheck(`NTA Premium ${ntaPrem?.toFixed(1)}%`, ntaPass, `Price MYR${price} vs NTA MYR${nta}`) : buildCheck('NTA Coverage', null, 'Not provided'),
+		revGrowth != null ? buildCheck(`Revenue Growth ${revGrowth}% YoY`, revPass, revGrowth >= 20 ? 'Strong growth' : 'Moderate') : buildCheck('Revenue Growth', null, 'Not provided'),
+		npm != null ? buildCheck(`Net Profit Margin ${npm}%`, npmPass, npm >= 15 ? 'Healthy' : npm >= 5 ? 'Moderate' : 'Thin') : buildCheck('Profit Margin', null, 'Not provided'),
+		de != null ? buildCheck(`Debt-to-Equity ${de}`, dePass, de <= 0.3 ? 'Low debt ✅' : de <= 0.7 ? 'Moderate' : 'High ⚠️') : buildCheck('Debt-to-Equity', null, 'Not provided'),
+		floatPct != null ? buildCheck(`Free Float ${floatPct}%`, floatPass, floatPct >= 25 ? 'Good liquidity' : 'Low float risk') : buildCheck('Free Float', null, 'Not provided'),
+		corner != null ? buildCheck(`Cornerstone ${corner}%`, cornerPass, corner >= 20 ? 'Institutional confidence ✅' : 'Low institutional backing') : buildCheck('Cornerstone Investors', null, 'Not provided'),
+		mktcap != null ? buildCheck(`Market Cap RM${mktcap}M`, mcPass, mktcap >= 300 ? 'Mid/Large cap' : 'Small cap — volatile') : buildCheck('Market Cap', null, 'Not provided'),
+	].join('');
+	$('ipo-val-grid').innerHTML = [
+		{ l: 'IPO PE', v: ipoPE ? ipoPE.toFixed(1) + '×' : '—', c: pePass === true ? 'green' : pePass === false ? 'red' : 'yellow' },
+		{ l: 'Industry PE', v: indPE + '×', c: 'dim' },
+		{ l: 'PE Discount', v: peDisco != null ? (peDisco >= 0 ? '+' : '') + peDisco.toFixed(1) + '%' : '—', c: peDisco >= 0 ? 'green' : 'red' },
+		{ l: 'NTA Premium', v: ntaPrem != null ? ntaPrem.toFixed(1) + '%' : '—', c: ntaPrem != null && ntaPrem <= 20 ? 'green' : 'yellow' },
+		{ l: 'Profit Margin', v: npm != null ? npm.toFixed(1) + '%' : '—', c: npm >= 15 ? 'green' : npm >= 5 ? 'yellow' : 'red' },
+		{ l: 'D/E Ratio', v: de != null ? de.toFixed(2) : '—', c: de <= 0.3 ? 'green' : de <= 0.7 ? 'accent' : 'red' },
+		{ l: 'Free Float', v: floatPct != null ? floatPct + '%' : '—', c: floatPct >= 25 ? 'green' : 'yellow' },
+		{ l: 'Oversub', v: oversub != null ? oversub + '×' : '—', c: oversub >= 10 ? 'green' : oversub >= 3 ? 'accent' : 'dim' },
+	].map(({ l, v, c }) => `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join('');
 }
-
 function listingCalc() {
-  const ipoP  = num('ld-ipo-price');
-  const open  = num('ld-open');
-  const price = num('ld-price');
-  if (!ipoP || !open || !price) { $('ipo-listing-result').style.display = 'none'; return; }
-  $('ipo-listing-result').style.display = '';
-
-  const high    = num('ld-high') || price;
-  const low     = num('ld-low')  || price;
-  const vol     = num('ld-vol');
-  const floatU  = num('ld-float-units');
-  const bidask  = num('ld-bidask');
-  const atr     = num('ld-atr');
-  const rsi     = num('ld-rsi');
-  const k       = num('ld-k');
-  const d       = num('ld-d');
-
-  const gapFromIPO   = ((open - ipoP) / ipoP) * 100;
-  const currentVsIPO = ((price - ipoP) / ipoP) * 100;
-  const volRatio     = (vol && floatU && floatU > 0) ? vol / floatU : null;
-  const range        = high - low;
-  const body         = Math.abs(price - open);
-  const upperWick    = high - Math.max(open, price);
-  const wickRatio    = range > 0 ? (upperWick / range) * 100 : 0;
-
-  // Pump & dump signals
-  const isPump     = gapFromIPO > 50 || (volRatio && volRatio > 5);
-  const isDump     = price < ipoP || (bidask != null && bidask < -10 && price < open);
-  const isRejected = wickRatio > 50;
-  const isBroken   = price < ipoP;
-
-  // Checklist
-  const gapPass    = gapFromIPO >= 5 && gapFromIPO <= 30 ? true : gapFromIPO > 30 ? 'warn' : false;
-  const volPass    = volRatio != null ? (volRatio <= 3 ? true : volRatio <= 5 ? 'warn' : false) : null;
-  const bidPass    = bidask != null ? (bidask >= 5 ? true : bidask >= 0 ? 'warn' : false) : null;
-  const wickPass   = wickRatio < 30 ? true : wickRatio < 50 ? 'warn' : false;
-  const closePass  = price >= open ? true : false;
-  const brokenPass = !isBroken ? true : false;
-
-  // Decision
-  let decision, riskLevel, advice, advCls;
-  if (isBroken) {
-    decision = 'EXIT NOW'; riskLevel = 'High Risk';
-    advice = `💀 BROKEN IPO — Price ${price.toFixed(3)} is BELOW offer price ${ipoP.toFixed(3)}. Exit immediately. Do not average down. Broken IPOs often continue falling.`;
-    advCls = 'red';
-  } else if (isPump && isRejected) {
-    decision = 'PUMP ALERT'; riskLevel = 'High Risk';
-    advice = `🚨 PUMP & DUMP DETECTED — Gap ${gapFromIPO.toFixed(1)}% from IPO price${volRatio ? `, volume ${volRatio.toFixed(1)}× float` : ''}. Upper wick ${wickRatio.toFixed(0)}% = sellers rejecting high prices. Do NOT chase. Wait for price to stabilise below ${(ipoP * 1.15).toFixed(3)} before considering entry.`;
-    advCls = 'red';
-  } else if (isDump) {
-    decision = 'DUMP ALERT'; riskLevel = 'High Risk';
-    advice = `⬇️ DUMP SIGNAL — Price closing below open${bidask < -10 ? `, Bid/Ask ${bidask.toFixed(1)}% — sellers flooding` : ''}. Avoid buying. If holding, exit on any bounce to open price.`;
-    advCls = 'red';
-  } else if (gapPass === true && closePass && (bidPass === true || bidPass === 'warn')) {
-    decision = 'HEALTHY IPO'; riskLevel = 'Low Risk';
-    advice = `✅ Healthy listing — ${gapFromIPO.toFixed(1)}% gap from IPO price. Price closing ${price >= open ? 'above' : 'near'} open = buyers in control. ${bidask >= 5 ? 'Bid/Ask positive — demand intact. ' : ''}Can hold existing position or buy on pullback toward ${(ipoP * 1.05).toFixed(3)} (5% above IPO price).`;
-    advCls = 'green';
-  } else {
-    decision = 'WATCH'; riskLevel = 'Medium Risk';
-    advice = `⚠️ Mixed signals — ${gapFromIPO.toFixed(1)}% gap from IPO price. ${isRejected ? `Upper wick ${wickRatio.toFixed(0)}% suggests sellers at highs. ` : ''}${bidask < 0 ? 'Bid/Ask negative — caution. ' : ''}Wait for cleaner candle before adding.`;
-    advCls = 'yellow';
-  }
-
-  const dClass = ['HEALTHY IPO'].includes(decision) ? 'proceed' : ['EXIT NOW','PUMP ALERT','DUMP ALERT'].includes(decision) ? 'skip' : 'watch';
-  $('ld-decision-strip').className = `decision-strip ${dClass}`;
-  const badge = $('ld-d-badge'); badge.className = `d-badge ${dClass}`; badge.textContent = decision;
-  const rp = $('ld-risk-pill');
-  rp.className = `risk-pill ${riskLevel.includes('Low') ? 'risk-low' : riskLevel.includes('High') ? 'risk-high' : 'risk-medium'}`;
-  rp.textContent = riskLevel;
-  $('ld-d-meta').innerHTML = `
-    <div>Gap from IPO: <span style="color:${gapFromIPO>=0?'var(--green)':'var(--red)'}">
-      ${gapFromIPO>=0?'+':''}${gapFromIPO.toFixed(2)}%</span>
-      &nbsp; Current vs IPO: <span style="color:${currentVsIPO>=0?'var(--green)':'var(--red)'}">
-      ${currentVsIPO>=0?'+':''}${currentVsIPO.toFixed(2)}%</span>
+	const ipoP = num('ld-ipo-price');
+	const open = num('ld-open');
+	const price = num('ld-price');
+	if (!ipoP || !open || !price) { $('ipo-listing-result').style.display = 'none'; return; }
+	$('ipo-listing-result').style.display = '';
+	const high = num('ld-high') || price;
+	const low = num('ld-low') || price;
+	const vol = num('ld-vol');
+	const floatU = num('ld-float-units');
+	const bidask = num('ld-bidask');
+	const atr = num('ld-atr');
+	const rsi = num('ld-rsi');
+	const k = num('ld-k');
+	const d = num('ld-d');
+	const gapFromIPO = ((open - ipoP) / ipoP) * 100;
+	const currentVsIPO = ((price - ipoP) / ipoP) * 100;
+	const volRatio = (vol && floatU && floatU > 0) ? vol / floatU : null;
+	const range = high - low;
+	const body = Math.abs(price - open);
+	const upperWick = high - Math.max(open, price);
+	const wickRatio = range > 0 ? (upperWick / range) * 100 : 0;
+	const isPump = gapFromIPO > 50 || (volRatio && volRatio > 5);
+	const isDump = price < ipoP || (bidask != null && bidask < -10 && price < open);
+	const isRejected = wickRatio > 50;
+	const isBroken = price < ipoP;
+	const gapPass = gapFromIPO >= 5 && gapFromIPO <= 30 ? true : gapFromIPO > 30 ? 'warn' : false;
+	const volPass = volRatio != null ? (volRatio <= 3 ? true : volRatio <= 5 ? 'warn' : false) : null;
+	const bidPass = bidask != null ? (bidask >= 5 ? true : bidask >= 0 ? 'warn' : false) : null;
+	const wickPass = wickRatio < 30 ? true : wickRatio < 50 ? 'warn' : false;
+	const closePass = price >= open ? true : false;
+	const brokenPass = !isBroken ? true : false;
+	let decision, riskLevel, advice, advCls;
+	if (isBroken) {
+		decision = 'EXIT NOW'; riskLevel = 'High Risk';
+		advice = `💀 BROKEN IPO — Price ${price.toFixed(3)} is BELOW offer price ${ipoP.toFixed(3)}. Exit immediately. Do not average down. Broken IPOs often continue falling.`;
+		advCls = 'red';
+	} else if (isPump && isRejected) {
+		decision = 'PUMP ALERT'; riskLevel = 'High Risk';
+		advice = `🚨 PUMP & DUMP DETECTED — Gap ${gapFromIPO.toFixed(1)}% from IPO price${volRatio ? `, volume ${volRatio.toFixed(1)}× float` : ''}. Upper wick ${wickRatio.toFixed(0)}% = sellers rejecting high prices. Do NOT chase. Wait for price to stabilise below ${(ipoP * 1.15).toFixed(3)} before considering entry.`;
+		advCls = 'red';
+	} else if (isDump) {
+		decision = 'DUMP ALERT'; riskLevel = 'High Risk';
+		advice = `⬇️ DUMP SIGNAL — Price closing below open${bidask < -10 ? `, Bid/Ask ${bidask.toFixed(1)}% — sellers flooding` : ''}. Avoid buying. If holding, exit on any bounce to open price.`;
+		advCls = 'red';
+	} else if (gapPass === true && closePass && (bidPass === true || bidPass === 'warn')) {
+		decision = 'HEALTHY IPO'; riskLevel = 'Low Risk';
+		advice = `✅ Healthy listing — ${gapFromIPO.toFixed(1)}% gap from IPO price. Price closing ${price >= open ? 'above' : 'near'} open = buyers in control. ${bidask >= 5 ? 'Bid/Ask positive — demand intact. ' : ''}Can hold existing position or buy on pullback toward ${(ipoP * 1.05).toFixed(3)} (5% above IPO price).`;
+		advCls = 'green';
+	} else {
+		decision = 'WATCH'; riskLevel = 'Medium Risk';
+		advice = `⚠️ Mixed signals — ${gapFromIPO.toFixed(1)}% gap from IPO price. ${isRejected ? `Upper wick ${wickRatio.toFixed(0)}% suggests sellers at highs. ` : ''}${bidask < 0 ? 'Bid/Ask negative — caution. ' : ''}Wait for cleaner candle before adding.`;
+		advCls = 'yellow';
+	}
+	const dClass = ['HEALTHY IPO'].includes(decision) ? 'proceed' : ['EXIT NOW', 'PUMP ALERT', 'DUMP ALERT'].includes(decision) ? 'skip' : 'watch';
+	$('ld-decision-strip').className = `decision-strip ${dClass}`;
+	const badge = $('ld-d-badge'); badge.className = `d-badge ${dClass}`; badge.textContent = decision;
+	const rp = $('ld-risk-pill');
+	rp.className = `risk-pill ${riskLevel.includes('Low') ? 'risk-low' : riskLevel.includes('High') ? 'risk-high' : 'risk-medium'}`;
+	rp.textContent = riskLevel;
+	$('ld-d-meta').innerHTML = `
+    <div>Gap from IPO: <span style="color:${gapFromIPO >= 0 ? 'var(--green)' : 'var(--red)'}">
+      ${gapFromIPO >= 0 ? '+' : ''}${gapFromIPO.toFixed(2)}%</span>
+      &nbsp; Current vs IPO: <span style="color:${currentVsIPO >= 0 ? 'var(--green)' : 'var(--red)'}">
+      ${currentVsIPO >= 0 ? '+' : ''}${currentVsIPO.toFixed(2)}%</span>
     </div>
-    <div>${isPump?'🚨 PUMP DETECTED':isDump?'⬇️ DUMP SIGNAL':isBroken?'💀 BROKEN':'✅ Normal'}
-      &nbsp; Upper Wick: <span style="color:${wickRatio>50?'var(--red)':wickRatio>30?'var(--yellow)':'var(--green)'}">
+    <div>${isPump ? '🚨 PUMP DETECTED' : isDump ? '⬇️ DUMP SIGNAL' : isBroken ? '💀 BROKEN' : '✅ Normal'}
+      &nbsp; Upper Wick: <span style="color:${wickRatio > 50 ? 'var(--red)' : wickRatio > 30 ? 'var(--yellow)' : 'var(--green)'}">
       ${wickRatio.toFixed(0)}%</span>
     </div>`;
-
-  $('ld-advice').textContent = advice;
-  $('ld-advice').className = `advice-box ${advCls}`;
-
-  // Stats grid
-  $('ld-stats-grid').innerHTML = [
-    { l:'Gap from IPO',   v: (gapFromIPO>=0?'+':'')+gapFromIPO.toFixed(2)+'%', c: gapFromIPO>=5&&gapFromIPO<=30?'green':gapFromIPO>30?'yellow':'red' },
-    { l:'Open Price',     v: 'MYR '+open.toFixed(3), c: 'accent' },
-    { l:'Current Price',  v: 'MYR '+price.toFixed(3), c: price>=open?'green':'red' },
-    { l:'Upper Wick',     v: wickRatio.toFixed(0)+'%', c: wickRatio<30?'green':wickRatio<50?'yellow':'red' },
-    { l:'Vol vs Float',   v: volRatio ? volRatio.toFixed(2)+'×' : '—', c: volRatio&&volRatio<=3?'green':volRatio&&volRatio<=5?'yellow':'red' },
-    { l:'Bid/Ask',        v: bidask != null ? (bidask>=0?'+':'')+bidask.toFixed(1)+'%' : '—', c: bidask>=5?'green':bidask>=0?'accent':'red' },
-    { l:'IPO Status',     v: isBroken ? '💀 BROKEN' : isPump ? '🚨 PUMP' : '✅ Intact', c: isBroken||isPump ? 'red' : 'green' },
-    { l:'Close vs Open',  v: price >= open ? '▲ Bullish' : '▼ Bearish', c: price >= open ? 'green' : 'red' },
-  ].map(({l,v,c}) => `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join('');
-
-  // Price position bar
-  const fillPct = high > ipoP ? Math.min(100, Math.max(0, (price - ipoP) / (high - ipoP) * 100)) : 50;
-  const pFill = $('ld-price-fill'); if (pFill) pFill.style.width = fillPct + '%';
-  const pMark = $('ld-price-marker'); if (pMark) pMark.style.left = fillPct + '%';
-  const pPos  = $('ld-range-pos'); if (pPos) pPos.textContent = fillPct.toFixed(0) + '% of range';
-  const pLow  = $('ld-range-low'); if (pLow) pLow.textContent = 'IPO MYR' + ipoP.toFixed(3);
-  const pHigh = $('ld-range-high'); if (pHigh) pHigh.textContent = 'High MYR' + high.toFixed(3);
-
-  // Checklist
-  $('ld-checklist').innerHTML = [
-    buildCheck(`Gap from IPO: ${gapFromIPO.toFixed(1)}%`, gapPass, gapFromIPO > 50 ? '🚨 Extreme pump' : gapFromIPO > 30 ? 'High — caution' : 'Healthy range'),
-    buildCheck(`Price vs Open: ${price >= open ? 'Above' : 'Below'}`, closePass, price >= open ? 'Buyers holding ✅' : 'Sellers winning ⚠️'),
-    buildCheck(`Upper Wick Rejection: ${wickRatio.toFixed(0)}%`, wickPass, wickRatio > 50 ? '🚨 Sellers at top' : wickRatio > 30 ? 'Some rejection' : 'Clean close'),
-    volRatio != null ? buildCheck(`Volume: ${volRatio.toFixed(1)}× float`, volPass, volRatio > 5 ? '🚨 Extreme — pump risk' : volRatio > 3 ? 'High volume' : 'Normal') : buildCheck('Volume vs Float', null, 'Enter volume + float'),
-    bidask != null ? buildCheck(`Bid/Ask: ${(bidask>=0?'+':'')+bidask.toFixed(1)}%`, bidPass, bidask < -10 ? '🚨 Sellers dumping' : bidask < 0 ? 'Net sellers' : 'Net buyers') : buildCheck('Bid/Ask Ratio', null, 'Not provided'),
-    buildCheck(`IPO Price Intact: ${isBroken ? 'BROKEN' : 'Yes'}`, brokenPass, isBroken ? `💀 Below offer price MYR${ipoP}` : `✅ Above MYR${ipoP}`),
-  ].join('');
-
-  // Trade plan if ATR available
-  const tpCard = $('ld-tradeplan-card');
-  if (atr && tpCard && !isBroken && !isPump) {
-    tpCard.style.display = '';
-    const sl  = price - atr * 1.5;
-    const tp1 = price + atr * 1.5;
-    const tp2 = price + atr * 3.0;
-    $('ld-price-block').innerHTML = `
+	$('ld-advice').textContent = advice;
+	$('ld-advice').className = `advice-box ${advCls}`;
+	$('ld-stats-grid').innerHTML = [
+		{ l: 'Gap from IPO', v: (gapFromIPO >= 0 ? '+' : '') + gapFromIPO.toFixed(2) + '%', c: gapFromIPO >= 5 && gapFromIPO <= 30 ? 'green' : gapFromIPO > 30 ? 'yellow' : 'red' },
+		{ l: 'Open Price', v: 'MYR ' + open.toFixed(3), c: 'accent' },
+		{ l: 'Current Price', v: 'MYR ' + price.toFixed(3), c: price >= open ? 'green' : 'red' },
+		{ l: 'Upper Wick', v: wickRatio.toFixed(0) + '%', c: wickRatio < 30 ? 'green' : wickRatio < 50 ? 'yellow' : 'red' },
+		{ l: 'Vol vs Float', v: volRatio ? volRatio.toFixed(2) + '×' : '—', c: volRatio && volRatio <= 3 ? 'green' : volRatio && volRatio <= 5 ? 'yellow' : 'red' },
+		{ l: 'Bid/Ask', v: bidask != null ? (bidask >= 0 ? '+' : '') + bidask.toFixed(1) + '%' : '—', c: bidask >= 5 ? 'green' : bidask >= 0 ? 'accent' : 'red' },
+		{ l: 'IPO Status', v: isBroken ? '💀 BROKEN' : isPump ? '🚨 PUMP' : '✅ Intact', c: isBroken || isPump ? 'red' : 'green' },
+		{ l: 'Close vs Open', v: price >= open ? '▲ Bullish' : '▼ Bearish', c: price >= open ? 'green' : 'red' },
+	].map(({ l, v, c }) => `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v}</div></div>`).join('');
+	const fillPct = high > ipoP ? Math.min(100, Math.max(0, (price - ipoP) / (high - ipoP) * 100)) : 50;
+	const pFill = $('ld-price-fill'); if (pFill) pFill.style.width = fillPct + '%';
+	const pMark = $('ld-price-marker'); if (pMark) pMark.style.left = fillPct + '%';
+	const pPos = $('ld-range-pos'); if (pPos) pPos.textContent = fillPct.toFixed(0) + '% of range';
+	const pLow = $('ld-range-low'); if (pLow) pLow.textContent = 'IPO MYR' + ipoP.toFixed(3);
+	const pHigh = $('ld-range-high'); if (pHigh) pHigh.textContent = 'High MYR' + high.toFixed(3);
+	$('ld-checklist').innerHTML = [
+		buildCheck(`Gap from IPO: ${gapFromIPO.toFixed(1)}%`, gapPass, gapFromIPO > 50 ? '🚨 Extreme pump' : gapFromIPO > 30 ? 'High — caution' : 'Healthy range'),
+		buildCheck(`Price vs Open: ${price >= open ? 'Above' : 'Below'}`, closePass, price >= open ? 'Buyers holding ✅' : 'Sellers winning ⚠️'),
+		buildCheck(`Upper Wick Rejection: ${wickRatio.toFixed(0)}%`, wickPass, wickRatio > 50 ? '🚨 Sellers at top' : wickRatio > 30 ? 'Some rejection' : 'Clean close'),
+		volRatio != null ? buildCheck(`Volume: ${volRatio.toFixed(1)}× float`, volPass, volRatio > 5 ? '🚨 Extreme — pump risk' : volRatio > 3 ? 'High volume' : 'Normal') : buildCheck('Volume vs Float', null, 'Enter volume + float'),
+		bidask != null ? buildCheck(`Bid/Ask: ${(bidask >= 0 ? '+' : '') + bidask.toFixed(1)}%`, bidPass, bidask < -10 ? '🚨 Sellers dumping' : bidask < 0 ? 'Net sellers' : 'Net buyers') : buildCheck('Bid/Ask Ratio', null, 'Not provided'),
+		buildCheck(`IPO Price Intact: ${isBroken ? 'BROKEN' : 'Yes'}`, brokenPass, isBroken ? `💀 Below offer price MYR${ipoP}` : `✅ Above MYR${ipoP}`),
+	].join('');
+	const tpCard = $('ld-tradeplan-card');
+	if (atr && tpCard && !isBroken && !isPump) {
+		tpCard.style.display = '';
+		const sl = price - atr * 1.5;
+		const tp1 = price + atr * 1.5;
+		const tp2 = price + atr * 3.0;
+		$('ld-price-block').innerHTML = `
       <div class="prow entry"><span class="prow-label">Entry</span><span class="prow-val accent">MYR ${price.toFixed(3)}</span><span class="prow-note">Limit order — current price</span></div>
       <div class="prow sl"><span class="prow-label">Stop Loss (ATR×1.5)</span><span class="prow-val red">MYR ${sl.toFixed(3)}</span><span class="prow-note">Hard stop — exit if broken</span></div>
       <div class="prow tp1"><span class="prow-label">TP1 — Take 50%</span><span class="prow-val green">MYR ${tp1.toFixed(3)}</span><span class="prow-note">Listing day exit — don't be greedy</span></div>
       <div class="prow tp2"><span class="prow-label">TP2 — Trail 50%</span><span class="prow-val g2">MYR ${tp2.toFixed(3)}</span><span class="prow-note">Only if strong close + no dump signals</span></div>`;
-  } else if (tpCard) { tpCard.style.display = 'none'; }
+	} else if (tpCard) { tpCard.style.display = 'none'; }
 }
-
 function resetIPO() {
-  ['ipo-price','ipo-eps','ipo-ind-pe','ipo-nta','ipo-mktcap',
-   'ipo-rev-growth','ipo-npm','ipo-de','ipo-div',
-   'ipo-float','ipo-corner','ipo-oversub'].forEach(id => { const el=$(id); if(el) el.value=''; });
-  ['ipo-shariah','ipo-sector'].forEach(id => { const el=$(id); if(el) el.value=''; });
-  $('ipo-pre-result').style.display = 'none';
+	['ipo-price', 'ipo-eps', 'ipo-ind-pe', 'ipo-nta', 'ipo-mktcap',
+		'ipo-rev-growth', 'ipo-npm', 'ipo-de', 'ipo-div',
+		'ipo-float', 'ipo-corner', 'ipo-oversub'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+	['ipo-shariah', 'ipo-sector'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+	$('ipo-pre-result').style.display = 'none';
 }
-
 function resetListing() {
-  ['ld-ipo-price','ld-open','ld-high','ld-low','ld-price',
-   'ld-vol','ld-float-units','ld-bidask','ld-atr','ld-rsi','ld-k','ld-d'].forEach(id => { const el=$(id); if(el) el.value=''; });
-  $('ipo-listing-result').style.display = 'none';
+	['ld-ipo-price', 'ld-open', 'ld-high', 'ld-low', 'ld-price',
+		'ld-vol', 'ld-float-units', 'ld-bidask', 'ld-atr', 'ld-rsi', 'ld-k', 'ld-d'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+	$('ipo-listing-result').style.display = 'none';
 }
-
-/* ══════════════════════════════════════
-   REF GRID TOGGLE
-══════════════════════════════════════ */
 function toggleRefGrid(btn) {
-  const grid = btn.nextElementSibling;
-  const isOpen = grid.classList.contains('open');
-  grid.classList.toggle('open', !isOpen);
-  btn.classList.toggle('open', !isOpen);
+	const grid = btn.nextElementSibling;
+	const isOpen = grid.classList.contains('open');
+	grid.classList.toggle('open', !isOpen);
+	btn.classList.toggle('open', !isOpen);
 }
