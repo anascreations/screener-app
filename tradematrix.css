@@ -856,16 +856,18 @@ select {
 
 .ref-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  /* Lower the min-width slightly for safer mobile fit */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: .7rem;
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transition: max-height .3s ease, opacity .2s ease;
+  transition: max-height .4s ease, opacity .2s ease; /* Slightly longer for large content */
   margin-bottom: 0;
 }
 .ref-grid.open {
-  max-height: 400px;
+  /* Set this high enough to contain all panels */
+  max-height: 2000px; 
   opacity: 1;
   margin-bottom: .7rem;
 }
@@ -875,6 +877,8 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--r);
   overflow: hidden;
+  width: 100%; /* Force panel to stay within the grid cell */
+  box-sizing: border-box;
 }
 
 .ref-panel-hdr {
@@ -897,12 +901,12 @@ select {
 
 .ref-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Better for wrapped text */
   gap: .5rem;
-  flex-wrap: wrap;
+  flex-wrap: wrap; 
   font-size: 10.5px;
- /* color: var(--dim); */
-  padding: .2rem 0;
+  padding: .25rem 0;
+  word-break: break-word; /* Prevents long text from pushing the width */
 }
 .ref-row + .ref-row {
   border-top: 1px solid var(--border);
