@@ -267,7 +267,7 @@ ctx2.font = `8px 'IBM Plex Mono', monospace`;
 ctx2.textAlign = 'center';
 const timeLbls = ['12AM','','4AM','','8AM','','12PM','','4PM','','8PM','','12AM'];
 timeLbls.forEach((lbl, i) => {
-if (lbl) { ctx2.fillStyle = '#2a4057'; ctx2.fillText(lbl, tX(i*2), bY+bH+10); }
+if (lbl) { ctx2.fillStyle = '#7a9bb5'; ctx2.fillText(lbl, tX(i*2), bY+bH+10); }
 });
 
 keyLabels.forEach(kl => {
