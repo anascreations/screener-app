@@ -267,7 +267,7 @@ ctx2.font = `8px 'IBM Plex Mono', monospace`;
 ctx2.textAlign = 'center';
 const timeLbls = ['12AM','','4AM','','8AM','','12PM','','4PM','','8PM','','12AM'];
 timeLbls.forEach((lbl, i) => {
-if (lbl) { ctx2.fillStyle = '#7a9bb5'; ctx2.fillText(lbl, tX(i*2), bY+bH+10); }
+if (lbl) { ctx2.fillStyle = '#2a4057'; ctx2.fillText(lbl, tX(i*2), bY+bH+10); }
 });
 
 keyLabels.forEach(kl => {
@@ -3371,17 +3371,29 @@ const canvas = $('sr-canvas');
 if (!canvas) return;
 const parent = canvas.parentElement;
 const dpr = window.devicePixelRatio || 1;
-const cssW = Math.min(parent.clientWidth - 8, 900);
-const cssH = 520;
-canvas.style.width = cssW + 'px';
+
+// ── Responsive breakpoints ──────────────────────────
+const screenW = window.innerWidth;
+const isMobile = screenW < 520;
+const isTablet = screenW >= 520 && screenW < 768;
+
+const cssW = parent.clientWidth - 4;
+// Mobile: taller rows to fit labels inside; desktop: standard
+const rowH    = isMobile ? 38 : 32;
+const TOP     = isMobile ? 28 : 36;
+const BOT     = 20;
+const LEFT    = isMobile ? 54 : 66;
+// Mobile: no right margin — labels go inside chart
+const RIGHT   = isMobile ? 4 : (isTablet ? 140 : 175);
+const cssH    = TOP + BOT + rowH * (levels.length + 2) + 60;
+
+canvas.style.width  = cssW + 'px';
 canvas.style.height = cssH + 'px';
-canvas.width = cssW * dpr;
+canvas.width  = cssW * dpr;
 canvas.height = cssH * dpr;
 const ctx = canvas.getContext('2d');
 ctx.scale(dpr, dpr);
 const W = cssW, H = cssH;
-
-const LEFT = 72, RIGHT = 175, TOP = 36, BOT = 28;
 const chartW = W - LEFT - RIGHT;
 const chartH = H - TOP - BOT;
 
@@ -3389,141 +3401,170 @@ const chartH = H - TOP - BOT;
 const allP = [...levels.map(l => l.price), price];
 const minP = Math.min(...allP), maxP = Math.max(...allP);
 const range = maxP - minP || price * 0.08;
-const pad = range * 0.3;
-const pMin = minP - pad, pMax = maxP + pad;
-const pToY = p => TOP + chartH - ((p - pMin) / (pMax - pMin)) * chartH;
+const pad   = range * 0.32;
+const pMin  = minP - pad, pMax = maxP + pad;
+const pToY  = p => TOP + chartH - ((p - pMin) / (pMax - pMin)) * chartH;
 
-// Background
+// ── Background ──────────────────────────────────────
 ctx.fillStyle = '#060a0f';
 ctx.fillRect(0, 0, W, H);
-
-// Chart area bg
 ctx.fillStyle = '#0b1018';
 ctx.fillRect(LEFT, TOP, chartW, chartH);
 
-// Grid
-const gridSteps = 8;
+// ── Y-axis grid & price labels ───────────────────────
+const gridSteps = isMobile ? 5 : 8;
 ctx.strokeStyle = '#1a2b3c';
 ctx.lineWidth = 1;
 for (let i = 0; i <= gridSteps; i++) {
 const y = TOP + (chartH / gridSteps) * i;
 ctx.beginPath(); ctx.moveTo(LEFT, y); ctx.lineTo(LEFT + chartW, y); ctx.stroke();
 const p = pMax - (pMax - pMin) * (i / gridSteps);
-ctx.fillStyle = '#2a4057';
-ctx.font = `10px 'IBM Plex Mono', monospace`;
+ctx.fillStyle = '#7a9bb5';
+ctx.font = `${isMobile ? 9 : 10}px 'IBM Plex Mono',monospace`;
 ctx.textAlign = 'right';
-ctx.fillText(fmtPrice(p), LEFT - 5, y + 3);
+ctx.fillText(fmtPrice(p), LEFT - 3, y + 3);
 }
 
-// Zone between nearest support and resistance (comfort zone shading)
-const supports = levels.filter(l => l.type === 'support').sort((a, b) => b.price - a.price);
-const resistances = levels.filter(l => l.type === 'resistance').sort((a, b) => a.price - b.price);
+// ── Support/Resistance zone shading ─────────────────
+const supports    = levels.filter(l => l.type === 'support').sort((a,b) => b.price - a.price);
+const resistances = levels.filter(l => l.type === 'resistance').sort((a,b) => a.price - b.price);
 if (supports.length > 0 && resistances.length > 0) {
 const yS = pToY(supports[0].price);
 const yR = pToY(resistances[0].price);
 const grad = ctx.createLinearGradient(0, yR, 0, yS);
-grad.addColorStop(0, 'rgba(240,58,74,0.05)');
+grad.addColorStop(0,   'rgba(240,58,74,0.05)');
 grad.addColorStop(0.5, 'rgba(0,200,240,0.04)');
-grad.addColorStop(1, 'rgba(0,232,122,0.05)');
+grad.addColorStop(1,   'rgba(0,232,122,0.05)');
 ctx.fillStyle = grad;
 ctx.fillRect(LEFT, yR, chartW, yS - yR);
 }
 
-// Draw each level
+// ── Draw each level ──────────────────────────────────
 levels.forEach(lv => {
-const y = pToY(lv.price);
-const isSup = lv.type === 'support';
-const isRes = lv.type === 'resistance';
+const y       = pToY(lv.price);
+const isSup   = lv.type === 'support';
 const isPivot = lv.source === 'pivot';
-const conf = lv.confluence;
+const conf    = lv.confluence;
 const isStrong = conf >= 2;
-const isMajor = conf >= 3;
+const isMajor  = conf >= 3;
 
-// Color logic
 let baseColor;
-if (isMajor) baseColor = '#f5c842'; // major confluence = gold
-else if (isStrong) baseColor = isSup ? '#00e87a' : '#f03a4a'; // strong S or R
-else baseColor = isSup ? '#00aa55' : '#bb2233'; // weak S or R
+if (isMajor)        baseColor = '#f5c842';
+else if (isStrong)  baseColor = isSup ? '#00e87a' : '#f03a4a';
+else                baseColor = isSup ? '#00aa55' : '#bb2233';
 if (lv.type === 'current') baseColor = '#00c8f0';
 
-// Band height
-const bandH = isMajor ? 22 : isStrong ? 16 : 8;
-const bandAlpha = isMajor ? 0.35 : isStrong ? 0.22 : 0.12;
+const bandH     = isMajor ? 20 : isStrong ? 14 : 7;
+const bandAlpha = isMajor ? 0.32 : isStrong ? 0.20 : 0.11;
 
+// Band fill
 ctx.save();
 ctx.globalAlpha = bandAlpha;
 ctx.fillStyle = baseColor;
 ctx.fillRect(LEFT, y - bandH / 2, chartW, bandH);
 ctx.restore();
 
-// Line
+// Price line
 ctx.save();
 ctx.globalAlpha = isMajor ? 1 : isStrong ? 0.85 : 0.55;
 ctx.strokeStyle = baseColor;
-ctx.lineWidth = isMajor ? 2.5 : isStrong ? 1.8 : 1;
-ctx.setLineDash(isPivot && !isStrong ? [5, 4] : []);
-if (isStrong || isMajor) {
-ctx.shadowBlur = isMajor ? 10 : 6;
-ctx.shadowColor = baseColor;
-}
+ctx.lineWidth   = isMajor ? 2.5 : isStrong ? 1.8 : 1;
+ctx.setLineDash(isPivot && !isStrong ? [5,4] : []);
+if (isStrong || isMajor) { ctx.shadowBlur = isMajor ? 10 : 6; ctx.shadowColor = baseColor; }
 ctx.beginPath(); ctx.moveTo(LEFT, y); ctx.lineTo(LEFT + chartW, y); ctx.stroke();
-ctx.shadowBlur = 0;
-ctx.setLineDash([]);
+ctx.shadowBlur = 0; ctx.setLineDash([]);
 ctx.restore();
 
-// Right label
-ctx.textAlign = 'left';
-ctx.font = isStrong ? `bold 11px 'IBM Plex Mono',monospace` : `10px 'IBM Plex Mono',monospace`;
-ctx.fillStyle = baseColor;
 const distStr = (lv.distPct >= 0 ? '+' : '') + lv.distPct.toFixed(2) + '%';
+
+if (isMobile) {
+// ── MOBILE: labels drawn INSIDE chart on the line ──
+// Left side: label name + price on a pill background
+const labelTxt = `${lv.label} ${fmtPrice(lv.price)}`;
+ctx.font = isStrong ? `bold 9px 'IBM Plex Mono',monospace` : `8px 'IBM Plex Mono',monospace`;
+const tw = ctx.measureText(labelTxt).width;
+const px = LEFT + 4, py = y - 1;
+// pill bg
+ctx.fillStyle = 'rgba(6,10,15,0.78)';
+ctx.fillRect(px - 2, py - 9, tw + 6, 13);
+// text
+ctx.fillStyle = baseColor;
+ctx.textAlign = 'left';
+ctx.fillText(labelTxt, px, py + 2);
+// dist % on the right inside chart
+ctx.font = `8px 'IBM Plex Mono',monospace`;
+ctx.fillStyle = '#7a9bb5';
+ctx.textAlign = 'right';
+ctx.fillText(distStr, LEFT + chartW - 4, py + 2);
+} else {
+// ── DESKTOP/TABLET: labels on the right outside ──
+const labelFontSize = isTablet ? 10 : 11;
+ctx.textAlign = 'left';
+ctx.font = isStrong
+? `bold ${labelFontSize}px 'IBM Plex Mono',monospace`
+: `${labelFontSize - 1}px 'IBM Plex Mono',monospace`;
+ctx.fillStyle = baseColor;
 ctx.fillText(`${lv.label}  ${fmtPrice(lv.price)}`, LEFT + chartW + 8, y - 1);
 ctx.fillStyle = '#4e6d88';
 ctx.font = `9px 'IBM Plex Mono',monospace`;
 ctx.fillText(distStr, LEFT + chartW + 8, y + 10);
 
-// Confluence badge
+// Confluence badge (desktop only)
 if (isStrong) {
-const bx = LEFT + chartW - 42;
+const bx = LEFT + chartW - 44;
 ctx.fillStyle = isMajor ? 'rgba(245,200,66,0.25)' : 'rgba(0,200,240,0.15)';
 ctx.beginPath();
-ctx.roundRect ? ctx.roundRect(bx - 2, y - 8, 40, 16, 3) : ctx.rect(bx - 2, y - 8, 40, 16);
+ctx.roundRect ? ctx.roundRect(bx - 2, y - 8, 42, 16, 3) : ctx.rect(bx - 2, y - 8, 42, 16);
 ctx.fill();
 ctx.fillStyle = isMajor ? '#f5c842' : '#00c8f0';
 ctx.font = `bold 9px 'IBM Plex Mono',monospace`;
 ctx.textAlign = 'center';
-ctx.fillText(`${conf}× CONF`, bx + 18, y + 4);
+ctx.fillText(`${conf}× CONF`, bx + 19, y + 4);
 ctx.textAlign = 'left';
+}
 }
 });
 
-// Current price line — bright with glow
+// ── Current price line ───────────────────────────────
 const cpY = pToY(price);
 ctx.save();
-ctx.shadowBlur = 20; ctx.shadowColor = '#00c8f0';
-ctx.strokeStyle = '#00c8f0'; ctx.lineWidth = 2.5;
+ctx.shadowBlur = 16; ctx.shadowColor = '#00c8f0';
+ctx.strokeStyle = '#00c8f0'; ctx.lineWidth = isMobile ? 2 : 2.5;
 ctx.beginPath(); ctx.moveTo(LEFT, cpY); ctx.lineTo(LEFT + chartW, cpY); ctx.stroke();
 ctx.shadowBlur = 0;
-// Price tag box
+// Price tag — mobile: inside chart; desktop: outside
 const priceStr = '▶ ' + fmtPrice(price);
-ctx.font = `bold 12px 'IBM Plex Mono',monospace`;
+ctx.font = `bold ${isMobile ? 10 : 12}px 'IBM Plex Mono',monospace`;
 const tw = ctx.measureText(priceStr).width;
+if (isMobile) {
+// Right-aligned inside chart
+ctx.fillStyle = '#00c8f0';
+ctx.fillRect(LEFT + chartW - tw - 10, cpY - 10, tw + 8, 20);
+ctx.fillStyle = '#060a0f';
+ctx.textAlign = 'right';
+ctx.fillText(priceStr, LEFT + chartW - 4, cpY + 4);
+} else {
 ctx.fillStyle = '#00c8f0';
 ctx.fillRect(LEFT + chartW + 6, cpY - 10, tw + 8, 20);
 ctx.fillStyle = '#060a0f';
+ctx.textAlign = 'left';
 ctx.fillText(priceStr, LEFT + chartW + 10, cpY + 4);
+}
 ctx.restore();
 
-// Title bar
+// ── Title bar ────────────────────────────────────────
 ctx.fillStyle = '#1a2b3c';
-ctx.fillRect(LEFT, TOP - 26, chartW, 22);
+ctx.fillRect(LEFT, TOP - (isMobile ? 22 : 26), chartW, isMobile ? 18 : 22);
 ctx.fillStyle = '#00c8f0';
-ctx.font = `bold 10px 'Syne',sans-serif`;
+ctx.font = `bold ${isMobile ? 8 : 10}px 'Syne',sans-serif`;
 ctx.textAlign = 'left';
-ctx.fillText('SUPPORT / RESISTANCE ZONE CHART', LEFT + 6, TOP - 10);
+ctx.fillText(isMobile ? 'S/R ZONE CHART' : 'SUPPORT / RESISTANCE ZONE CHART', LEFT + 5, TOP - (isMobile ? 9 : 11));
+if (!isMobile) {
 ctx.fillStyle = '#4e6d88';
 ctx.font = `9px 'IBM Plex Mono',monospace`;
 ctx.textAlign = 'right';
-ctx.fillText('🟢 Support  🔴 Resistance  🟡 Confluence  ◈ Major Zone', LEFT + chartW - 4, TOP - 10);
+ctx.fillText('🟢 Support  🔴 Resistance  🟡 Confluence  ◈ Major', LEFT + chartW - 4, TOP - 11);
+}
 ctx.textAlign = 'left';
 }
 
@@ -4048,3 +4089,13 @@ const isOpen = grid.classList.contains('open');
 grid.classList.toggle('open', !isOpen);
 btn.classList.toggle('open', !isOpen);
 }
+
+// Redraw SR canvas on resize / orientation change (Android)
+let _srResizeTimer;
+window.addEventListener('resize', () => {
+clearTimeout(_srResizeTimer);
+_srResizeTimer = setTimeout(() => { if ($('sr-canvas')) srCalc(); }, 180);
+});
+window.addEventListener('orientationchange', () => {
+setTimeout(() => { if ($('sr-canvas')) srCalc(); }, 300);
+});
