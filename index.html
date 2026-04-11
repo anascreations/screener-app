@@ -34,6 +34,8 @@
   <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 ETF</button>
   <button class="tab-btn swing-tab" data-tab="swing" onclick="switchTab('swing')">🔄 Swing Reversal</button>
   <button class="tab-btn ipo-tab" data-tab="ipo" onclick="switchTab('ipo')">🏷️ IPO</button>
+  <button class="tab-btn sr-tab" data-tab="sr" onclick="switchTab('sr')">📊 S/R Zones</button>
+  <button class="tab-btn mtf-tab" data-tab="mtf" onclick="switchTab('mtf')">🔥 MTF Momentum</button>
   <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
 </div>
 
@@ -41,6 +43,54 @@
      MA CALCULATOR PANEL
 ═══════════════════════════════════════════════════════════ -->
 <div class="panel active" id="panel-ma">
+
+<!-- ── Trading Session & Timeframe Card ── -->
+<div class="card tt-card">
+  <div class="card-hdr"><span class="ci tt-ci">⏱</span> Trading Sessions &amp; Best Timeframes <span class="badge-new">Live MYT</span></div>
+  <div class="card-body">
+    <div class="tt-live-row">
+      <div class="tt-live-left">
+        <div class="tt-live-sub">Current Window</div>
+        <div class="tt-session-badge" id="tt-sess-ma">Detecting...</div>
+        <div class="tt-rec-tf" id="tt-rec-tf-ma">—</div>
+      </div>
+      <div class="tt-live-right">
+        <div class="tt-live-sub">Malaysia Time</div>
+        <div class="tt-myt-clock" id="tt-myt-ma">--:--:-- MYT</div>
+      </div>
+    </div>
+    <div class="tt-timeline-wrap">
+      <canvas id="tt-tl-ma" class="tt-timeline-canvas"></canvas>
+    </div>
+    <div class="tt-windows">
+      <div class="tt-win tt-prime">
+        <span class="tt-win-tag">🎯 PRIME</span>
+        <span class="tt-win-time">9:30 PM – 11:00 PM</span>
+        <span class="tt-win-tf-badge">5m · 15m</span>
+        <span class="tt-win-note">Market open · Highest volume · Best momentum entries</span>
+      </div>
+      <div class="tt-win tt-lull">
+        <span class="tt-win-tag">💤 LULL</span>
+        <span class="tt-win-time">11:30 PM – 1:30 AM</span>
+        <span class="tt-win-tf-badge">1H · Avoid</span>
+        <span class="tt-win-note">Lunch hour · Low volume · False breakouts common</span>
+      </div>
+      <div class="tt-win tt-power">
+        <span class="tt-win-tag">⚡ POWER HOUR</span>
+        <span class="tt-win-time">2:30 AM – 4:00 AM</span>
+        <span class="tt-win-tf-badge">5m · 15m</span>
+        <span class="tt-win-note">Volume returns · Trend continuation · Exit by 3:50 AM</span>
+      </div>
+      <div class="tt-win tt-closed">
+        <span class="tt-win-tag">🔴 CLOSED</span>
+        <span class="tt-win-time">4:00 AM – 9:30 PM</span>
+        <span class="tt-win-tf-badge">4H · Daily</span>
+        <span class="tt-win-note">US market closed · Plan &amp; analyse for next session</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="ref-grid-wrap">
   <button class="ref-grid-toggle" onclick="toggleRefGrid(this)">
     📖 Quick Reference — F1 / ADX / KDJ / MACD
@@ -89,6 +139,20 @@
   <div class="card">
     <div class="card-hdr"><span class="ci">∿</span> MA 7-Filter Stack <span class="badge-new">+ADX +Supertrend</span></div>
     <div class="card-body">
+
+      <div class="tf-selector">
+        <span class="tf-sel-label">Timeframe</span>
+        <div class="tf-pills" id="ma-tf-pills">
+          <button class="tf-pill" data-tf="1m"  onclick="setTF('ma','1m')">1m</button>
+          <button class="tf-pill" data-tf="5m"  onclick="setTF('ma','5m')">5m</button>
+          <button class="tf-pill" data-tf="15m" onclick="setTF('ma','15m')">15m</button>
+          <button class="tf-pill" data-tf="1H"  onclick="setTF('ma','1H')">1H</button>
+          <button class="tf-pill" data-tf="4H"  onclick="setTF('ma','4H')">4H</button>
+          <button class="tf-pill active" data-tf="D" onclick="setTF('ma','D')">Daily</button>
+          <button class="tf-pill" data-tf="W"   onclick="setTF('ma','W')">Weekly</button>
+        </div>
+        <div class="tf-ctx" id="ma-tf-ctx">Daily · Hold: Days–2 Weeks · F1 Ideal ≤3.5% · ADX ≥25</div>
+      </div>
 
       <div class="sec-label">MA Stack + Price</div>
       <div class="fg" style="margin-bottom:.9rem">
@@ -222,6 +286,54 @@
      EMA CALCULATOR PANEL
 ═══════════════════════════════════════════════════════════ -->
 <div class="panel" id="panel-ema">
+
+<!-- ── Trading Session & Timeframe Card ── -->
+<div class="card tt-card">
+  <div class="card-hdr"><span class="ci tt-ci">⏱</span> Trading Sessions &amp; Best Timeframes <span class="badge-new">Live MYT</span></div>
+  <div class="card-body">
+    <div class="tt-live-row">
+      <div class="tt-live-left">
+        <div class="tt-live-sub">Current Window</div>
+        <div class="tt-session-badge" id="tt-sess-ema">Detecting...</div>
+        <div class="tt-rec-tf" id="tt-rec-tf-ema">—</div>
+      </div>
+      <div class="tt-live-right">
+        <div class="tt-live-sub">Malaysia Time</div>
+        <div class="tt-myt-clock" id="tt-myt-ema">--:--:-- MYT</div>
+      </div>
+    </div>
+    <div class="tt-timeline-wrap">
+      <canvas id="tt-tl-ema" class="tt-timeline-canvas"></canvas>
+    </div>
+    <div class="tt-windows">
+      <div class="tt-win tt-prime">
+        <span class="tt-win-tag">🎯 PRIME</span>
+        <span class="tt-win-time">9:30 PM – 11:00 PM</span>
+        <span class="tt-win-tf-badge">5m · 15m</span>
+        <span class="tt-win-note">Market open · Highest volume · Best momentum entries</span>
+      </div>
+      <div class="tt-win tt-lull">
+        <span class="tt-win-tag">💤 LULL</span>
+        <span class="tt-win-time">11:30 PM – 1:30 AM</span>
+        <span class="tt-win-tf-badge">1H · Avoid</span>
+        <span class="tt-win-note">Lunch hour · Low volume · False breakouts common</span>
+      </div>
+      <div class="tt-win tt-power">
+        <span class="tt-win-tag">⚡ POWER HOUR</span>
+        <span class="tt-win-time">2:30 AM – 4:00 AM</span>
+        <span class="tt-win-tf-badge">5m · 15m</span>
+        <span class="tt-win-note">Volume returns · Trend continuation · Exit by 3:50 AM</span>
+      </div>
+      <div class="tt-win tt-closed">
+        <span class="tt-win-tag">🔴 CLOSED</span>
+        <span class="tt-win-time">4:00 AM – 9:30 PM</span>
+        <span class="tt-win-tf-badge">4H · Daily</span>
+        <span class="tt-win-note">US market closed · Plan &amp; analyse for next session</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="ref-grid-wrap">
   <button class="ref-grid-toggle" onclick="toggleRefGrid(this)">
     📖 Quick Reference — F1 / ADX / KDJ / MACD
@@ -272,6 +384,20 @@
   <div class="card">
     <div class="card-hdr"><span class="ci">≋</span> EMA 7-Filter Stack <span class="badge-new">+ADX +Ichimoku</span></div>
     <div class="card-body">
+
+      <div class="tf-selector">
+        <span class="tf-sel-label">Timeframe</span>
+        <div class="tf-pills" id="ema-tf-pills">
+          <button class="tf-pill" data-tf="1m"  onclick="setTF('ema','1m')">1m</button>
+          <button class="tf-pill" data-tf="5m"  onclick="setTF('ema','5m')">5m</button>
+          <button class="tf-pill" data-tf="15m" onclick="setTF('ema','15m')">15m</button>
+          <button class="tf-pill" data-tf="1H"  onclick="setTF('ema','1H')">1H</button>
+          <button class="tf-pill" data-tf="4H"  onclick="setTF('ema','4H')">4H</button>
+          <button class="tf-pill active" data-tf="D" onclick="setTF('ema','D')">Daily</button>
+          <button class="tf-pill" data-tf="W"   onclick="setTF('ema','W')">Weekly</button>
+        </div>
+        <div class="tf-ctx" id="ema-tf-ctx">Daily · Hold: Days–2 Weeks · F1 Ideal ≤3.5% · ADX ≥25</div>
+      </div>
 
       <div class="sec-label">EMA Stack + Price</div>
       <div class="fg" style="margin-bottom:.9rem">
@@ -447,6 +573,53 @@
     </div>
   </div>
 
+  <!-- ── Gold Trading Time Card ── -->
+  <div class="card tt-card tt-card-gold">
+    <div class="card-hdr"><span class="ci" style="color:var(--gold)">⏱</span> Gold Trading Sessions <span class="badge-new">Live MYT</span></div>
+    <div class="card-body">
+      <div class="tt-live-row">
+        <div class="tt-live-left">
+          <div class="tt-live-sub">Current Gold Window</div>
+          <div class="tt-session-badge" id="tt-sess-gold">Detecting...</div>
+          <div class="tt-rec-tf" id="tt-rec-tf-gold">—</div>
+        </div>
+        <div class="tt-live-right">
+          <div class="tt-live-sub">Malaysia Time</div>
+          <div class="tt-myt-clock" style="color:var(--gold)" id="tt-myt-gold">--:--:-- MYT</div>
+        </div>
+      </div>
+      <div class="tt-timeline-wrap">
+        <canvas id="tt-tl-gold" class="tt-timeline-canvas"></canvas>
+      </div>
+      <div class="tt-windows">
+        <div class="tt-win" style="border-color:rgba(255,215,0,0.35);background:rgba(255,215,0,0.05)">
+          <span class="tt-win-tag" style="color:var(--gold)">🥇 PRIME — LONDON/NY</span>
+          <span class="tt-win-time">9:00 PM – 1:00 AM</span>
+          <span class="tt-win-tf-badge" style="background:rgba(255,215,0,0.15);color:var(--gold)">5m · 15m · 1H</span>
+          <span class="tt-win-note">London-NY overlap · Highest gold liquidity · Best entry window</span>
+        </div>
+        <div class="tt-win" style="border-color:rgba(0,200,240,0.25);background:rgba(0,200,240,0.04)">
+          <span class="tt-win-tag" style="color:var(--accent)">🟢 LONDON OPEN</span>
+          <span class="tt-win-time">4:00 PM – 9:00 PM</span>
+          <span class="tt-win-tf-badge" style="background:rgba(0,200,240,0.12);color:var(--accent)">15m · 1H</span>
+          <span class="tt-win-note">European session · Good volume · Second-best window</span>
+        </div>
+        <div class="tt-win tt-lull">
+          <span class="tt-win-tag">💤 NY CLOSE / LULL</span>
+          <span class="tt-win-time">1:00 AM – 4:00 PM</span>
+          <span class="tt-win-tf-badge">4H · Daily</span>
+          <span class="tt-win-note">Asian session low volume · Tight range · Avoid intraday scalps</span>
+        </div>
+        <div class="tt-win" style="border-color:rgba(245,200,66,0.25);background:rgba(245,200,66,0.04)">
+          <span class="tt-win-tag" style="color:var(--yellow)">⚡ NY OPEN</span>
+          <span class="tt-win-time">9:30 PM – 11:30 PM</span>
+          <span class="tt-win-tf-badge" style="background:rgba(245,200,66,0.15);color:var(--yellow)">5m · 15m</span>
+          <span class="tt-win-note">US economic data releases · High volatility spikes expected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Reference Cards — Gold Specific -->
   <div class="ref-grid-wrap">
   <button class="ref-grid-toggle" onclick="toggleRefGrid(this)">
@@ -496,6 +669,20 @@
   <div class="card">
     <div class="card-hdr"><span class="ci gold-ci">◈</span> Gold XAUUSD — 7-Filter System</div>
     <div class="card-body">
+
+      <div class="tf-selector">
+        <span class="tf-sel-label">Timeframe</span>
+        <div class="tf-pills" id="gold-tf-pills">
+          <button class="tf-pill" data-tf="1m"  onclick="setTF('gold','1m')">1m</button>
+          <button class="tf-pill" data-tf="5m"  onclick="setTF('gold','5m')">5m</button>
+          <button class="tf-pill" data-tf="15m" onclick="setTF('gold','15m')">15m</button>
+          <button class="tf-pill" data-tf="1H"  onclick="setTF('gold','1H')">1H</button>
+          <button class="tf-pill" data-tf="4H"  onclick="setTF('gold','4H')">4H</button>
+          <button class="tf-pill active" data-tf="D" onclick="setTF('gold','D')">Daily</button>
+          <button class="tf-pill" data-tf="W"   onclick="setTF('gold','W')">Weekly</button>
+        </div>
+        <div class="tf-ctx" id="gold-tf-ctx">Daily · Hold: Days–2 Weeks · F1 Ideal ≤3.5% · ADX ≥25</div>
+      </div>
 
       <div class="sec-label">Price &amp; EMA Stack (Macro → Micro)</div>
       <div class="fg" style="margin-bottom:.9rem">
@@ -714,6 +901,53 @@
     </div>
   </div>
 
+  <!-- ── Bursa Trading Time Card ── -->
+  <div class="card tt-card tt-card-bursa">
+    <div class="card-hdr"><span class="ci" style="color:var(--green)">⏱</span> Bursa Malaysia Sessions <span class="badge-new">Live MYT</span></div>
+    <div class="card-body">
+      <div class="tt-live-row">
+        <div class="tt-live-left">
+          <div class="tt-live-sub">Bursa Status</div>
+          <div class="tt-session-badge" id="tt-sess-bursa">Detecting...</div>
+          <div class="tt-rec-tf" id="tt-rec-tf-bursa">—</div>
+        </div>
+        <div class="tt-live-right">
+          <div class="tt-live-sub">Malaysia Time</div>
+          <div class="tt-myt-clock" style="color:var(--green)" id="tt-myt-bursa">--:--:-- MYT</div>
+        </div>
+      </div>
+      <div class="tt-timeline-wrap">
+        <canvas id="tt-tl-bursa" class="tt-timeline-canvas"></canvas>
+      </div>
+      <div class="tt-windows">
+        <div class="tt-win" style="border-color:rgba(0,232,122,0.35);background:rgba(0,232,122,0.05)">
+          <span class="tt-win-tag" style="color:var(--green)">🟢 MORNING SESSION</span>
+          <span class="tt-win-time">9:00 AM – 12:30 PM</span>
+          <span class="tt-win-tf-badge" style="background:rgba(0,232,122,0.15);color:var(--green)">5m · 15m · 1H</span>
+          <span class="tt-win-note">Opening drive · Best ETF liquidity · Enter in first 30 min</span>
+        </div>
+        <div class="tt-win tt-lull">
+          <span class="tt-win-tag">🍽️ LUNCH BREAK</span>
+          <span class="tt-win-time">12:30 PM – 2:30 PM</span>
+          <span class="tt-win-tf-badge">Avoid / Review</span>
+          <span class="tt-win-note">Market halted · Update S/R levels · Plan afternoon entries</span>
+        </div>
+        <div class="tt-win" style="border-color:rgba(0,136,187,0.3);background:rgba(0,136,187,0.05)">
+          <span class="tt-win-tag" style="color:var(--accent2)">🔵 AFTERNOON SESSION</span>
+          <span class="tt-win-time">2:30 PM – 5:00 PM</span>
+          <span class="tt-win-tf-badge" style="background:rgba(0,136,187,0.15);color:var(--accent2)">15m · 1H</span>
+          <span class="tt-win-note">Closing push · Volume picks up 4–5 PM · Hard exit by 4:50 PM</span>
+        </div>
+        <div class="tt-win tt-closed">
+          <span class="tt-win-tag">🔴 BURSA CLOSED</span>
+          <span class="tt-win-time">5:00 PM – 9:00 AM</span>
+          <span class="tt-win-tf-badge">Daily · Weekly</span>
+          <span class="tt-win-note">After hours · Analyse daily chart · Set alerts for next open</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <div class="ref-grid-wrap">
   <button class="ref-grid-toggle" onclick="toggleRefGrid(this)">
     📖 Quick Reference — F1 / ADX / KDJ / MACD
@@ -762,6 +996,19 @@
   <div class="card">
     <div class="card-hdr"><span class="bursa-ci">🇲🇾</span> Gold ETF 8-Filter System <span class="badge-new">NAV + Premium + Bid/Ask + Bursa Session</span></div>
     <div class="card-body">
+
+      <div class="tf-selector" style="border-color:rgba(0,232,122,0.2);background:rgba(0,232,122,0.04)">
+        <span class="tf-sel-label">Timeframe</span>
+        <div class="tf-pills" id="bursa-tf-pills">
+          <button class="tf-pill" data-tf="5m"  onclick="setTF('bursa','5m')">5m</button>
+          <button class="tf-pill" data-tf="15m" onclick="setTF('bursa','15m')">15m</button>
+          <button class="tf-pill" data-tf="1H"  onclick="setTF('bursa','1H')">1H</button>
+          <button class="tf-pill" data-tf="4H"  onclick="setTF('bursa','4H')">4H</button>
+          <button class="tf-pill active" data-tf="D"   onclick="setTF('bursa','D')">Daily</button>
+          <button class="tf-pill" data-tf="W"   onclick="setTF('bursa','W')">Weekly</button>
+        </div>
+        <div class="tf-ctx" id="bursa-tf-ctx">Daily · Hold: Days–2 Weeks · F1 Ideal ≤3.5% · ADX ≥25</div>
+      </div>
 
       <div class="sec-label">Live Quote (copy directly from your trading app)</div>
       <div class="fg" style="margin-bottom:.9rem">
@@ -1074,6 +1321,18 @@
   <div class="card">
     <div class="card-hdr"><span class="ci swing-ci">🔄</span> Swing Reversal Inputs — V-Bottom Detection</div>
     <div class="card-body">
+
+      <div class="tf-selector" style="border-color:rgba(91,33,182,0.3);background:rgba(91,33,182,0.06)">
+        <span class="tf-sel-label">Timeframe</span>
+        <div class="tf-pills" id="swing-tf-pills">
+          <button class="tf-pill" data-tf="15m" onclick="setTF('swing','15m')" style="--tp-active:#7c3aed">15m</button>
+          <button class="tf-pill" data-tf="1H"  onclick="setTF('swing','1H')">1H</button>
+          <button class="tf-pill" data-tf="4H"  onclick="setTF('swing','4H')">4H</button>
+          <button class="tf-pill active" data-tf="D"   onclick="setTF('swing','D')">Daily</button>
+          <button class="tf-pill" data-tf="W"   onclick="setTF('swing','W')">Weekly</button>
+        </div>
+        <div class="tf-ctx" id="swing-tf-ctx">Daily · Hold: Days–2 Weeks · Reversal confirms on close · ADX ≥25</div>
+      </div>
 
       <div class="sec-label">Reversal Candle (OHLC — Bottom Candle)</div>
       <div class="fg" style="margin-bottom:.9rem">
@@ -1525,6 +1784,331 @@
 <!-- ═══════════════════════════════════════════════════════════
      TRADING GUIDE PANEL
 ═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-sr">
+  <div class="card">
+    <div class="card-hdr"><span class="ci sr-ci">⊕</span> Support / Resistance Zone Analyzer <span class="badge-new">+Confluence +Pivots</span></div>
+    <div class="card-body">
+
+      <div class="sr-toolbar">
+        <button class="btn btn-sr-import" onclick="importMAtoSR()">⬇️ Import MA Levels</button>
+        <button class="btn btn-sr-import" onclick="importEMAtoSR()">⬇️ Import EMA Levels</button>
+        <button class="btn btn-secondary" onclick="resetSR()">↺</button>
+      </div>
+
+      <div class="sr-input-grid">
+        <!-- Left: Price Levels -->
+        <div class="sr-input-col">
+          <div class="sec-label">Current Market Price</div>
+          <div class="fg" style="margin-bottom:.6rem">
+            <div class="fld fld-wide"><label>Market Price <span style="color:var(--accent)">★</span></label><input type="number" id="sr-price" step="0.0001" placeholder="1.4200" oninput="srCalc()"/></div>
+          </div>
+          <div class="sec-label">Price Levels (Support &amp; Resistance)</div>
+          <div class="sr-levels-grid">
+            <div class="sr-level-hdr"><span>Label</span><span>Price</span></div>
+            <div class="sr-level-row"><input class="sr-lb" type="text" id="sr-lb1" placeholder="MA5" oninput="srCalc()"/><input class="sr-lv" type="number" id="sr-lv1" step="0.0001" placeholder="1.38" oninput="srCalc()"/></div>
+            <div class="sr-level-row"><input class="sr-lb" type="text" id="sr-lb2" placeholder="MA20" oninput="srCalc()"/><input class="sr-lv" type="number" id="sr-lv2" step="0.0001" placeholder="1.31" oninput="srCalc()"/></div>
+            <div class="sr-level-row"><input class="sr-lb" type="text" id="sr-lb3" placeholder="MA50" oninput="srCalc()"/><input class="sr-lv" type="number" id="sr-lv3" step="0.0001" placeholder="1.25" oninput="srCalc()"/></div>
+            <div class="sr-level-row"><input class="sr-lb" type="text" id="sr-lb4" placeholder="MA200" oninput="srCalc()"/><input class="sr-lv" type="number" id="sr-lv4" step="0.0001" placeholder="1.18" oninput="srCalc()"/></div>
+            <div class="sr-level-row"><input class="sr-lb" type="text" id="sr-lb5" placeholder="Level 5" oninput="srCalc()"/><input class="sr-lv" type="number" id="sr-lv5" step="0.0001" placeholder="" oninput="srCalc()"/></div>
+            <div class="sr-level-row"><input class="sr-lb" type="text" id="sr-lb6" placeholder="Level 6" oninput="srCalc()"/><input class="sr-lv" type="number" id="sr-lv6" step="0.0001" placeholder="" oninput="srCalc()"/></div>
+            <div class="sr-level-row"><input class="sr-lb" type="text" id="sr-lb7" placeholder="Level 7" oninput="srCalc()"/><input class="sr-lv" type="number" id="sr-lv7" step="0.0001" placeholder="" oninput="srCalc()"/></div>
+            <div class="sr-level-row"><input class="sr-lb" type="text" id="sr-lb8" placeholder="Level 8" oninput="srCalc()"/><input class="sr-lv" type="number" id="sr-lv8" step="0.0001" placeholder="" oninput="srCalc()"/></div>
+          </div>
+        </div>
+
+        <!-- Right: Pivot Calculator -->
+        <div class="sr-input-col">
+          <div class="sec-label">Pivot Point Calculator <span class="opt-tag">optional</span></div>
+          <div class="sr-pivot-box">
+            <div class="fg" style="margin-bottom:.5rem">
+              <div class="fld"><label>Previous High</label><input type="number" id="sr-ph" step="0.0001" placeholder="1.5200" oninput="srPivotCalc()"/></div>
+              <div class="fld"><label>Previous Low</label><input type="number" id="sr-pl" step="0.0001" placeholder="1.4800" oninput="srPivotCalc()"/></div>
+              <div class="fld"><label>Previous Close</label><input type="number" id="sr-pc" step="0.0001" placeholder="1.5050" oninput="srPivotCalc()"/></div>
+            </div>
+            <div id="sr-pivot-results" class="sr-pivot-results" style="display:none"></div>
+            <div class="sr-pivot-note">Pivot levels auto-add to the chart below.</div>
+          </div>
+
+          <div class="sec-label" style="margin-top:1rem">Confluence Detection</div>
+          <div class="sr-confluence-info">
+            <div class="sr-conf-row"><span class="sr-conf-dot" style="background:var(--yellow)"></span><span>2+ levels within 1.5% = <strong>Confluence Zone</strong></span></div>
+            <div class="sr-conf-row"><span class="sr-conf-dot" style="background:var(--orange)"></span><span>3+ levels within 1.5% = <strong>Major Zone</strong></span></div>
+            <div class="sr-conf-row"><span class="sr-conf-dot" style="background:var(--green)"></span><span>Below price = <strong>Support</strong></span></div>
+            <div class="sr-conf-row"><span class="sr-conf-dot" style="background:var(--red)"></span><span>Above price = <strong>Resistance</strong></span></div>
+          </div>
+        </div>
+      </div><!-- /sr-input-grid -->
+
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div id="sr-chart-wrap" class="card" style="display:none">
+    <div class="card-hdr"><span class="ci sr-ci">⊞</span> Zone Chart</div>
+    <div class="card-body sr-chart-body">
+      <canvas id="sr-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Analysis -->
+  <div id="sr-analysis-wrap" style="display:none">
+    <div id="sr-analysis-content"></div>
+  </div>
+
+  <!-- Horizontal Distance Bar Chart -->
+  <div id="sr-bar-wrap" class="card" style="display:none">
+    <div class="card-hdr"><span class="ci sr-ci">≡</span> Distance Bar Chart — % from Current Price</div>
+    <div class="card-body">
+      <div id="sr-bar-chart"></div>
+    </div>
+  </div>
+
+</div><!-- /panel-sr -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     MTF MOMENTUM HEATMAP PANEL
+═══════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-mtf">
+
+  <div class="mtf-hero">
+    <div class="mtf-hero-icon">🔥</div>
+    <div style="flex:1">
+      <div class="mtf-hero-title">Multi-Timeframe Momentum</div>
+      <div class="mtf-hero-sub">Enter RSI · ADX · MACD · EMA alignment across timeframes — see where momentum converges</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim)">Current Window</div>
+      <div class="tt-session-badge" id="tt-sess-mtf" style="font-size:13px">Detecting...</div>
+      <div style="font-size:10px;color:var(--dim);margin-top:.1rem" id="tt-myt-mtf">--:-- MYT</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="ci mtf-ci">⊞</span> MTF Input Grid <span class="badge-new">4 Timeframes</span></div>
+    <div class="card-body">
+
+      <div class="mtf-grid-wrap">
+        <!-- Header row -->
+        <div class="mtf-header-row">
+          <div class="mtf-col-label"></div>
+          <div class="mtf-col-hdr mtf-col-hdr-15m">15m<div class="mtf-col-sub">Intraday</div></div>
+          <div class="mtf-col-hdr mtf-col-hdr-1H">1H<div class="mtf-col-sub">Short-term</div></div>
+          <div class="mtf-col-hdr mtf-col-hdr-4H">4H<div class="mtf-col-sub">Swing</div></div>
+          <div class="mtf-col-hdr mtf-col-hdr-D">Daily<div class="mtf-col-sub">Macro</div></div>
+        </div>
+
+        <!-- RSI row -->
+        <div class="mtf-row">
+          <div class="mtf-row-label">📊 RSI14</div>
+          <div class="mtf-cell"><input class="mtf-inp" type="number" id="mtf-rsi-15m" placeholder="62" step="0.1" oninput="mtfCalc()"/></div>
+          <div class="mtf-cell"><input class="mtf-inp" type="number" id="mtf-rsi-1H"  placeholder="58" step="0.1" oninput="mtfCalc()"/></div>
+          <div class="mtf-cell"><input class="mtf-inp" type="number" id="mtf-rsi-4H"  placeholder="55" step="0.1" oninput="mtfCalc()"/></div>
+          <div class="mtf-cell"><input class="mtf-inp" type="number" id="mtf-rsi-D"   placeholder="53" step="0.1" oninput="mtfCalc()"/></div>
+        </div>
+
+        <!-- ADX row -->
+        <div class="mtf-row">
+          <div class="mtf-row-label">⚡ ADX14</div>
+          <div class="mtf-cell"><input class="mtf-inp" type="number" id="mtf-adx-15m" placeholder="28" step="0.1" oninput="mtfCalc()"/></div>
+          <div class="mtf-cell"><input class="mtf-inp" type="number" id="mtf-adx-1H"  placeholder="32" step="0.1" oninput="mtfCalc()"/></div>
+          <div class="mtf-cell"><input class="mtf-inp" type="number" id="mtf-adx-4H"  placeholder="26" step="0.1" oninput="mtfCalc()"/></div>
+          <div class="mtf-cell"><input class="mtf-inp" type="number" id="mtf-adx-D"   placeholder="22" step="0.1" oninput="mtfCalc()"/></div>
+        </div>
+
+        <!-- MACD row -->
+        <div class="mtf-row">
+          <div class="mtf-row-label">📈 MACD</div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-macd-15m" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">Bull ▲</option>
+              <option value="bear">Bear ▼</option>
+              <option value="cross_bull">Cross ↑</option>
+              <option value="cross_bear">Cross ↓</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-macd-1H" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">Bull ▲</option>
+              <option value="bear">Bear ▼</option>
+              <option value="cross_bull">Cross ↑</option>
+              <option value="cross_bear">Cross ↓</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-macd-4H" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">Bull ▲</option>
+              <option value="bear">Bear ▼</option>
+              <option value="cross_bull">Cross ↑</option>
+              <option value="cross_bear">Cross ↓</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-macd-D" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">Bull ▲</option>
+              <option value="bear">Bear ▼</option>
+              <option value="cross_bull">Cross ↑</option>
+              <option value="cross_bear">Cross ↓</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- EMA Stack row -->
+        <div class="mtf-row">
+          <div class="mtf-row-label">∿ EMA Stack</div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-ema-15m" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">Full Bull ✅</option>
+              <option value="partial">Partial ⚠️</option>
+              <option value="bear">Bear 🔴</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-ema-1H" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">Full Bull ✅</option>
+              <option value="partial">Partial ⚠️</option>
+              <option value="bear">Bear 🔴</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-ema-4H" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">Full Bull ✅</option>
+              <option value="partial">Partial ⚠️</option>
+              <option value="bear">Bear 🔴</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-ema-D" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">Full Bull ✅</option>
+              <option value="partial">Partial ⚠️</option>
+              <option value="bear">Bear 🔴</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Price vs VWAP row -->
+        <div class="mtf-row">
+          <div class="mtf-row-label">📉 Vs VWAP</div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-vwap-15m" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="above">Above ✅</option>
+              <option value="below">Below 🔴</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-vwap-1H" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="above">Above ✅</option>
+              <option value="below">Below 🔴</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-vwap-4H" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="above">Above ✅</option>
+              <option value="below">Below 🔴</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-vwap-D" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="above">Above ✅</option>
+              <option value="below">Below 🔴</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KDJ row -->
+        <div class="mtf-row">
+          <div class="mtf-row-label">🎯 KDJ (K&gt;D)</div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-kdj-15m" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">K&gt;D Bull ✅</option>
+              <option value="ob">Overbought ⚠️</option>
+              <option value="bear">K&lt;D Bear 🔴</option>
+              <option value="os">Oversold 💡</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-kdj-1H" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">K&gt;D Bull ✅</option>
+              <option value="ob">Overbought ⚠️</option>
+              <option value="bear">K&lt;D Bear 🔴</option>
+              <option value="os">Oversold 💡</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-kdj-4H" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">K&gt;D Bull ✅</option>
+              <option value="ob">Overbought ⚠️</option>
+              <option value="bear">K&lt;D Bear 🔴</option>
+              <option value="os">Oversold 💡</option>
+            </select>
+          </div>
+          <div class="mtf-cell">
+            <select class="mtf-sel" id="mtf-kdj-D" onchange="mtfCalc()">
+              <option value="">—</option>
+              <option value="bull">K&gt;D Bull ✅</option>
+              <option value="ob">Overbought ⚠️</option>
+              <option value="bear">K&lt;D Bear 🔴</option>
+              <option value="os">Oversold 💡</option>
+            </select>
+          </div>
+        </div>
+
+      </div><!-- /mtf-grid-wrap -->
+
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="resetMTF()">↺</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Heatmap Result -->
+  <div id="mtf-result" style="display:none">
+
+    <!-- Alignment verdict strip -->
+    <div class="decision-strip" id="mtf-decision-strip">
+      <div class="d-badge" id="mtf-d-badge">—</div>
+      <span class="risk-pill" id="mtf-risk-pill">—</span>
+      <div id="mtf-d-meta" style="font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:.1rem"></div>
+    </div>
+
+    <div class="advice-box" id="mtf-advice"></div>
+
+    <!-- Heatmap canvas -->
+    <div class="card">
+      <div class="card-hdr"><span class="ci mtf-ci">⊞</span> Momentum Heatmap</div>
+      <div class="card-body">
+        <canvas id="mtf-heatmap-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Per-TF score cards -->
+    <div class="mtf-score-row" id="mtf-score-row"></div>
+
+    <!-- Confluence table -->
+    <div class="card">
+      <div class="card-hdr"><span class="ci mtf-ci">◎</span> Confluence Analysis</div>
+      <div class="card-body" id="mtf-confluence-body"></div>
+    </div>
+
+  </div>
+
+</div><!-- /panel-mtf -->
+
 <div class="panel" id="panel-guide">
 
   <div class="guide-hero">
