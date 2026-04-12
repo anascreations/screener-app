@@ -1,3 +1,161 @@
+const TM_USER = 'admin'; 
+const TM_PASS = 'TdmRX_2026';
+
+const TM_SESSION_KEY  = 'tm_session';
+const TM_SESSION_HOURS = 12; // auto-logout after 12 hours of inactivity
+
+document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('tm-copy-year');
+    if (el) el.textContent = '© ' + new Date().getFullYear();
+});
+
+function tmHashStr(s) {
+// Simple obfuscation — not cryptographic, sufficient for personal use
+let h = 0;
+for (let i = 0; i < s.length; i++) {
+h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+}
+return h.toString(36);
+}
+
+function tmSaveSession(username) {
+const stay = document.getElementById('tm-stay')?.checked;
+const payload = {
+user: username,
+hash: tmHashStr(username + TM_PASS),
+ts: Date.now(),
+stay: stay
+};
+if (stay) {
+localStorage.setItem(TM_SESSION_KEY, JSON.stringify(payload));
+} else {
+sessionStorage.setItem(TM_SESSION_KEY, JSON.stringify(payload));
+}
+}
+
+function tmLoadSession() {
+const raw = localStorage.getItem(TM_SESSION_KEY)
+|| sessionStorage.getItem(TM_SESSION_KEY);
+if (!raw) return null;
+try {
+const p = JSON.parse(raw);
+// Validate hash
+if (p.hash !== tmHashStr(p.user + TM_PASS)) return null;
+// Check timeout (only for non-stay sessions handled by sessionStorage anyway)
+const ageHours = (Date.now() - p.ts) / 3600000;
+if (p.stay && ageHours > TM_SESSION_HOURS * 2) return null; // 24h max even with stay
+return p;
+} catch(e) { return null; }
+}
+
+function tmClearSession() {
+localStorage.removeItem(TM_SESSION_KEY);
+sessionStorage.removeItem(TM_SESSION_KEY);
+}
+
+function tmShowApp(username) {
+const overlay = document.getElementById('tm-login-overlay');
+if (overlay) {
+overlay.classList.add('tm-login-exit');
+setTimeout(() => { overlay.style.display = 'none'; }, 400);
+}
+// Show user pill in header
+const pill = document.getElementById('tm-user-pill');
+const name = document.getElementById('tm-user-name');
+if (pill) pill.style.display = 'flex';
+if (name) name.textContent = username;
+}
+
+function tmDoLogin() {
+const un  = document.getElementById('tm-un')?.value?.trim();
+const pw  = document.getElementById('tm-pw')?.value;
+const err = document.getElementById('tm-login-err');
+const btn = document.querySelector('.tm-login-btn');
+
+if (!un || !pw) {
+if (err) { err.textContent = '⚠️ Please enter both username and password'; err.style.display = ''; }
+return;
+}
+
+// Animate button
+if (btn) { btn.textContent = 'Verifying…'; btn.disabled = true; }
+
+setTimeout(() => {
+if (un === TM_USER && pw === TM_PASS) {
+tmSaveSession(un);
+tmShowApp(un);
+// Update last-login info in overlay for next time
+const info = document.getElementById('tm-session-info');
+if (info) info.textContent = '';
+} else {
+if (err) {
+err.textContent = '⚠️ Incorrect username or password';
+err.style.display = '';
+}
+const box = document.querySelector('.tm-login-box');
+if (box) {
+box.classList.add('tm-login-shake');
+setTimeout(() => box.classList.remove('tm-login-shake'), 500);
+}
+// Clear password field
+const pwEl = document.getElementById('tm-pw');
+if (pwEl) { pwEl.value = ''; pwEl.focus(); }
+}
+if (btn) { btn.textContent = 'Login'; btn.disabled = false; }
+}, 350); // small delay feels more "real"
+}
+
+function tmLogout() {
+tmClearSession();
+// Reset fields
+const un = document.getElementById('tm-un');
+const pw = document.getElementById('tm-pw');
+const err= document.getElementById('tm-login-err');
+const info = document.getElementById('tm-session-info');
+if (un) un.value = '';
+if (pw) pw.value = '';
+if (err) err.style.display = 'none';
+if (info) info.textContent = `Last login: ${new Date().toLocaleString('en-MY')}`;
+// Hide user pill
+const pill = document.getElementById('tm-user-pill');
+if (pill) pill.style.display = 'none';
+// Show overlay
+const overlay = document.getElementById('tm-login-overlay');
+if (overlay) {
+overlay.classList.remove('tm-login-exit');
+overlay.style.display = 'flex';
+setTimeout(() => { if (un) un.focus(); }, 100);
+}
+}
+
+function tmTogglePW(btn) {
+const pw = document.getElementById('tm-pw');
+if (!pw) return;
+if (pw.type === 'password') { pw.type = 'text'; btn.textContent = '🙈'; }
+else { pw.type = 'password'; btn.textContent = '👁'; }
+}
+
+// ── Boot: check for existing session ──────────────────
+(function tmBoot() {
+const session = tmLoadSession();
+if (session) {
+// Valid session — skip login
+tmShowApp(session.user);
+// Refresh session timestamp
+session.ts = Date.now();
+const store = session.stay ? localStorage : sessionStorage;
+store.setItem(TM_SESSION_KEY, JSON.stringify(session));
+} else {
+// Show login — focus username after short delay
+const overlay = document.getElementById('tm-login-overlay');
+if (overlay) overlay.style.display = 'flex';
+setTimeout(() => {
+const un = document.getElementById('tm-un');
+if (un) un.focus();
+}, 200);
+}
+})();
+
 const $ = id => document.getElementById(id);
 const num = id => { const v = parseFloat($(id)?.value); return isNaN(v) ? null : v; };
 const sel = id => $(id)?.value || '';
@@ -112,20 +270,101 @@ return String(myt.getUTCHours()).padStart(2,'0') + ':' +
        String(myt.getUTCSeconds()).padStart(2,'0') + ' MYT';
 }
 
+/* ── DST Detection ─────────────────────────────────────
+   US Daylight Saving: 2nd Sun Mar → 1st Sun Nov
+   DST = EDT (UTC-4) → NY open = 9:30 PM MYT
+   Standard = EST (UTC-5) → NY open = 10:30 PM MYT
+──────────────────────────────────────────────────── */
+function isUSDST() {
+try {
+const fmt = new Intl.DateTimeFormat('en-US', {
+timeZone: 'America/New_York',
+timeZoneName: 'short'
+});
+const tz = fmt.formatToParts(new Date()).find(p => p.type === 'timeZoneName')?.value || '';
+return tz === 'EDT';
+} catch(e) {
+// Fallback: rough month-based check (DST Mar–Nov)
+const m = new Date().getMonth() + 1;
+return m >= 3 && m <= 11;
+}
+}
+
+function getUSOpenHourMYT() {
+// DST (EDT, ~Mar–Nov): 9:30 AM ET = 21:30 MYT
+// Standard (EST, ~Nov–Mar): 9:30 AM ET = 22:30 MYT
+return isUSDST() ? 21.5 : 22.5;
+}
+
+function getUSCloseHourMYT() {
+// DST: 4:00 PM ET = 4:00 AM MYT (+1 day)
+// Standard: 4:00 PM ET = 5:00 AM MYT (+1 day)
+return isUSDST() ? 4.0 : 5.0;
+}
+
 function getUSWindowMYT() {
-const h = getMYTHour();
-// Prime: 21:30–23:00
-if (h >= 21.5 && h < 23.0)  return { label:'🎯 Prime Window',   cls:'sess-prime',  tf:'5m · 15m',    note:'Market just opened · Best momentum · Full size OK' };
-// Lull: 23:30–1:30
-if (h >= 23.5 || h < 1.5)   return { label:'💤 Lull Period',    cls:'sess-lull',   tf:'1H or avoid', note:'Low volume · False breakouts · Reduce size 50%' };
-// Post-lull transition: 1:30–2:30
-if (h >= 1.5 && h < 2.5)    return { label:'🔄 Pre-Power',      cls:'sess-good',   tf:'15m · 1H',    note:'Volume recovering · Wait for momentum confirmation' };
-// Power Hour: 2:30–4:00
-if (h >= 2.5 && h < 4.0)    return { label:'⚡ Power Hour',     cls:'sess-power',  tf:'5m · 15m',    note:'Volume surge · Final push · Hard exit at 3:50 AM' };
-// Pre-market: 17:30–21:30
-if (h >= 17.5 && h < 21.5)  return { label:'🔔 Pre-Market',     cls:'sess-pre',    tf:'1H · 4H',     note:'Limited liquidity · Watch gap highs/lows' };
-// Market closed
-return { label:'🔴 US Market Closed', cls:'sess-closed', tf:'4H · Daily', note:'Market closed · Plan & analyse S/R levels for tomorrow' };
+const h    = getMYTHour();
+const open = getUSOpenHourMYT();   // 21.5 or 22.5
+const close= getUSCloseHourMYT();  // 4.0  or 5.0
+const openFmt  = isUSDST() ? '9:30 PM' : '10:30 PM';
+const closeFmt = isUSDST() ? '4:00 AM' : '5:00 AM';
+const exitFmt  = isUSDST() ? '3:50 AM' : '4:50 AM';
+const lullEnd  = isUSDST() ? 1.5  : 2.5;
+const powerStart = isUSDST() ? 2.5 : 3.5;
+
+const dstNote  = isUSDST() ? '' : ' (EST — market opens 1hr later)';
+
+// Prime: open → open+1.5h
+if (h >= open && h < open + 1.5)
+return { label:'🎯 Prime Window', cls:'sess-prime', tf:'5m · 15m',
+note:`Market opened${dstNote} · Best momentum · Full size OK` };
+// Lull: open+2h → lullEnd (crosses midnight)
+const lullStart = open + 2.0;
+const inLull = (lullStart < 24)
+? (h >= lullStart || h < lullEnd)
+: (h >= lullStart - 24 && h < lullEnd);
+if (inLull)
+return { label:'💤 Lull Period', cls:'sess-lull', tf:'1H or avoid',
+note:'Low volume · False breakouts common · Reduce size 50%' };
+// Pre-Power
+if (h >= lullEnd && h < powerStart)
+return { label:'🔄 Pre-Power', cls:'sess-good', tf:'15m · 1H',
+note:'Volume recovering · Wait for momentum confirmation' };
+// Power Hour: powerStart → close
+if (h >= powerStart && h < close)
+return { label:'⚡ Power Hour', cls:'sess-power', tf:'5m · 15m',
+note:`Volume surge · Final push · Hard exit at ${exitFmt}` };
+// Pre-market: 5:30h before open
+if (h >= open - 4 && h < open)
+return { label:'🔔 Pre-Market', cls:'sess-pre', tf:'1H · 4H',
+note:'Limited liquidity · Watch pre-market highs/lows' };
+return { label:'🔴 US Market Closed', cls:'sess-closed', tf:'4H · Daily',
+note:`Market closed · Opens ${openFmt} MYT${dstNote}` };
+}
+
+// Update the window time labels in HTML dynamically
+function updateUSWindowLabels() {
+const open  = isUSDST() ? '9:30 PM' : '10:30 PM';
+const open1 = isUSDST() ? '11:00 PM': '12:00 AM';
+const lull1 = isUSDST() ? '11:30 PM': '12:30 AM';
+const lull2 = isUSDST() ? '1:30 AM' : '2:30 AM';
+const pow1  = isUSDST() ? '2:30 AM' : '3:30 AM';
+const pow2  = isUSDST() ? '4:00 AM' : '5:00 AM';
+const exit  = isUSDST() ? '3:50 AM' : '4:50 AM';
+const cls1  = isUSDST() ? '4:00 AM – 9:30 PM' : '5:00 AM – 10:30 PM';
+const dst   = isUSDST() ? '' : ' <span class="tt-dst-badge">EST</span>';
+
+// Update all panels with US windows (MA, EMA, MTF)
+document.querySelectorAll('.tt-us-prime-time').forEach(el =>
+el.innerHTML = `${open} – ${open1}${dst}`);
+document.querySelectorAll('.tt-us-lull-time').forEach(el =>
+el.innerHTML = `${lull1} – ${lull2}`);
+document.querySelectorAll('.tt-us-power-time').forEach(el =>
+el.innerHTML = `${pow1} – ${pow2}`);
+document.querySelectorAll('.tt-us-power-note').forEach(el =>
+el.textContent = `Volume returns · Trend continuation · Exit by ${exit}`);
+document.querySelectorAll('.tt-us-closed-time').forEach(el =>
+el.textContent = cls1);
 }
 
 function getGoldWindowMYT() {
@@ -152,6 +391,9 @@ const wUS   = getUSWindowMYT();
 const wGold = getGoldWindowMYT();
 const wBursa= getBursaWindowMYT();
 const mytStr = getMYTString();
+
+// Update dynamic DST time labels in HTML
+updateUSWindowLabels();
 
 // US-based cards (MA, EMA, MTF)
 ['ma', 'ema', 'mtf'].forEach(id => {
@@ -230,21 +472,29 @@ keyLabels = [
 { t: 1.0,  text: '1AM',  color: '#4e6d88' },
 ];
 } else {
-// US default
+// US — DST-aware
+const op  = getUSOpenHourMYT();   // 21.5 (DST) or 22.5 (EST)
+const cl  = getUSCloseHourMYT();  // 4.0  (DST) or 5.0  (EST)
+const ps  = (op + 3.0) % 24;     // power-hour start crosses midnight
+const lullS = (op + 2.0) % 24;   // lull start
+const lullE = ps;                 // lull end = power start
 bands = [
-{ from: 8,    to: 17,   color: 'rgba(255,160,50,0.18)' },
-{ from: 16,   to: 24,   color: 'rgba(0,180,100,0.18)'  },
-{ from: 0,    to: 2,    color: 'rgba(0,180,100,0.12)'  },
-{ from: 21.5, to: 23,   color: 'rgba(0,200,240,0.40)' },
-{ from: 23.5, to: 24,   color: 'rgba(80,80,100,0.30)' },
-{ from: 0,    to: 1.5,  color: 'rgba(80,80,100,0.30)' },
-{ from: 2.5,  to: 4,    color: 'rgba(245,200,66,0.40)' },
+{ from: 8,    to: 17,  color: 'rgba(255,160,50,0.18)'  },
+{ from: 16,   to: 24,  color: 'rgba(0,180,100,0.14)'   },
+{ from: 0,    to: cl,  color: 'rgba(0,180,100,0.10)'   },
+{ from: op,   to: Math.min(op + 1.5, 24), color: 'rgba(0,200,240,0.42)' },
+{ from: lullS,to: 24,  color: 'rgba(80,80,100,0.26)'   },
+{ from: 0,    to: lullE, color: 'rgba(80,80,100,0.26)' },
+{ from: ps,   to: cl,  color: 'rgba(245,200,66,0.42)'  },
 ];
-markers = [21.5, 4];
+markers = [op, cl];
+const pwTxt  = isUSDST() ? '2:30AM'  : '3:30AM';
+const clTxt  = isUSDST() ? '4AM'     : '5AM';
+const opTxt  = isUSDST() ? '9:30PM'  : '10:30PM';
 keyLabels = [
-{ t: 21.5, text: '9:30PM', color: '#00c8f0' },
-{ t: 2.5,  text: '2:30AM', color: '#f5c842' },
-{ t: 4.1,  text: '4AM',    color: '#4e6d88' },
+{ t: op, text: opTxt, color: '#00c8f0' },
+{ t: ps, text: pwTxt, color: '#f5c842' },
+{ t: cl, text: clTxt, color: '#4e6d88' },
 ];
 }
 
@@ -4081,6 +4331,43 @@ if (el) el.value = '';
 });
 const result = $('mtf-result');
 if (result) result.style.display = 'none';
+}
+
+function importBursaToMA() {
+const map = [
+['bu-price',  'ma-price'],
+['bu-ma5',    'ma-ma5'],
+['bu-ma20',   'ma-ma20'],
+['bu-ma50',   'ma-ma50'],
+['bu-ma200',  'ma-ma200'],
+['bu-adx',    'ma-adx'],
+['bu-atr',    'ma-atr'],
+['bu-rsi',    'ma-rsi'],
+['bu-k',      'ma-k'],
+['bu-d',      'ma-d'],
+['bu-j',      'ma-j'],
+['bu-dif',    'ma-dif'],
+['bu-dea',    'ma-dea'],
+['bu-volratio','ma-vol'],
+];
+let copied = 0;
+map.forEach(([from, to]) => {
+const src = $(from), dst = $(to);
+if (src && dst && src.value) { dst.value = src.value; copied++; }
+});
+if (copied === 0) {
+alert('No Bursa data found. Please fill in the ETF tab first, then click Import.');
+return;
+}
+switchTab('ma');
+maCalc();
+// Brief flash on MA tab to confirm
+const card = document.querySelector('#panel-ma .card');
+if (card) {
+card.style.transition = 'box-shadow .4s';
+card.style.boxShadow = '0 0 24px rgba(0,232,122,0.5)';
+setTimeout(() => { card.style.boxShadow = ''; }, 900);
+}
 }
 
 function toggleRefGrid(btn) {

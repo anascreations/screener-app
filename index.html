@@ -11,6 +11,55 @@
 <body>
 
 <!-- ══════════════════════════════════════
+     LOGIN OVERLAY
+══════════════════════════════════════ -->
+<div id="tm-login-overlay" class="tm-login-overlay">
+  <div class="tm-login-box">
+    <div class="tm-login-logo">
+      <div class="tm-logo-dot" style="width:10px;height:10px"></div>
+      TradeMatrix <span style="color:var(--accent2);font-size:12px;font-weight:600;margin-left:3px">PRO</span>
+    </div>
+    <div class="tm-login-sub">Secure Access — Professional Trading Suite</div>
+
+    <div class="tm-login-err" id="tm-login-err" style="display:none">
+      ⚠️ Incorrect username or password
+    </div>
+
+    <div class="tm-login-field">
+      <label class="tm-login-label">Username</label>
+      <input class="tm-login-input" type="text" id="tm-un"
+        autocomplete="username" placeholder="Enter username"
+        onkeydown="if(event.key==='Enter')tmDoLogin()"/>
+    </div>
+    <div class="tm-login-field">
+      <label class="tm-login-label">Password</label>
+      <div class="tm-pw-wrap">
+        <input class="tm-login-input" type="password" id="tm-pw"
+          autocomplete="current-password" placeholder="Enter password"
+          onkeydown="if(event.key==='Enter')tmDoLogin()"/>
+        <button class="tm-pw-toggle" onclick="tmTogglePW(this)" tabindex="-1" type="button">👁</button>
+      </div>
+    </div>
+
+    <div class="tm-login-row">
+      <label class="tm-stay-label">
+        <input type="checkbox" id="tm-stay" checked/>
+        <span>Stay logged in</span>
+      </label>
+      <div class="tm-session-info" id="tm-session-info"></div>
+    </div>
+
+    <button class="tm-login-btn" onclick="tmDoLogin()">
+      <span>Login</span>
+    </button>
+
+    <div class="tm-login-footer">
+      anascreations · <span id="tm-copy-year"></span> All Rights Reserved
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
      HEADER
 ══════════════════════════════════════ -->
 <div class="tm-header">
@@ -21,6 +70,11 @@
   <div class="tm-header-right">
     <div class="tm-clock" id="tm-clock">--:--:-- UTC</div>
     <div class="tm-session" id="tm-session-badge">— Session</div>
+    <div class="tm-user-pill" id="tm-user-pill" style="display:none">
+      <span class="tm-user-icon">👤</span>
+      <span class="tm-user-name" id="tm-user-name"></span>
+      <button class="tm-logout-btn" onclick="tmLogout()" title="Logout">⏻</button>
+    </div>
   </div>
 </div>
 
@@ -65,25 +119,25 @@
     <div class="tt-windows">
       <div class="tt-win tt-prime">
         <span class="tt-win-tag">🎯 PRIME</span>
-        <span class="tt-win-time">9:30 PM – 11:00 PM</span>
+        <span class="tt-win-time tt-us-prime-time">9:30 PM – 11:00 PM</span>
         <span class="tt-win-tf-badge">5m · 15m</span>
         <span class="tt-win-note">Market open · Highest volume · Best momentum entries</span>
       </div>
       <div class="tt-win tt-lull">
         <span class="tt-win-tag">💤 LULL</span>
-        <span class="tt-win-time">11:30 PM – 1:30 AM</span>
+        <span class="tt-win-time tt-us-lull-time">11:30 PM – 1:30 AM</span>
         <span class="tt-win-tf-badge">1H · Avoid</span>
         <span class="tt-win-note">Lunch hour · Low volume · False breakouts common</span>
       </div>
       <div class="tt-win tt-power">
         <span class="tt-win-tag">⚡ POWER HOUR</span>
-        <span class="tt-win-time">2:30 AM – 4:00 AM</span>
+        <span class="tt-win-time tt-us-power-time">2:30 AM – 4:00 AM</span>
         <span class="tt-win-tf-badge">5m · 15m</span>
-        <span class="tt-win-note">Volume returns · Trend continuation · Exit by 3:50 AM</span>
+        <span class="tt-win-note tt-us-power-note">Volume returns · Trend continuation · Exit by 3:50 AM</span>
       </div>
       <div class="tt-win tt-closed">
         <span class="tt-win-tag">🔴 CLOSED</span>
-        <span class="tt-win-time">4:00 AM – 9:30 PM</span>
+        <span class="tt-win-time tt-us-closed-time">4:00 AM – 9:30 PM</span>
         <span class="tt-win-tf-badge">4H · Daily</span>
         <span class="tt-win-note">US market closed · Plan &amp; analyse for next session</span>
       </div>
@@ -308,25 +362,25 @@
     <div class="tt-windows">
       <div class="tt-win tt-prime">
         <span class="tt-win-tag">🎯 PRIME</span>
-        <span class="tt-win-time">9:30 PM – 11:00 PM</span>
+        <span class="tt-win-time tt-us-prime-time">9:30 PM – 11:00 PM</span>
         <span class="tt-win-tf-badge">5m · 15m</span>
         <span class="tt-win-note">Market open · Highest volume · Best momentum entries</span>
       </div>
       <div class="tt-win tt-lull">
         <span class="tt-win-tag">💤 LULL</span>
-        <span class="tt-win-time">11:30 PM – 1:30 AM</span>
+        <span class="tt-win-time tt-us-lull-time">11:30 PM – 1:30 AM</span>
         <span class="tt-win-tf-badge">1H · Avoid</span>
         <span class="tt-win-note">Lunch hour · Low volume · False breakouts common</span>
       </div>
       <div class="tt-win tt-power">
         <span class="tt-win-tag">⚡ POWER HOUR</span>
-        <span class="tt-win-time">2:30 AM – 4:00 AM</span>
+        <span class="tt-win-time tt-us-power-time">2:30 AM – 4:00 AM</span>
         <span class="tt-win-tf-badge">5m · 15m</span>
-        <span class="tt-win-note">Volume returns · Trend continuation · Exit by 3:50 AM</span>
+        <span class="tt-win-note tt-us-power-note">Volume returns · Trend continuation · Exit by 3:50 AM</span>
       </div>
       <div class="tt-win tt-closed">
         <span class="tt-win-tag">🔴 CLOSED</span>
-        <span class="tt-win-time">4:00 AM – 9:30 PM</span>
+        <span class="tt-win-time tt-us-closed-time">4:00 AM – 9:30 PM</span>
         <span class="tt-win-tf-badge">4H · Daily</span>
         <span class="tt-win-note">US market closed · Plan &amp; analyse for next session</span>
       </div>
@@ -1105,6 +1159,7 @@
       <div class="form-actions">
         <!-- <button class="btn btn-bursa" onclick="bursaCalc()">🇲🇾 Analyse ETF</button> -->
         <button class="btn btn-secondary" onclick="resetBursa()">↺</button>
+        <button class="btn btn-bursa-import" onclick="importBursaToMA()">⬆ Use MA Calculator</button>
       </div>
     </div>
   </div>
@@ -1792,7 +1847,7 @@
       <div class="sr-toolbar">
         <button class="btn btn-sr-import" onclick="importMAtoSR()">⬇️ Import MA Levels</button>
         <button class="btn btn-sr-import" onclick="importEMAtoSR()">⬇️ Import EMA Levels</button>
-        <button class="btn btn-secondary" onclick="resetSR()">↺</button>
+        <button class="btn btn-secondary" onclick="resetSR()">↺ Reset</button>
       </div>
 
       <div class="sr-input-grid">
@@ -2070,7 +2125,7 @@
       </div><!-- /mtf-grid-wrap -->
 
       <div class="form-actions">
-        <button class="btn btn-secondary" onclick="resetMTF()">↺</button>
+        <button class="btn btn-secondary" onclick="resetMTF()">↺ Reset</button>
       </div>
 
     </div>

@@ -3690,3 +3690,293 @@ flex-wrap: wrap;
 .mtf-header-row, .mtf-row { grid-template-columns: 72px repeat(4, 1fr); }
 .mtf-row-label { font-size: 9px; padding: .3rem .3rem; }
 }
+
+/* ── DST Badge & Bursa Import Button ────────────────── */
+.tt-dst-badge {
+display: inline-block;
+font-size: 9px;
+font-weight: 700;
+background: rgba(245,200,66,0.2);
+color: var(--yellow);
+border: 1px solid rgba(245,200,66,0.4);
+border-radius: 4px;
+padding: 0 5px;
+margin-left: 4px;
+vertical-align: middle;
+letter-spacing: .05em;
+}
+.btn-bursa-import {
+background: rgba(0,232,122,0.1);
+color: var(--green);
+border: 1px solid rgba(0,232,122,0.35);
+padding: .35rem .8rem;
+border-radius: var(--r);
+font-family: var(--mono);
+font-size: 12px;
+font-weight: 600;
+cursor: pointer;
+transition: all .2s;
+}
+.btn-bursa-import:hover {
+background: rgba(0,232,122,0.2);
+border-color: var(--green);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOGIN OVERLAY
+═══════════════════════════════════════════════════════ */
+.tm-login-overlay {
+position: fixed;
+inset: 0;
+z-index: 9999;
+background: radial-gradient(ellipse at 60% 40%, rgba(0,30,50,0.97) 0%, rgba(6,10,15,0.99) 100%);
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 1rem;
+backdrop-filter: blur(4px);
+animation: tm-login-fadein .35s ease;
+}
+.tm-login-overlay.tm-login-exit {
+animation: tm-login-fadeout .4s ease forwards;
+}
+@keyframes tm-login-fadein {
+from { opacity: 0; }
+to   { opacity: 1; }
+}
+@keyframes tm-login-fadeout {
+from { opacity: 1; }
+to   { opacity: 0; }
+}
+
+/* Box */
+.tm-login-box {
+width: 100%;
+max-width: 400px;
+background: var(--card);
+border: 1px solid var(--border2);
+border-radius: 18px;
+padding: 2rem 2rem 1.5rem;
+display: flex;
+flex-direction: column;
+gap: 1.1rem;
+box-shadow:
+0 0 0 1px rgba(0,200,240,0.08),
+0 24px 60px rgba(0,0,0,0.7),
+0 0 80px rgba(0,200,240,0.06);
+animation: tm-login-slidein .4s cubic-bezier(.22,1,.36,1);
+}
+@keyframes tm-login-slidein {
+from { transform: translateY(24px) scale(0.97); opacity: 0; }
+to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+.tm-login-shake {
+animation: tm-shake .4s ease !important;
+}
+@keyframes tm-shake {
+0%,100% { transform: translateX(0); }
+20%     { transform: translateX(-10px); }
+40%     { transform: translateX(10px); }
+60%     { transform: translateX(-7px); }
+80%     { transform: translateX(7px); }
+}
+
+/* Logo inside box */
+.tm-login-logo {
+font-family: var(--head);
+font-size: 26px;
+font-weight: 800;
+color: var(--accent);
+display: flex;
+align-items: center;
+gap: .5rem;
+}
+.tm-login-sub {
+font-size: 11px;
+color: var(--dim);
+letter-spacing: .05em;
+margin-top: -.6rem;
+}
+
+/* Error message */
+.tm-login-err {
+background: rgba(240,58,74,0.1);
+border: 1px solid rgba(240,58,74,0.35);
+border-radius: var(--r);
+color: var(--red);
+font-size: 12px;
+padding: .5rem .75rem;
+animation: tm-login-fadein .2s ease;
+}
+
+/* Fields */
+.tm-login-field {
+display: flex;
+flex-direction: column;
+gap: .35rem;
+}
+.tm-login-label {
+font-size: 10px;
+text-transform: uppercase;
+letter-spacing: .12em;
+color: var(--dim);
+}
+.tm-login-input {
+width: 100%;
+background: var(--surface);
+border: 1px solid var(--border2);
+border-radius: var(--r);
+color: var(--text);
+font-family: var(--mono);
+font-size: 14px;
+padding: .65rem .75rem;
+transition: border-color .2s, box-shadow .2s;
+outline: none;
+-webkit-appearance: none;
+}
+.tm-login-input:focus {
+border-color: var(--accent);
+box-shadow: 0 0 0 3px rgba(0,200,240,0.12);
+}
+.tm-pw-wrap {
+position: relative;
+display: flex;
+align-items: center;
+}
+.tm-pw-wrap .tm-login-input {
+padding-right: 2.8rem;
+}
+.tm-pw-toggle {
+position: absolute;
+right: .6rem;
+background: none;
+border: none;
+cursor: pointer;
+font-size: 16px;
+color: var(--dim);
+padding: .2rem;
+line-height: 1;
+transition: opacity .15s;
+}
+.tm-pw-toggle:hover { opacity: .8; }
+
+/* Stay row */
+.tm-login-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: .5rem;
+flex-wrap: wrap;
+}
+.tm-stay-label {
+display: flex;
+align-items: center;
+gap: .4rem;
+font-size: 12px;
+color: var(--dim);
+cursor: pointer;
+user-select: none;
+pointer-events: auto;   /* ← add this */
+-webkit-tap-highlight-color: transparent;  /* ← add this */
+}
+.tm-stay-label input[type=checkbox] {
+accent-color: var(--accent);
+width: 18px;
+height: 18px;
+min-width: 18px;
+cursor: pointer;
+pointer-events: auto;
+-webkit-appearance: checkbox;
+appearance: checkbox;
+margin: 0;
+}
+.tm-session-info {
+font-size: 10px;
+color: var(--dim);
+text-align: right;
+}
+
+/* Login button */
+.tm-login-btn {
+width: 100%;
+padding: .8rem;
+background: linear-gradient(135deg, var(--accent2), var(--accent));
+color: #060a0f;
+font-family: var(--head);
+font-size: 15px;
+font-weight: 800;
+border: none;
+border-radius: var(--r);
+cursor: pointer;
+letter-spacing: .06em;
+transition: opacity .2s, transform .1s, box-shadow .2s;
+box-shadow: 0 4px 20px rgba(0,200,240,0.3);
+}
+.tm-login-btn:hover:not(:disabled) {
+opacity: .92;
+transform: translateY(-1px);
+box-shadow: 0 6px 28px rgba(0,200,240,0.4);
+}
+.tm-login-btn:active:not(:disabled) {
+transform: translateY(0);
+}
+.tm-login-btn:disabled {
+opacity: .6;
+cursor: default;
+}
+
+/* Footer */
+.tm-login-footer {
+font-size: 10px;
+color: var(--dim);
+text-align: center;
+letter-spacing: .05em;
+border-top: 1px solid var(--border);
+padding-top: .75rem;
+}
+
+/* ── User Pill in Header ──────────────────────────── */
+.tm-user-pill {
+display: flex;
+align-items: center;
+gap: .4rem;
+background: rgba(0,200,240,0.08);
+border: 1px solid rgba(0,200,240,0.2);
+border-radius: 20px;
+padding: .22rem .55rem .22rem .45rem;
+font-size: 11px;
+color: var(--accent);
+font-family: var(--mono);
+animation: tm-login-fadein .3s ease;
+}
+.tm-user-icon { font-size: 13px; line-height: 1; }
+.tm-user-name {
+font-weight: 600;
+max-width: 80px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+.tm-logout-btn {
+background: none;
+border: none;
+color: var(--dim);
+cursor: pointer;
+font-size: 14px;
+padding: 0 0 0 .25rem;
+line-height: 1;
+transition: color .15s;
+display: flex;
+align-items: center;
+}
+.tm-logout-btn:hover { color: var(--red); }
+
+/* Mobile adjustments */
+@media (max-width: 420px) {
+.tm-login-box {
+padding: 1.5rem 1.25rem 1.25rem;
+border-radius: 14px;
+}
+.tm-login-logo { font-size: 22px; }
+.tm-user-name  { display: none; }
+}
