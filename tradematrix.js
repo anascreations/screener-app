@@ -1,13 +1,14 @@
-const TM_USER = 'admin'; 
-const TM_PASS = 'TdmRX_2026';
+/* ═══════════════════════════════════════════════════════
+   ★  TRADEMATRIX LOGIN SYSTEM
+   ─────────────────────────────────────────────────────
+   Change TM_USER and TM_PASS below to your credentials.
+   These are the only two lines you need to edit.
+═══════════════════════════════════════════════════════ */
+const TM_USER = 'admin';          // ← change username here
+const TM_PASS = '123'; // ← change password here
 
 const TM_SESSION_KEY  = 'tm_session';
 const TM_SESSION_HOURS = 12; // auto-logout after 12 hours of inactivity
-
-document.addEventListener('DOMContentLoaded', () => {
-    const el = document.getElementById('tm-copy-year');
-    if (el) el.textContent = '© ' + new Date().getFullYear();
-});
 
 function tmHashStr(s) {
 // Simple obfuscation — not cryptographic, sufficient for personal use
@@ -53,17 +54,55 @@ localStorage.removeItem(TM_SESSION_KEY);
 sessionStorage.removeItem(TM_SESSION_KEY);
 }
 
+function tmClearAllResults() {
+// Call every reset function to wipe all inputs and results
+try { resetMA(); }      catch(e) {}
+try { resetEMA(); }     catch(e) {}
+try { resetGold(); }    catch(e) {}
+try { resetBursa(); }   catch(e) {}
+try { resetSwing(); }   catch(e) {}
+try { resetIPO(); }     catch(e) {}
+try { resetListing(); } catch(e) {}
+try { resetSR(); }      catch(e) {}
+try { resetMTF(); }     catch(e) {}
+try { smReset(); }      catch(e) {}
+// Switch back to first tab
+try { switchTab('ma'); } catch(e) {}
+}
+
 function tmShowApp(username) {
 const overlay = document.getElementById('tm-login-overlay');
 if (overlay) {
 overlay.classList.add('tm-login-exit');
 setTimeout(() => { overlay.style.display = 'none'; }, 400);
 }
-// Show user pill in header
+// Clear all data on every login (fresh session)
+setTimeout(() => { tmClearAllResults(); }, 420);
 const pill = document.getElementById('tm-user-pill');
 const name = document.getElementById('tm-user-name');
 if (pill) pill.style.display = 'flex';
 if (name) name.textContent = username;
+}
+
+function tmLogout() {
+tmClearAllResults();
+tmClearSession();
+const un  = document.getElementById('tm-un');
+const pw  = document.getElementById('tm-pw');
+const err = document.getElementById('tm-login-err');
+const info= document.getElementById('tm-session-info');
+if (un)   un.value = '';
+if (pw)   pw.value = '';
+if (err)  err.style.display = 'none';
+if (info) info.textContent = `Last logout: ${new Date().toLocaleString('en-MY')}`;
+const pill = document.getElementById('tm-user-pill');
+if (pill) pill.style.display = 'none';
+const overlay = document.getElementById('tm-login-overlay');
+if (overlay) {
+overlay.classList.remove('tm-login-exit');
+overlay.style.display = 'flex';
+setTimeout(() => { if (un) un.focus(); }, 100);
+}
 }
 
 function tmDoLogin() {
@@ -103,29 +142,6 @@ if (pwEl) { pwEl.value = ''; pwEl.focus(); }
 }
 if (btn) { btn.textContent = 'Login'; btn.disabled = false; }
 }, 350); // small delay feels more "real"
-}
-
-function tmLogout() {
-tmClearSession();
-// Reset fields
-const un = document.getElementById('tm-un');
-const pw = document.getElementById('tm-pw');
-const err= document.getElementById('tm-login-err');
-const info = document.getElementById('tm-session-info');
-if (un) un.value = '';
-if (pw) pw.value = '';
-if (err) err.style.display = 'none';
-if (info) info.textContent = `Last login: ${new Date().toLocaleString('en-MY')}`;
-// Hide user pill
-const pill = document.getElementById('tm-user-pill');
-if (pill) pill.style.display = 'none';
-// Show overlay
-const overlay = document.getElementById('tm-login-overlay');
-if (overlay) {
-overlay.classList.remove('tm-login-exit');
-overlay.style.display = 'flex';
-setTimeout(() => { if (un) un.focus(); }, 100);
-}
 }
 
 function tmTogglePW(btn) {
@@ -3535,6 +3551,10 @@ if (lv != null) levels.push({ price: lv, label: lb, source: 'manual' });
 const pivotLevels = srGetPivotLevels();
 pivotLevels.forEach(pl => levels.push(pl));
 
+// Add Volume Profile levels if present
+const vpLevels = srGetVPLevels();
+vpLevels.forEach(vl => levels.push(vl));
+
 if (levels.length === 0) {
 if (chartWrap) chartWrap.style.display = 'none';
 if (analysisWrap) analysisWrap.style.display = 'none';
@@ -3966,6 +3986,10 @@ for (let i = 1; i <= 8; i++) {
 const lv = $(`sr-lv${i}`); const lb = $(`sr-lb${i}`);
 if (lv) lv.value = ''; if (lb) lb.value = '';
 }
+for (let i = 1; i <= 4; i++) {
+const vp = $(`sr-vp${i}`); const vt = $(`sr-vp-t${i}`);
+if (vp) vp.value = ''; if (vt) vt.value = '';
+}
 const pivot = $('sr-pivot-results'); if (pivot) pivot.style.display = 'none';
 [$('sr-chart-wrap'), $('sr-analysis-wrap'), $('sr-bar-wrap')].forEach(el => { if (el) el.style.display = 'none'; });
 }
@@ -4368,6 +4392,309 @@ card.style.transition = 'box-shadow .4s';
 card.style.boxShadow = '0 0 24px rgba(0,232,122,0.5)';
 setTimeout(() => { card.style.boxShadow = ''; }, 900);
 }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SMART MONEY DASHBOARD — DDNK METHOD
+═══════════════════════════════════════════════════════ */
+
+// ── Power Hour Countdown ────────────────────────────
+function smGetNextWindow() {
+const h     = getMYTHour();
+const open  = getUSOpenHourMYT();
+const close = getUSCloseHourMYT();
+const prime_end   = open + 1.5;
+const lull_end    = (open + 3.0) % 24;
+const power_start = lull_end;
+
+// Windows in order [start, end, label, color]
+const wins = [
+{ start: open,        end: prime_end,   name:'🎯 Prime Window',   cls:'sess-prime',  color:'#00c8f0' },
+{ start: lull_end,    end: close,       name:'⚡ Power Hour',     cls:'sess-power',  color:'#f5c842' },
+{ start: open - 4.0,  end: open,        name:'🔔 Pre-Market',     cls:'sess-pre',    color:'#ff7043' },
+];
+
+// Find current window or next one
+function inWindow(s, e) {
+if (s < e) return h >= s && h < e;
+return h >= s || h < e; // crosses midnight
+}
+function hoursUntil(target) {
+let diff = target - h;
+if (diff < 0) diff += 24;
+return diff;
+}
+
+for (const w of wins) {
+if (inWindow(w.start, w.end)) {
+const remaining = hoursUntil(w.end < w.start ? w.end + 24 : w.end);
+return { ...w, mode:'active', hoursLeft: remaining, hoursUntil: 0 };
+}
+}
+// Find soonest upcoming
+let nearest = null, nearestH = 99;
+for (const w of wins) {
+const u = hoursUntil(w.start);
+if (u < nearestH) { nearestH = u; nearest = w; }
+}
+return nearest ? { ...nearest, mode:'waiting', hoursLeft: 0, hoursUntil: nearestH } : null;
+}
+
+function smUpdateCountdown() {
+const w = smGetNextWindow();
+if (!w) return;
+const el     = $('sm-countdown');
+const elName = $('sm-countdown-name');
+const elBar  = $('sm-countdown-bar');
+if (!el) return;
+
+const hoursRef = w.mode === 'active' ? w.hoursLeft : w.hoursUntil;
+const totalH   = w.mode === 'active' ? (w.end < w.start ? w.end + 24 - w.start : w.end - w.start) : 24;
+const pct      = w.mode === 'active' ? Math.max(0, (1 - hoursRef / totalH) * 100) : Math.max(0, (1 - hoursRef / totalH) * 100);
+
+const h  = Math.floor(hoursRef);
+const m  = Math.floor((hoursRef - h) * 60);
+const s  = Math.floor(((hoursRef - h) * 60 - m) * 60);
+const ts = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+el.textContent = ts;
+el.style.color = w.color;
+if (elName) {
+elName.textContent = w.mode === 'active'
+? `${w.name} — Time Remaining`
+: `Until ${w.name}`;
+elName.style.color = w.color;
+}
+if (elBar) {
+elBar.style.width = (w.mode === 'active' ? pct : (1 - hoursRef/24)*100) + '%';
+elBar.style.background = w.color;
+}
+}
+setInterval(smUpdateCountdown, 1000);
+smUpdateCountdown();
+
+// ── Fear & Greed Arc ───────────────────────────────
+function smDrawFGArc(val) {
+const canvas = $('sm-fg-canvas');
+if (!canvas) return;
+const dpr = window.devicePixelRatio || 1;
+canvas.width  = 110 * dpr;
+canvas.height = 65 * dpr;
+canvas.style.width  = '110px';
+canvas.style.height = '65px';
+const ctx = canvas.getContext('2d');
+ctx.scale(dpr, dpr);
+const cx = 55, cy = 58, r = 44;
+
+// Background arc
+ctx.beginPath();
+ctx.arc(cx, cy, r, Math.PI, 0, false);
+ctx.lineWidth = 10;
+ctx.strokeStyle = '#1a2b3c';
+ctx.stroke();
+
+// Gradient segments
+const segs = [
+{ from:0,   to:20,  color:'#f03a4a' },
+{ from:20,  to:40,  color:'#ff7043' },
+{ from:40,  to:60,  color:'#f5c842' },
+{ from:60,  to:80,  color:'#00e87a' },
+{ from:80,  to:100, color:'#00c8f0' },
+];
+segs.forEach(seg => {
+const startA = Math.PI + (seg.from / 100) * Math.PI;
+const endA   = Math.PI + (seg.to   / 100) * Math.PI;
+ctx.beginPath();
+ctx.arc(cx, cy, r, startA, endA, false);
+ctx.lineWidth = 10;
+ctx.strokeStyle = seg.color;
+ctx.stroke();
+});
+
+if (val != null && !isNaN(val)) {
+// Needle
+const angle = Math.PI + (val / 100) * Math.PI;
+const nx = cx + (r - 12) * Math.cos(angle);
+const ny = cy + (r - 12) * Math.sin(angle);
+ctx.beginPath();
+ctx.moveTo(cx, cy);
+ctx.lineTo(nx, ny);
+ctx.lineWidth = 2.5;
+ctx.shadowBlur = 6;
+ctx.shadowColor = '#fff';
+ctx.strokeStyle = '#fff';
+ctx.stroke();
+ctx.shadowBlur = 0;
+// Center dot
+ctx.beginPath();
+ctx.arc(cx, cy, 4, 0, Math.PI*2);
+ctx.fillStyle = '#fff';
+ctx.fill();
+// Value
+ctx.fillStyle = '#fff';
+ctx.font = `bold 13px 'Syne', sans-serif`;
+ctx.textAlign = 'center';
+ctx.fillText(Math.round(val), cx, cy - 14);
+}
+}
+
+// ── Main smCalc ────────────────────────────────────
+function smCalc() {
+// Fear & Greed
+const fg  = parseFloat($('sm-fg')?.value);
+const fgLabel = $('sm-fg-label');
+if (!isNaN(fg)) {
+smDrawFGArc(fg);
+const zones = [
+[0,25,'Extreme Fear 😱','red'],
+[25,45,'Fear 😟','orange'],
+[45,55,'Neutral 😐','yellow'],
+[55,75,'Greed 😏','green'],
+[75,100,'Extreme Greed 🤑','accent'],
+];
+const z = zones.find(([lo,hi]) => fg >= lo && fg <= hi);
+if (z && fgLabel) {
+fgLabel.textContent = z[2];
+fgLabel.className = `sm-fg-label ${z[3]}`;
+}
+} else {
+smDrawFGArc(null);
+}
+
+// Put/Call
+const pcr = parseFloat($('sm-pcr')?.value);
+const pcrLabel = $('sm-pcr-label');
+if (!isNaN(pcr) && pcrLabel) {
+if (pcr > 1.2)       { pcrLabel.textContent = `${pcr.toFixed(2)} — Extreme Fear → Contrarian BUY signal`; pcrLabel.className = 'sm-pcr-label green'; }
+else if (pcr > 0.9)  { pcrLabel.textContent = `${pcr.toFixed(2)} — Bearish sentiment → Caution`; pcrLabel.className = 'sm-pcr-label yellow'; }
+else if (pcr > 0.7)  { pcrLabel.textContent = `${pcr.toFixed(2)} — Neutral`; pcrLabel.className = 'sm-pcr-label accent'; }
+else                 { pcrLabel.textContent = `${pcr.toFixed(2)} — Complacency → Market may be overbought`; pcrLabel.className = 'sm-pcr-label red'; }
+}
+
+// Pre-Market Gap
+const prevC  = parseFloat($('sm-prev-close')?.value);
+const pmH    = parseFloat($('sm-pm-high')?.value);
+const pmL    = parseFloat($('sm-pm-low')?.value);
+const pmLast = parseFloat($('sm-pm-last')?.value);
+const avgVol = parseFloat($('sm-avg-vol')?.value);
+const pmVol  = parseFloat($('sm-pm-vol')?.value);
+const gapEl  = $('sm-gap-result');
+
+if (!isNaN(prevC) && !isNaN(pmLast) && gapEl) {
+const gapPct    = ((pmLast - prevC) / prevC) * 100;
+const isGapUp   = gapPct > 0;
+const isGapDown = gapPct < 0;
+const absGap    = Math.abs(gapPct);
+const volRatio  = (!isNaN(avgVol) && !isNaN(pmVol) && avgVol > 0) ? (pmVol / avgVol) * 100 : null;
+const gapRange  = (!isNaN(pmH) && !isNaN(pmL)) ? ((pmLast - pmL) / (pmH - pmL) * 100) : null;
+
+let gapClass, gapLabel, advice;
+if (absGap > 3)      { gapClass='red';    gapLabel='Large Gap — extreme move'; }
+else if (absGap > 1) { gapClass='yellow'; gapLabel='Moderate Gap — tradeable'; }
+else                 { gapClass='green';  gapLabel='Small Gap — normal open'; }
+
+if (isGapUp)   advice = absGap > 2 ? '⚠️ Large gap up — wait for first 5-min candle to confirm direction before entering' : '✅ Gap up — bullish bias, enter on pullback to pre-mkt low';
+else if (isGapDown) advice = absGap > 2 ? '🔴 Large gap down — avoid long entries, watch for gap fill attempt' : '⚠️ Gap down — wait for stabilisation above yesterday\'s low';
+else advice = '📊 Flat open — no gap bias, follow MA stack direction';
+
+gapEl.style.display = '';
+gapEl.innerHTML = `
+<div class="sm-gap-row">
+<div class="sm-gap-stat"><div class="sm-gs-label">Gap %</div><div class="sm-gs-val ${gapClass}">${(isGapUp?'+':'')}${gapPct.toFixed(2)}%</div><div class="sm-gs-sub">${gapLabel}</div></div>
+<div class="sm-gap-stat"><div class="sm-gs-label">Direction</div><div class="sm-gs-val ${isGapUp?'green':isGapDown?'red':'accent'}">${isGapUp?'▲ Gap Up':isGapDown?'▼ Gap Down':'◆ Flat'}</div><div class="sm-gs-sub">${isGapUp?'Bullish bias':'Bearish bias'}</div></div>
+${volRatio!=null?`<div class="sm-gap-stat"><div class="sm-gs-label">Pre-Mkt Vol</div><div class="sm-gs-val ${volRatio>30?'green':volRatio>15?'yellow':'dim'}">${volRatio.toFixed(1)}%</div><div class="sm-gs-sub">of daily avg</div></div>`:''}
+${gapRange!=null?`<div class="sm-gap-stat"><div class="sm-gs-label">Price in PM Range</div><div class="sm-gs-val accent">${gapRange.toFixed(0)}%</div><div class="sm-gs-sub">${gapRange>70?'Near PM High':gapRange<30?'Near PM Low':'Mid-range'}</div></div>`:''}
+</div>
+<div class="sm-gap-advice">${advice}</div>`;
+} else if (gapEl) gapEl.style.display = 'none';
+
+// Institutional Bias Score
+smScoreBias(fg, pcr);
+}
+
+function smScoreBias(fg, pcr) {
+const checks = [
+$('smc-above-vwap')?.checked,
+$('smc-pm-vol')?.checked,
+$('smc-gap-dir')?.checked,
+$('smc-dark-pool')?.checked,
+$('smc-news')?.checked,
+$('smc-sector')?.checked,
+];
+const score = checks.filter(Boolean).length;
+const total = checks.length;
+
+// Add sentiment bonus
+let sentBonus = 0, sentNote = '';
+if (!isNaN(fg)) {
+if (fg <= 25)      { sentBonus = 2; sentNote = '+ Extreme Fear = contrarian bullish (+2)'; }
+else if (fg <= 45) { sentBonus = 1; sentNote = '+ Fear zone = mild contrarian (+1)'; }
+else if (fg >= 75) { sentBonus = -1; sentNote = '− Extreme Greed = caution (−1)'; }
+}
+if (!isNaN(pcr)) {
+if (pcr > 1.2) { sentBonus += 1; sentNote += ' · High P/C = contrarian bull (+1)'; }
+else if (pcr < 0.6) { sentBonus -= 1; sentNote += ' · Low P/C = complacency (−1)'; }
+}
+
+const finalScore = Math.max(0, Math.min(8, score + sentBonus));
+const el = $('sm-bias-result');
+if (!el) return;
+el.style.display = '';
+
+const cls = finalScore >= 6 ? 'green' : finalScore >= 4 ? 'yellow' : 'red';
+const verdict = finalScore >= 6 ? '✅ HIGH CONVICTION — Institutional conditions aligned. Safe to enter with full planned size.'
+: finalScore >= 4 ? '⚠️ MODERATE — Some institutional signals missing. Reduce position size by 25–50%.'
+: '🔴 LOW — Institutional conditions weak. Do not enter. Wait for more checkboxes to pass.';
+
+el.innerHTML = `
+<div class="sm-bias-score-row">
+<div class="sm-bias-score ${cls}">${finalScore}<span style="font-size:14px;font-weight:400">/8</span></div>
+<div class="sm-bias-detail">
+<div style="font-size:12px;font-weight:700;color:var(--text)">Institutional Bias Score</div>
+<div style="font-size:10px;color:var(--dim);margin-top:.2rem">${score}/${total} checklist · ${sentNote || 'No sentiment data'}</div>
+</div>
+</div>
+<div class="advice-box ${cls === 'green' ? 'green' : cls === 'yellow' ? 'yellow' : 'red'}" style="margin-top:.5rem;font-size:12px">${verdict}</div>`;
+}
+
+function smReset() {
+['sm-fg','sm-pcr','sm-prev-close','sm-pm-high','sm-pm-low','sm-pm-last','sm-avg-vol','sm-pm-vol'].forEach(id => {
+const el = $(id); if (el) el.value = '';
+});
+['smc-above-vwap','smc-pm-vol','smc-gap-dir','smc-dark-pool','smc-news','smc-sector'].forEach(id => {
+const el = $(id); if (el) el.checked = false;
+});
+const gapEl = $('sm-gap-result'); if (gapEl) gapEl.style.display = 'none';
+const biasEl = $('sm-bias-result'); if (biasEl) biasEl.style.display = 'none';
+const fgLabel = $('sm-fg-label'); if (fgLabel) { fgLabel.textContent = 'CNN Fear & Greed (0–100)'; fgLabel.className = 'sm-fg-label'; }
+const pcrLabel = $('sm-pcr-label'); if (pcrLabel) { pcrLabel.textContent = 'CBOE Total P/C ratio'; pcrLabel.className = 'sm-pcr-label'; }
+smDrawFGArc(null);
+}
+
+function smToggle() {
+const body = $('sm-body');
+const btn  = $('sm-collapse-btn');
+if (!body || !btn) return;
+const hidden = body.style.display === 'none';
+body.style.display = hidden ? '' : 'none';
+btn.textContent = hidden ? '▲ Hide' : '▼ Show';
+}
+
+// Initialise arc on load
+setTimeout(() => smDrawFGArc(null), 300);
+
+// ── Volume Profile levels in srCalc ───────────────
+// Patch into srCalc by extending getVPLevels
+function srGetVPLevels() {
+const result = [];
+for (let i = 1; i <= 4; i++) {
+const type = $(`sr-vp-t${i}`)?.value;
+const price = parseFloat($(`sr-vp${i}`)?.value);
+if (type && !isNaN(price)) {
+result.push({ price, label: type, source: 'vp' });
+}
+}
+return result;
 }
 
 function toggleRefGrid(btn) {
