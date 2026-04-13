@@ -2290,6 +2290,7 @@
     <button class="guide-tab-btn"        onclick="switchGuide('g-sr')">📊 S/R Zones</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-risk')">⚖️ Risk Rules</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-indicators')">🔬 Indicators</button>
+    <button class="guide-tab-btn"        onclick="switchGuide('g-smd')">🏆 Smart Money</button>
   </div>
 
   <!-- ── MA / EMA Combined Guide ── -->
@@ -2590,6 +2591,112 @@
       </div>
     </div>
   </div><!-- /g-indicators -->
+
+<!-- ── Smart Money Dashboard Guide ── -->
+  <div class="guide-section" id="g-smd">
+    <div class="guide-card">
+      <div class="guide-card-hdr">🏆 Smart Money Dashboard</div>
+      <div class="guide-card-body">
+        <div class="guide-intro" style="border-left-color:var(--yellow)">The Smart Money Dashboard brings that discipline into one place. <strong>Only trade when the Institutional Bias Score is 5+/8.</strong></div>
+
+        <div class="guide-flow">
+          <div class="guide-step">
+            <div class="step-num">01</div>
+            <div class="step-body">
+              <div class="step-title">⏱ Power Hour Countdown — No Input Needed</div>
+              <div class="step-desc">This runs automatically using your device clock and DST detection. It shows a live countdown to the next high-probability trading window (Prime or Power Hour). <strong>Rule: only execute scalps and day trades during Prime Window or Power Hour.</strong> Outside these windows, reduce size by 50% or stay flat. If the countdown shows more than 2 hours remaining, use that time to complete the rest of this checklist instead of trading.</div>
+              <div class="step-rule">🎯 Prime Window: 9:30–11:00 PM MYT (EDT) / 10:30 PM–12:00 AM (EST) · Power Hour: last 90 min before close</div>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">02</div>
+            <div class="step-body">
+              <div class="step-title">😱 Fear &amp; Greed Index — CNN Daily Score</div>
+              <div class="step-desc">Get the current score from <strong>edition.cnn.com/markets/fear-and-greed</strong> — a large dial shows a number 0–100. Enter it here. Use contrarian logic: when everyone is fearful, the smart money is buying. When everyone is greedy, the smart money is selling.<br/><br/>
+              <strong>0–25 Extreme Fear</strong> → contrarian BUY signal — adds +2 to your Bias Score. Market is likely oversold and institutions are accumulating quietly.<br/>
+              <strong>25–45 Fear</strong> → mild buy bias — adds +1.<br/>
+              <strong>45–55 Neutral</strong> → no edge from sentiment, rely fully on your MA/EMA filters.<br/>
+              <strong>55–75 Greed</strong> → no bonus, no penalty — trade normally.<br/>
+              <strong>75–100 Extreme Greed</strong> → caution, deducts −1 from Bias Score. Market may be near a short-term top.</div>
+              <div class="step-rule">💡 Update once per day — score changes daily, not intraday</div>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">03</div>
+            <div class="step-body">
+              <div class="step-title">📊 Put/Call Ratio — CBOE Daily Figure</div>
+              <div class="step-desc">Get the CBOE Total P/C Ratio from <strong>cboe.com/us/options/market_statistics/daily</strong> or search Google for "CBOE put call ratio today". Published after US market close each day. Typical range: 0.60–1.30.<br/><br/>
+              This measures how many put options (bets on falling prices) vs call options (bets on rising prices) traders are buying. Uses it as a contrarian signal — extreme put buying means extreme fear, which often precedes a bounce.<br/><br/>
+              <strong>&gt;1.2</strong> → extreme fear in options market → contrarian BUY signal, adds +1 to Bias Score.<br/>
+              <strong>0.9–1.2</strong> → bearish sentiment → proceed with caution, no bonus.<br/>
+              <strong>0.7–0.9</strong> → neutral → normal trading.<br/>
+              <strong>&lt;0.7</strong> → complacency / everyone bullish → market may be overbought, deducts −1.</div>
+              <div class="step-rule">💡 Update once per day — use previous day's closing figure</div>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">04</div>
+            <div class="step-body">
+              <div class="step-title">📈 Pre-Market Gap Tracker — Fill Before 9:30 PM MYT</div>
+              <div class="step-desc">This is most important pre-session step. He analyses the gap before every single trading day. Fill in all 6 fields for your target stock or index.<br/><br/>
+              <strong>Prev Close:</strong> Yesterday's closing price — Yahoo Finance, TradingView, or your broker.<br/>
+              <strong>Pre-Mkt High/Low:</strong> Today's pre-market range — Yahoo Finance shows this from 4 AM ET (4 PM MYT) onwards. TradingView: enable "Extended Hours" in chart settings.<br/>
+              <strong>Pre-Mkt Last:</strong> Most recent pre-market price right now.<br/>
+              <strong>20d Avg Vol:</strong> Yahoo Finance shows "Avg. Volume" on the stock summary page. TradingView: check Volume indicator's MA value.<br/>
+              <strong>Pre-Mkt Vol:</strong> Yahoo Finance shows pre-market volume beneath the pre-market price.<br/><br/>
+              <strong>How to interpret the result:</strong> A gap &gt;1% with pre-market volume &gt;20% of daily average = institutional participation — high-conviction setup. A flat open (gap &lt;0.3%) = no directional bias, rely entirely on your MA stack. A large gap (&gt;3%) = wait for the first 5-minute candle to close before entering — large gaps often partially fill in the first 30 minutes.</div>
+              <div class="step-rule">⚠️ Never enter on the open candle during a large gap day — wait for direction confirmation</div>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">05</div>
+            <div class="step-body">
+              <div class="step-title">🏦 Institutional Bias Checklist — 6 Questions</div>
+              <div class="step-desc">Tick each box that applies right now. Each represents a condition that increases the probability institutions are buying alongside you.<br/><br/>
+              <strong>Price above VWAP:</strong> Add VWAP indicator in TradingView (search "VWAP"). If today's price is above the VWAP line = institutions are net buyers today. This is intraday bull/bear dividing line.<br/><br/>
+              <strong>Pre-mkt vol &gt;20% of avg:</strong> Auto-calculated from your Gap Tracker fields. If shown as green, tick this box.<br/><br/>
+              <strong>Gap direction matches Daily trend:</strong> If your Daily MA stack is bullish (MA5&gt;MA20&gt;MA50) AND today is a gap up = tick. If bearish Daily trend and gap down = do not fight it.<br/><br/>
+              <strong>Dark pool buy flow:</strong> Free source: <strong>unusualwhales.com</strong> — check "Dark Pool" tab for your ticker. Large buy prints (&gt;$1M blocks) appearing today = institutional accumulation. Alternatively <strong>darkpoollevels.com</strong> shows recent activity.<br/><br/>
+              <strong>No major news in next 2 hours:</strong> Check <strong>forexfactory.com/calendar</strong> or search "US economic calendar today". Red-folder events (NFP, CPI, FOMC, Fed speeches) within 2 hours = do NOT tick this — volatility spikes can stop you out randomly.<br/><br/>
+              <strong>Sector ETF also bullish:</strong> Find your stock's sector ETF — tech = QQQ or XLK, energy = XLE, financials = XLF, healthcare = XLV. If the sector ETF is also above its MA5 and trending up, the whole sector has institutional support, not just your stock.</div>
+              <div class="step-rule">🏆 Rule: only enter when 5 or more boxes are ticked AND the Bias Score shows HIGH CONVICTION</div>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">06</div>
+            <div class="step-body">
+              <div class="step-title">📊 Volume Profile Zones (S/R Tab) — Order Flow Context</div>
+              <div class="step-desc">Volume Profile shows where most trading volume occurred at each price level. In TradingView: click the Volume Profile tool in the left toolbar (looks like a sideways histogram) → drag across the last 20–60 days → it draws automatically.<br/><br/>
+              <strong>POC (Point of Control):</strong> The price level with the highest volume — the fairest value according to the market. Price is magnetically attracted to the POC. Great level for limit orders.<br/>
+              <strong>HVN (High Volume Node):</strong> Tall bars in the profile = price spent a lot of time here = strong support/resistance. If price approaches an HVN from above, expect it to slow down or bounce. Enter the HVN prices in the S/R Zone tab — they will show as thick bands on the chart.<br/>
+              <strong>LVN (Low Volume Node):</strong> Thin/small bars = very little trading happened here = price moves fast through this zone. LVNs between your entry and target are good — price will accelerate through them. LVNs between entry and stop are bad — your stop could trigger quickly.</div>
+              <div class="step-rule">💡 Add POC + 2 HVNs to the S/R Zone tab every day — these are key institutional reference levels</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card" style="margin-top:.75rem;border:none;padding:0">
+          <div class="guide-card-hdr">🏆 Daily Pre-Session Routine (9 PM MYT)</div>
+          <div class="guide-card-body">
+            <div class="guide-flow">
+              <div class="guide-step"><div class="step-num">7PM</div><div class="step-body"><div class="step-title">Update Fear &amp; Greed + Put/Call Ratio</div><div class="step-desc">Open CNN Fear &amp; Greed and CBOE website. Enter both values into the dashboard. These set your overall market bias for the day.</div></div></div>
+              <div class="guide-step"><div class="step-num">8PM</div><div class="step-body"><div class="step-title">Fill Pre-Market Gap Tracker</div><div class="step-desc">Open Yahoo Finance for your target stock. Note pre-market High, Low, Last, and Volume. Fill all 6 gap fields. Read the gap advice the dashboard generates.</div></div></div>
+              <div class="guide-step"><div class="step-num">8:30PM</div><div class="step-body"><div class="step-title">Check Economic Calendar + Dark Pool</div><div class="step-desc">Open ForexFactory — are there red-folder events before midnight? If yes, untick "No major news". Check Unusual Whales for dark pool activity on your ticker.</div></div></div>
+              <div class="guide-step"><div class="step-num">9PM</div><div class="step-body"><div class="step-title">Tick/Untick Bias Checklist + Check Bias Score</div><div class="step-desc">Open TradingView. Add VWAP. Check if price is above it. Verify sector ETF direction. Complete all 6 checkboxes. <strong>Only proceed if Bias Score is 5+/8.</strong></div></div></div>
+              <div class="guide-step"><div class="step-num">9:25PM</div><div class="step-body"><div class="step-title">Open MA/EMA Tab — Enter Your Indicators</div><div class="step-desc">Now that institutional bias is confirmed, use the MA or EMA calculator to check technical alignment. You need BOTH smart money bias AND technical signals to trade with full size.</div></div></div>
+              <div class="guide-step"><div class="step-num">9:30PM</div><div class="step-body"><div class="step-title">Market Opens — Execute Only on Confirmed Setups</div><div class="step-desc">Wait for the first candle to close. If gap is large (&gt;2%), wait for the second candle too. Enter only when price action confirms the pre-market bias direction. Set your ATR stop immediately.</div></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /g-smd -->
 
 </div><!-- /panel-guide -->
 
