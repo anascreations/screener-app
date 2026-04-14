@@ -4283,3 +4283,47 @@ font-size: 10px;
 color: var(--dim);
 line-height: 1.5;
 }
+/* ═══════════════════════════════════════════════════════
+   S/R BEST ENTRY PLAN CARD
+═══════════════════════════════════════════════════════ */
+.sr-entry-plan-grid {
+	display: flex;
+	flex-direction: column;
+	gap: .3rem;
+}
+.sr-ep-row {
+	display: grid;
+	grid-template-columns: 22px 110px 90px 1fr;
+	align-items: center;
+	gap: .5rem;
+	padding: .4rem .55rem;
+	border-radius: var(--r);
+	font-size: 11px;
+}
+.sr-ep-entry { background: rgba(0,232,122,0.08);  border-left: 3px solid var(--green); }
+.sr-ep-stop  { background: rgba(240,58,74,0.08);   border-left: 3px solid var(--red); }
+.sr-ep-tp1   { background: rgba(240,58,74,0.05);   border-left: 3px solid #f03a4a88; }
+.sr-ep-tp2   { background: rgba(255,112,67,0.05);  border-left: 3px solid #ff704388; }
+.sr-ep-trail { background: rgba(0,200,240,0.05);   border-left: 3px solid var(--accent); }
+.sr-ep-icon  { font-size: 13px; text-align: center; }
+.sr-ep-label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); }
+.sr-ep-price {
+	font-size: 14px;
+	font-weight: 700;
+	font-family: var(--head);
+	color: var(--text);
+}
+.sr-ep-entry .sr-ep-price { color: var(--green); }
+.sr-ep-stop  .sr-ep-price { color: var(--red); }
+.sr-ep-tp1   .sr-ep-price { color: #f87171; }
+.sr-ep-tp2   .sr-ep-price { color: var(--orange); }
+.sr-ep-trail .sr-ep-price { color: var(--accent); font-size: 12px; }
+.sr-ep-note  { font-size: 10px; color: var(--dim); line-height: 1.4; }
+.sr-ep-note .green  { color: var(--green); font-weight: 700; }
+.sr-ep-note .yellow { color: var(--yellow); font-weight: 700; }
+.sr-ep-note .red    { color: var(--red); font-weight: 700; }
+
+@media (max-width: 500px) {
+	.sr-ep-row { grid-template-columns: 20px 90px 75px 1fr; font-size: 10px; }
+	.sr-ep-price { font-size: 12px; }
+}

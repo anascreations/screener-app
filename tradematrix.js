@@ -3636,26 +3636,9 @@ el.style.display = '';
 srCalc();
 }
 
-// ── Label slot allocator — prevents right-side labels from overlapping ──
-const _srLabelSlots = [];
-function srResetLabelSlots() { _srLabelSlots.length = 0; }
-function srGetLabelY(idealY) {
-	const MIN_GAP = 20;
-	let candidate = idealY;
-	for (let attempt = 0; attempt < 60; attempt++) {
-		const clash = _srLabelSlots.find(s => Math.abs(s - candidate) < MIN_GAP);
-		if (!clash) { _srLabelSlots.push(candidate); return candidate; }
-		const dir = attempt % 2 === 0 ? 1 : -1;
-		candidate = idealY + dir * Math.ceil((attempt + 1) / 2) * MIN_GAP;
-	}
-	_srLabelSlots.push(candidate);
-	return candidate;
-}
-
 function drawSRCanvas(price, levels) {
 const canvas = $('sr-canvas');
 if (!canvas) return;
-srResetLabelSlots();
 const parent = canvas.parentElement;
 const dpr = window.devicePixelRatio || 1;
 
@@ -3665,14 +3648,14 @@ const isMobile = screenW < 520;
 const isTablet = screenW >= 520 && screenW < 768;
 
 const cssW = parent.clientWidth - 4;
+// Mobile: taller rows to fit labels inside; desktop: standard
 const rowH    = isMobile ? 38 : 32;
 const TOP     = isMobile ? 28 : 36;
 const BOT     = 20;
 const LEFT    = isMobile ? 54 : 66;
+// Mobile: no right margin — labels go inside chart
 const RIGHT   = isMobile ? 4 : (isTablet ? 140 : 175);
-// FIX 1: ensure minimum 520px height so clustered levels have room to spread
-const minH    = TOP + BOT + rowH * (levels.length + 2) + 60;
-const cssH    = Math.max(minH, 520);
+const cssH    = TOP + BOT + rowH * (levels.length + 2) + 60;
 
 canvas.style.width  = cssW + 'px';
 canvas.style.height = cssH + 'px';
@@ -3684,12 +3667,11 @@ const W = cssW, H = cssH;
 const chartW = W - LEFT - RIGHT;
 const chartH = H - TOP - BOT;
 
-// Price range — expand padding when levels are tightly clustered
+// Price range
 const allP = [...levels.map(l => l.price), price];
 const minP = Math.min(...allP), maxP = Math.max(...allP);
 const range = maxP - minP || price * 0.08;
-// FIX 1b: ensure at least 20% padding so clustered levels spread apart visually
-const pad   = Math.max(range * 0.45, price * 0.04);
+const pad   = range * 0.32;
 const pMin  = minP - pad, pMax = maxP + pad;
 const pToY  = p => TOP + chartH - ((p - pMin) / (pMax - pMin)) * chartH;
 
@@ -3727,26 +3709,9 @@ ctx.fillStyle = grad;
 ctx.fillRect(LEFT, yR, chartW, yS - yR);
 }
 
-// ── Pre-compute pixel Y for each level ───────────────
-levels.forEach(lv => { lv._y = pToY(lv.price); });
-
-// ── FIX 2: compute max band height per level (cap at half gap to nearest) ──
-levels.forEach((lv, i) => {
-const nearestGap = levels.reduce((minGap, other, j) => {
-	if (i === j) return minGap;
-	return Math.min(minGap, Math.abs(other._y - lv._y));
-}, Infinity);
-const conf    = lv.confluence;
-const isMajor  = conf >= 3;
-const isStrong = conf >= 2;
-const rawBandH = isMajor ? 10 : isStrong ? 7 : 3;
-// never let the band exceed 40% of the gap to the nearest other level
-lv._bandH = nearestGap === Infinity ? rawBandH : Math.min(rawBandH, nearestGap * 0.4);
-});
-
 // ── Draw each level ──────────────────────────────────
 levels.forEach(lv => {
-const y       = lv._y;
+const y       = pToY(lv.price);
 const isSup   = lv.type === 'support';
 const isPivot = lv.source === 'pivot';
 const conf    = lv.confluence;
@@ -3759,8 +3724,8 @@ else if (isStrong)  baseColor = isSup ? '#00e87a' : '#f03a4a';
 else                baseColor = isSup ? '#00aa55' : '#bb2233';
 if (lv.type === 'current') baseColor = '#00c8f0';
 
-const bandH     = lv._bandH;
-const bandAlpha = isMajor ? 0.30 : isStrong ? 0.18 : 0.10;
+const bandH     = isMajor ? 20 : isStrong ? 14 : 7;
+const bandAlpha = isMajor ? 0.32 : isStrong ? 0.20 : 0.11;
 
 // Band fill
 ctx.save();
@@ -3783,54 +3748,38 @@ ctx.restore();
 const distStr = (lv.distPct >= 0 ? '+' : '') + lv.distPct.toFixed(2) + '%';
 
 if (isMobile) {
-// ── MOBILE: labels inside chart with slot collision avoidance ──
+// ── MOBILE: labels drawn INSIDE chart on the line ──
+// Left side: label name + price on a pill background
 const labelTxt = `${lv.label} ${fmtPrice(lv.price)}`;
 ctx.font = isStrong ? `bold 9px 'IBM Plex Mono',monospace` : `8px 'IBM Plex Mono',monospace`;
 const tw = ctx.measureText(labelTxt).width;
-const labelY = srGetLabelY(y);
-const px = LEFT + 4;
-// connector line if label was pushed away from the price line
-if (Math.abs(labelY - y) > 3) {
-	ctx.save(); ctx.globalAlpha = 0.25; ctx.strokeStyle = baseColor;
-	ctx.lineWidth = 0.5; ctx.setLineDash([2,3]);
-	ctx.beginPath(); ctx.moveTo(LEFT + chartW - 8, y); ctx.lineTo(LEFT + chartW - 8, labelY); ctx.stroke();
-	ctx.setLineDash([]); ctx.restore();
-}
+const px = LEFT + 4, py = y - 1;
 // pill bg
-ctx.fillStyle = 'rgba(6,10,15,0.82)';
-ctx.fillRect(px - 2, labelY - 9, tw + 6, 13);
+ctx.fillStyle = 'rgba(6,10,15,0.78)';
+ctx.fillRect(px - 2, py - 9, tw + 6, 13);
 // text
 ctx.fillStyle = baseColor;
 ctx.textAlign = 'left';
-ctx.fillText(labelTxt, px, labelY + 2);
+ctx.fillText(labelTxt, px, py + 2);
 // dist % on the right inside chart
 ctx.font = `8px 'IBM Plex Mono',monospace`;
 ctx.fillStyle = '#7a9bb5';
 ctx.textAlign = 'right';
-ctx.fillText(distStr, LEFT + chartW - 4, labelY + 2);
+ctx.fillText(distStr, LEFT + chartW - 4, py + 2);
 } else {
-// ── DESKTOP/TABLET: right-side labels with collision avoidance ──
+// ── DESKTOP/TABLET: labels on the right outside ──
 const labelFontSize = isTablet ? 10 : 11;
-// FIX 3: get a non-colliding Y slot for this label
-const labelY = srGetLabelY(y);
-// Connector line from price line to label if offset
-if (Math.abs(labelY - y) > 4) {
-	ctx.save(); ctx.globalAlpha = 0.35; ctx.strokeStyle = baseColor;
-	ctx.lineWidth = 0.5; ctx.setLineDash([2,3]);
-	ctx.beginPath(); ctx.moveTo(LEFT + chartW + 6, y); ctx.lineTo(LEFT + chartW + 6, labelY); ctx.stroke();
-	ctx.setLineDash([]); ctx.restore();
-}
 ctx.textAlign = 'left';
 ctx.font = isStrong
-	? `bold ${labelFontSize}px 'IBM Plex Mono',monospace`
-	: `${labelFontSize - 1}px 'IBM Plex Mono',monospace`;
+? `bold ${labelFontSize}px 'IBM Plex Mono',monospace`
+: `${labelFontSize - 1}px 'IBM Plex Mono',monospace`;
 ctx.fillStyle = baseColor;
-ctx.fillText(`${lv.label}  ${fmtPrice(lv.price)}`, LEFT + chartW + 8, labelY);
+ctx.fillText(`${lv.label}  ${fmtPrice(lv.price)}`, LEFT + chartW + 8, y - 1);
 ctx.fillStyle = '#4e6d88';
 ctx.font = `9px 'IBM Plex Mono',monospace`;
-ctx.fillText(distStr, LEFT + chartW + 8, labelY + 11);
+ctx.fillText(distStr, LEFT + chartW + 8, y + 10);
 
-// Confluence badge (desktop only, drawn on the price line itself)
+// Confluence badge (desktop only)
 if (isStrong) {
 const bx = LEFT + chartW - 44;
 ctx.fillStyle = isMajor ? 'rgba(245,200,66,0.25)' : 'rgba(0,200,240,0.15)';
@@ -3858,6 +3807,7 @@ const priceStr = '▶ ' + fmtPrice(price);
 ctx.font = `bold ${isMobile ? 10 : 12}px 'IBM Plex Mono',monospace`;
 const tw = ctx.measureText(priceStr).width;
 if (isMobile) {
+// Right-aligned inside chart
 ctx.fillStyle = '#00c8f0';
 ctx.fillRect(LEFT + chartW - tw - 10, cpY - 10, tw + 8, 20);
 ctx.fillStyle = '#060a0f';
@@ -3871,6 +3821,79 @@ ctx.textAlign = 'left';
 ctx.fillText(priceStr, LEFT + chartW + 10, cpY + 4);
 }
 ctx.restore();
+
+// ── Entry & Target Zone Markers ──────────────────────
+const entrySupports   = levels.filter(l => l.type === 'support').sort((a,b) => b.price - a.price);
+const entryResists    = levels.filter(l => l.type === 'resistance').sort((a,b) => a.price - b.price);
+const bestEntry = entrySupports[0] || null;
+const bestTP1   = entryResists[0]  || null;
+const bestTP2   = entryResists[1]  || null;
+
+// Draw entry zone arrow + label on left edge
+if (bestEntry) {
+	const ey = pToY(bestEntry.price);
+	// Left arrow marker
+	ctx.save();
+	ctx.fillStyle = '#00e87a';
+	ctx.shadowBlur = 10; ctx.shadowColor = '#00e87a';
+	ctx.beginPath();
+	ctx.moveTo(LEFT - 2, ey);
+	ctx.lineTo(LEFT - 12, ey - 6);
+	ctx.lineTo(LEFT - 12, ey + 6);
+	ctx.closePath();
+	ctx.fill();
+	ctx.shadowBlur = 0;
+	// Label box
+	ctx.font = `bold 8px 'IBM Plex Mono',monospace`;
+	const etxt = '📥 BUY';
+	const etw = ctx.measureText(etxt).width;
+	ctx.fillStyle = 'rgba(0,232,122,0.18)';
+	ctx.fillRect(LEFT - 14 - etw - 4, ey - 8, etw + 6, 16);
+	ctx.fillStyle = '#00e87a';
+	ctx.textAlign = 'right';
+	ctx.fillText(etxt, LEFT - 16, ey + 4);
+	ctx.restore();
+}
+
+// Draw TP1 zone marker
+if (bestTP1) {
+	const t1y = pToY(bestTP1.price);
+	ctx.save();
+	ctx.fillStyle = '#f03a4a';
+	ctx.shadowBlur = 8; ctx.shadowColor = '#f03a4a';
+	ctx.beginPath();
+	ctx.moveTo(LEFT - 2, t1y);
+	ctx.lineTo(LEFT - 12, t1y - 6);
+	ctx.lineTo(LEFT - 12, t1y + 6);
+	ctx.closePath();
+	ctx.fill();
+	ctx.shadowBlur = 0;
+	ctx.font = `bold 8px 'IBM Plex Mono',monospace`;
+	const t1txt = '📤 TP1';
+	const t1tw = ctx.measureText(t1txt).width;
+	ctx.fillStyle = 'rgba(240,58,74,0.18)';
+	ctx.fillRect(LEFT - 14 - t1tw - 4, t1y - 8, t1tw + 6, 16);
+	ctx.fillStyle = '#f03a4a';
+	ctx.textAlign = 'right';
+	ctx.fillText(t1txt, LEFT - 16, t1y + 4);
+	ctx.restore();
+}
+
+// Draw TP2 zone marker
+if (bestTP2) {
+	const t2y = pToY(bestTP2.price);
+	ctx.save();
+	ctx.fillStyle = '#ff7043';
+	ctx.font = `bold 8px 'IBM Plex Mono',monospace`;
+	const t2txt = '🎯 TP2';
+	const t2tw = ctx.measureText(t2txt).width;
+	ctx.fillStyle = 'rgba(255,112,67,0.15)';
+	ctx.fillRect(LEFT - 14 - t2tw - 4, t2y - 8, t2tw + 6, 16);
+	ctx.fillStyle = '#ff7043';
+	ctx.textAlign = 'right';
+	ctx.fillText(t2txt, LEFT - 16, t2y + 4);
+	ctx.restore();
+}
 
 // ── Title bar ────────────────────────────────────────
 ctx.fillStyle = '#1a2b3c';
@@ -3955,6 +3978,97 @@ html += '</div>';
 }
 
 html += '</div></div>';
+
+// ── Best Entry Plan Card ────────────────────────────
+const entryPlanSupports  = levels.filter(l => l.type === 'support').sort((a,b) => b.price - a.price);
+const entryPlanResists   = levels.filter(l => l.type === 'resistance').sort((a,b) => a.price - b.price);
+const ep_ns = entryPlanSupports[0];  // nearest support  = entry zone
+const ep_nr = entryPlanResists[0];   // nearest resistance = TP1
+const ep_nr2 = entryPlanResists[1];  // second resistance  = TP2
+
+if (ep_ns || ep_nr) {
+	// Entry = nearest support price (or midpoint of confluence cluster)
+	const confCluster = entryPlanSupports.filter(l =>
+		Math.abs(l.price - ep_ns.price) / ep_ns.price * 100 <= 1.5
+	);
+	const entryPrice = confCluster.length > 1
+		? confCluster.reduce((s,l) => s + l.price, 0) / confCluster.length
+		: ep_ns ? ep_ns.price : price;
+
+	// Stop = below nearest support, gap to next support or 1% min
+	const ep_ns2 = entryPlanSupports[confCluster.length] || null;
+	const stopGap = ep_ns2
+		? Math.max((entryPrice - ep_ns2.price) * 0.6, entryPrice * 0.008)
+		: entryPrice * 0.012;
+	const stopPrice = entryPrice - stopGap;
+
+	// Targets
+	const tp1Price  = ep_nr  ? ep_nr.price  : entryPrice * 1.015;
+	const tp2Price  = ep_nr2 ? ep_nr2.price : entryPrice * 1.030;
+	const riskDist  = entryPrice - stopPrice;
+	const tp1Dist   = tp1Price - entryPrice;
+	const tp2Dist   = tp2Price - entryPrice;
+	const rr1 = riskDist > 0 ? (tp1Dist / riskDist) : 0;
+	const rr2 = riskDist > 0 ? (tp2Dist / riskDist) : 0;
+
+	const rrCls1 = rr1 >= 2 ? 'green' : rr1 >= 1.5 ? 'yellow' : 'red';
+	const rrCls2 = rr2 >= 2 ? 'green' : rr2 >= 1.5 ? 'yellow' : 'red';
+
+	const isBullish = price > entryPrice;
+	const pctToEntry = ((entryPrice - price) / price * 100);
+	const entryStatus = Math.abs(pctToEntry) <= 0.5
+		? `<span style="color:var(--green)">✅ Price is AT entry zone now</span>`
+		: pctToEntry < 0
+		? `<span style="color:var(--yellow)">⏳ Wait for pullback — ${Math.abs(pctToEntry).toFixed(2)}% below current price</span>`
+		: `<span style="color:var(--accent)">📈 Price already above entry zone — enter on pullback</span>`;
+
+	html += `
+	<div class="card" style="margin-top:.6rem">
+	<div class="card-hdr"><span class="ci" style="color:var(--green)">📥</span> Best Entry &amp; Target Plan</div>
+	<div class="card-body">
+	<div style="font-size:11px;margin-bottom:.65rem;padding:.4rem .6rem;background:rgba(0,200,240,0.05);border-radius:6px;border-left:3px solid var(--accent)">
+	${entryStatus}
+	${confCluster.length > 1 ? `&nbsp;·&nbsp; <span style="color:var(--yellow)">⚡ ${confCluster.length}-level confluence at entry zone</span>` : ''}
+	</div>
+	<div class="sr-entry-plan-grid">
+	<div class="sr-ep-row sr-ep-entry">
+	<span class="sr-ep-icon">📥</span>
+	<span class="sr-ep-label">Entry Zone</span>
+	<span class="sr-ep-price">${fmtPrice(entryPrice)}</span>
+	<span class="sr-ep-note">${confCluster.length > 1 ? `Midpoint of ${confCluster.length} support levels` : ep_ns ? `At ${ep_ns.label}` : 'Nearest support'}</span>
+	</div>
+	<div class="sr-ep-row sr-ep-stop">
+	<span class="sr-ep-icon">🛑</span>
+	<span class="sr-ep-label">Stop Loss</span>
+	<span class="sr-ep-price">${fmtPrice(stopPrice)}</span>
+	<span class="sr-ep-note">−${(stopGap/entryPrice*100).toFixed(2)}% · ${ep_ns2 ? 'Below ' + ep_ns2.label : 'ATR buffer'}</span>
+	</div>
+	<div class="sr-ep-row sr-ep-tp1">
+	<span class="sr-ep-icon">📤</span>
+	<span class="sr-ep-label">TP1 — Take 50%</span>
+	<span class="sr-ep-price">${fmtPrice(tp1Price)}</span>
+	<span class="sr-ep-note"><span class="${rrCls1}">R:R 1:${rr1.toFixed(1)}</span> · ${ep_nr ? ep_nr.label : 'First resistance'} · +${(tp1Dist/entryPrice*100).toFixed(2)}%</span>
+	</div>
+	<div class="sr-ep-row sr-ep-tp2">
+	<span class="sr-ep-icon">🎯</span>
+	<span class="sr-ep-label">TP2 — Take 30%</span>
+	<span class="sr-ep-price">${fmtPrice(tp2Price)}</span>
+	<span class="sr-ep-note"><span class="${rrCls2}">R:R 1:${rr2.toFixed(1)}</span> · ${ep_nr2 ? ep_nr2.label : 'Second resistance'} · +${(tp2Dist/entryPrice*100).toFixed(2)}%</span>
+	</div>
+	<div class="sr-ep-row sr-ep-trail">
+	<span class="sr-ep-icon">🔄</span>
+	<span class="sr-ep-label">Remainder 20%</span>
+	<span class="sr-ep-price">Trail</span>
+	<span class="sr-ep-note">Move stop to breakeven after TP1 · trail with MA5</span>
+	</div>
+	</div>
+	<div style="font-size:10px;color:var(--dim);margin-top:.65rem;padding:.35rem .5rem;background:rgba(0,0,0,0.2);border-radius:4px">
+	⚠️ Entry zone is based on S/R levels only. Always confirm with MA/EMA Calculator score ≥70 and check ADX &gt;25 before entering. Use ATR14 from TradeMatrix Trade Plan for the most precise stop loss.
+	</div>
+	</div>
+	</div>`;
+}
+
 const el = $('sr-analysis-content');
 if (el) el.innerHTML = html;
 }
