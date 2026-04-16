@@ -1,0 +1,7 @@
+{
+  "name": "tradematrix-pro",
+  "version": "3.0.0",
+  "scripts": {
+    "build": "bash build.sh"
+  }
+}

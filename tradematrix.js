@@ -1,9 +1,3 @@
-/* ═══════════════════════════════════════════════════════
-   ★  TRADEMATRIX LOGIN SYSTEM
-   ─────────────────────────────────────────────────────
-   Change TM_USER and TM_PASS below to your credentials.
-   These are the only two lines you need to edit.
-═══════════════════════════════════════════════════════ */
 const TM_USER = 'admin';          // ← change username here
 const TM_PASS = '123'; // ← change password here
 
