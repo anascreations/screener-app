@@ -33,6 +33,20 @@ padding: 0;
 --r2: 12px;
 }
 
+[data-theme="light"] {
+	--bg:      #f0f4f8;
+	--surface: #ffffff;
+	--card:    #ffffff;
+	--card2:   #f5f7fa;
+	--border:  #d1dce8;
+	--border2: #b8c9da;
+	--text:    #1a2b3c;
+	--dim:     #6b8099;
+	--muted:   #1a2b3c;
+	--glow:    rgba(0,136,187,0.10);
+	--shadow:  rgba(0,0,0,0.12);
+}
+
 html {
 scroll-behavior: smooth;
 }
@@ -4446,3 +4460,16 @@ line-height: 1.5;
 	.gds-sub-label { display: none; }
 	.gds-time { font-size: 10px; }
 }
+
+.tm-theme-btn {
+	background: none;
+	border: 1px solid var(--border);
+	color: var(--dim);
+	font-size: 15px;
+	width: 30px; height: 30px;
+	border-radius: 50%;
+	cursor: pointer;
+	transition: all .2s;
+	display: flex; align-items: center; justify-content: center;
+}
+.tm-theme-btn:hover { border-color: var(--accent); color: var(--accent); }
