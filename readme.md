@@ -131,7 +131,10 @@ Before entering any trade, confirm these 4 gates are **GREEN**:
 
 ---
 
-## 🚀 How to Run TradeMatrix Pro
+# Build & Deployment
+
+TradeMatrix Pro is a **static web application** that securely injects credentials at build time using environment variables.
+This prevents hardcoded secrets from being committed to GitHub while still allowing simple static hosting on platforms like **Vercel** and **Render**.
 
 To launch the local dashboard:
 
@@ -140,3 +143,172 @@ To launch the local dashboard:
 3. Run the following command:
    ```bash
    python -m http.server 8000
+
+---
+
+## 🚀 Features
+
+- ✅ No hardcoded credentials in source control
+- ✅ Environment-variable–based credential injection
+- ✅ Simple Bash build script
+- ✅ Works with Vercel & Render static hosting
+- ✅ Auto-deploy on every Git push
+
+---
+
+## 📁 Project Structure
+
+```
+tradematrix-pro/
+├── index.html
+├── tradematrix.js      # Contains __TM_USER__ and __TM_PASS__ placeholders
+├── tradematrix.css
+├── build.sh            # Injects credentials at build time
+├── package.json
+└── .gitignore
+```
+
+---
+
+## ✅ Step 1 — Modify `tradematrix.js`
+
+Replace hardcoded credentials with placeholders.
+
+### ❌ Before
+```js
+const TM_USER = 'admin';
+const TM_PASS = '123';
+```
+
+### ✅ After
+```js
+const TM_USER = '__TM_USER__';
+const TM_PASS = '__TM_PASS__';
+```
+
+> ⚠️ These placeholders are replaced **during build**, not committed with real values.
+
+---
+
+## ✅ Step 2 — Create Build Script (`build.sh`)
+
+```bash
+#!/bin/bash
+
+# Copy JS file then inject environment variables
+cp tradematrix.js tradematrix.build.js
+sed -i "s/__TM_USER__/$TM_USER/g" tradematrix.build.js
+sed -i "s/__TM_PASS__/$TM_PASS/g" tradematrix.build.js
+mv tradematrix.build.js tradematrix.js
+
+echo "Build complete — credentials injected"
+```
+
+Make it executable:
+```bash
+chmod +x build.sh
+```
+
+---
+
+## ✅ Step 3 — Create `package.json`
+
+```json
+{
+  "name": "tradematrix-pro",
+  "version": "3.0.0",
+  "scripts": {
+    "build": "bash build.sh"
+  }
+}
+```
+
+---
+
+## ✅ Step 4 — Create `.gitignore`
+
+```gitignore
+.env
+node_modules
+.vercel
+```
+
+---
+
+## 📦 Deploy to Vercel (Recommended)
+
+### Push to GitHub
+```bash
+git init
+git add .
+git commit -m "TradeMatrix Pro v3"
+git remote add origin https://github.com/yourusername/tradematrix-pro.git
+git push -u origin main
+```
+
+### Build Settings
+| Field | Value |
+|------|------|
+| Framework | Other |
+| Build Command | `bash build.sh` |
+| Output Directory | `.` |
+
+### Environment Variables
+| Name | Value |
+|------|------|
+| TM_USER | yourUsername |
+| TM_PASS | yourPassword123 |
+
+Deploy → ✅ Live
+```
+https://tradematrix-pro.vercel.app
+```
+
+---
+
+## 📦 Deploy to Render
+
+| Setting | Value |
+|-------|------|
+| Build Command | `bash build.sh` |
+| Publish Directory | `.` |
+
+Environment Variables:
+- TM_USER
+- TM_PASS
+
+Live URL:
+```
+https://tradematrix-pro.onrender.com
+```
+
+---
+
+## 🆚 Platform Comparison
+
+| Feature | Vercel | Render |
+|-------|--------|--------|
+| Speed | ⚡ Fastest | 🟢 Fast |
+| Free tier | ✅ | ✅ |
+| Auto deploy | ✅ | ✅ |
+| Recommended | ✅ Yes | Alternative |
+
+---
+
+## 🔐 Updating Credentials
+
+**Vercel**: Project → Settings → Environment Variables → Edit → Redeploy  
+**Render**: Dashboard → Environment → Edit → Manual Deploy
+
+---
+
+## ✅ Security Notes
+
+- Credentials never committed
+- Build-time injection only
+- Repo safe for public hosting
+
+---
+
+© TradeMatrix Pro v3
+   
