@@ -1708,7 +1708,69 @@ if (section) section.classList.add('active');
 document.querySelectorAll('.guide-tab-btn').forEach(b => {
 if (b.getAttribute('onclick') === `switchGuide('${id}')`) b.classList.add('active');
 });
+if (id === 'g-schedule') gdsPopulateTimes();
 }
+
+function gdsPopulateTimes() {
+const dst = isUSDST();
+const open   = dst ? '9:30 PM'  : '10:30 PM';
+const open5  = dst ? '9:35 PM'  : '10:35 PM';
+const pt1s   = dst ? '9:35–9:50 PM'   : '10:35–10:50 PM';
+const pt1e   = dst ? '10:00–10:30 PM' : '11:00–11:30 PM';
+const pt1l   = dst ? '10:30–11:00 PM' : '11:30 PM–12:00 AM';
+const primeE = dst ? '11:00 PM' : '12:00 AM';
+const lullS  = dst ? '11:00 PM' : '12:00 AM';
+const lullE  = dst ? '2:30 AM'  : '3:30 AM';
+const powS   = dst ? '2:30 AM'  : '3:30 AM';
+const powE   = dst ? '3:50 AM'  : '4:50 AM';
+const closeT = dst ? '4:00 AM'  : '5:00 AM';
+const tz     = dst ? 'EDT (Mar–Nov)' : 'EST (Nov–Mar)';
+const tzCls  = dst ? 'gds-badge-edt' : 'gds-badge-est';
+
+// Banner
+const banner = $('gds-dst-banner');
+if (banner) banner.className = `gds-dst-banner ${dst ? 'gds-banner-edt' : 'gds-banner-est'}`;
+const ttl = $('gds-dst-title');
+if (ttl) ttl.textContent = dst
+	? '🌞 US Daylight Saving (EDT) — Market opens 9:30 PM MYT'
+	: '❄️ US Standard Time (EST) — Market opens 10:30 PM MYT';
+const tnote = $('gds-dst-note');
+if (tnote) tnote.textContent = dst
+	? 'Current period: March–November. All times below are MYT (UTC+8).'
+	: 'Current period: November–March. All times 1 hour later than EDT. All times below are MYT (UTC+8).';
+const tbadge = $('gds-dst-badge');
+if (tbadge) { tbadge.textContent = tz; tbadge.className = `gds-dst-badge ${tzCls}`; }
+
+// Inline badge at market open block
+const inl = $('gds-open-inline');
+if (inl) inl.innerHTML = `<span class="${tzCls}" style="font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;margin-left:.4rem">${tz}</span>`;
+
+// Update all time labels
+const setAll = (cls, text) =>
+	document.querySelectorAll(`.${cls}`).forEach(el => { el.textContent = text; });
+
+setAll('gds-open-time',       open);
+setAll('gds-open-time-label', open);
+setAll('gds-prime-end',       primeE);
+setAll('gds-exit-time',       powE);
+setAll('gds-close-time',      closeT);
+
+// Prime sub-table times
+const subTimes = document.querySelectorAll('.gds-sub-time');
+if (subTimes[0]) subTimes[0].textContent = pt1s;
+if (subTimes[1]) subTimes[1].textContent = pt1e;
+if (subTimes[2]) subTimes[2].textContent = pt1l;
+
+// Range labels
+const primeRng = document.querySelector('.gds-prime-range');
+if (primeRng) primeRng.innerHTML = `${open5}<br/>–<br/>${primeE}`;
+const lullRng = document.querySelector('.gds-lull-range');
+if (lullRng) lullRng.innerHTML = `${lullS}<br/>–<br/>${lullE}`;
+const powRng = document.querySelector('.gds-power-range');
+if (powRng) powRng.innerHTML = `${powS}<br/>–<br/>${powE}`;
+}
+
+
 const TOOLTIPS = {
 'ma-price': {
 title: 'Market Price',
@@ -3822,79 +3884,6 @@ ctx.fillText(priceStr, LEFT + chartW + 10, cpY + 4);
 }
 ctx.restore();
 
-// ── Entry & Target Zone Markers ──────────────────────
-const entrySupports   = levels.filter(l => l.type === 'support').sort((a,b) => b.price - a.price);
-const entryResists    = levels.filter(l => l.type === 'resistance').sort((a,b) => a.price - b.price);
-const bestEntry = entrySupports[0] || null;
-const bestTP1   = entryResists[0]  || null;
-const bestTP2   = entryResists[1]  || null;
-
-// Draw entry zone arrow + label on left edge
-if (bestEntry) {
-	const ey = pToY(bestEntry.price);
-	// Left arrow marker
-	ctx.save();
-	ctx.fillStyle = '#00e87a';
-	ctx.shadowBlur = 10; ctx.shadowColor = '#00e87a';
-	ctx.beginPath();
-	ctx.moveTo(LEFT - 2, ey);
-	ctx.lineTo(LEFT - 12, ey - 6);
-	ctx.lineTo(LEFT - 12, ey + 6);
-	ctx.closePath();
-	ctx.fill();
-	ctx.shadowBlur = 0;
-	// Label box
-	ctx.font = `bold 8px 'IBM Plex Mono',monospace`;
-	const etxt = '📥 BUY';
-	const etw = ctx.measureText(etxt).width;
-	ctx.fillStyle = 'rgba(0,232,122,0.18)';
-	ctx.fillRect(LEFT - 14 - etw - 4, ey - 8, etw + 6, 16);
-	ctx.fillStyle = '#00e87a';
-	ctx.textAlign = 'right';
-	ctx.fillText(etxt, LEFT - 16, ey + 4);
-	ctx.restore();
-}
-
-// Draw TP1 zone marker
-if (bestTP1) {
-	const t1y = pToY(bestTP1.price);
-	ctx.save();
-	ctx.fillStyle = '#f03a4a';
-	ctx.shadowBlur = 8; ctx.shadowColor = '#f03a4a';
-	ctx.beginPath();
-	ctx.moveTo(LEFT - 2, t1y);
-	ctx.lineTo(LEFT - 12, t1y - 6);
-	ctx.lineTo(LEFT - 12, t1y + 6);
-	ctx.closePath();
-	ctx.fill();
-	ctx.shadowBlur = 0;
-	ctx.font = `bold 8px 'IBM Plex Mono',monospace`;
-	const t1txt = '📤 TP1';
-	const t1tw = ctx.measureText(t1txt).width;
-	ctx.fillStyle = 'rgba(240,58,74,0.18)';
-	ctx.fillRect(LEFT - 14 - t1tw - 4, t1y - 8, t1tw + 6, 16);
-	ctx.fillStyle = '#f03a4a';
-	ctx.textAlign = 'right';
-	ctx.fillText(t1txt, LEFT - 16, t1y + 4);
-	ctx.restore();
-}
-
-// Draw TP2 zone marker
-if (bestTP2) {
-	const t2y = pToY(bestTP2.price);
-	ctx.save();
-	ctx.fillStyle = '#ff7043';
-	ctx.font = `bold 8px 'IBM Plex Mono',monospace`;
-	const t2txt = '🎯 TP2';
-	const t2tw = ctx.measureText(t2txt).width;
-	ctx.fillStyle = 'rgba(255,112,67,0.15)';
-	ctx.fillRect(LEFT - 14 - t2tw - 4, t2y - 8, t2tw + 6, 16);
-	ctx.fillStyle = '#ff7043';
-	ctx.textAlign = 'right';
-	ctx.fillText(t2txt, LEFT - 16, t2y + 4);
-	ctx.restore();
-}
-
 // ── Title bar ────────────────────────────────────────
 ctx.fillStyle = '#1a2b3c';
 ctx.fillRect(LEFT, TOP - (isMobile ? 22 : 26), chartW, isMobile ? 18 : 22);
@@ -3978,97 +3967,6 @@ html += '</div>';
 }
 
 html += '</div></div>';
-
-// ── Best Entry Plan Card ────────────────────────────
-const entryPlanSupports  = levels.filter(l => l.type === 'support').sort((a,b) => b.price - a.price);
-const entryPlanResists   = levels.filter(l => l.type === 'resistance').sort((a,b) => a.price - b.price);
-const ep_ns = entryPlanSupports[0];  // nearest support  = entry zone
-const ep_nr = entryPlanResists[0];   // nearest resistance = TP1
-const ep_nr2 = entryPlanResists[1];  // second resistance  = TP2
-
-if (ep_ns || ep_nr) {
-	// Entry = nearest support price (or midpoint of confluence cluster)
-	const confCluster = entryPlanSupports.filter(l =>
-		Math.abs(l.price - ep_ns.price) / ep_ns.price * 100 <= 1.5
-	);
-	const entryPrice = confCluster.length > 1
-		? confCluster.reduce((s,l) => s + l.price, 0) / confCluster.length
-		: ep_ns ? ep_ns.price : price;
-
-	// Stop = below nearest support, gap to next support or 1% min
-	const ep_ns2 = entryPlanSupports[confCluster.length] || null;
-	const stopGap = ep_ns2
-		? Math.max((entryPrice - ep_ns2.price) * 0.6, entryPrice * 0.008)
-		: entryPrice * 0.012;
-	const stopPrice = entryPrice - stopGap;
-
-	// Targets
-	const tp1Price  = ep_nr  ? ep_nr.price  : entryPrice * 1.015;
-	const tp2Price  = ep_nr2 ? ep_nr2.price : entryPrice * 1.030;
-	const riskDist  = entryPrice - stopPrice;
-	const tp1Dist   = tp1Price - entryPrice;
-	const tp2Dist   = tp2Price - entryPrice;
-	const rr1 = riskDist > 0 ? (tp1Dist / riskDist) : 0;
-	const rr2 = riskDist > 0 ? (tp2Dist / riskDist) : 0;
-
-	const rrCls1 = rr1 >= 2 ? 'green' : rr1 >= 1.5 ? 'yellow' : 'red';
-	const rrCls2 = rr2 >= 2 ? 'green' : rr2 >= 1.5 ? 'yellow' : 'red';
-
-	const isBullish = price > entryPrice;
-	const pctToEntry = ((entryPrice - price) / price * 100);
-	const entryStatus = Math.abs(pctToEntry) <= 0.5
-		? `<span style="color:var(--green)">✅ Price is AT entry zone now</span>`
-		: pctToEntry < 0
-		? `<span style="color:var(--yellow)">⏳ Wait for pullback — ${Math.abs(pctToEntry).toFixed(2)}% below current price</span>`
-		: `<span style="color:var(--accent)">📈 Price already above entry zone — enter on pullback</span>`;
-
-	html += `
-	<div class="card" style="margin-top:.6rem">
-	<div class="card-hdr"><span class="ci" style="color:var(--green)">📥</span> Best Entry &amp; Target Plan</div>
-	<div class="card-body">
-	<div style="font-size:11px;margin-bottom:.65rem;padding:.4rem .6rem;background:rgba(0,200,240,0.05);border-radius:6px;border-left:3px solid var(--accent)">
-	${entryStatus}
-	${confCluster.length > 1 ? `&nbsp;·&nbsp; <span style="color:var(--yellow)">⚡ ${confCluster.length}-level confluence at entry zone</span>` : ''}
-	</div>
-	<div class="sr-entry-plan-grid">
-	<div class="sr-ep-row sr-ep-entry">
-	<span class="sr-ep-icon">📥</span>
-	<span class="sr-ep-label">Entry Zone</span>
-	<span class="sr-ep-price">${fmtPrice(entryPrice)}</span>
-	<span class="sr-ep-note">${confCluster.length > 1 ? `Midpoint of ${confCluster.length} support levels` : ep_ns ? `At ${ep_ns.label}` : 'Nearest support'}</span>
-	</div>
-	<div class="sr-ep-row sr-ep-stop">
-	<span class="sr-ep-icon">🛑</span>
-	<span class="sr-ep-label">Stop Loss</span>
-	<span class="sr-ep-price">${fmtPrice(stopPrice)}</span>
-	<span class="sr-ep-note">−${(stopGap/entryPrice*100).toFixed(2)}% · ${ep_ns2 ? 'Below ' + ep_ns2.label : 'ATR buffer'}</span>
-	</div>
-	<div class="sr-ep-row sr-ep-tp1">
-	<span class="sr-ep-icon">📤</span>
-	<span class="sr-ep-label">TP1 — Take 50%</span>
-	<span class="sr-ep-price">${fmtPrice(tp1Price)}</span>
-	<span class="sr-ep-note"><span class="${rrCls1}">R:R 1:${rr1.toFixed(1)}</span> · ${ep_nr ? ep_nr.label : 'First resistance'} · +${(tp1Dist/entryPrice*100).toFixed(2)}%</span>
-	</div>
-	<div class="sr-ep-row sr-ep-tp2">
-	<span class="sr-ep-icon">🎯</span>
-	<span class="sr-ep-label">TP2 — Take 30%</span>
-	<span class="sr-ep-price">${fmtPrice(tp2Price)}</span>
-	<span class="sr-ep-note"><span class="${rrCls2}">R:R 1:${rr2.toFixed(1)}</span> · ${ep_nr2 ? ep_nr2.label : 'Second resistance'} · +${(tp2Dist/entryPrice*100).toFixed(2)}%</span>
-	</div>
-	<div class="sr-ep-row sr-ep-trail">
-	<span class="sr-ep-icon">🔄</span>
-	<span class="sr-ep-label">Remainder 20%</span>
-	<span class="sr-ep-price">Trail</span>
-	<span class="sr-ep-note">Move stop to breakeven after TP1 · trail with MA5</span>
-	</div>
-	</div>
-	<div style="font-size:10px;color:var(--dim);margin-top:.65rem;padding:.35rem .5rem;background:rgba(0,0,0,0.2);border-radius:4px">
-	⚠️ Entry zone is based on S/R levels only. Always confirm with MA/EMA Calculator score ≥70 and check ADX &gt;25 before entering. Use ATR14 from TradeMatrix Trade Plan for the most precise stop loss.
-	</div>
-	</div>
-	</div>`;
-}
-
 const el = $('sr-analysis-content');
 if (el) el.innerHTML = html;
 }

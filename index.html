@@ -2291,6 +2291,7 @@
     <button class="guide-tab-btn"        onclick="switchGuide('g-risk')">⚖️ Risk Rules</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-indicators')">🔬 Indicators</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-smd')">🏆 Smart Money</button>
+    <button class="guide-tab-btn"        onclick="switchGuide('g-schedule')">🗓 Daily Schedule</button>
   </div>
 
   <!-- ── MA / EMA Combined Guide ── -->
@@ -2697,6 +2698,218 @@
       </div>
     </div>
   </div><!-- /g-smd -->
+
+  <!-- ── Daily Schedule Guide ── -->
+  <div class="guide-section" id="g-schedule">
+
+    <!-- DST Notice Banner -->
+    <div class="gds-dst-banner" id="gds-dst-banner">
+      <div class="gds-dst-icon">🕐</div>
+      <div class="gds-dst-text">
+        <strong id="gds-dst-title">Detecting timezone…</strong>
+        <span id="gds-dst-note"></span>
+      </div>
+      <div class="gds-dst-badge" id="gds-dst-badge">—</div>
+    </div>
+
+    <!-- Master Timeline -->
+    <div class="guide-card">
+      <div class="guide-card-hdr">🗓 Recommended Daily Trading Schedule — US Market (MYT)</div>
+      <div class="guide-card-body">
+        <div class="guide-intro" style="border-left-color:var(--yellow)">
+          Follow this schedule <strong>every trading day</strong>. Active trading is only two 90-minute windows —
+          everything before <span class="gds-open-time">9:30 PM</span> is preparation.
+          The market will always be there tomorrow; your preparation determines whether you profit tonight.
+        </div>
+
+        <div class="gds-timeline">
+
+          <!-- 7:00 PM -->
+          <div class="gds-block gds-prep">
+            <div class="gds-time">7:00 PM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">📰 Market Intelligence <span class="gds-dur">15 min</span></div>
+              <div class="gds-items">
+                <div class="gds-item">😱 Check <strong>CNN Fear &amp; Greed</strong> — edition.cnn.com/markets/fear-and-greed</div>
+                <div class="gds-item">📊 Check <strong>CBOE Put/Call ratio</strong> — cboe.com/us/options/market_statistics/daily</div>
+                <div class="gds-item">📅 Check <strong>ForexFactory</strong> for red-folder events tonight — forexfactory.com/calendar</div>
+                <div class="gds-item gds-warn">⚠️ If NFP / CPI / FOMC tonight → reduce size 50% or skip entirely</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7:30 PM -->
+          <div class="gds-block gds-prep">
+            <div class="gds-time">7:30 PM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">🔍 Run Screener A — TradeMatrix Watchlist <span class="gds-dur">20 min</span></div>
+              <div class="gds-items">
+                <div class="gds-item">Moomoo → Screener → <strong>TradeMatrix Watchlist</strong></div>
+                <div class="gds-item">Sort by <strong>Volume Ratio descending</strong> + % Change descending</div>
+                <div class="gds-item">Pick top <strong>5–8 stocks</strong> — these are tonight's candidates</div>
+                <div class="gds-item gds-tip">💡 Run at 7:30 PM (before pre-market) — Daily MA data is cleanest at this time, not skewed by pre-market noise</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8:00 PM -->
+          <div class="gds-block gds-prep">
+            <div class="gds-time">8:00 PM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">📊 Pre-Market Opens — Chart Analysis <span class="gds-dur">45 min</span></div>
+              <div class="gds-items">
+                <div class="gds-item">Pre-market data available from 8:00 PM MYT (4 AM ET) in Moomoo</div>
+                <div class="gds-item">Open each candidate → landscape mode → read all indicator values</div>
+                <div class="gds-item">Note: Pre-Market High / Low / Last / Volume for each stock</div>
+                <div class="gds-item">Enter values into <strong>TradeMatrix EMA or MA Calculator</strong></div>
+                <div class="gds-item gds-gate">🚦 Keep only stocks scoring <strong>≥ 70/100</strong> — target: 2–4 stocks remain</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8:45 PM -->
+          <div class="gds-block gds-prep">
+            <div class="gds-time">8:45 PM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">🔍 Run Screener B — TradeMatrix Ready <span class="gds-dur">10 min</span></div>
+              <div class="gds-items">
+                <div class="gds-item">Run <strong>TradeMatrix Ready</strong> screener (high-conviction filters)</div>
+                <div class="gds-item">Cross-reference with your Screener A shortlist</div>
+                <div class="gds-item gds-tip">💡 Stocks appearing in <strong>both lists</strong> = highest priority tonight</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9:00 PM -->
+          <div class="gds-block gds-prep">
+            <div class="gds-time">9:00 PM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">🏆 Smart Money Dashboard <span class="gds-dur">15 min</span></div>
+              <div class="gds-items">
+                <div class="gds-item">Enter Fear &amp; Greed + P/C ratio in MA tab dashboard</div>
+                <div class="gds-item">Fill Pre-Market Gap Tracker (all 6 fields from Moomoo stock page)</div>
+                <div class="gds-item">Tick/untick all 6 institutional bias checkboxes</div>
+                <div class="gds-item gds-gate">🚦 <strong>Gate 1:</strong> Bias Score must be ≥ 5/8 — if not, do not trade tonight</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9:15 PM -->
+          <div class="gds-block gds-prep">
+            <div class="gds-time">9:15 PM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">📐 S/R Zone + Entry Planning <span class="gds-dur">10 min</span></div>
+              <div class="gds-items">
+                <div class="gds-item">Open S/R Zone Analyzer → Import EMA/MA levels → add pivot H/L/C</div>
+                <div class="gds-item gds-gate">🚦 <strong>Gate 2:</strong> R:R must be ≥ 1.5:1 — check analysis card</div>
+                <div class="gds-item">Note exact Entry / Stop Loss / TP1 / TP2 from Entry Plan card</div>
+                <div class="gds-item gds-warn">⚡ Pre-set <strong>limit orders in Moomoo now</strong> — ready to activate, not yet placed</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MARKET OPEN — DST-aware -->
+          <div class="gds-block gds-open">
+            <div class="gds-time gds-open-time-label">9:30 PM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">🔔 Market Opens <span class="gds-dst-inline" id="gds-open-inline"></span></div>
+              <div class="gds-items">
+                <div class="gds-item gds-warn"><strong>DO NOT enter on the open candle</strong> — first candle is chaotic: gap fills, stop hunts, wide spreads</div>
+                <div class="gds-item">Watch only for the first 5 minutes</div>
+                <div class="gds-item">First 5-min candle closes → read direction → confirm with your plan</div>
+                <div class="gds-item gds-gate">🚦 Activate limit order only if: candle direction = trend · price holds above pre-market low · volume above average</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prime Window -->
+          <div class="gds-block gds-prime">
+            <div class="gds-time gds-prime-range">9:35 PM<br/>–<br/>11:00 PM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">🎯 PRIME WINDOW — Best 90 Minutes <span class="gds-dur">Best entries here</span></div>
+              <div class="gds-sub-table">
+                <div class="gds-sub-row">
+                  <span class="gds-sub-time gds-prime-t1">9:35–9:50 PM</span>
+                  <span class="gds-sub-label">Opening Momentum</span>
+                  <span class="gds-sub-note">Best for breakout entries — price breaks pre-market high on volume spike</span>
+                </div>
+                <div class="gds-sub-row">
+                  <span class="gds-sub-time gds-prime-t2">10:00–10:30 PM</span>
+                  <span class="gds-sub-label">First Pullback</span>
+                  <span class="gds-sub-note">Best R:R — price dips to MA5/EMA8, bounces with KDJ J turning up</span>
+                </div>
+                <div class="gds-sub-row">
+                  <span class="gds-sub-time gds-prime-t3">10:30–11:00 PM</span>
+                  <span class="gds-sub-label">Second Wave</span>
+                  <span class="gds-sub-note">Continuation entry if first was missed — MACD histogram expanding</span>
+                </div>
+              </div>
+              <div class="gds-item gds-gate" style="margin-top:.5rem">🚦 No clean entry by <span class="gds-prime-end">11:00 PM</span>? → Close watchlist. Do not chase into Lull.</div>
+            </div>
+          </div>
+
+          <!-- Lull -->
+          <div class="gds-block gds-lull">
+            <div class="gds-time gds-lull-range">11:00 PM<br/>–<br/>2:30 AM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">💤 LULL PERIOD — No New Entries</div>
+              <div class="gds-items">
+                <div class="gds-item">Low volume · False breakouts common · Wide spreads</div>
+                <div class="gds-item">If open trades: check stops, move to breakeven if TP1 was hit</div>
+                <div class="gds-item gds-tip">💡 Best use of this time: sleep, review the Prime Window trades, plan Power Hour</div>
+                <div class="gds-item gds-warn">⚠️ Checking your phone every 5 minutes during Lull creates emotional decisions — don't do it</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Power Hour -->
+          <div class="gds-block gds-power">
+            <div class="gds-time gds-power-range">2:30 AM<br/>–<br/>3:50 AM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">⚡ POWER HOUR — Optional <span class="gds-dur">Only if rested</span></div>
+              <div class="gds-items">
+                <div class="gds-item">Only trade if: rested · fresh setup formed · bias still ≥5/8 · R:R still valid</div>
+                <div class="gds-item">Re-run Screener B at 2:30 AM — new movers may appear</div>
+                <div class="gds-item gds-warn">⚠️ Do NOT use Power Hour to recover Lull losses — only fresh, confirmed setups</div>
+                <div class="gds-item gds-gate">🚦 Hard exit all positions by <strong class="gds-exit-time">3:50 AM</strong> — no exceptions</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Close -->
+          <div class="gds-block gds-closed">
+            <div class="gds-time gds-close-time">4:00 AM</div>
+            <div class="gds-content">
+              <div class="gds-block-title">🔴 Market Closes</div>
+              <div class="gds-items">
+                <div class="gds-item">All intraday positions must be closed before this</div>
+                <div class="gds-item">Post-session: log your trades (entry, exit, what worked, what didn't)</div>
+                <div class="gds-item gds-tip">💡 Review on Sunday before the new week starts</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /gds-timeline -->
+
+        <!-- Summary box -->
+        <div class="gds-summary-box">
+          <div class="gds-summary-title">⏱ Total Time Commitment</div>
+          <div class="gds-summary-grid">
+            <div class="gds-sum-item"><span class="gds-sum-label">Preparation</span><span class="gds-sum-val">7:00 – 9:30 PM · 2.5 hrs</span></div>
+            <div class="gds-sum-item"><span class="gds-sum-label">Prime Window</span><span class="gds-sum-val gds-sum-prime">9:35 – 11:00 PM · 90 min</span></div>
+            <div class="gds-sum-item"><span class="gds-sum-label">Lull (step away)</span><span class="gds-sum-val">11:00 PM – 2:30 AM · optional rest</span></div>
+            <div class="gds-sum-item"><span class="gds-sum-label">Power Hour</span><span class="gds-sum-val gds-sum-power">2:30 – 3:50 AM · 80 min (optional)</span></div>
+          </div>
+          <div style="font-size:11px;color:var(--dim);margin-top:.6rem">
+            Active trading = only 2 windows · 90 min Prime + 80 min Power Hour (optional).
+            The remaining time is preparation and rest — not trading.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /g-schedule -->
 
 </div><!-- /panel-guide -->
 

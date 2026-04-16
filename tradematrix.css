@@ -4284,46 +4284,165 @@ color: var(--dim);
 line-height: 1.5;
 }
 /* ═══════════════════════════════════════════════════════
-   S/R BEST ENTRY PLAN CARD
+   DAILY SCHEDULE GUIDE (g-schedule)
 ═══════════════════════════════════════════════════════ */
-.sr-entry-plan-grid {
+
+/* DST Banner */
+.gds-dst-banner {
+	display: flex;
+	align-items: center;
+	gap: .75rem;
+	padding: .65rem .9rem;
+	border-radius: var(--r2);
+	border: 1px solid rgba(0,200,240,0.3);
+	background: rgba(0,200,240,0.06);
+	margin-bottom: .85rem;
+	flex-wrap: wrap;
+}
+.gds-banner-edt { border-color: rgba(0,200,240,0.35); background: rgba(0,200,240,0.06); }
+.gds-banner-est { border-color: rgba(245,200,66,0.35); background: rgba(245,200,66,0.05); }
+.gds-dst-icon  { font-size: 20px; flex-shrink: 0; }
+.gds-dst-text  { display: flex; flex-direction: column; gap: .15rem; flex: 1; }
+.gds-dst-text strong { font-size: 13px; color: var(--text); }
+.gds-dst-text span   { font-size: 10px; color: var(--dim); }
+.gds-dst-badge {
+	font-size: 10px;
+	font-weight: 700;
+	padding: 3px 10px;
+	border-radius: 20px;
+	letter-spacing: .06em;
+	flex-shrink: 0;
+}
+.gds-badge-edt { background: rgba(0,200,240,0.15); color: var(--accent); border: 1px solid rgba(0,200,240,0.3); }
+.gds-badge-est { background: rgba(245,200,66,0.15); color: var(--yellow); border: 1px solid rgba(245,200,66,0.3); }
+
+/* Timeline */
+.gds-timeline {
 	display: flex;
 	flex-direction: column;
-	gap: .3rem;
-}
-.sr-ep-row {
-	display: grid;
-	grid-template-columns: 22px 110px 90px 1fr;
-	align-items: center;
 	gap: .5rem;
-	padding: .4rem .55rem;
-	border-radius: var(--r);
-	font-size: 11px;
+	margin-top: .75rem;
 }
-.sr-ep-entry { background: rgba(0,232,122,0.08);  border-left: 3px solid var(--green); }
-.sr-ep-stop  { background: rgba(240,58,74,0.08);   border-left: 3px solid var(--red); }
-.sr-ep-tp1   { background: rgba(240,58,74,0.05);   border-left: 3px solid #f03a4a88; }
-.sr-ep-tp2   { background: rgba(255,112,67,0.05);  border-left: 3px solid #ff704388; }
-.sr-ep-trail { background: rgba(0,200,240,0.05);   border-left: 3px solid var(--accent); }
-.sr-ep-icon  { font-size: 13px; text-align: center; }
-.sr-ep-label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); }
-.sr-ep-price {
-	font-size: 14px;
+.gds-block {
+	display: grid;
+	grid-template-columns: 72px 1fr;
+	gap: .6rem;
+	padding: .6rem .7rem;
+	border-radius: var(--r2);
+	border-left: 3px solid var(--border2);
+	background: var(--card2);
+	align-items: start;
+}
+.gds-prep  { border-left-color: var(--dim); }
+.gds-open  { border-left-color: var(--accent); background: rgba(0,200,240,0.05); }
+.gds-prime { border-left-color: var(--accent); background: rgba(0,200,240,0.07); }
+.gds-lull  { border-left-color: #2a3a50; background: rgba(20,30,45,0.6); }
+.gds-power { border-left-color: var(--yellow); background: rgba(245,200,66,0.05); }
+.gds-closed{ border-left-color: var(--red); background: rgba(240,58,74,0.04); }
+
+.gds-time {
+	font-size: 11px;
 	font-weight: 700;
 	font-family: var(--head);
-	color: var(--text);
+	color: var(--accent);
+	text-align: center;
+	line-height: 1.35;
+	padding-top: .15rem;
 }
-.sr-ep-entry .sr-ep-price { color: var(--green); }
-.sr-ep-stop  .sr-ep-price { color: var(--red); }
-.sr-ep-tp1   .sr-ep-price { color: #f87171; }
-.sr-ep-tp2   .sr-ep-price { color: var(--orange); }
-.sr-ep-trail .sr-ep-price { color: var(--accent); font-size: 12px; }
-.sr-ep-note  { font-size: 10px; color: var(--dim); line-height: 1.4; }
-.sr-ep-note .green  { color: var(--green); font-weight: 700; }
-.sr-ep-note .yellow { color: var(--yellow); font-weight: 700; }
-.sr-ep-note .red    { color: var(--red); font-weight: 700; }
+.gds-prime .gds-time, .gds-prime-range { color: #00e8f8; }
+.gds-lull  .gds-time { color: var(--dim); }
+.gds-power .gds-time { color: var(--yellow); }
+.gds-closed .gds-time { color: var(--red); }
+.gds-open .gds-time { color: var(--accent); }
 
-@media (max-width: 500px) {
-	.sr-ep-row { grid-template-columns: 20px 90px 75px 1fr; font-size: 10px; }
-	.sr-ep-price { font-size: 12px; }
+.gds-content { display: flex; flex-direction: column; gap: .3rem; }
+.gds-block-title {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--text);
+	display: flex;
+	align-items: center;
+	gap: .4rem;
+	flex-wrap: wrap;
+}
+.gds-dur {
+	font-size: 9px;
+	font-weight: 400;
+	background: rgba(255,255,255,0.06);
+	padding: 1px 7px;
+	border-radius: 10px;
+	color: var(--dim);
+}
+.gds-items { display: flex; flex-direction: column; gap: .22rem; }
+.gds-item  { font-size: 11px; color: var(--dim); padding-left: .4rem; line-height: 1.45; }
+.gds-item strong { color: var(--text); }
+.gds-gate  {
+	color: var(--yellow) !important;
+	background: rgba(245,200,66,0.07);
+	border-radius: 4px;
+	padding: .25rem .45rem;
+	border-left: 2px solid var(--yellow);
+}
+.gds-warn  {
+	color: var(--orange) !important;
+}
+.gds-tip   {
+	color: var(--accent) !important;
+	font-style: italic;
+}
+
+/* Prime sub-table */
+.gds-sub-table {
+	display: flex;
+	flex-direction: column;
+	gap: .25rem;
+	margin: .3rem 0;
+}
+.gds-sub-row {
+	display: grid;
+	grid-template-columns: 120px 100px 1fr;
+	gap: .5rem;
+	align-items: start;
+	font-size: 11px;
+}
+.gds-sub-time  { font-weight: 700; color: var(--accent); font-size: 10px; }
+.gds-prime-t1  { color: #00c8f0; }
+.gds-prime-t2  { color: #00e87a; }
+.gds-prime-t3  { color: var(--yellow); }
+.gds-sub-label { color: var(--text); font-weight: 600; }
+.gds-sub-note  { color: var(--dim); }
+
+/* Summary box */
+.gds-summary-box {
+	background: rgba(0,200,240,0.05);
+	border: 1px solid rgba(0,200,240,0.2);
+	border-radius: var(--r2);
+	padding: .75rem .85rem;
+	margin-top: .85rem;
+}
+.gds-summary-title {
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .1em;
+	color: var(--accent);
+	margin-bottom: .5rem;
+}
+.gds-summary-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: .35rem .75rem;
+}
+@media (max-width: 480px) { .gds-summary-grid { grid-template-columns: 1fr; } }
+.gds-sum-item  { display: flex; flex-direction: column; gap: .1rem; }
+.gds-sum-label { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
+.gds-sum-val   { font-size: 11px; color: var(--text); font-weight: 600; }
+.gds-sum-prime { color: var(--accent); }
+.gds-sum-power { color: var(--yellow); }
+
+@media (max-width: 520px) {
+	.gds-block { grid-template-columns: 60px 1fr; }
+	.gds-sub-row { grid-template-columns: 100px 1fr; }
+	.gds-sub-label { display: none; }
+	.gds-time { font-size: 10px; }
 }
