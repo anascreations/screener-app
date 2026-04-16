@@ -1,5 +1,5 @@
-const TM_USER = 'admin';          // ← change username here
-const TM_PASS = '123'; // ← change password here
+const TM_USER = '__TM_USER__';
+const TM_PASS = '__TM_PASS__';
 
 const TM_SESSION_KEY  = 'tm_session';
 const TM_SESSION_HOURS = 12; // auto-logout after 12 hours of inactivity
