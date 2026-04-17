@@ -167,20 +167,28 @@ if (un) un.focus();
 })();
 
 function tmToggleTheme() {
-	const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-	document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+	const isNowDark = document.documentElement.getAttribute('data-theme') !== 'light';
+	const newTheme  = isNowDark ? 'light' : 'dark';
+	document.documentElement.setAttribute('data-theme', newTheme);
 	const btn = $('tm-theme-btn');
-	if (btn) btn.textContent = isDark ? '☀️' : '🌙';
-	localStorage.setItem('tm_theme', isDark ? 'light' : 'dark');
+	if (btn) btn.textContent = isNowDark ? '☀️' : '🌙';
+	localStorage.setItem('tm_theme', newTheme);
+	// Redraw canvases that use hardcoded colours
+	setTimeout(() => {
+		try { updateTTCards(); } catch(e) {}
+		try { if ($('sr-canvas') && $('sr-canvas').style.display !== 'none') srCalc(); } catch(e) {}
+		try { smDrawFGArc(parseFloat($('sm-fg')?.value) || null); } catch(e) {}
+	}, 50);
 }
 
-// Restore saved theme on load
-(function() {
+// Restore saved theme on load — runs before DOMContentLoaded
+(function tmRestoreTheme() {
 	const saved = localStorage.getItem('tm_theme');
 	if (saved === 'light') {
 		document.documentElement.setAttribute('data-theme', 'light');
+		// Set button icon once DOM is ready
 		document.addEventListener('DOMContentLoaded', () => {
-			const btn = $('tm-theme-btn');
+			const btn = document.getElementById('tm-theme-btn');
 			if (btn) btn.textContent = '☀️';
 		});
 	}
@@ -188,6 +196,29 @@ function tmToggleTheme() {
 
 const $ = id => document.getElementById(id);
 const num = id => { const v = parseFloat($(id)?.value); return isNaN(v) ? null : v; };
+
+// ── Theme-aware canvas color palette ─────────────────
+// All canvas drawing functions use these instead of hardcoded hex
+function themeColors() {
+	const light = document.documentElement.getAttribute('data-theme') === 'light';
+	return {
+		bg:        light ? '#f0f4f8'   : '#060a0f',
+		chartBg:   light ? '#ffffff'   : '#0b1018',
+		chartBg2:  light ? '#f8fafc'   : '#0d1520',
+		grid:      light ? '#d8e6f2'   : '#1a2b3c',
+		gridTick:  light ? '#dde8f2'   : '#0f1e2e',
+		axisLabel: light ? '#5a7a94'   : '#7a9bb5',
+		dimLabel:  light ? '#8aaabe'   : '#4e6d88',
+		dimLabel2: light ? '#9ab5c8'   : '#2a4057',
+		borderBox: light ? '#d1dce8'   : '#1a2b3c',
+		candleBg:  light ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)',
+		textMain:  light ? '#0d1e2d'   : '#d0e2f0',
+		priceBg:   light ? '#060a0f'   : '#060a0f',   // price tag always dark
+		nowLine:   '#00c8f0',
+		accent:    '#00c8f0',
+	};
+}
+
 const sel = id => $(id)?.value || '';
 const pct = (v, base) => (base && base !== 0) ? ((v - base) / base * 100) : null;
 const fmt = (v, d = 4) => v == null ? '—' : Number(v).toFixed(d);
@@ -466,10 +497,11 @@ ctx2.scale(dpr, dpr);
 const W = cssW, H = cssH;
 const bY = 14, bH = 18;
 const tX = t => (t / 24) * W;
+const tc = themeColors();
 
-ctx2.fillStyle = '#060a0f';
+ctx2.fillStyle = tc.bg;
 ctx2.fillRect(0, 0, W, H);
-ctx2.fillStyle = '#1a2b3c';
+ctx2.fillStyle = tc.grid;
 ctx2.beginPath();
 if (ctx2.roundRect) ctx2.roundRect(0, bY, W, bH, 3); else ctx2.rect(0, bY, W, bH);
 ctx2.fill();
@@ -533,7 +565,7 @@ ctx2.fillStyle = b.color;
 ctx2.fillRect(tX(b.from), bY, tX(b.to) - tX(b.from), bH);
 });
 
-ctx2.strokeStyle = '#0f1e2e'; ctx2.lineWidth = 1;
+ctx2.strokeStyle = tc.gridTick; ctx2.lineWidth = 1;
 [0,2,4,6,8,10,12,14,16,18,20,22,24].forEach(h => {
 ctx2.beginPath(); ctx2.moveTo(tX(h), bY); ctx2.lineTo(tX(h), bY+bH); ctx2.stroke();
 });
@@ -547,7 +579,7 @@ ctx2.font = `8px 'IBM Plex Mono', monospace`;
 ctx2.textAlign = 'center';
 const timeLbls = ['12AM','','4AM','','8AM','','12PM','','4PM','','8PM','','12AM'];
 timeLbls.forEach((lbl, i) => {
-if (lbl) { ctx2.fillStyle = '#2a4057'; ctx2.fillText(lbl, tX(i*2), bY+bH+10); }
+if (lbl) { ctx2.fillStyle = tc.axisLabel; ctx2.fillText(lbl, tX(i*2), bY+bH+10); }
 });
 
 keyLabels.forEach(kl => {
@@ -3717,6 +3749,7 @@ const canvas = $('sr-canvas');
 if (!canvas) return;
 const parent = canvas.parentElement;
 const dpr = window.devicePixelRatio || 1;
+const tc = themeColors();
 
 // ── Responsive breakpoints ──────────────────────────
 const screenW = window.innerWidth;
@@ -3724,12 +3757,10 @@ const isMobile = screenW < 520;
 const isTablet = screenW >= 520 && screenW < 768;
 
 const cssW = parent.clientWidth - 4;
-// Mobile: taller rows to fit labels inside; desktop: standard
 const rowH    = isMobile ? 38 : 32;
 const TOP     = isMobile ? 28 : 36;
 const BOT     = 20;
 const LEFT    = isMobile ? 54 : 66;
-// Mobile: no right margin — labels go inside chart
 const RIGHT   = isMobile ? 4 : (isTablet ? 140 : 175);
 const cssH    = TOP + BOT + rowH * (levels.length + 2) + 60;
 
@@ -3752,20 +3783,20 @@ const pMin  = minP - pad, pMax = maxP + pad;
 const pToY  = p => TOP + chartH - ((p - pMin) / (pMax - pMin)) * chartH;
 
 // ── Background ──────────────────────────────────────
-ctx.fillStyle = '#060a0f';
+ctx.fillStyle = tc.bg;
 ctx.fillRect(0, 0, W, H);
-ctx.fillStyle = '#0b1018';
+ctx.fillStyle = tc.chartBg;
 ctx.fillRect(LEFT, TOP, chartW, chartH);
 
 // ── Y-axis grid & price labels ───────────────────────
 const gridSteps = isMobile ? 5 : 8;
-ctx.strokeStyle = '#1a2b3c';
+ctx.strokeStyle = tc.grid;
 ctx.lineWidth = 1;
 for (let i = 0; i <= gridSteps; i++) {
 const y = TOP + (chartH / gridSteps) * i;
 ctx.beginPath(); ctx.moveTo(LEFT, y); ctx.lineTo(LEFT + chartW, y); ctx.stroke();
 const p = pMax - (pMax - pMin) * (i / gridSteps);
-ctx.fillStyle = '#7a9bb5';
+ctx.fillStyle = tc.axisLabel;
 ctx.font = `${isMobile ? 9 : 10}px 'IBM Plex Mono',monospace`;
 ctx.textAlign = 'right';
 ctx.fillText(fmtPrice(p), LEFT - 3, y + 3);
@@ -3839,7 +3870,7 @@ ctx.textAlign = 'left';
 ctx.fillText(labelTxt, px, py + 2);
 // dist % on the right inside chart
 ctx.font = `8px 'IBM Plex Mono',monospace`;
-ctx.fillStyle = '#7a9bb5';
+ctx.fillStyle = tc.axisLabel;
 ctx.textAlign = 'right';
 ctx.fillText(distStr, LEFT + chartW - 4, py + 2);
 } else {
@@ -3851,7 +3882,7 @@ ctx.font = isStrong
 : `${labelFontSize - 1}px 'IBM Plex Mono',monospace`;
 ctx.fillStyle = baseColor;
 ctx.fillText(`${lv.label}  ${fmtPrice(lv.price)}`, LEFT + chartW + 8, y - 1);
-ctx.fillStyle = '#4e6d88';
+ctx.fillStyle = tc.dimLabel;
 ctx.font = `9px 'IBM Plex Mono',monospace`;
 ctx.fillText(distStr, LEFT + chartW + 8, y + 10);
 
@@ -3878,12 +3909,11 @@ ctx.shadowBlur = 16; ctx.shadowColor = '#00c8f0';
 ctx.strokeStyle = '#00c8f0'; ctx.lineWidth = isMobile ? 2 : 2.5;
 ctx.beginPath(); ctx.moveTo(LEFT, cpY); ctx.lineTo(LEFT + chartW, cpY); ctx.stroke();
 ctx.shadowBlur = 0;
-// Price tag — mobile: inside chart; desktop: outside
+// Price tag — always dark for contrast against the cyan box
 const priceStr = '▶ ' + fmtPrice(price);
 ctx.font = `bold ${isMobile ? 10 : 12}px 'IBM Plex Mono',monospace`;
 const tw = ctx.measureText(priceStr).width;
 if (isMobile) {
-// Right-aligned inside chart
 ctx.fillStyle = '#00c8f0';
 ctx.fillRect(LEFT + chartW - tw - 10, cpY - 10, tw + 8, 20);
 ctx.fillStyle = '#060a0f';
@@ -3899,14 +3929,14 @@ ctx.fillText(priceStr, LEFT + chartW + 10, cpY + 4);
 ctx.restore();
 
 // ── Title bar ────────────────────────────────────────
-ctx.fillStyle = '#1a2b3c';
+ctx.fillStyle = tc.borderBox;
 ctx.fillRect(LEFT, TOP - (isMobile ? 22 : 26), chartW, isMobile ? 18 : 22);
 ctx.fillStyle = '#00c8f0';
 ctx.font = `bold ${isMobile ? 8 : 10}px 'Syne',sans-serif`;
 ctx.textAlign = 'left';
 ctx.fillText(isMobile ? 'S/R ZONE CHART' : 'SUPPORT / RESISTANCE ZONE CHART', LEFT + 5, TOP - (isMobile ? 9 : 11));
 if (!isMobile) {
-ctx.fillStyle = '#4e6d88';
+ctx.fillStyle = tc.dimLabel;
 ctx.font = `9px 'IBM Plex Mono',monospace`;
 ctx.textAlign = 'right';
 ctx.fillText('🟢 Support  🔴 Resistance  🟡 Confluence  ◈ Major', LEFT + chartW - 4, TOP - 11);
@@ -4238,7 +4268,8 @@ canvas.height = cssH * dpr;
 const ctx = canvas.getContext('2d');
 ctx.scale(dpr, dpr);
 
-ctx.fillStyle = '#060a0f';
+const tc = themeColors();
+ctx.fillStyle = tc.bg;
 ctx.fillRect(0, 0, cssW, cssH);
 
 // Column headers
@@ -4250,7 +4281,7 @@ ctx.fillStyle = MTF_TF_COLORS[tf];
 ctx.font = `bold 13px 'Syne', sans-serif`;
 ctx.textAlign = 'center';
 ctx.fillText(tf, x + cellW/2, 16);
-ctx.fillStyle = '#4e6d88';
+ctx.fillStyle = tc.dimLabel;
 ctx.font = `9px 'IBM Plex Mono', monospace`;
 ctx.fillText(MTF_TF_LABELS[tf], x + cellW/2, 28);
 });
@@ -4258,11 +4289,11 @@ ctx.fillText(MTF_TF_LABELS[tf], x + cellW/2, 28);
 // Row labels + cells
 MTF_ROWS.forEach((row, ri) => {
 const y = TOP_H + ri * CELL_H;
-// Row bg
-ctx.fillStyle = ri % 2 === 0 ? '#0b1018' : '#0d1520';
+// Row bg — alternating
+ctx.fillStyle = ri % 2 === 0 ? tc.chartBg : tc.chartBg2;
 ctx.fillRect(0, y, cssW, CELL_H);
 // Row label
-ctx.fillStyle = '#4e6d88';
+ctx.fillStyle = tc.dimLabel;
 ctx.font = `10px 'IBM Plex Mono', monospace`;
 ctx.textAlign = 'right';
 ctx.fillText(MTF_ROW_LABELS[row], LEFT_W - 6, y + CELL_H/2 + 4);
@@ -4285,15 +4316,15 @@ ctx.font = `bold 10px 'IBM Plex Mono', monospace`;
 ctx.textAlign = 'center';
 ctx.fillText(sc.label, x + cellW/2, y + CELL_H/2 + 4);
 } else {
-ctx.fillStyle = '#1a2b3c44';
+ctx.fillStyle = tc.candleBg;
 ctx.fillRect(x+1, y+2, cellW-3, CELL_H-4);
-ctx.fillStyle = '#2a3f55';
+ctx.fillStyle = tc.dimLabel2;
 ctx.font = `10px 'IBM Plex Mono', monospace`;
 ctx.textAlign = 'center';
 ctx.fillText('—', x + cellW/2, y + CELL_H/2 + 4);
 }
 // Grid border
-ctx.strokeStyle = '#1a2b3c';
+ctx.strokeStyle = tc.grid;
 ctx.lineWidth = 1;
 ctx.strokeRect(x, y, cellW, CELL_H);
 });
@@ -4307,31 +4338,28 @@ const sc = tfScores[tf];
 if (!sc || sc.count === 0) return;
 const pct = sc.pct;
 const barColor = pct >= 65 ? '#00e87a' : pct >= 45 ? '#f5c842' : '#f03a4a';
-ctx.fillStyle = '#0d1520';
+ctx.fillStyle = tc.chartBg2;
 ctx.fillRect(x, scoreY, cellW, BOTTOM_H);
-// Score label
 ctx.fillStyle = barColor;
 ctx.font = `bold 14px 'Syne', sans-serif`;
 ctx.textAlign = 'center';
 ctx.fillText(`${pct.toFixed(0)}%`, x + cellW/2, scoreY + 18);
-// Mini bar
 const barW = (cellW - 16) * (pct / 100);
-ctx.fillStyle = '#1a2b3c';
+ctx.fillStyle = tc.grid;
 ctx.fillRect(x+8, scoreY+22, cellW-16, 6);
 ctx.fillStyle = barColor;
 ctx.shadowBlur = pct >= 65 ? 6 : 0; ctx.shadowColor = barColor;
 ctx.fillRect(x+8, scoreY+22, barW, 6);
 ctx.shadowBlur = 0;
-// Status label
-ctx.fillStyle = '#4e6d88';
+ctx.fillStyle = tc.dimLabel;
 ctx.font = `9px 'IBM Plex Mono', monospace`;
 ctx.fillText(pct >= 65 ? 'BULLISH' : pct >= 45 ? 'NEUTRAL' : 'BEARISH', x + cellW/2, scoreY + 38);
 });
 
-// Left column labels area
-ctx.fillStyle = '#060a0f';
+// Left corner
+ctx.fillStyle = tc.chartBg2;
 ctx.fillRect(0, scoreY, LEFT_W, BOTTOM_H);
-ctx.fillStyle = '#4e6d88';
+ctx.fillStyle = tc.dimLabel;
 ctx.font = `9px 'IBM Plex Mono', monospace`;
 ctx.textAlign = 'right';
 ctx.fillText('TF Score', LEFT_W - 6, scoreY + 18);
