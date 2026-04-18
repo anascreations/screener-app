@@ -1,5 +1,5 @@
-const TM_USER = '__TM_USER__';
-const TM_PASS = '__TM_PASS__';
+const TM_USER = 'admin';
+const TM_PASS = '123';
 
 const TM_SESSION_KEY  = 'tm_session';
 const TM_SESSION_HOURS = 12; // auto-logout after 12 hours of inactivity
@@ -4910,3 +4910,378 @@ _srResizeTimer = setTimeout(() => { if ($('sr-canvas')) srCalc(); }, 180);
 window.addEventListener('orientationchange', () => {
 setTimeout(() => { if ($('sr-canvas')) srCalc(); }, 300);
 });
+/* ═══════════════════════════════════════════════════════
+   SCREENSHOT AUTO-FILL — OCR ENGINE (Tesseract.js)
+   Extracts Moomoo indicator values from uploaded image
+═══════════════════════════════════════════════════════ */
+
+// ── State ────────────────────────────────────────────
+const _imgFiles = {};   // tab → File object
+let   _tessWorker = null;
+let   _tessReady  = false;
+let   _tessLoading = false;
+
+// ── Field mapping per tab ─────────────────────────────
+// Maps extracted indicator keys → input element IDs
+const IMG_FIELD_MAP = {
+	ma: {
+		PRICE:    'ma-price',
+		MA5:      'ma-ma5',    MA20:   'ma-ma20',
+		MA50:     'ma-ma50',   MA200:  'ma-ma200',
+		BB_UPPER: 'ma-bbu',    BB_LOWER:'ma-bbl',
+		RSI:      'ma-rsi',
+		K:        'ma-k',      D: 'ma-d',      J: 'ma-j',
+		DIF:      'ma-dif',    DEA:'ma-dea',   HIST:'ma-hist',
+		VOL_RATIO:'ma-vol',    ATR:'ma-atr',
+		ADX:      'ma-adx',    PDI:'ma-pdi',   MDI:'ma-mdi',  ADXR:'ma-adxr',
+	},
+	ema: {
+		PRICE:    'ema-price',
+		EMA8:     'ema-ema8',  EMA21:'ema-ema21',
+		EMA55:    'ema-ema55', EMA200:'ema-ema200',
+		BB_UPPER: null,        BB_LOWER: null,
+		RSI:      'ema-rsi',
+		K:        'ema-k',     D:'ema-d',      J:'ema-j',
+		DIF:      'ema-dif',   DEA:'ema-dea',  HIST:'ema-hist',
+		VOL_RATIO:'ema-vol',   ATR:'ema-atr',
+		ADX:      'ema-adx',   PDI:'ema-pdi',  MDI:'ema-mdi', ADXR:'ema-adxr',
+		OPEN:     'ema-open',  PREV:'ema-prev',
+		HIGH:     'ema-high',  LOW:'ema-low',
+		HIGH52:   'ema-52h',   LOW52:'ema-52l',
+		BETA:     'ema-beta',
+	},
+	gold: {
+		PRICE:    'gold-price',
+		EMA21:    'gold-e21',  EMA55:'gold-e55',  EMA200:'gold-e200',
+		RSI:      'gold-rsi',
+		K:        'gold-k',    D:'gold-d',         J:'gold-j',
+		DIF:      'gold-dif',  DEA:'gold-dea',     HIST:'gold-hist',
+		VOL_RATIO:'gold-vol',  ATR:'gold-atr',
+		ADX:      'gold-adx',  PDI:'gold-pdi',     MDI:'gold-mdi',  ADXR:'gold-adxr',
+	},
+	bu: {
+		PRICE:    'bu-price',
+		MA5:      'bu-ma5',    MA20:'bu-ma20',  MA50:'bu-ma50',  MA200:'bu-ma200',
+		RSI:      'bu-rsi',
+		K:        'bu-k',      D:'bu-d',         J:'bu-j',
+		DIF:      'bu-dif',    DEA:'bu-dea',     HIST:'bu-hist',
+		VOL_RATIO:'bu-volratio', ATR:'bu-atr',
+		ADX:      'bu-adx',    PDI:'bu-pdi',     MDI:'bu-mdi',   ADXR:'bu-adxr',
+		OPEN:     'bu-open',   HIGH:'bu-high',   LOW:'bu-low',
+		PREV:     'bu-prev',
+	},
+	sw: {
+		PRICE:    'sw-price',
+		MA5:      'sw-ma5',    MA20:'sw-ma20',  MA50:'sw-ma50',  MA200:'sw-ma200',
+		RSI:      'sw-rsi',
+		K:        'sw-k',      D:'sw-d',         J:'sw-j',
+		DIF:      'sw-dif',    DEA:'sw-dea',     HIST:'sw-hist',
+		ATR:      'sw-atr',
+		ADX:      'sw-adx',    PDI:'sw-pdi',     MDI:'sw-mdi',   ADXR:'sw-adxr',
+		OPEN:     'sw-open',   HIGH:'sw-high',   LOW:'sw-low',   CLOSE:'sw-close',
+	},
+};
+
+// ── UI Helpers ────────────────────────────────────────
+function tmToggleUpload(tab) {
+	const body  = $(`img-body-${tab}`);
+	const arrow = $(`img-arrow-${tab}`);
+	if (!body) return;
+	const open = body.style.display !== 'none' && body.style.display !== '';
+	body.style.display  = open ? 'none' : '';
+	if (arrow) arrow.textContent = open ? '▼' : '▲';
+}
+
+function tmImgSelected(tab, input) {
+	const file = input?.files?.[0];
+	if (!file) return;
+	_imgFiles[tab] = file;
+
+	const reader = new FileReader();
+	reader.onload = e => {
+		const thumb = $(`img-thumb-${tab}`);
+		const fname = $(`img-fname-${tab}`);
+		const prev  = $(`img-preview-${tab}`);
+		const drop  = $(`img-drop-${tab}`);
+		if (thumb) thumb.src = e.target.result;
+		if (fname) fname.textContent = file.name;
+		if (prev)  prev.style.display  = 'flex';
+		if (drop)  drop.style.display  = 'none';
+	};
+	reader.readAsDataURL(file);
+	tmSetImgStatus(tab, '');
+}
+
+function tmClearImage(tab) {
+	_imgFiles[tab] = null;
+	const thumb = $(`img-thumb-${tab}`);
+	const prev  = $(`img-preview-${tab}`);
+	const drop  = $(`img-drop-${tab}`);
+	const fileInput = $(`img-file-${tab}`);
+	if (thumb) thumb.src = '';
+	if (prev)  prev.style.display  = 'none';
+	if (drop)  drop.style.display  = '';
+	if (fileInput) fileInput.value = '';
+	tmSetImgStatus(tab, '');
+}
+
+function tmSetImgStatus(tab, html, type) {
+	const el = $(`img-status-${tab}`);
+	if (!el) return;
+	if (!html) { el.style.display = 'none'; el.innerHTML = ''; return; }
+	el.style.display = '';
+	el.className = `img-status ${type || ''}`;
+	el.innerHTML = html;
+}
+
+// ── Tesseract Initialisation (lazy) ──────────────────
+async function tmInitTesseract() {
+	if (_tessReady) return true;
+	if (_tessLoading) {
+		// Wait for existing init
+		for (let i = 0; i < 60; i++) {
+			await new Promise(r => setTimeout(r, 500));
+			if (_tessReady) return true;
+		}
+		return false;
+	}
+	_tessLoading = true;
+	try {
+		const T = window.Tesseract;
+		if (!T) throw new Error('Tesseract.js not loaded');
+		_tessWorker = await T.createWorker('eng', 1, {
+			logger: () => {},     // suppress logs
+		});
+		await _tessWorker.setParameters({
+			tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,-:()/%+ ',
+		});
+		_tessReady  = true;
+		_tessLoading = false;
+		return true;
+	} catch (e) {
+		_tessLoading = false;
+		console.error('Tesseract init failed:', e);
+		return false;
+	}
+}
+
+// ── Main extraction function ──────────────────────────
+async function tmExtractFromImage(tab) {
+	const file = _imgFiles[tab];
+	if (!file) { tmSetImgStatus(tab, '⚠️ No image selected', 'warn'); return; }
+
+	tmSetImgStatus(tab, '<span class="img-spin"></span> Initialising OCR engine… (first use downloads ~10MB, one-time only)', 'loading');
+
+	const ok = await tmInitTesseract();
+	if (!ok) {
+		tmSetImgStatus(tab, '❌ OCR engine failed to load. Check internet connection and try again.', 'error');
+		return;
+	}
+
+	tmSetImgStatus(tab, '<span class="img-spin"></span> Scanning image… extracting indicator values…', 'loading');
+
+	try {
+		// Convert file to data URL for Tesseract
+		const dataUrl = await new Promise((res, rej) => {
+			const r = new FileReader();
+			r.onload  = e => res(e.target.result);
+			r.onerror = rej;
+			r.readAsDataURL(file);
+		});
+
+		const result = await _tessWorker.recognize(dataUrl);
+		const text   = result?.data?.text || '';
+
+		if (!text.trim()) {
+			tmSetImgStatus(tab, '⚠️ Could not read text from image. Ensure the screenshot is clear and not cropped.', 'warn');
+			return;
+		}
+
+		// Parse extracted values
+		const values  = tmParseIndicators(text);
+		const filled  = tmPopulateFromValues(tab, values);
+
+		// Trigger calc
+		const calcFn = { ma:'maCalc', ema:'emaCalc', gold:'goldCalc', bu:'bursaCalc', sw:'swingCalc' }[tab];
+		if (calcFn && window[calcFn]) window[calcFn]();
+
+		const total = Object.keys(values).length;
+		if (filled === 0) {
+			tmSetImgStatus(tab, `⚠️ No indicator values detected. Make sure your Moomoo screenshot shows the chart indicator lines (MA, KDJ, MACD, DMI, ATR, RSI) with their labels and values visible.`, 'warn');
+		} else {
+			tmSetImgStatus(tab, `✅ Extracted ${filled} value${filled>1?'s':''} — Price, ${Object.keys(values).filter(k=>k!=='PRICE').join(', ')}. Review fields below and correct any errors before calculating.`, 'success');
+		}
+	} catch (err) {
+		console.error('OCR error:', err);
+		tmSetImgStatus(tab, `❌ Extraction failed: ${err.message}. Try a higher-resolution screenshot.`, 'error');
+	}
+}
+
+// ── Regex Parser — Moomoo indicator format ─────────────
+function tmParseIndicators(text) {
+	const v = {};
+	const t = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+
+	const grab = (pattern) => {
+		const m = t.match(pattern);
+		if (!m) return null;
+		const n = parseFloat(m[1].replace(/,/g,''));
+		return isNaN(n) ? null : n;
+	};
+
+	// Price — look for standalone price near top (large number, 2–6 digits before decimal)
+	// Moomoo shows price as "21.550" or "0.950" prominently
+	const priceM = t.match(/^\s*[\d,]+\.?\d*\s*[↑↓]?\s*[+\-]?[\d.]+%/);
+	if (priceM) {
+		const pn = parseFloat(priceM[0].replace(/[^\d.]/g, ''));
+		if (!isNaN(pn) && pn > 0) v.PRICE = pn;
+	}
+	// Fallback: look for "High XX Low XX" pattern and extract nearby price
+	if (!v.PRICE) {
+		const hm = t.match(/High\s+([\d.,]+)/i);
+		const lm = t.match(/Low\s+([\d.,]+)/i);
+		if (hm && lm) {
+			const h = parseFloat(hm[1]), l = parseFloat(lm[1]);
+			if (!isNaN(h) && !isNaN(l)) v.PRICE = ((h + l) / 2);
+		}
+	}
+
+	// MA values: "MA MA5:16.484 MA20:15.523 MA50:15.450 MA200:15.119"
+	const ma5   = grab(/MA5[:\s]([\d.]+)/i);
+	const ma20  = grab(/MA20[:\s]([\d.]+)/i);
+	const ma50  = grab(/MA50[:\s]([\d.]+)/i);
+	const ma200 = grab(/MA200[:\s]([\d.]+)/i);
+	if (ma5)   v.MA5   = ma5;
+	if (ma20)  v.MA20  = ma20;
+	if (ma50)  v.MA50  = ma50;
+	if (ma200) v.MA200 = ma200;
+
+	// EMA values: "EMA EMA8:20.685 EMA21:19.904 EMA55:20.041 EMA200:23.430"
+	const ema8   = grab(/EMA8[:\s]([\d.]+)/i);
+	const ema21  = grab(/EMA21[:\s]([\d.]+)/i);
+	const ema55  = grab(/EMA55[:\s]([\d.]+)/i);
+	const ema200 = grab(/EMA200[:\s]([\d.]+)/i);
+	if (ema8)   v.EMA8   = ema8;
+	if (ema21)  v.EMA21  = ema21;
+	if (ema55)  v.EMA55  = ema55;
+	if (ema200) v.EMA200 = ema200;
+
+	// BOLL: "BOLL(20,2) MID:19.496 UPPER:21.559 LOWER:17.434"
+	const bbu = grab(/UPPER[:\s]([\d.]+)/i);
+	const bbl = grab(/LOWER[:\s]([\d.]+)/i);
+	if (bbu) v.BB_UPPER = bbu;
+	if (bbl) v.BB_LOWER = bbl;
+
+	// RSI: "RSI RSI11:68.797" or "RSI14:68.797" or "RSI:68.797"
+	const rsi = grab(/RSI\d*[:\s]([\d.]+)/i);
+	if (rsi) v.RSI = rsi;
+
+	// KDJ: "KDJ(9,3,3) K:82.634 D:78.050 J:91.801"
+	// Must extract from KDJ context to avoid grabbing K/D elsewhere
+	const kdjM = t.match(/KDJ[^]*?K[:\s]([\d.]+)[^]*?D[:\s]([\d.]+)[^]*?J[:\s]([\d.]+)/i);
+	if (kdjM) {
+		const kv = parseFloat(kdjM[1]), dv = parseFloat(kdjM[2]), jv = parseFloat(kdjM[3]);
+		if (!isNaN(kv)) v.K = kv;
+		if (!isNaN(dv)) v.D = dv;
+		if (!isNaN(jv)) v.J = jv;
+	} else {
+		// Fallback individual grabs
+		const kk = grab(/ K[:\s]([\d.]+)/i);
+		const dd = grab(/ D[:\s]([\d.]+)/i);
+		const jj = grab(/ J[:\s]([\d.]+)/i);
+		if (kk && kk <= 150) v.K = kk;
+		if (dd && dd <= 150) v.D = dd;
+		if (jj && jj <= 200) v.J = jj;
+	}
+
+	// MACD: "MACD(12,26,9) DIF:0.549 DEA:0.260 MACD:0.577"
+	const dif  = grab(/DIF[:\s](-?[\d.]+)/i);
+	const dea  = grab(/DEA[:\s](-?[\d.]+)/i);
+	const hist = grab(/MACD[:\s](-?[\d.]+)/i);
+	if (dif  != null) v.DIF  = dif;
+	if (dea  != null) v.DEA  = dea;
+	if (hist != null) v.HIST = hist;
+
+	// Volume: "Volume Ratio 1.57" or "VOL:25.36M" — prefer Volume Ratio
+	const volRatio = grab(/Volume\s+Ratio[:\s]*([\d.]+)/i) ||
+	                 grab(/Vol(?:ume)?\s+Ratio[:\s]*([\d.]+)/i) ||
+	                 grab(/VOL\s*Ratio[:\s]*([\d.]+)/i);
+	if (volRatio) v.VOL_RATIO = volRatio;
+
+	// ATR: "ATR ATR1:0.753" or "ATR:0.753"
+	const atr = grab(/ATR\d*[:\s]([\d.]+)/i);
+	if (atr) v.ATR = atr;
+
+	// DMI: "DMI(14,6) PDI:50.215 MDI:6.618 ADX:46.380 ADXR:27.963"
+	const dmiM = t.match(/DMI[^]*?PDI[:\s]([\d.]+)[^]*?MDI[:\s]([\d.]+)[^]*?ADX[:\s]([\d.]+)[^]*?ADXR[:\s]([\d.]+)/i);
+	if (dmiM) {
+		const pdi  = parseFloat(dmiM[1]);
+		const mdi  = parseFloat(dmiM[2]);
+		const adx  = parseFloat(dmiM[3]);
+		const adxr = parseFloat(dmiM[4]);
+		if (!isNaN(pdi))  v.PDI  = pdi;
+		if (!isNaN(mdi))  v.MDI  = mdi;
+		if (!isNaN(adx))  v.ADX  = adx;
+		if (!isNaN(adxr)) v.ADXR = adxr;
+	} else {
+		// Fallback individual
+		const pdi  = grab(/PDI[:\s]([\d.]+)/i);
+		const mdi  = grab(/MDI[:\s]([\d.]+)/i);
+		const adx  = grab(/\bADX[:\s]([\d.]+)/i);
+		const adxr = grab(/ADXR[:\s]([\d.]+)/i);
+		if (pdi)  v.PDI  = pdi;
+		if (mdi)  v.MDI  = mdi;
+		if (adx)  v.ADX  = adx;
+		if (adxr) v.ADXR = adxr;
+	}
+
+	// OHLC from stock info area
+	const open   = grab(/Open[:\s]*([\d.,]+)/i);
+	const high   = grab(/High[:\s]*([\d.,]+)/i);
+	const low    = grab(/Low[:\s]*([\d.,]+)/i);
+	const prevC  = grab(/Prev\s*Close[:\s]*([\d.,]+)/i);
+	const beta   = grab(/Beta[:\s]*([\d.]+)/i);
+	const h52    = grab(/52.?w?k?\s*High[:\s]*([\d.,]+)/i);
+	const l52    = grab(/52.?w?k?\s*Low[:\s]*([\d.,]+)/i);
+	if (open)  v.OPEN   = open;
+	if (high)  v.HIGH   = high;
+	if (low)   v.LOW    = low;
+	if (prevC) v.PREV   = prevC;
+	if (beta)  v.BETA   = beta;
+	if (h52)   v.HIGH52 = h52;
+	if (l52)   v.LOW52  = l52;
+
+	// Candle close (from "Prev Close" context fallback used for sw-close)
+	// For swing tab — use the last price or close shown
+	if (!v.CLOSE && v.PRICE) v.CLOSE = v.PRICE;
+
+	return v;
+}
+
+// ── Populate fields from parsed values ────────────────
+function tmPopulateFromValues(tab, values) {
+	const map = IMG_FIELD_MAP[tab];
+	if (!map) return 0;
+	let filled = 0;
+
+	Object.entries(map).forEach(([key, fieldId]) => {
+		if (!fieldId || values[key] == null) return;
+		const el = $(fieldId);
+		if (!el) return;
+		// Only fill if currently empty OR value clearly different (allow override)
+		const current = el.value ? parseFloat(el.value) : null;
+		const newVal  = values[key];
+		// Round to match step precision
+		const step    = parseFloat(el.step) || 0.0001;
+		const decimals= step < 0.001 ? 4 : step < 0.01 ? 3 : step < 0.1 ? 2 : 1;
+		el.value = newVal.toFixed(decimals);
+		// Flash green to show which fields were filled
+		el.classList.remove('img-field-filled');
+		void el.offsetWidth;
+		el.classList.add('img-field-filled');
+		setTimeout(() => el.classList.remove('img-field-filled'), 3000);
+		filled++;
+	});
+
+	return filled;
+}

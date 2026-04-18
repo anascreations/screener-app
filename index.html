@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>TradeMatrix Pro v3</title>
+<title>TradeMatrix Pro — MA / EMA / Gold Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="tradematrix.css"/>
@@ -83,8 +83,8 @@
      TAB BAR
 ══════════════════════════════════════ -->
 <div class="tab-bar">
-  <button class="tab-btn active" data-tab="ma"     onclick="switchTab('ma')">∿ MA</button>
-  <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA</button>
+  <button class="tab-btn active" data-tab="ma"     onclick="switchTab('ma')">∿ MA Calculator</button>
+  <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA Calculator</button>
   <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAUUSD</button>
   <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 ETF</button>
   <button class="tab-btn swing-tab" data-tab="swing" onclick="switchTab('swing')">🔄 Swing Reversal</button>
@@ -262,6 +262,35 @@
     </div>
   </div>
 </div>
+
+<!-- ── Screenshot Auto-Fill Card (MA) ── -->
+<div class="card img-upload-card" id="img-card-ma">
+  <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('ma')">
+    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="img-toggle-arrow" id="img-arrow-ma">▼</span>
+  </div>
+  <div class="img-card-body" id="img-body-ma">
+    <div class="img-instruction">Upload your Moomoo chart screenshot — values will be extracted and filled automatically. You can still edit any field after.</div>
+    <div class="img-drop-zone" id="img-drop-ma" onclick="document.getElementById('img-file-ma').click()">
+      <div class="img-drop-inner">
+        <span class="img-drop-icon">📷</span>
+        <span class="img-drop-text">Tap to select Moomoo screenshot</span>
+        <span class="img-drop-sub">Chart with MA · KDJ · MACD · ATR · DMI · RSI visible</span>
+      </div>
+      <input type="file" id="img-file-ma" accept="image/*" style="display:none" onchange="tmImgSelected('ma',this)"/>
+    </div>
+    <div class="img-preview-row" id="img-preview-ma" style="display:none">
+      <img class="img-thumb" id="img-thumb-ma" src="" alt=""/>
+      <div class="img-preview-actions">
+        <div class="img-fname" id="img-fname-ma"></div>
+        <button class="btn btn-primary" onclick="tmExtractFromImage('ma')">⚡ Extract &amp; Fill</button>
+        <button class="btn btn-secondary" onclick="tmClearImage('ma')">✕ Clear</button>
+      </div>
+    </div>
+    <div class="img-status" id="img-status-ma" style="display:none"></div>
+  </div>
+</div>
+
 
   <div class="card">
     <div class="card-hdr"><span class="ci">∿</span> MA 7-Filter Stack <span class="badge-new">+ADX +Supertrend</span></div>
@@ -512,6 +541,35 @@
 </div>
 
   <div class="card">
+<!-- ── Screenshot Auto-Fill Card (EMA) ── -->
+<div class="card img-upload-card" id="img-card-ema">
+  <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('ema')">
+    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="img-toggle-arrow" id="img-arrow-ema">▼</span>
+  </div>
+  <div class="img-card-body" id="img-body-ema">
+    <div class="img-instruction">Upload your Moomoo chart screenshot — values will be extracted and filled automatically. You can still edit any field after.</div>
+    <div class="img-drop-zone" id="img-drop-ema" onclick="document.getElementById('img-file-ema').click()">
+      <div class="img-drop-inner">
+        <span class="img-drop-icon">📷</span>
+        <span class="img-drop-text">Tap to select Moomoo screenshot</span>
+        <span class="img-drop-sub">Chart with EMA · KDJ · MACD · ATR · DMI · RSI visible</span>
+      </div>
+      <input type="file" id="img-file-ema" accept="image/*" style="display:none" onchange="tmImgSelected('ema',this)"/>
+    </div>
+    <div class="img-preview-row" id="img-preview-ema" style="display:none">
+      <img class="img-thumb" id="img-thumb-ema" src="" alt=""/>
+      <div class="img-preview-actions">
+        <div class="img-fname" id="img-fname-ema"></div>
+        <button class="btn btn-primary" onclick="tmExtractFromImage('ema')">⚡ Extract &amp; Fill</button>
+        <button class="btn btn-secondary" onclick="tmClearImage('ema')">✕ Clear</button>
+      </div>
+    </div>
+    <div class="img-status" id="img-status-ema" style="display:none"></div>
+  </div>
+</div>
+
+
     <div class="card-hdr"><span class="ci">≋</span> EMA 7-Filter Stack <span class="badge-new">+ADX +Ichimoku</span></div>
     <div class="card-body">
 
@@ -800,6 +858,35 @@
 </div>
 
   <div class="card">
+<!-- ── Screenshot Auto-Fill Card (Gold) ── -->
+<div class="card img-upload-card" id="img-card-gold">
+  <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('gold')">
+    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="img-toggle-arrow" id="img-arrow-gold">▼</span>
+  </div>
+  <div class="img-card-body" id="img-body-gold">
+    <div class="img-instruction">Upload your Moomoo XAUUSD chart screenshot — EMA, KDJ, MACD, ATR, DMI, RSI values will be extracted automatically.</div>
+    <div class="img-drop-zone" id="img-drop-gold" onclick="document.getElementById('img-file-gold').click()">
+      <div class="img-drop-inner">
+        <span class="img-drop-icon">📷</span>
+        <span class="img-drop-text">Tap to select Moomoo XAUUSD screenshot</span>
+        <span class="img-drop-sub">Ensure EMA · KDJ · MACD · DMI · ATR · RSI sub-charts visible</span>
+      </div>
+      <input type="file" id="img-file-gold" accept="image/*" style="display:none" onchange="tmImgSelected('gold',this)"/>
+    </div>
+    <div class="img-preview-row" id="img-preview-gold" style="display:none">
+      <img class="img-thumb" id="img-thumb-gold" src="" alt=""/>
+      <div class="img-preview-actions">
+        <div class="img-fname" id="img-fname-gold"></div>
+        <button class="btn btn-primary" onclick="tmExtractFromImage('gold')">⚡ Extract &amp; Fill</button>
+        <button class="btn btn-secondary" onclick="tmClearImage('gold')">✕ Clear</button>
+      </div>
+    </div>
+    <div class="img-status" id="img-status-gold" style="display:none"></div>
+  </div>
+</div>
+
+
     <div class="card-hdr"><span class="ci gold-ci">◈</span> Gold XAUUSD — 7-Filter System</div>
     <div class="card-body">
 
@@ -1133,6 +1220,33 @@
     <div class="card-hdr"><span class="bursa-ci">🇲🇾</span> Gold ETF 8-Filter System <span class="badge-new">NAV + Premium + Bid/Ask + Bursa Session</span></div>
     <div class="card-body">
 
+<!-- ── Screenshot Auto-Fill Card (Bursa) ── -->
+<div class="card img-upload-card" id="img-card-bu">
+  <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('bu')">
+    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="img-toggle-arrow" id="img-arrow-bu">▼</span>
+  </div>
+  <div class="img-card-body" id="img-body-bu">
+    <div class="img-instruction">Upload your Moomoo Bursa ETF chart screenshot — MA, KDJ, MACD, ATR, DMI values will be extracted automatically.</div>
+    <div class="img-drop-zone" id="img-drop-bu" onclick="document.getElementById('img-file-bu').click()">
+      <div class="img-drop-inner">
+        <span class="img-drop-icon">📷</span>
+        <span class="img-drop-text">Tap to select Moomoo ETF screenshot</span>
+        <span class="img-drop-sub">Ensure MA · KDJ · MACD · DMI · ATR visible</span>
+      </div>
+      <input type="file" id="img-file-bu" accept="image/*" style="display:none" onchange="tmImgSelected('bu',this)"/>
+    </div>
+    <div class="img-preview-row" id="img-preview-bu" style="display:none">
+      <img class="img-thumb" id="img-thumb-bu" src="" alt=""/>
+      <div class="img-preview-actions">
+        <div class="img-fname" id="img-fname-bu"></div>
+        <button class="btn btn-primary" onclick="tmExtractFromImage('bu')">⚡ Extract &amp; Fill</button>
+        <button class="btn btn-secondary" onclick="tmClearImage('bu')">✕ Clear</button>
+      </div>
+    </div>
+    <div class="img-status" id="img-status-bu" style="display:none"></div>
+  </div>
+</div>
       <div class="tf-selector" style="border-color:rgba(0,232,122,0.2);background:rgba(0,232,122,0.04)">
         <span class="tf-sel-label">Timeframe</span>
         <div class="tf-pills" id="bursa-tf-pills">
@@ -1458,6 +1572,34 @@
         <div class="ref-row"><span class="ref-range" style="color:var(--red)">&lt; 1.0×</span><span>🔴 Weak — may be false signal</span></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── Screenshot Auto-Fill Card (Swing) ── -->
+<div class="card img-upload-card" id="img-card-sw">
+  <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('sw')">
+    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="img-toggle-arrow" id="img-arrow-sw">▼</span>
+  </div>
+  <div class="img-card-body" id="img-body-sw">
+    <div class="img-instruction">Upload your Moomoo chart screenshot — candle OHLC, MA, KDJ, MACD, ATR, Supertrend, DMI values will be extracted automatically.</div>
+    <div class="img-drop-zone" id="img-drop-sw" onclick="document.getElementById('img-file-sw').click()">
+      <div class="img-drop-inner">
+        <span class="img-drop-icon">📷</span>
+        <span class="img-drop-text">Tap to select Moomoo screenshot</span>
+        <span class="img-drop-sub">Ensure MA · Supertrend · KDJ · MACD · ATR visible</span>
+      </div>
+      <input type="file" id="img-file-sw" accept="image/*" style="display:none" onchange="tmImgSelected('sw',this)"/>
+    </div>
+    <div class="img-preview-row" id="img-preview-sw" style="display:none">
+      <img class="img-thumb" id="img-thumb-sw" src="" alt=""/>
+      <div class="img-preview-actions">
+        <div class="img-fname" id="img-fname-sw"></div>
+        <button class="btn btn-primary" onclick="tmExtractFromImage('sw')">⚡ Extract &amp; Fill</button>
+        <button class="btn btn-secondary" onclick="tmClearImage('sw')">✕ Clear</button>
+      </div>
+    </div>
+    <div class="img-status" id="img-status-sw" style="display:none"></div>
   </div>
 </div>
 
@@ -2944,6 +3086,7 @@
 <!-- ── Global Tooltip Overlay ── -->
 <div id="tm-tooltip" class="tm-tooltip" style="display:none"></div>
 
+<script src="https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <script src="tradematrix.js"></script>
 </body>
 </html>
