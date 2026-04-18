@@ -5120,129 +5120,240 @@ async function tmExtractFromImage(tab) {
 // ── Regex Parser — Moomoo indicator format ─────────────
 function tmParseIndicators(text) {
 	const v = {};
-	const t = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
+	// Normalise — preserve newlines for context-aware parsing
+	const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+	// Single-line version for fallback grabs
+	const t = text.replace(/\n/g, ' ').replace(/\r/g, ' ').replace(/\s+/g, ' ');
+
+	// ── Grab helpers ───────────────────────────────────
+	// First match anywhere in text
 	const grab = (pattern) => {
 		const m = t.match(pattern);
 		if (!m) return null;
-		const n = parseFloat(m[1].replace(/,/g,''));
+		const raw = (m[1] || m[0]).replace(/,/g, '').replace(/[Oo]/g, '0'); // OCR O→0
+		const n = parseFloat(raw);
 		return isNaN(n) ? null : n;
 	};
+	// Grab that searches line by line (better for noisy OCR)
+	const grabLine = (lineKeyword, valuePattern) => {
+		for (const ln of lines) {
+			if (new RegExp(lineKeyword, 'i').test(ln)) {
+				const m = ln.match(valuePattern);
+				if (m) {
+					const n = parseFloat(m[1].replace(/,/g,'').replace(/[Oo]/g,'0'));
+					return isNaN(n) ? null : n;
+				}
+			}
+		}
+		return null;
+	};
 
-	// Price — look for standalone price near top (large number, 2–6 digits before decimal)
-	// Moomoo shows price as "21.550" or "0.950" prominently
-	const priceM = t.match(/^\s*[\d,]+\.?\d*\s*[↑↓]?\s*[+\-]?[\d.]+%/);
-	if (priceM) {
-		const pn = parseFloat(priceM[0].replace(/[^\d.]/g, ''));
-		if (!isNaN(pn) && pn > 0) v.PRICE = pn;
+	// ── PRICE ─────────────────────────────────────────
+	// Strategy 1: Moomoo shows price on its own line as large bold number
+	// like "21.550" or "0.950" followed by arrow + change on next line
+	// OCR typically puts it on a line that starts with digits only
+	for (const ln of lines) {
+		// Line that is purely a price: "21.550" or "21,550.00" with optional trailing arrow
+		if (/^[\d,]+\.\d{1,6}\s*[↑↓▲▼+\-]?$/.test(ln)) {
+			const n = parseFloat(ln.replace(/[^\d.]/g, ''));
+			if (!isNaN(n) && n > 0) { v.PRICE = n; break; }
+		}
+		// Line like "21.550 ↑ +0.060 +0.28%"
+		if (/^([\d,]+\.\d{1,6})\s*[↑↓▲▼]/.test(ln)) {
+			const m = ln.match(/^([\d,]+\.\d{1,6})/);
+			if (m) { const n = parseFloat(m[1].replace(/,/g,'')); if (!isNaN(n) && n>0) { v.PRICE = n; break; } }
+		}
 	}
-	// Fallback: look for "High XX Low XX" pattern and extract nearby price
+	// Strategy 2: Use Open/Prev Close average as sanity — then pick closest real candidate
 	if (!v.PRICE) {
-		const hm = t.match(/High\s+([\d.,]+)/i);
-		const lm = t.match(/Low\s+([\d.,]+)/i);
-		if (hm && lm) {
-			const h = parseFloat(hm[1]), l = parseFloat(lm[1]);
-			if (!isNaN(h) && !isNaN(l)) v.PRICE = ((h + l) / 2);
+		const openM  = grab(/\bOpen\b[:\s]*([\d.,]+)/i);
+		const prevCM = grab(/Prev\s*Close[:\s]*([\d.,]+)/i);
+		if (openM && prevCM) {
+			// Price should be close to Open or Prev Close
+			const avg = (openM + prevCM) / 2;
+			v.PRICE = parseFloat(avg.toFixed(4));
+		} else if (openM) {
+			v.PRICE = openM;
 		}
 	}
 
-	// MA values: "MA MA5:16.484 MA20:15.523 MA50:15.450 MA200:15.119"
-	const ma5   = grab(/MA5[:\s]([\d.]+)/i);
-	const ma20  = grab(/MA20[:\s]([\d.]+)/i);
-	const ma50  = grab(/MA50[:\s]([\d.]+)/i);
-	const ma200 = grab(/MA200[:\s]([\d.]+)/i);
-	if (ma5)   v.MA5   = ma5;
-	if (ma20)  v.MA20  = ma20;
-	if (ma50)  v.MA50  = ma50;
-	if (ma200) v.MA200 = ma200;
-
-	// EMA values: "EMA EMA8:20.685 EMA21:19.904 EMA55:20.041 EMA200:23.430"
-	const ema8   = grab(/EMA8[:\s]([\d.]+)/i);
-	const ema21  = grab(/EMA21[:\s]([\d.]+)/i);
-	const ema55  = grab(/EMA55[:\s]([\d.]+)/i);
-	const ema200 = grab(/EMA200[:\s]([\d.]+)/i);
-	if (ema8)   v.EMA8   = ema8;
-	if (ema21)  v.EMA21  = ema21;
-	if (ema55)  v.EMA55  = ema55;
-	if (ema200) v.EMA200 = ema200;
-
-	// BOLL: "BOLL(20,2) MID:19.496 UPPER:21.559 LOWER:17.434"
-	const bbu = grab(/UPPER[:\s]([\d.]+)/i);
-	const bbl = grab(/LOWER[:\s]([\d.]+)/i);
-	if (bbu) v.BB_UPPER = bbu;
-	if (bbl) v.BB_LOWER = bbl;
-
-	// RSI: "RSI RSI11:68.797" or "RSI14:68.797" or "RSI:68.797"
-	const rsi = grab(/RSI\d*[:\s]([\d.]+)/i);
-	if (rsi) v.RSI = rsi;
-
-	// KDJ: "KDJ(9,3,3) K:82.634 D:78.050 J:91.801"
-	// Must extract from KDJ context to avoid grabbing K/D elsewhere
-	const kdjM = t.match(/KDJ[^]*?K[:\s]([\d.]+)[^]*?D[:\s]([\d.]+)[^]*?J[:\s]([\d.]+)/i);
-	if (kdjM) {
-		const kv = parseFloat(kdjM[1]), dv = parseFloat(kdjM[2]), jv = parseFloat(kdjM[3]);
-		if (!isNaN(kv)) v.K = kv;
-		if (!isNaN(dv)) v.D = dv;
-		if (!isNaN(jv)) v.J = jv;
+	// ── MA VALUES ──────────────────────────────────────
+	// Moomoo format: "▲ MA MA5:21.040 MA20:19.496 MA50:18.999 MA200:25.804"
+	// Look for the full MA line first — most reliable
+	const maLine = lines.find(ln => /\bMA\s+MA5[:\s]/i.test(ln) || /\bMA5[:\s][\d.]+.*MA20[:\s]/i.test(ln));
+	if (maLine) {
+		const ma5m   = maLine.match(/MA5[:\s]+([\d.]+)/i);
+		const ma20m  = maLine.match(/MA20[:\s]+([\d.]+)/i);
+		const ma50m  = maLine.match(/MA50[:\s]+([\d.]+)/i);
+		const ma200m = maLine.match(/MA200[:\s]+([\d.]+)/i);
+		if (ma5m)   v.MA5   = parseFloat(ma5m[1]);
+		if (ma20m)  v.MA20  = parseFloat(ma20m[1]);
+		if (ma50m)  v.MA50  = parseFloat(ma50m[1]);
+		if (ma200m) v.MA200 = parseFloat(ma200m[1]);
 	} else {
-		// Fallback individual grabs
-		const kk = grab(/ K[:\s]([\d.]+)/i);
-		const dd = grab(/ D[:\s]([\d.]+)/i);
-		const jj = grab(/ J[:\s]([\d.]+)/i);
-		if (kk && kk <= 150) v.K = kk;
-		if (dd && dd <= 150) v.D = dd;
-		if (jj && jj <= 200) v.J = jj;
+		// Fallback: individual grabs with word-boundary to avoid MA200 matching MA20
+		const ma200 = grab(/\bMA200[:\s]+([\d.]+)/i);
+		const ma50  = grab(/\bMA50[:\s]+([\d.]+)/i);
+		const ma20  = grab(/\bMA20[:\s]+([\d.]+)/i);
+		// MA5 — only match if not preceded by digits (avoid matching MA50, MA500 etc)
+		const ma5   = grab(/\bMA5(?!0)[:\s]+([\d.]+)/i);
+		if (ma200) v.MA200 = ma200;
+		if (ma50)  v.MA50  = ma50;
+		if (ma20)  v.MA20  = ma20;
+		if (ma5)   v.MA5   = ma5;
 	}
 
-	// MACD: "MACD(12,26,9) DIF:0.549 DEA:0.260 MACD:0.577"
-	const dif  = grab(/DIF[:\s](-?[\d.]+)/i);
-	const dea  = grab(/DEA[:\s](-?[\d.]+)/i);
-	const hist = grab(/MACD[:\s](-?[\d.]+)/i);
-	if (dif  != null) v.DIF  = dif;
-	if (dea  != null) v.DEA  = dea;
-	if (hist != null) v.HIST = hist;
-
-	// Volume: "Volume Ratio 1.57" or "VOL:25.36M" — prefer Volume Ratio
-	const volRatio = grab(/Volume\s+Ratio[:\s]*([\d.]+)/i) ||
-	                 grab(/Vol(?:ume)?\s+Ratio[:\s]*([\d.]+)/i) ||
-	                 grab(/VOL\s*Ratio[:\s]*([\d.]+)/i);
-	if (volRatio) v.VOL_RATIO = volRatio;
-
-	// ATR: "ATR ATR1:0.753" or "ATR:0.753"
-	const atr = grab(/ATR\d*[:\s]([\d.]+)/i);
-	if (atr) v.ATR = atr;
-
-	// DMI: "DMI(14,6) PDI:50.215 MDI:6.618 ADX:46.380 ADXR:27.963"
-	const dmiM = t.match(/DMI[^]*?PDI[:\s]([\d.]+)[^]*?MDI[:\s]([\d.]+)[^]*?ADX[:\s]([\d.]+)[^]*?ADXR[:\s]([\d.]+)/i);
-	if (dmiM) {
-		const pdi  = parseFloat(dmiM[1]);
-		const mdi  = parseFloat(dmiM[2]);
-		const adx  = parseFloat(dmiM[3]);
-		const adxr = parseFloat(dmiM[4]);
-		if (!isNaN(pdi))  v.PDI  = pdi;
-		if (!isNaN(mdi))  v.MDI  = mdi;
-		if (!isNaN(adx))  v.ADX  = adx;
-		if (!isNaN(adxr)) v.ADXR = adxr;
+	// ── EMA VALUES ─────────────────────────────────────
+	// "EMA EMA8:20.685 EMA21:19.904 EMA55:20.041 EMA200:23.430"
+	const emaLine = lines.find(ln => /\bEMA\s+EMA8[:\s]/i.test(ln) || /\bEMA8[:\s][\d.]+.*EMA21[:\s]/i.test(ln));
+	if (emaLine) {
+		const e8m   = emaLine.match(/EMA8[:\s]+([\d.]+)/i);
+		const e21m  = emaLine.match(/EMA21[:\s]+([\d.]+)/i);
+		const e55m  = emaLine.match(/EMA55[:\s]+([\d.]+)/i);
+		const e200m = emaLine.match(/EMA200[:\s]+([\d.]+)/i);
+		if (e8m)   v.EMA8   = parseFloat(e8m[1]);
+		if (e21m)  v.EMA21  = parseFloat(e21m[1]);
+		if (e55m)  v.EMA55  = parseFloat(e55m[1]);
+		if (e200m) v.EMA200 = parseFloat(e200m[1]);
 	} else {
-		// Fallback individual
-		const pdi  = grab(/PDI[:\s]([\d.]+)/i);
-		const mdi  = grab(/MDI[:\s]([\d.]+)/i);
-		const adx  = grab(/\bADX[:\s]([\d.]+)/i);
-		const adxr = grab(/ADXR[:\s]([\d.]+)/i);
-		if (pdi)  v.PDI  = pdi;
-		if (mdi)  v.MDI  = mdi;
-		if (adx)  v.ADX  = adx;
-		if (adxr) v.ADXR = adxr;
+		const e200 = grab(/\bEMA200[:\s]+([\d.]+)/i);
+		const e55  = grab(/\bEMA55[:\s]+([\d.]+)/i);
+		const e21  = grab(/\bEMA21[:\s]+([\d.]+)/i);
+		const e8   = grab(/\bEMA8(?![\d])[:\s]+([\d.]+)/i);
+		if (e200) v.EMA200 = e200;
+		if (e55)  v.EMA55  = e55;
+		if (e21)  v.EMA21  = e21;
+		if (e8)   v.EMA8   = e8;
 	}
 
-	// OHLC from stock info area
-	const open   = grab(/Open[:\s]*([\d.,]+)/i);
-	const high   = grab(/High[:\s]*([\d.,]+)/i);
-	const low    = grab(/Low[:\s]*([\d.,]+)/i);
+	// ── BOLL ──────────────────────────────────────────
+	// "BOLL(20,2) MID:19.496 UPPER:21.559 LOWER:17.434"
+	const bollLine = lines.find(ln => /BOLL/i.test(ln) && /UPPER|LOWER/i.test(ln));
+	if (bollLine) {
+		const bbu = bollLine.match(/UPPER[:\s]+([\d.]+)/i);
+		const bbl = bollLine.match(/LOWER[:\s]+([\d.]+)/i);
+		if (bbu) v.BB_UPPER = parseFloat(bbu[1]);
+		if (bbl) v.BB_LOWER = parseFloat(bbl[1]);
+	} else {
+		const bbu = grab(/UPPER[:\s]+([\d.]+)/i);
+		const bbl = grab(/LOWER[:\s]+([\d.]+)/i);
+		if (bbu) v.BB_UPPER = bbu;
+		if (bbl) v.BB_LOWER = bbl;
+	}
+
+	// ── RSI ───────────────────────────────────────────
+	// "RSI RSI11:68.797" or "RSI14:64.674" — pick number between 0–100
+	const rsiLine = lines.find(ln => /\bRSI\b/i.test(ln));
+	if (rsiLine) {
+		const rm = rsiLine.match(/RSI\d*[:\s]+([\d.]+)/i);
+		if (rm) {
+			const n = parseFloat(rm[1]);
+			if (!isNaN(n) && n >= 0 && n <= 100) v.RSI = n;
+		}
+	}
+	if (!v.RSI) {
+		const rsi = grab(/RSI\d*[:\s]+([\d.]+)/i);
+		if (rsi !== null && rsi >= 0 && rsi <= 100) v.RSI = rsi;
+	}
+
+	// ── KDJ ───────────────────────────────────────────
+	// "KDJ(9,3,3) K:82.634 D:78.050 J:91.801"
+	const kdjLine = lines.find(ln => /\bKDJ\b/i.test(ln) && /K[:\s][\d.]/.test(ln));
+	if (kdjLine) {
+		const km = kdjLine.match(/\bK[:\s]+([\d.]+)/i);
+		const dm = kdjLine.match(/\bD[:\s]+([\d.]+)/i);
+		const jm = kdjLine.match(/\bJ[:\s]+([\d.]+)/i);
+		if (km) { const n = parseFloat(km[1]); if (n <= 150) v.K = n; }
+		if (dm) { const n = parseFloat(dm[1]); if (n <= 150) v.D = n; }
+		if (jm) { const n = parseFloat(jm[1]); if (n <= 200) v.J = n; }
+	}
+
+	// ── MACD ──────────────────────────────────────────
+	// "MACD(12,26,9) DIF:0.549 DEA:0.260 MACD:0.577" — two lines possible
+	const macdLine = lines.find(ln => /\bMACD\b/i.test(ln) && /DIF|DEA/i.test(ln));
+	if (macdLine) {
+		const difm  = macdLine.match(/DIF[:\s]+(-?[\d.]+)/i);
+		const deam  = macdLine.match(/DEA[:\s]+(-?[\d.]+)/i);
+		const macdm = macdLine.match(/MACD[:\s]+(-?[\d.]+)/i);
+		if (difm)  v.DIF  = parseFloat(difm[1]);
+		if (deam)  v.DEA  = parseFloat(deam[1]);
+		if (macdm) v.HIST = parseFloat(macdm[1]);
+	} else {
+		const dif  = grab(/\bDIF[:\s]+(-?[\d.]+)/i);
+		const dea  = grab(/\bDEA[:\s]+(-?[\d.]+)/i);
+		const hist = grab(/\bMACD[:\s]+(-?[\d.]+)/i);
+		if (dif  != null) v.DIF  = dif;
+		if (dea  != null) v.DEA  = dea;
+		if (hist != null) v.HIST = hist;
+	}
+
+	// ── VOLUME RATIO ───────────────────────────────────
+	// Moomoo stock page: "Volume Ratio  1.57"  (two words, then number)
+	// Moomoo chart label: "VOL:25.36M" + separate line "Volume Ratio 1.57"
+	// Also seen as "Vol. Ratio" or "VolRatio"
+	let volRatio = null;
+	// Try line-by-line first — most reliable
+	for (const ln of lines) {
+		if (/vol(?:ume)?\s*ratio/i.test(ln)) {
+			const m = ln.match(/([\d.]+)\s*$/);  // number at end of line
+			if (m) { const n = parseFloat(m[1]); if (!isNaN(n) && n > 0 && n < 50) { volRatio = n; break; } }
+			// Or number anywhere after keyword
+			const m2 = ln.match(/vol[a-z.\s]*ratio[:\s]+([\d.]+)/i);
+			if (m2) { const n = parseFloat(m2[1]); if (!isNaN(n) && n > 0 && n < 50) { volRatio = n; break; } }
+		}
+	}
+	// Fallback: broader text search
+	if (!volRatio) {
+		volRatio = grab(/Vol(?:ume)?\s*\.?\s*Ratio[:\s]*([\d.]+)/i) ||
+		           grab(/VolRatio[:\s]*([\d.]+)/i);
+	}
+	if (volRatio && volRatio > 0 && volRatio < 50) v.VOL_RATIO = volRatio;
+
+	// ── ATR ───────────────────────────────────────────
+	// "ATR ATR1:0.753" — number typically 0.01–50
+	const atrLine = lines.find(ln => /\bATR\b/i.test(ln) && /ATR\d*[:\s][\d.]/.test(ln));
+	if (atrLine) {
+		const am = atrLine.match(/ATR\d*[:\s]+([\d.]+)/i);
+		if (am) v.ATR = parseFloat(am[1]);
+	}
+	if (!v.ATR) {
+		const atr = grab(/ATR\d*[:\s]+([\d.]+)/i);
+		if (atr !== null && atr > 0 && atr < 200) v.ATR = atr;
+	}
+
+	// ── DMI ───────────────────────────────────────────
+	// "DMI(14,6) PDI:50.215 MDI:6.618 ADX:46.380 ADXR:27.963"
+	const dmiLine = lines.find(ln => /\bDMI\b/i.test(ln) && /PDI|MDI/i.test(ln));
+	if (dmiLine) {
+		const pm = dmiLine.match(/PDI[:\s]+([\d.]+)/i);
+		const mm = dmiLine.match(/MDI[:\s]+([\d.]+)/i);
+		const am = dmiLine.match(/\bADX[:\s]+([\d.]+)/i);
+		const ar = dmiLine.match(/ADXR[:\s]+([\d.]+)/i);
+		if (pm) v.PDI  = parseFloat(pm[1]);
+		if (mm) v.MDI  = parseFloat(mm[1]);
+		if (am) v.ADX  = parseFloat(am[1]);
+		if (ar) v.ADXR = parseFloat(ar[1]);
+	} else {
+		// Fallback: separate lines
+		const pdi  = grab(/\bPDI[:\s]+([\d.]+)/i);
+		const mdi  = grab(/\bMDI[:\s]+([\d.]+)/i);
+		const adx  = grab(/\bADX[:\s]+([\d.]+)/i);
+		const adxr = grab(/\bADXR[:\s]+([\d.]+)/i);
+		if (pdi  != null) v.PDI  = pdi;
+		if (mdi  != null) v.MDI  = mdi;
+		if (adx  != null) v.ADX  = adx;
+		if (adxr != null) v.ADXR = adxr;
+	}
+
+	// ── OHLC from stock info area ─────────────────────
+	const open   = grab(/\bOpen\b[:\s]*([\d.,]+)/i);
+	const high   = grab(/\bHigh\b[:\s]*([\d.,]+)/i);
+	const low    = grab(/\bLow\b[:\s]*([\d.,]+)/i);
 	const prevC  = grab(/Prev\s*Close[:\s]*([\d.,]+)/i);
-	const beta   = grab(/Beta[:\s]*([\d.]+)/i);
-	const h52    = grab(/52.?w?k?\s*High[:\s]*([\d.,]+)/i);
-	const l52    = grab(/52.?w?k?\s*Low[:\s]*([\d.,]+)/i);
+	const beta   = grab(/\bBeta\b[:\s]*([\d.]+)/i);
+	const h52    = grab(/52.{0,4}[Hh]igh[:\s]*([\d.,]+)/i);
+	const l52    = grab(/52.{0,4}[Ll]ow[:\s]*([\d.,]+)/i);
 	if (open)  v.OPEN   = open;
 	if (high)  v.HIGH   = high;
 	if (low)   v.LOW    = low;
@@ -5251,8 +5362,20 @@ function tmParseIndicators(text) {
 	if (h52)   v.HIGH52 = h52;
 	if (l52)   v.LOW52  = l52;
 
-	// Candle close (from "Prev Close" context fallback used for sw-close)
-	// For swing tab — use the last price or close shown
+	// ── Sanity check: Price must be plausible ──────────
+	// If price is wildly different from MA5 (if we have it), use MA5-area value
+	if (v.PRICE && v.MA5) {
+		const ratio = v.PRICE / v.MA5;
+		if (ratio > 3 || ratio < 0.33) {
+			// Price is suspicious — try Open as proxy
+			if (v.OPEN && v.MA5) {
+				const r2 = v.OPEN / v.MA5;
+				if (r2 > 0.5 && r2 < 2) v.PRICE = v.OPEN;
+			}
+		}
+	}
+
+	// Candle close for swing
 	if (!v.CLOSE && v.PRICE) v.CLOSE = v.PRICE;
 
 	return v;

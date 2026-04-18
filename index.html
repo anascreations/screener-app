@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>TradeMatrix Pro — MA / EMA / Gold Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=3.0, maximum-scale=3.0"/>
+<title>TradeMatrix Pro v3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="tradematrix.css"/>
@@ -83,8 +83,8 @@
      TAB BAR
 ══════════════════════════════════════ -->
 <div class="tab-bar">
-  <button class="tab-btn active" data-tab="ma"     onclick="switchTab('ma')">∿ MA Calculator</button>
-  <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA Calculator</button>
+  <button class="tab-btn active" data-tab="ma"     onclick="switchTab('ma')">∿ MA</button>
+  <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA</button>
   <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAUUSD</button>
   <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 ETF</button>
   <button class="tab-btn swing-tab" data-tab="swing" onclick="switchTab('swing')">🔄 Swing Reversal</button>
@@ -266,15 +266,15 @@
 <!-- ── Screenshot Auto-Fill Card (MA) ── -->
 <div class="card img-upload-card" id="img-card-ma">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('ma')">
-    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Screenshot <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-ma">▼</span>
   </div>
   <div class="img-card-body" id="img-body-ma">
-    <div class="img-instruction">Upload your Moomoo chart screenshot — values will be extracted and filled automatically. You can still edit any field after.</div>
+    <div class="img-instruction">Upload your screenshot — values will be extracted and filled automatically. You can still edit any field after.</div>
     <div class="img-drop-zone" id="img-drop-ma" onclick="document.getElementById('img-file-ma').click()">
       <div class="img-drop-inner">
         <span class="img-drop-icon">📷</span>
-        <span class="img-drop-text">Tap to select Moomoo screenshot</span>
+        <span class="img-drop-text">Tap to select screenshot</span>
         <span class="img-drop-sub">Chart with MA · KDJ · MACD · ATR · DMI · RSI visible</span>
       </div>
       <input type="file" id="img-file-ma" accept="image/*" style="display:none" onchange="tmImgSelected('ma',this)"/>
@@ -544,15 +544,15 @@
 <!-- ── Screenshot Auto-Fill Card (EMA) ── -->
 <div class="card img-upload-card" id="img-card-ema">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('ema')">
-    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Screenshot <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-ema">▼</span>
   </div>
   <div class="img-card-body" id="img-body-ema">
-    <div class="img-instruction">Upload your Moomoo chart screenshot — values will be extracted and filled automatically. You can still edit any field after.</div>
+    <div class="img-instruction">Upload your screenshot — values will be extracted and filled automatically. You can still edit any field after.</div>
     <div class="img-drop-zone" id="img-drop-ema" onclick="document.getElementById('img-file-ema').click()">
       <div class="img-drop-inner">
         <span class="img-drop-icon">📷</span>
-        <span class="img-drop-text">Tap to select Moomoo screenshot</span>
+        <span class="img-drop-text">Tap to select screenshot</span>
         <span class="img-drop-sub">Chart with EMA · KDJ · MACD · ATR · DMI · RSI visible</span>
       </div>
       <input type="file" id="img-file-ema" accept="image/*" style="display:none" onchange="tmImgSelected('ema',this)"/>
@@ -861,15 +861,15 @@
 <!-- ── Screenshot Auto-Fill Card (Gold) ── -->
 <div class="card img-upload-card" id="img-card-gold">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('gold')">
-    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Screenshot <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-gold">▼</span>
   </div>
   <div class="img-card-body" id="img-body-gold">
-    <div class="img-instruction">Upload your Moomoo XAUUSD chart screenshot — EMA, KDJ, MACD, ATR, DMI, RSI values will be extracted automatically.</div>
+    <div class="img-instruction">Upload your screenshot — EMA, KDJ, MACD, ATR, DMI, RSI values will be extracted automatically.</div>
     <div class="img-drop-zone" id="img-drop-gold" onclick="document.getElementById('img-file-gold').click()">
       <div class="img-drop-inner">
         <span class="img-drop-icon">📷</span>
-        <span class="img-drop-text">Tap to select Moomoo XAUUSD screenshot</span>
+        <span class="img-drop-text">Tap to select screenshot</span>
         <span class="img-drop-sub">Ensure EMA · KDJ · MACD · DMI · ATR · RSI sub-charts visible</span>
       </div>
       <input type="file" id="img-file-gold" accept="image/*" style="display:none" onchange="tmImgSelected('gold',this)"/>
@@ -1223,15 +1223,15 @@
 <!-- ── Screenshot Auto-Fill Card (Bursa) ── -->
 <div class="card img-upload-card" id="img-card-bu">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('bu')">
-    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Screenshot <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-bu">▼</span>
   </div>
   <div class="img-card-body" id="img-body-bu">
-    <div class="img-instruction">Upload your Moomoo Bursa ETF chart screenshot — MA, KDJ, MACD, ATR, DMI values will be extracted automatically.</div>
+    <div class="img-instruction">Upload your chart screenshot — MA, KDJ, MACD, ATR, DMI values will be extracted automatically.</div>
     <div class="img-drop-zone" id="img-drop-bu" onclick="document.getElementById('img-file-bu').click()">
       <div class="img-drop-inner">
         <span class="img-drop-icon">📷</span>
-        <span class="img-drop-text">Tap to select Moomoo ETF screenshot</span>
+        <span class="img-drop-text">Tap to select screenshot</span>
         <span class="img-drop-sub">Ensure MA · KDJ · MACD · DMI · ATR visible</span>
       </div>
       <input type="file" id="img-file-bu" accept="image/*" style="display:none" onchange="tmImgSelected('bu',this)"/>
@@ -1578,15 +1578,15 @@
 <!-- ── Screenshot Auto-Fill Card (Swing) ── -->
 <div class="card img-upload-card" id="img-card-sw">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('sw')">
-    <span class="ci img-ci">📷</span> Auto-Fill from Screenshot <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Screenshot <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-sw">▼</span>
   </div>
   <div class="img-card-body" id="img-body-sw">
-    <div class="img-instruction">Upload your Moomoo chart screenshot — candle OHLC, MA, KDJ, MACD, ATR, Supertrend, DMI values will be extracted automatically.</div>
+    <div class="img-instruction">Upload your screenshot — candle OHLC, MA, KDJ, MACD, ATR, Supertrend, DMI values will be extracted automatically.</div>
     <div class="img-drop-zone" id="img-drop-sw" onclick="document.getElementById('img-file-sw').click()">
       <div class="img-drop-inner">
         <span class="img-drop-icon">📷</span>
-        <span class="img-drop-text">Tap to select Moomoo screenshot</span>
+        <span class="img-drop-text">Tap to select screenshot</span>
         <span class="img-drop-sub">Ensure MA · Supertrend · KDJ · MACD · ATR visible</span>
       </div>
       <input type="file" id="img-file-sw" accept="image/*" style="display:none" onchange="tmImgSelected('sw',this)"/>
@@ -2447,13 +2447,13 @@
     <div class="guide-hero-icon">📖</div>
     <div>
       <div class="guide-hero-title">Professional Trading Guide</div>
-      <div class="guide-hero-sub">Complete strategy reference — MA · EMA · Gold · Bursa ETF · Swing · Sessions · Risk · Indicators</div>
+      <div class="guide-hero-sub">Complete strategy reference — MA · EMA · XAU/USD · Bursa ETF · Swing · Sessions · Risk · Indicators</div>
     </div>
   </div>
 
   <div class="guide-tabs">
     <button class="guide-tab-btn active" onclick="switchGuide('g-ma')">∿ MA/EMA</button>
-    <button class="guide-tab-btn"        onclick="switchGuide('g-gold')">◈ Gold</button>
+    <button class="guide-tab-btn"        onclick="switchGuide('g-gold')">◈ XAU/USD</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-bursa')">🇲🇾 Bursa ETF</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-swing')">🔄 Swing</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-session')">⏱ Sessions</button>
@@ -2522,7 +2522,7 @@
   <!-- ── Gold Guide ── -->
   <div class="guide-section" id="g-gold">
     <div class="guide-card">
-      <div class="guide-card-hdr" style="color:var(--gold)">◈ Gold XAUUSD — Unique Drivers</div>
+      <div class="guide-card-hdr" style="color:var(--gold)">◈ XAU/USD — Unique Drivers</div>
       <div class="guide-card-body">
         <div class="guide-intro" style="border-left-color:var(--gold)">Gold is driven by 4 forces: USD strength (inverse ~80%), real interest rates, geopolitical risk, and central bank demand. <strong>Always check DXY before entering.</strong> Use ATR×1.8 for stops — gold moves $15–40/day and needs wider room.</div>
         <div class="gold-drivers">
@@ -2914,7 +2914,7 @@
             <div class="gds-content">
               <div class="gds-block-title">🔍 Run Screener A — TradeMatrix Watchlist <span class="gds-dur">20 min</span></div>
               <div class="gds-items">
-                <div class="gds-item">Moomoo → Screener → <strong>TradeMatrix Watchlist</strong></div>
+                <div class="gds-item">Screener → <strong>TradeMatrix Watchlist</strong></div>
                 <div class="gds-item">Sort by <strong>Volume Ratio descending</strong> + % Change descending</div>
                 <div class="gds-item">Pick top <strong>5–8 stocks</strong> — these are tonight's candidates</div>
                 <div class="gds-item gds-tip">💡 Run at 7:30 PM (before pre-market) — Daily MA data is cleanest at this time, not skewed by pre-market noise</div>
@@ -2928,7 +2928,7 @@
             <div class="gds-content">
               <div class="gds-block-title">📊 Pre-Market Opens — Chart Analysis <span class="gds-dur">45 min</span></div>
               <div class="gds-items">
-                <div class="gds-item">Pre-market data available from 8:00 PM MYT (4 AM ET) in Moomoo</div>
+                <div class="gds-item">Pre-market data available from 8:00 PM MYT (4 AM ET)</div>
                 <div class="gds-item">Open each candidate → landscape mode → read all indicator values</div>
                 <div class="gds-item">Note: Pre-Market High / Low / Last / Volume for each stock</div>
                 <div class="gds-item">Enter values into <strong>TradeMatrix EMA or MA Calculator</strong></div>
@@ -2957,7 +2957,7 @@
               <div class="gds-block-title">🏆 Smart Money Dashboard <span class="gds-dur">15 min</span></div>
               <div class="gds-items">
                 <div class="gds-item">Enter Fear &amp; Greed + P/C ratio in MA tab dashboard</div>
-                <div class="gds-item">Fill Pre-Market Gap Tracker (all 6 fields from Moomoo stock page)</div>
+                <div class="gds-item">Fill Pre-Market Gap Tracker (all 6 fields from stock page)</div>
                 <div class="gds-item">Tick/untick all 6 institutional bias checkboxes</div>
                 <div class="gds-item gds-gate">🚦 <strong>Gate 1:</strong> Bias Score must be ≥ 5/8 — if not, do not trade tonight</div>
               </div>
@@ -2973,7 +2973,7 @@
                 <div class="gds-item">Open S/R Zone Analyzer → Import EMA/MA levels → add pivot H/L/C</div>
                 <div class="gds-item gds-gate">🚦 <strong>Gate 2:</strong> R:R must be ≥ 1.5:1 — check analysis card</div>
                 <div class="gds-item">Note exact Entry / Stop Loss / TP1 / TP2 from Entry Plan card</div>
-                <div class="gds-item gds-warn">⚡ Pre-set <strong>limit orders in Moomoo now</strong> — ready to activate, not yet placed</div>
+                <div class="gds-item gds-warn">⚡ Pre-set <strong>limit orders now</strong> — ready to activate, not yet placed</div>
               </div>
             </div>
           </div>
