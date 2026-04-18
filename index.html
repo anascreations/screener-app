@@ -234,6 +234,15 @@
       </div>
     </div>
     <div class="ref-panel">
+      <div class="ref-panel-hdr">DMI — PDI vs MDI</div>
+      <div class="ref-panel-body">
+        <div class="ref-row"><span class="ref-range" style="color:var(--green)">PDI&gt;MDI ADX&gt;25</span><span>✅ Strong Bull — enter</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--accent)">PDI&gt;MDI ADX&lt;25</span><span>⚠️ Bullish weak — wait</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">diff &lt;3pts</span><span>⚡ Crossover zone — watch</span></div>
+        <div class="ref-row"><span class="ref-range" style="color:var(--red)">MDI&gt;PDI ADX&gt;25</span><span>🔴 Bear — skip longs</span></div>
+      </div>
+    </div>
+    <div class="ref-panel">
       <div class="ref-panel-hdr">KDJ Oscillator</div>
       <div class="ref-panel-body">
         <div class="ref-row"><span class="ref-range" style="color:var(--red)">K&lt;D</span><span>🔴 Bearish — skip</span></div>
@@ -284,6 +293,9 @@
       <div class="sec-label">Trend Strength</div>
       <div class="fg" style="margin-bottom:.9rem">
         <div class="fld"><label>ADX14 <span class="opt-tag">opt</span></label><input type="number" id="ma-adx" step="0.1" placeholder="28.5" oninput="maCalc()"/></div>
+        <div class="fld"><label>PDI (+DI) <span class="opt-tag">opt</span></label><input type="number" id="ma-pdi" step="0.1" placeholder="40.8" oninput="maCalc()"/></div>
+        <div class="fld"><label>MDI (−DI) <span class="opt-tag">opt</span></label><input type="number" id="ma-mdi" step="0.1" placeholder="10.2" oninput="maCalc()"/></div>
+        <div class="fld"><label>ADXR <span class="opt-tag">opt</span></label><input type="number" id="ma-adxr" step="0.1" placeholder="18.1" oninput="maCalc()"/></div>
         <div class="fld"><label>Supertrend Val <span class="opt-tag">opt</span></label><input type="number" id="ma-st" step="0.0001" placeholder="1.28" oninput="maCalc()"/></div>
         <div class="fld"><label>BB Upper <span class="opt-tag">opt</span></label><input type="number" id="ma-bbu" step="0.0001" placeholder="1.51" oninput="maCalc()"/></div>
         <div class="fld"><label>BB Lower <span class="opt-tag">opt</span></label><input type="number" id="ma-bbl" step="0.0001" placeholder="1.22" oninput="maCalc()"/></div>
@@ -529,6 +541,9 @@
       <div class="sec-label">Trend Strength</div>
       <div class="fg" style="margin-bottom:.9rem">
         <div class="fld"><label>ADX14 <span class="opt-tag">opt</span></label><input type="number" id="ema-adx" step="0.1" placeholder="28.5" oninput="emaCalc()"/></div>
+        <div class="fld"><label>PDI (+DI) <span class="opt-tag">opt</span></label><input type="number" id="ema-pdi" step="0.1" placeholder="40.8" oninput="emaCalc()"/></div>
+        <div class="fld"><label>MDI (−DI) <span class="opt-tag">opt</span></label><input type="number" id="ema-mdi" step="0.1" placeholder="10.2" oninput="emaCalc()"/></div>
+        <div class="fld"><label>ADXR <span class="opt-tag">opt</span></label><input type="number" id="ema-adxr" step="0.1" placeholder="18.1" oninput="emaCalc()"/></div>
         <div class="fld"><label>Ichimoku Kumo <span class="opt-tag">opt</span></label>
           <select id="ema-ichi" onchange="emaCalc()">
             <option value="">— Not Set —</option>
@@ -814,6 +829,9 @@
       <div class="fg" style="margin-bottom:.9rem">
         <div class="fld"><label>RSI14 <span class="req-tag">req</span></label><input type="number" id="gold-rsi" step="0.1" placeholder="58.5" oninput="goldCalc()"/></div>
         <div class="fld"><label>ADX14 <span class="req-tag">req</span></label><input type="number" id="gold-adx" step="0.1" placeholder="32.0" oninput="goldCalc()"/></div>
+        <div class="fld"><label>PDI (+DI) <span class="opt-tag">opt</span></label><input type="number" id="gold-pdi" step="0.1" placeholder="40.8" oninput="goldCalc()"/></div>
+        <div class="fld"><label>MDI (−DI) <span class="opt-tag">opt</span></label><input type="number" id="gold-mdi" step="0.1" placeholder="10.2" oninput="goldCalc()"/></div>
+        <div class="fld"><label>ADXR <span class="opt-tag">opt</span></label><input type="number" id="gold-adxr" step="0.1" placeholder="18.1" oninput="goldCalc()"/></div>
         <div class="fld"><label>K (KDJ)</label><input type="number" id="gold-k" step="0.001" placeholder="65.3" oninput="goldCalc()"/></div>
         <div class="fld"><label>D (KDJ)</label><input type="number" id="gold-d" step="0.001" placeholder="58.2" oninput="goldCalc()"/></div>
         <div class="fld"><label>J (KDJ)</label><input type="number" id="gold-j" step="0.001" placeholder="79.4" oninput="goldCalc()"/></div>
@@ -1192,6 +1210,12 @@
           <input type="number" id="bu-rsi" step="0.1" placeholder="52.0" oninput="bursaCalc()"/></div>
         <div class="fld"><label>ADX14 <span class="opt-tag">opt</span></label>
           <input type="number" id="bu-adx" step="0.1" placeholder="28.5" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>PDI (+DI) <span class="opt-tag">opt</span></label>
+          <input type="number" id="bu-pdi" step="0.1" placeholder="40.8" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>MDI (−DI) <span class="opt-tag">opt</span></label>
+          <input type="number" id="bu-mdi" step="0.1" placeholder="10.2" oninput="bursaCalc()"/></div>
+        <div class="fld"><label>ADXR <span class="opt-tag">opt</span></label>
+          <input type="number" id="bu-adxr" step="0.1" placeholder="18.1" oninput="bursaCalc()"/></div>
         <div class="fld"><label>K (KDJ)</label>
           <input type="number" id="bu-k"   step="0.1" placeholder="60.0" oninput="bursaCalc()"/></div>
         <div class="fld"><label>D (KDJ)</label>
@@ -1500,6 +1524,9 @@
         <div class="fld"><label>MACD DEA</label><input type="number" id="sw-dea" step="0.0001" placeholder="-0.018" oninput="swingCalc()"/></div>
         <div class="fld"><label>Volume Ratio</label><input type="number" id="sw-vol" step="0.01" placeholder="2.10" oninput="swingCalc()"/></div>
         <div class="fld"><label>ADX14 <span class="opt-tag">opt</span></label><input type="number" id="sw-adx" step="0.1" placeholder="28.0" oninput="swingCalc()"/></div>
+        <div class="fld"><label>PDI (+DI) <span class="opt-tag">opt</span></label><input type="number" id="sw-pdi" step="0.1" placeholder="40.8" oninput="swingCalc()"/></div>
+        <div class="fld"><label>MDI (−DI) <span class="opt-tag">opt</span></label><input type="number" id="sw-mdi" step="0.1" placeholder="10.2" oninput="swingCalc()"/></div>
+        <div class="fld"><label>ADXR <span class="opt-tag">opt</span></label><input type="number" id="sw-adxr" step="0.1" placeholder="18.1" oninput="swingCalc()"/></div>
       </div>
 
       <div class="sec-label">Risk Management</div>

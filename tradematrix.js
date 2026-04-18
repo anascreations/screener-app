@@ -610,6 +610,49 @@ if (adx > 20) return { zone: 'Developing', pass: 'warn', c: 'var(--yellow)', e: 
 if (adx > 15) return { zone: 'Weak Trend', pass: 'warn', c: 'var(--orange)', e: '🟠', strength: 'Weak' };
 return { zone: 'No Trend/Range', pass: false, c: 'var(--red)', e: '🔴', strength: 'Ranging' };
 }
+
+function scoreDMI(pdi, mdi, adx, adxr) {
+if (pdi == null || mdi == null) return null;
+const diff    = pdi - mdi;
+const absDiff = Math.abs(diff);
+const crossZone = absDiff <= 3;
+const rising    = (adxr != null && adx != null) ? adx > adxr : null;
+
+// Bear: MDI leads
+if (mdi > pdi) {
+	if (adx != null && adx > 25) {
+		return { zone: 'Strong Bear', pass: false, c: 'var(--red)', e: '🔴',
+			label: `PDI ${pdi.toFixed(1)} < MDI ${mdi.toFixed(1)}, ADX ${adx?.toFixed(1)} — strong downtrend, skip longs`,
+			direction: 'bear', crossZone };
+	}
+	if (crossZone) {
+		return { zone: 'Near Cross ⚡', pass: 'warn', c: 'var(--yellow)', e: '⚡',
+			label: `PDI/MDI diff only ${absDiff.toFixed(1)} pts — crossover imminent, watch closely`,
+			direction: 'bear', crossZone };
+	}
+	return { zone: 'Bearish', pass: false, c: 'var(--red)', e: '🔴',
+		label: `PDI ${pdi.toFixed(1)} < MDI ${mdi.toFixed(1)} — bears in control`,
+		direction: 'bear', crossZone };
+}
+
+// Bull: PDI leads
+const risingNote = rising === true ? ' · ADX rising ✅' : rising === false ? ' · ADX weakening ⚠️' : '';
+if (adx != null && adx > 25) {
+	if (crossZone) {
+		return { zone: 'Bull Cross ⚡', pass: true, c: 'var(--accent)', e: '⚡',
+			label: `Fresh bull cross! PDI ${pdi.toFixed(1)} > MDI ${mdi.toFixed(1)}, ADX ${adx?.toFixed(1)}${risingNote} — highest conviction`,
+			direction: 'bull', crossZone, rising };
+	}
+	return { zone: 'Strong Bull', pass: true, c: 'var(--green)', e: '✅',
+		label: `PDI ${pdi.toFixed(1)} > MDI ${mdi.toFixed(1)}, ADX ${adx?.toFixed(1)}${risingNote} — bulls confirmed`,
+		direction: 'bull', crossZone, rising };
+}
+return { zone: 'Bull Weak ADX', pass: 'warn', c: 'var(--yellow)', e: '⚠️',
+	label: `PDI ${pdi.toFixed(1)} > MDI ${mdi.toFixed(1)} — bullish direction but ADX <25, wait for trend to strengthen`,
+	direction: 'bull', crossZone };
+}
+
+
 function scoreRSI(rsi, context = 'default') {
 if (rsi == null) return null;
 if (context === 'gold') {
@@ -966,6 +1009,9 @@ const dea = num('ma-dea');
 const vol = num('ma-vol');
 const atr = num('ma-atr');
 const adxV = num('ma-adx');
+const pdiV = num('ma-pdi');
+const mdiV = num('ma-mdi');
+const adxrV = num('ma-adxr');
 const stV = num('ma-st');
 const bbu = num('ma-bbu');
 const bbl = num('ma-bbl');
@@ -986,6 +1032,7 @@ const kdj = scoreKDJ(k, d, j);
 const macd = scoreMACDZone(dif, dea);
 const volS = scoreVolume(vol);
 const adxS = scoreADX(adxV);
+const dmiS = scoreDMI(pdiV, mdiV, adxV, adxrV);
 const stS = scoreSupertrend(price, stV);
 const rsiS = scoreRSI(num('ma-rsi'));
 const eng = scoreEngine();
@@ -997,6 +1044,7 @@ eng.add(kdj ? kdj.pass : null, 16);
 eng.add(macd ? macd.pass : null, 14);
 eng.add(volS ? volS.pass : null, 8);
 eng.add(adxS ? adxS.pass : null, 16);
+eng.add(dmiS ? dmiS.pass : null, 12);
 eng.add(stS ? stS.pass : null, 6);
 eng.add(rsiS ? rsiS.pass : null, 10);
 const tfCfg = getTFConfig('ma');
@@ -1009,6 +1057,7 @@ const adjScore = Math.max(0, Math.min(100, eng.result() + penalty));
 const momentumOk = (!kdj || kdj.pass !== false)
 && (!macd || macd.pass !== false)
 && (!adxS || adxS.pass !== false)
+&& (!dmiS || dmiS.pass !== false)
 && (!kdj || !(j != null && j > 85));
 let decision, riskLevel, posSize;
 if (!f1_pass || !f2_pass || !f3_pass || !momentumOk) {
@@ -1044,6 +1093,7 @@ pAboveMA20 > tfCfg.f1Ok
 `📐 Entry: ${fmt(price)} | SL: ${atr ? fmt(price - atr * tfCfg.atrMult) : 'set ' + tfCfg.atrMult + '×ATR below entry'}`,
 ma200 && price > ma200 ? `🌐 Macro bullish: Price above MA200 (${fmt(ma200)}) — trend aligned across all timeframes.` : '',
 adxS && adxS.pass === true ? `💪 ADX ${adxV?.toFixed(1)} — ${adxS.strength} trend strength. High-conviction setup.` : '',
+dmiS && dmiS.pass === true ? `📊 DMI: ${dmiS.label}` : (dmiS && dmiS.pass === false ? `⚠️ DMI Warning: ${dmiS.label}` : ''),
 `📦 Position size: ${posSize}. Set SL immediately after entry.`,
 ].filter(Boolean).join('\n');
 adv.textContent = lines;
@@ -1097,6 +1147,9 @@ volS
 adxS
 ? buildCheck(`ADX ${adxS.zone}`, adxS.pass === true ? true : adxS.pass === false ? false : null, `ADX: ${adxV?.toFixed(1)}`)
 : buildCheck('ADX Trend Strength', null, 'Not provided'),
+dmiS
+? buildCheck(`DMI ${dmiS.zone}`, dmiS.pass === true ? true : dmiS.pass === false ? false : null, dmiS.label)
+: buildCheck('DMI (PDI/MDI)', null, 'Optional — enter PDI, MDI, ADXR'),
 stS
 ? buildCheck(`Supertrend ${stS.zone}`, stS.pass, `Price:${fmt(price)} ST:${fmt(stV)}`)
 : buildCheck('Supertrend', null, 'Not provided'),
@@ -1139,7 +1192,7 @@ buildTradePlan('ma-price-block', 'ma-tradeplan-card', price, atr, accountSz, ris
 function resetMA() {
 ['ma-price', 'ma-ma5', 'ma-ma20', 'ma-ma50', 'ma-ma200',
 'ma-k', 'ma-d', 'ma-j', 'ma-dif', 'ma-dea', 'ma-hist',
-'ma-vol', 'ma-rsi', 'ma-atr', 'ma-adx', 'ma-st', 'ma-bbu', 'ma-bbl',
+'ma-vol', 'ma-rsi', 'ma-atr', 'ma-adx', 'ma-pdi', 'ma-mdi', 'ma-adxr', 'ma-st', 'ma-bbu', 'ma-bbl',
 'ma-risk-pct', 'ma-account',
 ].forEach(id => { const el = $(id); if (el) el.value = ''; });
 $('ma-result').style.display = 'none';
@@ -1160,6 +1213,9 @@ const dea = num('ema-dea');
 const vol = num('ema-vol');
 const atr = num('ema-atr');
 const adxV = num('ema-adx');
+const pdiV = num('ema-pdi');
+const mdiV = num('ema-mdi');
+const adxrV = num('ema-adxr');
 const stV = num('ema-st');
 const vwapV = num('ema-vwap');
 const ichiP = sel('ema-ichi');
@@ -1189,6 +1245,7 @@ const kdj = scoreKDJ(k, d, j);
 const macd = scoreMACDZone(dif, dea);
 const volS = scoreVolume(vol);
 const adxS = scoreADX(adxV);
+const dmiS = scoreDMI(pdiV, mdiV, adxV, adxrV);
 const stS = scoreSupertrend(price, stV);
 const ichiS = ichiP ? scoreIchimoku(ichiP) : null;
 const vwapS = scoreVWAP(price, vwapV);
@@ -1202,6 +1259,7 @@ eng.add(kdj ? kdj.pass : null, 14);
 eng.add(macd ? macd.pass : null, 12);
 eng.add(volS ? volS.pass : null, 8);
 eng.add(adxS ? adxS.pass : null, 16);
+eng.add(dmiS ? dmiS.pass : null, 12);
 eng.add(ichiS ? ichiS.pass : null, 6);
 eng.add(vwapS ? vwapS.pass : null, 4);
 eng.add(stS ? stS.pass : null, 4);
@@ -1218,6 +1276,7 @@ const grade = getGrade(e21AboveE55 || 0);
 const momentumOk = (!kdj || kdj.pass !== false)
 && (!macd || macd.pass !== false)
 && (!adxS || adxS.pass !== false)
+&& (!dmiS || dmiS.pass !== false)
 && (!kdj || !(j != null && j > 85));
 let decision, riskLevel, posSize;
 if (!f1_pass || !f2_pass || !f3_pass || !momentumOk) {
@@ -1251,6 +1310,7 @@ stretchPct > tfCfg.f1Ok
 `⏱️ Timeframe: ${tfCfg.label} — Expected hold: ${tfCfg.hold}. ${tfCfg.sessionNote}.`,
 e200 && price > e200 ? `🌐 Macro confirmed: Price above EMA200 — institutional trend alignment.` : '',
 adxS?.pass === true ? `💪 ADX ${adxV?.toFixed(1)} — ${adxS.strength} trend. High-probability entry.` : '',
+dmiS && dmiS.pass === true ? `📊 DMI: ${dmiS.label}` : (dmiS && dmiS.pass === false ? `⚠️ DMI Warning: ${dmiS.label}` : ''),
 ichiS?.pass === true ? `☁️ Price above Ichimoku cloud — trend confirmed.` : '',
 vwapV && price > vwapV ? `📊 Price above VWAP — intraday bulls in control.` : '',
 `📦 Use ${posSize} position. Stop Loss = Price − (ATR × ${tfCfg.atrMult}). Trail after TP1.`,
@@ -1307,6 +1367,9 @@ volS
 adxS
 ? buildCheck(`ADX — ${adxS.zone}`, adxS.pass === true ? true : adxS.pass === false ? false : null, `ADX: ${adxV?.toFixed(1)}`)
 : buildCheck('ADX Trend Strength', null, 'Not provided'),
+dmiS
+? buildCheck(`DMI ${dmiS.zone}`, dmiS.pass === true ? true : dmiS.pass === false ? false : null, dmiS.label)
+: buildCheck('DMI (PDI/MDI)', null, 'Optional — enter PDI, MDI, ADXR'),
 ichiS
 ? buildCheck(`Ichimoku — ${ichiS.zone}`, ichiS.pass === true ? true : ichiS.pass === false ? false : null, ichiS.zone)
 : buildCheck('Ichimoku Cloud', null, 'Not provided'),
@@ -1377,7 +1440,7 @@ buildTradePlan('ema-price-block', 'ema-tradeplan-card', price, atr, accountSz, r
 function resetEMA() {
 ['ema-price', 'ema-ema8', 'ema-ema21', 'ema-ema55', 'ema-ema200',
 'ema-k', 'ema-d', 'ema-j', 'ema-dif', 'ema-dea', 'ema-hist',
-'ema-vol', 'ema-rsi', 'ema-atr', 'ema-adx', 'ema-st', 'ema-vwap',
+'ema-vol', 'ema-rsi', 'ema-atr', 'ema-adx', 'ema-pdi', 'ema-mdi', 'ema-adxr', 'ema-st', 'ema-vwap',
 'ema-open', 'ema-prev', 'ema-high', 'ema-low', 'ema-52h', 'ema-52l',
 'ema-bidask', 'ema-beta', 'ema-risk-pct', 'ema-account',
 ].forEach(id => { const el = $(id); if (el) el.value = ''; });
@@ -1397,6 +1460,9 @@ return;
 $('gold-result').style.display = '';
 const rsi = num('gold-rsi');
 const adxV = num('gold-adx');
+const pdiV = num('gold-pdi');
+const mdiV = num('gold-mdi');
+const adxrV = num('gold-adxr');
 const k = num('gold-k');
 const d = num('gold-d');
 const j = num('gold-j');
@@ -1423,6 +1489,7 @@ const macroPass = price > e200;
 const kdj = scoreKDJ(k, d, j);
 const rsiS = scoreRSI(rsi, 'gold');
 const adxS = scoreADX(adxV);
+const dmiS = scoreDMI(pdiV, mdiV, adxV, adxrV);
 const macd = scoreMACDZone(dif, dea);
 const volS = scoreVolume(vol);
 let dxyPass = null, dxyLabel = '—';
@@ -1845,6 +1912,23 @@ title: 'MA200 — 200-Period Moving Average (Optional)',
 body: 'The annual average. The single most important macro trend indicator used by all major funds. Price above MA200 = institutional bull market. Below MA200 = institutional bear market. This filter adds +8 weight to your score when aligned.',
 where: '📍 Charting: Add MA indicator → Period = 200'
 },
+'ma-pdi': {
+title: 'PDI — Positive Directional Indicator (+DI)',
+body: 'Part of the DMI system. PDI measures upward price pressure. PDI > MDI = bulls in control. PDI just crossing above MDI with ADX > 25 = highest conviction buy signal. This confirms your MA bullish stack is genuine momentum, not a whipsaw.',
+where: '📍 Moomoo: Add DMI(14,6) indicator → read PDI value (orange line)',
+ranges: [['PDI > MDI, ADX > 25', 'green', '✅ Strong uptrend — full entry'], ['PDI > MDI, ADX < 25', 'yellow', '⚠️ Bullish but weak trend — reduce size'], ['PDI ≈ MDI (diff < 3pts)', 'accent', '⚡ Crossover zone — watch for direction'], ['PDI < MDI', 'red', '🔴 Bears in control — skip long']]
+},
+'ma-mdi': {
+title: 'MDI — Negative Directional Indicator (−DI)',
+body: 'Part of the DMI system. MDI measures downward price pressure. When MDI > PDI and ADX > 25, avoid all long entries regardless of MA stack. A high MDI warns that institutions are selling.',
+where: '📍 Moomoo: Add DMI(14,6) indicator → read MDI value (pink line)',
+},
+'ma-adxr': {
+title: 'ADXR — Average Directional Index Rating',
+body: 'ADXR is a smoothed version of ADX (average of ADX and ADX 14 periods ago). When ADX > ADXR = trend is strengthening — best entry timing. When ADX < ADXR = trend is fading — tighten stops. Optional but improves conviction significantly.',
+where: '📍 Moomoo: Add DMI(14,6) indicator → read ADXR value (blue line)',
+ranges: [['ADX > ADXR', 'green', 'Trend strengthening — enter/hold'], ['ADX < ADXR', 'yellow', 'Trend weakening — tighten stop or reduce']]
+},
 'ma-adx': {
 title: 'ADX14 — Average Directional Index (Optional)',
 body: 'Measures trend STRENGTH (not direction). Without a strong ADX, MA crossover signals are unreliable. Must be >28 for a confirmed trending move.',
@@ -1949,6 +2033,9 @@ title: 'EMA200 — Institutional Macro Filter (Optional)',
 body: 'The most important macro trend EMA. Price above EMA200 = institutional uptrend. This is a powerful confirmatory filter that adds conviction. Funds buy above EMA200, sell below it. Adds 6 points to score.',
 where: '📍 Charting: EMA indicator → Period = 200 → Close'
 },
+'ema-pdi': { title: 'PDI (+DI)', body: 'Same as MA tab PDI. PDI > MDI = bullish direction. Read from DMI(14,6) on Moomoo chart.', where: 'Moomoo → Chart → DMI → PDI' },
+'ema-mdi': { title: 'MDI (−DI)', body: 'MDI > PDI = bearish direction. If MDI > PDI and ADX > 25, skip long entry entirely.', where: 'Moomoo → Chart → DMI → MDI' },
+'ema-adxr': { title: 'ADXR', body: 'Smoothed ADX. ADX rising above ADXR = trend strengthening.', where: 'Moomoo → Chart → DMI → ADXR' },
 'ema-adx': {
 title: 'ADX14 — Trend Strength Filter (Optional)',
 body: 'Critical filter: EMA signals are unreliable in ranging markets (ADX <20). ADX >28 confirms the trend is real. ADX >50 signals a momentum surge — these produce the biggest moves.',
@@ -2253,6 +2340,9 @@ const atr = num('bu-atr');
 const nav = num('bu-nav');
 const rsi = num('bu-rsi');
 const adxV = num('bu-adx');
+const pdiV = num('bu-pdi');
+const mdiV = num('bu-mdi');
+const adxrV = num('bu-adxr');
 const k = num('bu-k');
 const d = num('bu-d');
 const j = num('bu-j');
@@ -2776,6 +2866,9 @@ const dif = num('sw-dif');
 const dea = num('sw-dea');
 const vol = num('sw-vol');
 const adxV = num('sw-adx');
+const pdiV = num('sw-pdi');
+const mdiV = num('sw-mdi');
+const adxrV = num('sw-adxr');
 const atr = num('sw-atr');
 const account = num('sw-account');
 const riskPct = num('sw-riskpct');
