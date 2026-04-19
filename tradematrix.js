@@ -5107,7 +5107,7 @@ async function tmExtractFromImage(tab) {
 
 		const total = Object.keys(values).length;
 		if (filled === 0) {
-			tmSetImgStatus(tab, `⚠️ No indicator values detected. Make sure your Moomoo screenshot shows the chart indicator lines (MA, KDJ, MACD, DMI, ATR, RSI) with their labels and values visible.`, 'warn');
+			tmSetImgStatus(tab, `⚠️ No indicator values detected. Make sure your screenshot shows the chart indicator lines (MA, KDJ, MACD, DMI, ATR, RSI) with their labels and values visible.`, 'warn');
 		} else {
 			tmSetImgStatus(tab, `✅ Extracted ${filled} value${filled>1?'s':''} — Price, ${Object.keys(values).filter(k=>k!=='PRICE').join(', ')}. Review fields below and correct any errors before calculating.`, 'success');
 		}
