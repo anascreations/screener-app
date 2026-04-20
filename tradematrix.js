@@ -4286,7 +4286,7 @@ function drawSRCanvas(price, levels) {
         content: [`${lv.label}  ${fmtPrice(lv.price)}`, `${typeTag}  ${distStr}${confBadge}`],
         position: 'end',
         xAdjust: -6,
-        yAdjust,          // ← collision-resolved offset
+        yAdjust: -6,          // ← collision-resolved offset
         backgroundColor: isLight ? 'rgba(255,255,255,0.95)' : 'rgba(6,10,15,0.92)',
         color: lineColor,
         font: [
