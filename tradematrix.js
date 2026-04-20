@@ -176,8 +176,23 @@ function tmToggleTheme() {
 	// Redraw canvases that use hardcoded colours
 	setTimeout(() => {
 		try { updateTTCards(); } catch(e) {}
-		try { if ($('sr-canvas') && $('sr-canvas').style.display !== 'none') srCalc(); } catch(e) {}
+		try { if (_srChartInstance) { _srChartInstance.destroy(); _srChartInstance = null; } } catch(e) {}
+		try { if ($('sr-chart-wrap') && $('sr-chart-wrap').style.display !== 'none') srCalc(); } catch(e) {}
 		try { smDrawFGArc(parseFloat($('sm-fg')?.value) || null); } catch(e) {}
+		// Destroy and re-trigger dial+pie charts so colors update for new theme
+		try {
+			Object.values(_cjsDialMap).forEach(c => c.destroy());
+			Object.keys(_cjsDialMap).forEach(k => delete _cjsDialMap[k]);
+			Object.values(_cjsPieMap).forEach(c => c.destroy());
+			Object.keys(_cjsPieMap).forEach(k => delete _cjsPieMap[k]);
+			// Re-run active panel calc to repopulate charts
+			const activeTab = document.querySelector('.tab-btn.active')?.dataset?.tab;
+			if (activeTab === 'ma')     { try { maCalc(); }     catch(e){} }
+			if (activeTab === 'ema')    { try { emaCalc(); }    catch(e){} }
+			if (activeTab === 'gold')   { try { goldCalc(); }   catch(e){} }
+			if (activeTab === 'bursa')  { try { bursaCalc(); }  catch(e){} }
+			if (activeTab === 'swing')  { try { swingCalc(); }  catch(e){} }
+		} catch(e) {}
 	}, 50);
 }
 
@@ -196,6 +211,27 @@ function tmToggleTheme() {
 
 const $ = id => document.getElementById(id);
 const num = id => { const v = parseFloat($(id)?.value); return isNaN(v) ? null : v; };
+
+// ── CSS Variable → Hex resolver for Chart.js ─────────────────────────────────
+// Chart.js cannot interpret CSS variable strings — map to hardcoded hex
+const _CSS_COLOR_MAP = {
+  'var(--accent)':  '#00c8f0',
+  'var(--accent2)': '#0088bb',
+  'var(--green)':   '#00e87a',
+  'var(--green2)':  '#00aa55',
+  'var(--yellow)':  '#f5c842',
+  'var(--red)':     '#f03a4a',
+  'var(--orange)':  '#ff7043',
+  'var(--gold)':    '#FFD700',
+  'var(--gold2)':   '#e6b800',
+  'var(--dim)':     '#4e6d88',
+  'var(--text)':    '#d0e2f0',
+  'var(--border)':  '#1a2b3c',
+};
+function rc(color) {
+  // rc = resolveColor — converts CSS var strings to hex for Chart.js
+  return _CSS_COLOR_MAP[color] || color;
+}
 
 // ── Theme-aware canvas color palette ─────────────────
 // All canvas drawing functions use these instead of hardcoded hex
@@ -602,13 +638,19 @@ ctx2.restore();
 setInterval(updateTTCards, 1000);
 updateTTCards();
 
-function scoreADX(adx) {
+function scoreADX(adx, prevAdx) {
 if (adx == null) return null;
-if (adx > 50) return { zone: 'Momentum Surge', pass: true, c: 'var(--accent)', e: '⚡', strength: 'Very Strong' };
-if (adx > 28) return { zone: 'Strong Trend', pass: true, c: 'var(--green)', e: '✅', strength: 'Strong' };
-if (adx > 20) return { zone: 'Developing', pass: 'warn', c: 'var(--yellow)', e: '⚠️', strength: 'Developing' };
-if (adx > 15) return { zone: 'Weak Trend', pass: 'warn', c: 'var(--orange)', e: '🟠', strength: 'Weak' };
-return { zone: 'No Trend/Range', pass: false, c: 'var(--red)', e: '🔴', strength: 'Ranging' };
+// Detect declining trend even when still in strong range
+const declining = (prevAdx != null && adx < prevAdx && adx < 32);
+if (adx > 50) return { zone: 'Momentum Surge', pass: true, c: 'var(--accent)', e: '⚡', strength: 'Very Strong', declining: false };
+if (adx > 35) return { zone: 'Very Strong', pass: true, c: 'var(--green)', e: '✅', strength: 'Very Strong', declining };
+if (adx > 25) {
+  if (declining) return { zone: 'Strong→Fading', pass: 'warn', c: 'var(--yellow)', e: '⚠️', strength: 'Fading', declining: true };
+  return { zone: 'Strong Trend', pass: true, c: 'var(--green)', e: '✅', strength: 'Strong', declining: false };
+}
+if (adx > 20) return { zone: 'Developing', pass: 'warn', c: 'var(--yellow)', e: '⚠️', strength: 'Developing', declining };
+if (adx > 15) return { zone: 'Weak Trend', pass: 'warn', c: 'var(--orange)', e: '🟠', strength: 'Weak', declining };
+return { zone: 'No Trend/Range', pass: false, c: 'var(--red)', e: '🔴', strength: 'Ranging', declining: false };
 }
 
 function scoreDMI(pdi, mdi, adx, adxr) {
@@ -658,34 +700,59 @@ if (rsi == null) return null;
 if (context === 'gold') {
 if (rsi >= 50 && rsi <= 70) return { zone: 'Sweet Spot', pass: true, c: 'var(--green)', e: '🎯' };
 if (rsi >= 45 && rsi < 50) return { zone: 'Building', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
-if (rsi > 70 && rsi <= 80) return { zone: 'Overbought', pass: 'warn', c: 'var(--orange)', e: '⚠️' };
+if (rsi > 70 && rsi <= 75) return { zone: 'Momentum OB', pass: 'warn', c: 'var(--yellow)', e: '⚠️' };
+if (rsi > 75 && rsi <= 80) return { zone: 'Overbought', pass: 'warn', c: 'var(--orange)', e: '⚠️' };
 if (rsi > 80) return { zone: 'Extreme OB', pass: false, c: 'var(--red)', e: '🔴' };
 if (rsi < 40) return { zone: 'Weak/Below', pass: false, c: 'var(--red)', e: '🔴' };
 return { zone: 'Neutral', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
 }
-if (rsi >= 50 && rsi <= 72) return { zone: 'Bullish Zone', pass: true, c: 'var(--green)', e: '✅' };
-if (rsi > 72 && rsi <= 82) return { zone: 'Overbought', pass: 'warn', c: 'var(--yellow)', e: '⚠️' };
-if (rsi > 82) return { zone: 'Extreme OB', pass: false, c: 'var(--red)', e: '🔴' };
-if (rsi < 40) return { zone: 'Weak', pass: false, c: 'var(--red)', e: '🔴' };
+// Default (equities/US stocks)
+if (rsi >= 55 && rsi <= 70) return { zone: 'Bullish Zone', pass: true, c: 'var(--green)', e: '✅' };
+if (rsi >= 50 && rsi < 55)  return { zone: 'Above 50', pass: true, c: 'var(--accent)', e: '🟢' };
+if (rsi > 70 && rsi <= 78)  return { zone: 'Momentum Run', pass: 'warn', c: 'var(--yellow)', e: '⚡',
+  note: 'High RSI can persist in strong trends — watch for bearish divergence' };
+if (rsi > 78 && rsi <= 85)  return { zone: 'Overbought', pass: 'warn', c: 'var(--orange)', e: '⚠️' };
+if (rsi > 85)               return { zone: 'Extreme OB', pass: false, c: 'var(--red)', e: '🔴' };
+if (rsi >= 40 && rsi < 50)  return { zone: 'Below 50', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
+if (rsi < 40)               return { zone: 'Weak', pass: false, c: 'var(--red)', e: '🔴' };
 return { zone: 'Neutral', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
 }
 function scoreKDJ(k, d, j) {
 if (k == null || d == null) return null;
-if (k < d) return { zone: 'Bearish', pass: false, c: 'var(--red)', e: '🔴' };
-if (j != null && j > 90) return { zone: 'Extreme OB', pass: false, c: 'var(--red)', e: '🔴' };
-if (j != null && j > 80) return { zone: 'Overbought', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
+// Fresh bullish crossover (K crossing above D) — strongest signal
+const freshCross = k > d && (k - d) < 5 && k < 75;
+if (j != null && j > 95) return { zone: 'Extreme OB — Exit Risk', pass: false, c: 'var(--red)', e: '🔴' };
+if (j != null && j > 85) return { zone: 'Overbought', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
+if (j != null && j < 10) return { zone: 'Extreme Oversold Bounce', pass: true, c: 'var(--green)', e: '💎',
+  note: 'J<10 = rare oversold extreme — high-probability bounce setup' };
 if (j != null && j < 20) return { zone: 'Oversold Bounce', pass: true, c: 'var(--accent)', e: '💡' };
+if (k < d) return { zone: 'Bearish', pass: false, c: 'var(--red)', e: '🔴' };
+if (freshCross) return { zone: 'Fresh Bull Cross ⚡', pass: true, c: 'var(--green)', e: '⚡',
+  note: 'Fresh K/D crossover — high-conviction momentum entry' };
 if (j != null && j > 50) return { zone: 'Bullish Strong', pass: true, c: 'var(--green)', e: '✅' };
 return { zone: 'Bullish Building', pass: true, c: 'var(--accent)', e: '🟢' };
 }
-function scoreMACDZone(dif, dea) {
+function scoreMACDZone(dif, dea, hist) {
 if (dif == null || dea == null) return null;
-if (dif < dea) return { zone: 'Bearish', pass: false, c: 'var(--red)', e: '🔴' };
-const diff = Math.abs(dif - dea);
+if (dif < dea) {
+  // Bearish — but check if histogram is shrinking (possible reversal)
+  if (hist != null && hist > -0.001) return { zone: 'Bearish (Hist Shrinking)', pass: false, c: 'var(--orange)', e: '⚠️',
+    note: 'MACD bearish but histogram contracting — watch for reversal' };
+  return { zone: 'Bearish', pass: false, c: 'var(--red)', e: '🔴' };
+}
+const diff = dif - dea;
 const avg = (Math.abs(dif) + Math.abs(dea)) / 2;
-if (avg > 0 && diff / avg < 0.05) return { zone: 'Near Cross', pass: 'warn', c: 'var(--yellow)', e: '⚠️' };
-if (dif > 0 && dea > 0) return { zone: 'Strong Bull', pass: true, c: 'var(--green)', e: '🚀' };
-return { zone: 'Bullish', pass: true, c: 'var(--accent)', e: '✅' };
+const expanding = hist != null && hist > 0;
+if (avg > 0 && diff / avg < 0.05) return { zone: 'Near Cross', pass: 'warn', c: 'var(--yellow)', e: '⚠️',
+  note: 'MACD/Signal very close — crossover could happen soon' };
+if (dif > 0 && dea > 0) {
+  if (expanding) return { zone: 'Strong Bull 🚀', pass: true, c: 'var(--green)', e: '🚀',
+    note: 'Both lines positive + histogram expanding = strongest MACD signal' };
+  return { zone: 'Strong Bull', pass: true, c: 'var(--green)', e: '🚀' };
+}
+// DIF > DEA but in negative territory (early bullish cross)
+return { zone: 'Bullish Cross', pass: true, c: 'var(--accent)', e: '✅',
+  note: 'MACD crossed above signal — momentum turning bullish' };
 }
 function scoreSupertrend(price, st) {
 if (price == null || st == null) return null;
@@ -707,10 +774,18 @@ return { zone: `${pctAbove.toFixed(2)}% below VWAP`, pass: false, c: 'var(--red)
 }
 function scoreVolume(vol) {
 if (vol == null) return null;
-if (vol >= 1.5) return { zone: 'Very Strong', pass: true, c: 'var(--green)', e: '⚡' };
-if (vol >= 1.2) return { zone: 'Strong', pass: true, c: 'var(--green)', e: '✅' };
-if (vol >= 0.8) return { zone: 'Moderate', pass: 'warn', c: 'var(--yellow)', e: '🟡' };
-return { zone: 'Weak', pass: false, c: 'var(--red)', e: '🔴' };
+if (vol >= 3.0) return { zone: 'Institutional Surge ⚡', pass: true, c: 'var(--green)', e: '⚡',
+  note: '3×+ avg volume = smart money accumulation — very high conviction' };
+if (vol >= 2.0) return { zone: 'Very Strong', pass: true, c: 'var(--green)', e: '⚡',
+  note: '2×+ avg = strong institutional interest' };
+if (vol >= 1.5) return { zone: 'Strong', pass: true, c: 'var(--green)', e: '✅' };
+if (vol >= 1.2) return { zone: 'Above Average', pass: true, c: 'var(--accent)', e: '🟢' };
+if (vol >= 0.9) return { zone: 'Average', pass: 'warn', c: 'var(--yellow)', e: '🟡',
+  note: 'Average volume — wait for volume confirmation before entry' };
+if (vol >= 0.6) return { zone: 'Below Average', pass: 'warn', c: 'var(--orange)', e: '🟠',
+  note: 'Low volume — breakouts here are less reliable' };
+return { zone: 'Very Low / Trap Risk', pass: false, c: 'var(--red)', e: '🔴',
+  note: 'Low volume breakout = potential bull trap. Wait for volume.' };
 }
 function getGrade(gap) {
 if (gap < 0) return { g: 'BEAR', e: '🔻', cls: 'grade-x', c: 'var(--red)' };
@@ -817,40 +892,63 @@ const card = $(cardId);
 const box = $(containerId);
 if (!card || !box || !price || !atr) { if (card) card.style.display = 'none'; return; }
 card.style.display = '';
-const slMult = context === 'gold' ? 1.8 : 1.5;
-const tp1Mult = context === 'gold' ? 1.5 : 1.5;
-const tp2Mult = context === 'gold' ? 3.0 : 3.0;
-const tp3Mult = context === 'gold' ? 5.0 : 5.0;
-const sl = price - atr * slMult;
+
+// ── Dynamic multipliers by context ──────────────────────────────────
+// Gold: wider SL due to higher volatility, bigger TP targets
+// Bursa ETF: tighter SL, quicker TP1 for liquidity
+// Default (US stocks): balanced
+const slMult  = context === 'gold' ? 1.8 : context === 'bursa' ? 1.3 : 1.5;
+const tp1Mult = context === 'gold' ? 1.5 : context === 'bursa' ? 1.2 : 1.5; // R:R 1:1 minimum
+const tp2Mult = context === 'gold' ? 3.0 : context === 'bursa' ? 2.5 : 2.8; // R:R ~1:2
+const tp3Mult = context === 'gold' ? 5.0 : context === 'bursa' ? 4.0 : 4.5; // R:R ~1:3+
+const trailMult = context === 'gold' ? 1.2 : 1.0;
+
+const sl  = price - atr * slMult;
+const be  = price + atr * 0.25; // breakeven zone (slight buffer above entry)
 const tp1 = price + atr * tp1Mult;
 const tp2 = price + atr * tp2Mult;
 const tp3 = price + atr * tp3Mult;
 const risk = price - sl;
+if (risk <= 0) { if (card) card.style.display = 'none'; return; }
 const rr1 = (tp1 - price) / risk;
 const rr2 = (tp2 - price) / risk;
 const rr3 = (tp3 - price) / risk;
 const dp = context === 'gold' ? 2 : 4;
+
+// ── Risk quality assessment ──────────────────────────────────────────
+const riskPctOfPrice = (risk / price) * 100;
+const rrQuality = rr2 >= 2 ? '✅ Excellent' : rr2 >= 1.5 ? '🟢 Good' : rr2 >= 1 ? '🟡 Minimum' : '🔴 Poor';
+
 const kellyId = containerId.replace('price-block', 'kelly-block');
 const kellyEl = $(kellyId);
 if (accountSize && riskPct) {
 const riskAmt = accountSize * (riskPct / 100);
-const shares = (riskAmt / risk).toFixed(2);
+// Enforce max 2% risk rule
+const effectiveRiskPct = Math.min(riskPct, 2);
+const effectiveRiskAmt = accountSize * (effectiveRiskPct / 100);
+const overRisk = riskPct > 2;
+const shares = (effectiveRiskAmt / risk).toFixed(2);
 const positionVal = (price * parseFloat(shares)).toFixed(2);
-const kelly = kellySize(55, 1.8, 1.0);
+const positionPct = ((price * parseFloat(shares)) / accountSize * 100).toFixed(1);
+const kelly = kellySize(58, rr2, 1.0); // 58% win rate assumption with this R:R
 const kellySz = kelly ? (kelly.half).toFixed(1) : null;
+const maxDrawdown3 = (effectiveRiskAmt * 3).toFixed(2); // 3 consecutive losses
 if (kellyEl) {
 kellyEl.style.display = '';
 kellyEl.innerHTML = `
         <div class="kelly-block">
           <div class="kelly-title">⚖️ Risk Management Calculator</div>
+          ${overRisk ? `<div class="kelly-row" style="color:var(--red);font-size:10px;margin-bottom:.2rem">⚠️ Risk ${riskPct}% exceeds 2% rule — capped at 2% for position sizing</div>` : ''}
           <div class="kelly-row"><span class="kelly-label">Account Size</span><span class="kelly-val">$${Number(accountSize).toLocaleString()}</span></div>
-          <div class="kelly-row"><span class="kelly-label">Risk per Trade (${riskPct}%)</span><span class="kelly-val red" style="color:var(--red)">$${riskAmt.toFixed(2)}</span></div>
-          <div class="kelly-row"><span class="kelly-label">Risk per Unit (SL distance)</span><span class="kelly-val">$${risk.toFixed(dp)}</span></div>
-          <div class="kelly-row"><span class="kelly-label">Suggested Units / Shares</span><span class="kelly-val green">${shares}</span></div>
-          <div class="kelly-row"><span class="kelly-label">Position Value</span><span class="kelly-val">$${Number(positionVal).toLocaleString()}</span></div>
-          ${kellySz ? `<div class="kelly-row"><span class="kelly-label">Half-Kelly Position Size</span><span class="kelly-val yellow">${kellySz}% of account</span></div>` : ''}
+          <div class="kelly-row"><span class="kelly-label">Risk per Trade (${effectiveRiskPct}%)</span><span class="kelly-val" style="color:var(--red)">$${effectiveRiskAmt.toFixed(2)}</span></div>
+          <div class="kelly-row"><span class="kelly-label">SL Distance (ATR×${slMult})</span><span class="kelly-val">$${risk.toFixed(dp)} · ${riskPctOfPrice.toFixed(2)}% of price</span></div>
+          <div class="kelly-row"><span class="kelly-label">Suggested Units / Shares</span><span class="kelly-val" style="color:var(--green)">${shares}</span></div>
+          <div class="kelly-row"><span class="kelly-label">Position Value</span><span class="kelly-val">$${Number(positionVal).toLocaleString()} (${positionPct}% of account)</span></div>
+          <div class="kelly-row"><span class="kelly-label">R:R Quality</span><span class="kelly-val">${rrQuality} (TP2 = 1:${rr2.toFixed(1)})</span></div>
+          ${kellySz ? `<div class="kelly-row"><span class="kelly-label">Half-Kelly Size</span><span class="kelly-val" style="color:var(--yellow)">${kellySz}% of account</span></div>` : ''}
+          <div class="kelly-row"><span class="kelly-label">3-Loss Drawdown Scenario</span><span class="kelly-val" style="color:var(--orange)">-$${maxDrawdown3} (${(parseFloat(maxDrawdown3)/accountSize*100).toFixed(1)}%)</span></div>
           <div class="kelly-row" style="margin-top:.25rem;padding-top:.25rem;border-top:1px solid var(--border)">
-            <span class="kelly-label" style="color:var(--muted);font-size:9.5px">💡 Rule: Never risk >2% per trade. Reduce size if in drawdown.</span>
+            <span class="kelly-label" style="color:var(--dim);font-size:9.5px">💡 After 3 losses: reduce size by 50% until 2 wins. Never average down on a losing trade.</span>
           </div>
         </div>`;
 }
@@ -859,80 +957,247 @@ if (kellyEl) kellyEl.style.display = 'none';
 }
 box.innerHTML = `
     <div class="prow entry">
-      <span class="prow-label">Ideal Entry</span>
+      <span class="prow-label">📍 Ideal Entry</span>
       <span class="prow-val accent">${price.toFixed(dp)}</span>
-      <span class="prow-note">Current market price — enter on confirmation candle</span>
+      <span class="prow-note">Enter on confirmed close above — not on anticipation</span>
     </div>
     <div class="prow sl">
-      <span class="prow-label">Stop Loss (ATR×${slMult})</span>
+      <span class="prow-label">🛑 Stop Loss (ATR×${slMult})</span>
       <span class="prow-val red">${sl.toFixed(dp)}</span>
-      <span class="prow-note">Set immediately — non-negotiable. Risk: $${risk.toFixed(dp)}</span>
+      <span class="prow-note">Hard stop — set immediately. SL distance: ${risk.toFixed(dp)} (${riskPctOfPrice.toFixed(2)}% of price)</span>
+    </div>
+    <div class="prow" style="background:rgba(0,200,240,0.03)">
+      <span class="prow-label">🔒 Breakeven Zone</span>
+      <span class="prow-val accent">${be.toFixed(dp)}</span>
+      <span class="prow-note">Move SL here if price stalls before TP1 — protect capital first</span>
     </div>
     <div class="prow tp1">
-      <span class="prow-label">TP1 — 40% Position</span>
+      <span class="prow-label">✅ TP1 — Exit 35%</span>
       <span class="prow-val green">${tp1.toFixed(dp)}</span>
-      <span class="prow-note">R:R 1:${rr1.toFixed(1)} — move SL to breakeven at TP1</span>
+      <span class="prow-note">R:R 1:${rr1.toFixed(2)} — at TP1: move SL to entry (breakeven). Lock profit.</span>
     </div>
     <div class="prow tp2">
-      <span class="prow-label">TP2 — 40% Position</span>
+      <span class="prow-label">🎯 TP2 — Exit 45%</span>
       <span class="prow-val g2">${tp2.toFixed(dp)}</span>
-      <span class="prow-note">R:R 1:${rr2.toFixed(1)} — trail stop by ATR×1.0</span>
+      <span class="prow-note">R:R 1:${rr2.toFixed(2)} — at TP2: trail stop ATR×${trailMult} below swing high</span>
     </div>
     <div class="prow tp3">
-      <span class="prow-label">TP3 — 20% Position</span>
+      <span class="prow-label">🚀 TP3 — Exit 20%</span>
       <span class="prow-val g3">${tp3.toFixed(dp)}</span>
-      <span class="prow-note">R:R 1:${rr3.toFixed(1)} — trail stop or hold for trend</span>
+      <span class="prow-note">R:R 1:${rr3.toFixed(2)} — runner position, trail or hold for continuation</span>
     </div>
     <div class="prow info" style="margin-top:.2rem">
-      <span class="prow-label">Trailing Stop</span>
-      <span class="prow-val gold">ATR × 1.0</span>
-      <span class="prow-note">After TP1 hit: trail using 1× ATR below each higher high</span>
+      <span class="prow-label">📐 Trailing Stop</span>
+      <span class="prow-val gold">ATR × ${trailMult}</span>
+      <span class="prow-note">After TP1: trail ${trailMult}×ATR below each new higher high. Never widen SL.</span>
     </div>`;
 }
-function drawPie(svgId, legendId, segments) {
-const svg = $(svgId);
-const legend = $(legendId);
-if (!svg || !legend) return;
-const total = segments.reduce((a, s) => a + Math.max(0, s.value), 0);
-if (total === 0) { svg.innerHTML = ''; legend.innerHTML = ''; return; }
-const cx = 80, cy = 80, r = 68, inner = 42;
-let paths = '';
-let startAngle = -Math.PI / 2;
-const segs = segments.filter(s => s.value > 0);
-segs.forEach(seg => {
-const angle = (seg.value / total) * 2 * Math.PI;
-const endAngle = startAngle + angle;
-const large = angle > Math.PI ? 1 : 0;
-const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
-const x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
-const ix1 = cx + inner * Math.cos(startAngle), iy1 = cy + inner * Math.sin(startAngle);
-const ix2 = cx + inner * Math.cos(endAngle), iy2 = cy + inner * Math.sin(endAngle);
-paths += `<path d="M${ix1} ${iy1} L${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${ix2} ${iy2} A${inner} ${inner} 0 ${large} 0 ${ix1} ${iy1} Z" fill="${seg.color}" opacity="0.9" stroke="var(--card)" stroke-width="2"><title>${seg.label}: ${((seg.value / total) * 100).toFixed(1)}%</title></path>`;
-startAngle = endAngle;
-});
-const topSeg = [...segs].sort((a, b) => b.value - a.value)[0];
-const topPct = ((topSeg.value / total) * 100).toFixed(0);
-paths += `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="${topSeg.color}">${topPct}%</text>`;
-paths += `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" fill="var(--text)">${topSeg.label.toUpperCase().slice(0, 8)}</text>`;
-svg.innerHTML = paths;
-legend.innerHTML = segs.map(s => {
-const p = ((s.value / total) * 100).toFixed(1);
-return `<div class="legend-item"><div class="legend-dot" style="background:${s.color}"></div><span class="legend-label">${s.label}</span><span class="legend-val" style="color:${s.color}">${s.value}</span><span class="legend-pct">${p}%</span></div>`;
-}).join('');
+// ─── Chart.js Gauge + Donut — Signal Breakdown ─────────────────────────────
+const _cjsDialMap = {};
+const _cjsPieMap  = {};
+
+function _cjsDialColor(score, goldMode) {
+  if (goldMode) return score >= 75 ? '#FFD700' : score >= 55 ? '#f5c842' : '#f03a4a';
+  return score >= 75 ? '#00e87a' : score >= 55 ? '#f5c842' : '#f03a4a';
 }
+
 function updateDial(arcId, scoreId, score, goldMode = false) {
-const arc = $(arcId);
-const txt = $(scoreId);
-if (!arc || !txt) return;
-const total = 188;
-const dash = (Math.min(100, Math.max(0, score)) / 100) * total;
-arc.setAttribute('stroke-dasharray', `${dash} ${total}`);
-txt.textContent = Math.round(score);
-const color = goldMode
-? (score >= 75 ? '#FFD700' : score >= 55 ? '#f5c842' : '#f03a4a')
-: (score >= 75 ? '#00e87a' : score >= 55 ? '#f5c842' : '#f03a4a');
-txt.setAttribute('fill', color);
+  // arcId = e.g. 'ma-dial-arc', extract prefix 'ma'
+  const pfx = arcId.replace('-dial-arc', '');
+  const canvasId = pfx + '-dial-canvas';
+  const canvas = $(canvasId);
+  if (!canvas) return;
+
+  const s = Math.min(100, Math.max(0, score));
+  const fillColor = _cjsDialColor(s, goldMode);
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const trackColor = isLight ? 'rgba(0,0,0,0.09)' : 'rgba(255,255,255,0.07)';
+
+  if (_cjsDialMap[pfx]) {
+    // Update existing chart
+    const ch = _cjsDialMap[pfx];
+    ch.data.datasets[0].data = [s, 100 - s];
+    ch.data.datasets[0].backgroundColor = [fillColor, trackColor];
+    ch.options.plugins.doughnutCenterText = { score: Math.round(s), color: fillColor, goldMode };
+    ch.update('active');
+    return;
+  }
+
+  // Create gauge chart (half-doughnut)
+  const ctx = canvas.getContext('2d');
+  _cjsDialMap[pfx] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [s, 100 - s],
+        backgroundColor: [fillColor, trackColor],
+        borderWidth: 0,
+        borderRadius: [6, 0],
+        hoverOffset: 4,
+      }],
+    },
+    options: {
+      rotation: -90,       // start from left
+      circumference: 180,  // half circle
+      cutout: '72%',
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 700, easing: 'easeOutCubic' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: isLight ? 'rgba(10,20,40,0.94)' : 'rgba(6,12,22,0.96)',
+          titleColor: fillColor,
+          bodyColor: '#d0e2f0',
+          borderColor: fillColor,
+          borderWidth: 1,
+          titleFont: { family: "'Syne', sans-serif", size: 13, weight: '700' },
+          bodyFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: {
+            title: () => `Score: ${Math.round(s)} / 100`,
+            label: () => {
+              if (s >= 75) return ' ✅ High conviction setup';
+              if (s >= 55) return ' ⚠️ Partial setup — watch';
+              return ' 🔴 Skip — filters not met';
+            },
+          },
+        },
+        doughnutCenterText: { score: Math.round(s), color: fillColor, goldMode },
+      },
+    },
+    plugins: [{
+      id: 'doughnutCenterText',
+      afterDraw(chart) {
+        const { ctx: c, chartArea: { top, left, width, height } } = chart;
+        const opt = chart.options.plugins.doughnutCenterText || {};
+        const sc = opt.score ?? 0;
+        const col = opt.color ?? '#00c8f0';
+        const cx = left + width / 2;
+        const cy = top + height * 0.88; // bottom of semicircle
+        c.save();
+        // Big score number
+        c.font = "bold 26px 'Syne', sans-serif";
+        c.fillStyle = col;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(sc, cx, cy - 10);
+        // Label
+        c.font = "600 9px 'IBM Plex Mono', monospace";
+        c.fillStyle = '#f5c842';
+        c.letterSpacing = '0.1em';
+        c.fillText('SCORE /100', cx, cy + 10);
+        c.restore();
+      },
+    }],
+  });
 }
+
+function drawPie(svgId, legendId, segments) {
+  const canvas = $(svgId);
+  const legend = $(legendId);
+  if (!canvas || !legend) return;
+
+  const validSegs = segments.filter(s => s.value > 0);
+  const total = validSegs.reduce((a, s) => a + s.value, 0);
+  if (total === 0) { if (legend) legend.innerHTML = ''; return; }
+
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const labels  = validSegs.map(s => s.label);
+  const values  = validSegs.map(s => s.value);
+  const colors  = validSegs.map(s => rc(s.color));   // ← resolve CSS vars → hex
+  const pcts    = validSegs.map(s => ((s.value / total) * 100).toFixed(1));
+  const topSeg  = [...validSegs].sort((a, b) => b.value - a.value)[0];
+  const topPct  = ((topSeg.value / total) * 100).toFixed(0);
+
+  if (_cjsPieMap[svgId]) {
+    const ch = _cjsPieMap[svgId];
+    ch.data.labels = labels;
+    ch.data.datasets[0].data   = values;
+    ch.data.datasets[0].backgroundColor = colors;
+    ch.options.plugins.doughnutCenter = { label: topSeg.label, pct: topPct, color: topSeg.color };
+    ch.update('active');
+  } else {
+    const ctx = canvas.getContext('2d');
+    _cjsPieMap[svgId] = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderColor: isLight ? 'rgba(255,255,255,0.6)' : 'rgba(6,10,15,0.5)',
+          borderWidth: 2,
+          hoverOffset: 8,
+          hoverBorderWidth: 0,
+        }],
+      },
+      options: {
+        cutout: '58%',
+        responsive: false,
+        animation: { duration: 600, easing: 'easeOutCubic' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            backgroundColor: isLight ? 'rgba(10,20,40,0.94)' : 'rgba(6,12,22,0.96)',
+            borderWidth: 1,
+            titleFont: { family: "'Syne', sans-serif", size: 13, weight: '700' },
+            bodyFont:  { family: "'IBM Plex Mono', monospace", size: 11 },
+            padding: 10,
+            cornerRadius: 8,
+            callbacks: {
+              title: (items) => items[0].label,
+              label: (item) => {
+                const pct = ((item.parsed / total) * 100).toFixed(1);
+                return ` Weight: ${item.parsed} (${pct}%)`;
+              },
+              labelColor: (item) => ({
+                borderColor: colors[item.dataIndex],
+                backgroundColor: colors[item.dataIndex],
+                borderWidth: 2,
+                borderRadius: 3,
+              }),
+            },
+          },
+          doughnutCenter: { label: topSeg.label, pct: topPct, color: topSeg.color },
+        },
+      },
+      plugins: [{
+        id: 'doughnutCenter',
+        afterDraw(chart) {
+          const { ctx: c, chartArea: { top, left, width, height } } = chart;
+          const opt = chart.options.plugins.doughnutCenter || {};
+          const cx = left + width / 2, cy = top + height / 2;
+          c.save();
+          c.font = "bold 20px 'Syne', sans-serif";
+          c.fillStyle = opt.color || '#00c8f0';
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.fillText((opt.pct || '0') + '%', cx, cy - 7);
+          c.font = "600 8px 'IBM Plex Mono', monospace";
+          c.fillStyle = 'var(--text)';
+          const lbl = (opt.label || '').toUpperCase().slice(0, 9);
+          c.fillText(lbl, cx, cy + 9);
+          c.restore();
+        },
+      }],
+    });
+  }
+
+  // Update legend
+  legend.innerHTML = validSegs.map((s, i) =>
+    `<div class="legend-item">
+      <div class="legend-dot" style="background:${colors[i]}"></div>
+      <span class="legend-label">${s.label}</span>
+      <span class="legend-val" style="color:${colors[i]}">${s.value}</span>
+      <span class="legend-pct">${pcts[i]}%</span>
+    </div>`
+  ).join('');
+}
+
 function updateMeter(meterId, passCount, total) {
 const el = $(meterId);
 if (!el) return;
@@ -1006,6 +1271,7 @@ const d = num('ma-d');
 const j = num('ma-j');
 const dif = num('ma-dif');
 const dea = num('ma-dea');
+const hist = num('ma-hist');
 const vol = num('ma-vol');
 const atr = num('ma-atr');
 const adxV = num('ma-adx');
@@ -1029,57 +1295,102 @@ const f2_pass = ma5 > ma20;
 const f3_pass = ma20 > ma50;
 const f4_ma200 = ma200 ? price > ma200 : null;
 const kdj = scoreKDJ(k, d, j);
-const macd = scoreMACDZone(dif, dea);
+const macd = scoreMACDZone(dif, dea, hist);
 const volS = scoreVolume(vol);
 const adxS = scoreADX(adxV);
 const dmiS = scoreDMI(pdiV, mdiV, adxV, adxrV);
 const stS = scoreSupertrend(price, stV);
 const rsiS = scoreRSI(num('ma-rsi'));
 const eng = scoreEngine();
-eng.add(f1_pass, 18);
-eng.add(f2_pass, 16);
-eng.add(f3_pass, 14);
-eng.add(f4_ma200, 8);
-eng.add(kdj ? kdj.pass : null, 16);
-eng.add(macd ? macd.pass : null, 14);
-eng.add(volS ? volS.pass : null, 8);
-eng.add(adxS ? adxS.pass : null, 16);
-eng.add(dmiS ? dmiS.pass : null, 12);
-eng.add(stS ? stS.pass : null, 6);
-eng.add(rsiS ? rsiS.pass : null, 10);
+// Core MA stack — most important
+eng.add(f1_pass, 20);   // Price above MA5: immediate momentum
+eng.add(f2_pass, 18);   // MA5 above MA20: short-term trend
+eng.add(f3_pass, 14);   // MA20 above MA50: medium trend
+eng.add(f4_ma200, 8);   // MA200: macro alignment
+// Momentum oscillators
+eng.add(kdj  ? kdj.pass  : null, 16); // KDJ: short-term momentum
+eng.add(macd ? macd.pass : null, 14); // MACD: trend momentum
+eng.add(rsiS ? rsiS.pass : null, 10); // RSI: overbought/oversold
+// Trend strength
+eng.add(adxS ? adxS.pass : null, 16); // ADX: trend intensity
+eng.add(dmiS ? dmiS.pass : null, 12); // DMI: direction confirmation
+// Supporting
+eng.add(volS ? volS.pass : null, 10); // Volume: institutional confirmation
+eng.add(stS  ? stS.pass  : null, 6);  // Supertrend: trend filter
 const tfCfg = getTFConfig('ma');
+
+// ── Confluence bonus: multiple strong signals ─────────────────────────
+let bonus = 0;
+const strongSignals = [
+  kdj?.pass === true && kdj?.zone?.includes('Cross'),    // fresh KDJ cross
+  macd?.pass === true && (macd?.zone?.includes('Strong') || macd?.zone?.includes('expanding')),
+  adxS?.pass === true && adxS?.strength === 'Very Strong',
+  dmiS?.pass === true && dmiS?.crossZone,                // fresh DMI cross
+  volS?.pass === true && vol >= 2.0,                     // 2x+ volume surge
+  f4_ma200 && ma50AbMA200 > 0,                           // full MA rainbow
+].filter(Boolean).length;
+if (strongSignals >= 4) bonus = 8;
+else if (strongSignals >= 3) bonus = 4;
+else if (strongSignals >= 2) bonus = 2;
+
+// ── Session bonus: trading at prime time ──────────────────────────────
+const sessNow = getUSWindowMYT();
+const sessBonus = sessNow.cls === 'sess-prime' ? 5
+  : sessNow.cls === 'sess-power' ? 3
+  : sessNow.cls === 'sess-lull'  ? -8   // penalize for lull trading
+  : 0;
+
+// ── Over-extension penalty ────────────────────────────────────────────
 let penalty = 0;
 const maHard = tfCfg.f1Warn * 1.6, maMed = tfCfg.f1Warn * 1.2, maSoft = tfCfg.f1Warn;
 if (pAboveMA20 > maHard) penalty = -30;
 else if (pAboveMA20 > maMed) penalty = -20;
 else if (pAboveMA20 > maSoft) penalty = -10;
-const adjScore = Math.max(0, Math.min(100, eng.result() + penalty));
+
+const adjScore = Math.max(0, Math.min(100, eng.result() + penalty + bonus + sessBonus));
+
 const momentumOk = (!kdj || kdj.pass !== false)
 && (!macd || macd.pass !== false)
 && (!adxS || adxS.pass !== false)
 && (!dmiS || dmiS.pass !== false)
-&& (!kdj || !(j != null && j > 85));
+&& (!kdj || !(j != null && j > 90));
+
+// ── Decision thresholds (tighter = more conservative = better) ───────
 let decision, riskLevel, posSize;
-if (!f1_pass || !f2_pass || !f3_pass || !momentumOk) {
+const kdjBearish = kdj?.pass === false;
+const macdBearish = macd?.pass === false;
+const criticalFail = !f1_pass || !f2_pass || !f3_pass;
+const momentumFail = kdjBearish || macdBearish;
+
+if (criticalFail || (momentumFail && !momentumOk)) {
 decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
-} else if (adjScore >= 75) {
-decision = 'PROCEED'; riskLevel = 'Low Risk'; posSize = pAboveMA20 > 5 ? '50%' : '100%';
-} else if (adjScore >= 65) {
-decision = 'PROCEED'; riskLevel = 'Medium Risk'; posSize = '50%';
-} else {
+} else if (adjScore >= 78) {
+decision = 'PROCEED'; riskLevel = 'Low Risk';
+posSize = pAboveMA20 > 7 ? '50%' : strongSignals >= 3 ? '100%' : '75%';
+} else if (adjScore >= 68) {
+decision = 'PROCEED'; riskLevel = 'Medium Risk';
+posSize = pAboveMA20 > 5 ? '25%' : '50%';
+} else if (adjScore >= 55) {
 decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
+} else {
+decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
 }
 const grade = getGrade(ma20AboveMA50);
 if (grade.g === 'X' && posSize === '100%') posSize = '50%';
 if (grade.g === 'X' && decision === 'PROCEED' && adjScore < 80) decision = 'WATCH';
+// Lull period: force WATCH even on good scores — no full size during low volume
+if (sessNow.cls === 'sess-lull' && decision === 'PROCEED' && posSize === '100%') posSize = '50%';
+
 setDecisionStrip('ma', decision, riskLevel, grade, `
     <div>Price: <span style="color:var(--text)">${fmt(price)}</span>
       &nbsp; MA5: <span style="color:var(--text)">${fmt(ma5)}</span>
       MA20: <span style="color:var(--text)">${fmt(ma20)}</span>
       MA50: <span style="color:var(--text)">${fmt(ma50)}</span>
     </div>
-    <div>Position: <span style="color:${posSize === '100%' ? 'var(--green)' : 'var(--yellow)'}">${posSize}</span>
+    <div>Position: <span style="color:${posSize === '100%' || posSize === '75%' ? 'var(--green)' : posSize === '50%' ? 'var(--yellow)' : 'var(--dim)'}">${posSize}</span>
       &nbsp; Score: <span style="color:var(--accent)">${adjScore.toFixed(0)}/100</span>
+      ${bonus > 0 ? `<span style="color:var(--green);font-size:9px"> +${bonus}pts confluence</span>` : ''}
+      ${sessBonus !== 0 ? `<span style="color:${sessBonus > 0 ? 'var(--green)' : 'var(--orange)'};font-size:9px"> ${sessBonus > 0 ? '+' : ''}${sessBonus}pts session</span>` : ''}
       ${adxV ? `&nbsp; ADX: <span style="color:${adxS.c}">${adxV.toFixed(1)} ${adxS.strength}</span>` : ''}
     </div>`
 );
@@ -1090,27 +1401,30 @@ pAboveMA20 > tfCfg.f1Ok
 ? `⚠️ Price ${pAboveMA20.toFixed(1)}% above MA20 — stretched for ${tfCfg.label} (ideal ≤${tfCfg.f1Ideal}%). Consider waiting for pullback toward MA5 (${fmt(ma5)}).`
 : `✅ Full bull MA stack confirmed. Price is ${pAboveMA20.toFixed(1)}% above MA20 (ideal ≤${tfCfg.f1Ideal}% on ${tfCfg.label}).`,
 `⏱️ Timeframe: ${tfCfg.label} — Expected hold: ${tfCfg.hold}. ${tfCfg.sessionNote}.`,
-`📐 Entry: ${fmt(price)} | SL: ${atr ? fmt(price - atr * tfCfg.atrMult) : 'set ' + tfCfg.atrMult + '×ATR below entry'}`,
+`📐 Entry: ${fmt(price)} | SL: ${atr ? fmt(price - atr * tfCfg.atrMult) : 'set ' + tfCfg.atrMult + '×ATR below entry'} | Target R:R ≥ 1:2`,
 ma200 && price > ma200 ? `🌐 Macro bullish: Price above MA200 (${fmt(ma200)}) — trend aligned across all timeframes.` : '',
-adxS && adxS.pass === true ? `💪 ADX ${adxV?.toFixed(1)} — ${adxS.strength} trend strength. High-conviction setup.` : '',
+adxS && adxS.pass === true ? `💪 ADX ${adxV?.toFixed(1)} ${adxS.strength} — ${adxS.declining ? '⚠️ ADX declining, watch momentum' : 'trend strength confirmed'}.` : '',
 dmiS && dmiS.pass === true ? `📊 DMI: ${dmiS.label}` : (dmiS && dmiS.pass === false ? `⚠️ DMI Warning: ${dmiS.label}` : ''),
-`📦 Position size: ${posSize}. Set SL immediately after entry.`,
+strongSignals >= 3 ? `🔥 High-confluence setup: ${strongSignals} strong signals aligned — higher conviction entry.` : '',
+`📦 Position size: ${posSize}. SL set immediately after entry. Never move SL wider.`,
+sessNow.cls === 'sess-prime' ? `🎯 Currently in Prime Window — optimal entry timing.` : '',
 ].filter(Boolean).join('\n');
 adv.textContent = lines;
 adv.className = 'advice-box green';
 } else if (decision === 'WATCH') {
-adv.textContent = `⚠️ Partial setup (Score: ${adjScore.toFixed(0)}/100). Conditions not ideal — wait for full MA alignment + momentum confirmation before entering. Monitor for KDJ crossover and MACD histogram expansion.`;
+const watchReason = pAboveMA20 > tfCfg.f1Warn ? `Price ${pAboveMA20.toFixed(1)}% extended above MA20` : `Score ${adjScore.toFixed(0)}/100 below threshold`;
+adv.textContent = `⚠️ Partial setup (Score: ${adjScore.toFixed(0)}/100). ${watchReason}. Wait for full MA alignment + momentum confirmation. Ideal entry: pullback to MA5/MA20 with KDJ crossover and expanding volume.`;
 adv.className = 'advice-box yellow';
 } else {
 const missing = [
 !f1_pass && `Price < MA5`,
 !f2_pass && `MA5 < MA20`,
 !f3_pass && `MA20 < MA50`,
-kdj?.pass === false && `KDJ Bearish`,
+kdj?.pass === false && `KDJ Bearish (K${k?.toFixed(0)}/D${d?.toFixed(0)})`,
 macd?.pass === false && `MACD Bearish`,
 adxS?.pass === false && `ADX Weak (${adxV?.toFixed(1)})`,
 ].filter(Boolean);
-adv.textContent = `🔴 Skip — ${missing.length} critical filter${missing.length > 1 ? 's' : ''} failed: ${missing.join(', ')}. Do not force entry against the filter stack.`;
+adv.textContent = `🔴 Skip — ${missing.length} critical filter${missing.length > 1 ? 's' : ''} failed: ${missing.join(', ')}. Do not force entry against the filter stack. Wait for all conditions to align.`;
 adv.className = 'advice-box red';
 }
 updateDial('ma-dial-arc', 'ma-dial-score', adjScore);
@@ -1139,13 +1453,13 @@ kdj
 ? buildCheck(`F5 — KDJ ${kdj.zone}`, kdj.pass === true ? true : kdj.pass === false ? false : null, `K:${k?.toFixed(1)} D:${d?.toFixed(1)} J:${j?.toFixed(1)}`)
 : buildCheck('F5 — KDJ', null, 'Not provided'),
 macd
-? buildCheck(`F6 — MACD ${macd.zone}`, macd.pass === true ? true : macd.pass === false ? false : null, `DIF:${dif} DEA:${dea}`)
+? buildCheck(`F6 — MACD ${macd.zone}`, macd.pass === true ? true : macd.pass === false ? false : null, `DIF:${dif} DEA:${dea}${hist != null ? ` H:${hist}` : ''}`)
 : buildCheck('F6 — MACD', null, 'Not provided'),
 volS
 ? buildCheck(`F7 — Volume ${volS.zone}`, volS.pass === true ? true : volS.pass === false ? false : null, `${vol}× ${volS.zone}`)
 : buildCheck('F7 — Volume', null, 'Not provided'),
 adxS
-? buildCheck(`ADX ${adxS.zone}`, adxS.pass === true ? true : adxS.pass === false ? false : null, `ADX: ${adxV?.toFixed(1)}`)
+? buildCheck(`ADX ${adxS.zone}${adxS.declining ? ' ↓' : ''}`, adxS.pass === true ? true : adxS.pass === false ? false : null, `ADX: ${adxV?.toFixed(1)}`)
 : buildCheck('ADX Trend Strength', null, 'Not provided'),
 dmiS
 ? buildCheck(`DMI ${dmiS.zone}`, dmiS.pass === true ? true : dmiS.pass === false ? false : null, dmiS.label)
@@ -3837,204 +4151,307 @@ el.style.display = '';
 srCalc();
 }
 
+// ─── Chart.js S/R Zone Chart ───────────────────────────────────────────────
+let _srChartInstance = null;
+
 function drawSRCanvas(price, levels) {
-const canvas = $('sr-canvas');
-if (!canvas) return;
-const parent = canvas.parentElement;
-const dpr = window.devicePixelRatio || 1;
-const tc = themeColors();
+  const canvas = $('sr-canvas');
+  if (!canvas) return;
 
-// ── Responsive breakpoints ──────────────────────────
-const screenW = window.innerWidth;
-const isMobile = screenW < 520;
-const isTablet = screenW >= 520 && screenW < 768;
+  // Ensure the canvas container has a real height before Chart.js tries to size itself
+  const wrap = $('sr-chartjs-wrap');
+  if (wrap && wrap.clientHeight < 100) wrap.style.height = '420px';
 
-const cssW = parent.clientWidth - 4;
-const rowH    = isMobile ? 38 : 32;
-const TOP     = isMobile ? 28 : 36;
-const BOT     = 20;
-const LEFT    = isMobile ? 54 : 66;
-const RIGHT   = isMobile ? 4 : (isTablet ? 140 : 175);
-const cssH    = TOP + BOT + rowH * (levels.length + 2) + 60;
+  // Destroy previous chart instance cleanly
+  if (_srChartInstance) {
+    _srChartInstance.destroy();
+    _srChartInstance = null;
+  }
 
-canvas.style.width  = cssW + 'px';
-canvas.style.height = cssH + 'px';
-canvas.width  = cssW * dpr;
-canvas.height = cssH * dpr;
-const ctx = canvas.getContext('2d');
-ctx.scale(dpr, dpr);
-const W = cssW, H = cssH;
-const chartW = W - LEFT - RIGHT;
-const chartH = H - TOP - BOT;
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const tc = themeColors();
 
-// Price range
-const allP = [...levels.map(l => l.price), price];
-const minP = Math.min(...allP), maxP = Math.max(...allP);
-const range = maxP - minP || price * 0.08;
-const pad   = range * 0.32;
-const pMin  = minP - pad, pMax = maxP + pad;
-const pToY  = p => TOP + chartH - ((p - pMin) / (pMax - pMin)) * chartH;
+  // ── Colors ──────────────────────────────────────────────────────────────────
+  const col = {
+    bg:       isLight ? '#ffffff' : '#0b1018',
+    gridLine: isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.06)',
+    axisText: isLight ? '#3a5a72' : '#7a9bb5',
+    tooltip:  isLight ? '#0f1825' : '#0f1825',
+    current:  '#00c8f0',
+    sup:      '#00e87a',
+    supWeak:  '#00aa55',
+    res:      '#f03a4a',
+    resWeak:  '#bb2233',
+    major:    '#f5c842',
+  };
 
-// ── Background ──────────────────────────────────────
-ctx.fillStyle = tc.bg;
-ctx.fillRect(0, 0, W, H);
-ctx.fillStyle = tc.chartBg;
-ctx.fillRect(LEFT, TOP, chartW, chartH);
+  // ── Build price range ────────────────────────────────────────────────────────
+  const allPrices = [...levels.map(l => l.price), price];
+  const minP  = Math.min(...allPrices);
+  const maxP  = Math.max(...allPrices);
+  const range = maxP - minP || price * 0.08;
+  const pad   = range * 0.35;
+  const yMin  = minP - pad;
+  const yMax  = maxP + pad;
 
-// ── Y-axis grid & price labels ───────────────────────
-const gridSteps = isMobile ? 5 : 8;
-ctx.strokeStyle = tc.grid;
-ctx.lineWidth = 1;
-for (let i = 0; i <= gridSteps; i++) {
-const y = TOP + (chartH / gridSteps) * i;
-ctx.beginPath(); ctx.moveTo(LEFT, y); ctx.lineTo(LEFT + chartW, y); ctx.stroke();
-const p = pMax - (pMax - pMin) * (i / gridSteps);
-ctx.fillStyle = tc.axisLabel;
-ctx.font = `${isMobile ? 9 : 10}px 'IBM Plex Mono',monospace`;
-ctx.textAlign = 'right';
-ctx.fillText(fmtPrice(p), LEFT - 3, y + 3);
-}
+  // ── Build annotation objects ─────────────────────────────────────────────────
+  const annotations = {};
 
-// ── Support/Resistance zone shading ─────────────────
-const supports    = levels.filter(l => l.type === 'support').sort((a,b) => b.price - a.price);
-const resistances = levels.filter(l => l.type === 'resistance').sort((a,b) => a.price - b.price);
-if (supports.length > 0 && resistances.length > 0) {
-const yS = pToY(supports[0].price);
-const yR = pToY(resistances[0].price);
-const grad = ctx.createLinearGradient(0, yR, 0, yS);
-grad.addColorStop(0,   'rgba(240,58,74,0.05)');
-grad.addColorStop(0.5, 'rgba(0,200,240,0.04)');
-grad.addColorStop(1,   'rgba(0,232,122,0.05)');
-ctx.fillStyle = grad;
-ctx.fillRect(LEFT, yR, chartW, yS - yR);
-}
+  // Pre-compute colors & metadata per level
+  const lvMeta = levels.map(lv => {
+    const isSup   = lv.type === 'support';
+    const isCur   = lv.type === 'current';
+    const isMajor = lv.confluence >= 3;
+    const isStrong= lv.confluence >= 2;
+    let lineColor, bandColor, lw;
+    if (isCur)        { lineColor = col.current; bandColor = 'rgba(0,200,240,0.10)'; lw = 2.5; }
+    else if (isMajor) { lineColor = col.major;   bandColor = 'rgba(245,200,66,0.14)'; lw = 2.5; }
+    else if (isStrong){ lineColor = isSup ? col.sup : col.res;
+                        bandColor = isSup ? 'rgba(0,232,122,0.10)' : 'rgba(240,58,74,0.10)'; lw = 2; }
+    else              { lineColor = isSup ? col.supWeak : col.resWeak;
+                        bandColor = isSup ? 'rgba(0,170,85,0.06)' : 'rgba(180,30,50,0.06)'; lw = 1.2; }
+    return { ...lv, isSup, isCur, isMajor, isStrong, lineColor, bandColor, lw };
+  });
 
-// ── Draw each level ──────────────────────────────────
-levels.forEach(lv => {
-const y       = pToY(lv.price);
-const isSup   = lv.type === 'support';
-const isPivot = lv.source === 'pivot';
-const conf    = lv.confluence;
-const isStrong = conf >= 2;
-const isMajor  = conf >= 3;
+  // ── Collision-avoidance: compute yAdjust for each label ──────────────────────
+  // We need pixel positions to determine overlap. We approximate using price ratio.
+  // Chart height ≈ 340px (canvas height), price range = yMax - yMin
+  const chartPxH  = 340;
+  const labelH    = 36;   // approximate height of a 2-line label box (px)
+  const pricePerPx = (yMax - yMin) / chartPxH;
 
-let baseColor;
-if (isMajor)        baseColor = '#f5c842';
-else if (isStrong)  baseColor = isSup ? '#00e87a' : '#f03a4a';
-else                baseColor = isSup ? '#00aa55' : '#bb2233';
-if (lv.type === 'current') baseColor = '#00c8f0';
+  // Convert price → approximate pixel Y from top
+  const priceToApproxPx = p => chartPxH * (1 - (p - yMin) / (yMax - yMin));
 
-const bandH     = isMajor ? 20 : isStrong ? 14 : 7;
-const bandAlpha = isMajor ? 0.32 : isStrong ? 0.20 : 0.11;
+  // Build list of { idx, price, approxPx, yAdjust } sorted by price ascending
+  const labelSlots = lvMeta.map((lv, i) => ({
+    i, price: lv.price,
+    px: priceToApproxPx(lv.price),
+    yAdjust: 0,
+  }));
 
-// Band fill
-ctx.save();
-ctx.globalAlpha = bandAlpha;
-ctx.fillStyle = baseColor;
-ctx.fillRect(LEFT, y - bandH / 2, chartW, bandH);
-ctx.restore();
+  // Sort by approximate Y descending (top of chart first = highest price)
+  labelSlots.sort((a, b) => a.px - b.px);
 
-// Price line
-ctx.save();
-ctx.globalAlpha = isMajor ? 1 : isStrong ? 0.85 : 0.55;
-ctx.strokeStyle = baseColor;
-ctx.lineWidth   = isMajor ? 2.5 : isStrong ? 1.8 : 1;
-ctx.setLineDash(isPivot && !isStrong ? [5,4] : []);
-if (isStrong || isMajor) { ctx.shadowBlur = isMajor ? 10 : 6; ctx.shadowColor = baseColor; }
-ctx.beginPath(); ctx.moveTo(LEFT, y); ctx.lineTo(LEFT + chartW, y); ctx.stroke();
-ctx.shadowBlur = 0; ctx.setLineDash([]);
-ctx.restore();
+  // Two-pass push-apart: repeatedly nudge overlapping labels apart
+  const MIN_GAP = labelH + 4;
+  for (let pass = 0; pass < 20; pass++) {
+    let moved = false;
+    for (let k = 1; k < labelSlots.length; k++) {
+      const prev = labelSlots[k - 1];
+      const curr = labelSlots[k];
+      const gap = (curr.px + curr.yAdjust) - (prev.px + prev.yAdjust);
+      if (gap < MIN_GAP) {
+        const push = (MIN_GAP - gap) / 2;
+        prev.yAdjust -= push;
+        curr.yAdjust += push;
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
 
-const distStr = (lv.distPct >= 0 ? '+' : '') + lv.distPct.toFixed(2) + '%';
+  // Map index → computed yAdjust (in pixels; negative = up, positive = down)
+  const adjustMap = {};
+  labelSlots.forEach(s => { adjustMap[s.i] = s.yAdjust; });
 
-if (isMobile) {
-// ── MOBILE: labels drawn INSIDE chart on the line ──
-// Left side: label name + price on a pill background
-const labelTxt = `${lv.label} ${fmtPrice(lv.price)}`;
-ctx.font = isStrong ? `bold 9px 'IBM Plex Mono',monospace` : `8px 'IBM Plex Mono',monospace`;
-const tw = ctx.measureText(labelTxt).width;
-const px = LEFT + 4, py = y - 1;
-// pill bg
-ctx.fillStyle = 'rgba(6,10,15,0.78)';
-ctx.fillRect(px - 2, py - 9, tw + 6, 13);
-// text
-ctx.fillStyle = baseColor;
-ctx.textAlign = 'left';
-ctx.fillText(labelTxt, px, py + 2);
-// dist % on the right inside chart
-ctx.font = `8px 'IBM Plex Mono',monospace`;
-ctx.fillStyle = tc.axisLabel;
-ctx.textAlign = 'right';
-ctx.fillText(distStr, LEFT + chartW - 4, py + 2);
-} else {
-// ── DESKTOP/TABLET: labels on the right outside ──
-const labelFontSize = isTablet ? 10 : 11;
-ctx.textAlign = 'left';
-ctx.font = isStrong
-? `bold ${labelFontSize}px 'IBM Plex Mono',monospace`
-: `${labelFontSize - 1}px 'IBM Plex Mono',monospace`;
-ctx.fillStyle = baseColor;
-ctx.fillText(`${lv.label}  ${fmtPrice(lv.price)}`, LEFT + chartW + 8, y - 1);
-ctx.fillStyle = tc.dimLabel;
-ctx.font = `9px 'IBM Plex Mono',monospace`;
-ctx.fillText(distStr, LEFT + chartW + 8, y + 10);
+  // ── Draw bands, lines, labels ────────────────────────────────────────────────
+  lvMeta.forEach((lv, i) => {
+    const { isSup, isMajor, isStrong, lineColor, bandColor, lw } = lv;
+    const bandHalfPct = (isMajor ? 0.006 : isStrong ? 0.004 : 0.002) * lv.price;
+    const distStr  = (lv.distPct >= 0 ? '+' : '') + lv.distPct.toFixed(2) + '%';
+    const confBadge= isStrong ? ` · ${lv.confluence}× CONF` : '';
+    const typeTag  = lv.isCur ? 'CURRENT' : isSup ? 'SUPPORT' : 'RESISTANCE';
+    const yAdj     = adjustMap[i] || 0;
 
-// Confluence badge (desktop only)
-if (isStrong) {
-const bx = LEFT + chartW - 44;
-ctx.fillStyle = isMajor ? 'rgba(245,200,66,0.25)' : 'rgba(0,200,240,0.15)';
-ctx.beginPath();
-ctx.roundRect ? ctx.roundRect(bx - 2, y - 8, 42, 16, 3) : ctx.rect(bx - 2, y - 8, 42, 16);
-ctx.fill();
-ctx.fillStyle = isMajor ? '#f5c842' : '#00c8f0';
-ctx.font = `bold 9px 'IBM Plex Mono',monospace`;
-ctx.textAlign = 'center';
-ctx.fillText(`${conf}× CONF`, bx + 19, y + 4);
-ctx.textAlign = 'left';
-}
-}
-});
+    // Band box
+    annotations[`band_${i}`] = {
+      type: 'box',
+      yMin: lv.price - bandHalfPct,
+      yMax: lv.price + bandHalfPct,
+      xMin: 0, xMax: 1,
+      backgroundColor: bandColor,
+      borderWidth: 0,
+    };
 
-// ── Current price line ───────────────────────────────
-const cpY = pToY(price);
-ctx.save();
-ctx.shadowBlur = 16; ctx.shadowColor = '#00c8f0';
-ctx.strokeStyle = '#00c8f0'; ctx.lineWidth = isMobile ? 2 : 2.5;
-ctx.beginPath(); ctx.moveTo(LEFT, cpY); ctx.lineTo(LEFT + chartW, cpY); ctx.stroke();
-ctx.shadowBlur = 0;
-// Price tag — always dark for contrast against the cyan box
-const priceStr = '▶ ' + fmtPrice(price);
-ctx.font = `bold ${isMobile ? 10 : 12}px 'IBM Plex Mono',monospace`;
-const tw = ctx.measureText(priceStr).width;
-if (isMobile) {
-ctx.fillStyle = '#00c8f0';
-ctx.fillRect(LEFT + chartW - tw - 10, cpY - 10, tw + 8, 20);
-ctx.fillStyle = '#060a0f';
-ctx.textAlign = 'right';
-ctx.fillText(priceStr, LEFT + chartW - 4, cpY + 4);
-} else {
-ctx.fillStyle = '#00c8f0';
-ctx.fillRect(LEFT + chartW + 6, cpY - 10, tw + 8, 20);
-ctx.fillStyle = '#060a0f';
-ctx.textAlign = 'left';
-ctx.fillText(priceStr, LEFT + chartW + 10, cpY + 4);
-}
-ctx.restore();
+    // Full horizontal price line
+    annotations[`line_${i}`] = {
+      type: 'line',
+      yMin: lv.price, yMax: lv.price,
+      borderColor: lineColor,
+      borderWidth: lw,
+      borderDash: lv.source === 'pivot' && !isStrong ? [6, 4] : [],
+      label: {
+        display: true,
+        content: [`${lv.label}  ${fmtPrice(lv.price)}`, `${typeTag}  ${distStr}${confBadge}`],
+        position: 'end',
+        xAdjust: -6,
+        yAdjust,          // ← collision-resolved offset
+        backgroundColor: isLight ? 'rgba(255,255,255,0.95)' : 'rgba(6,10,15,0.92)',
+        color: lineColor,
+        font: [
+          { family: "'IBM Plex Mono', monospace", size: 11, weight: '700' },
+          { family: "'IBM Plex Mono', monospace", size: 9,  weight: '400' },
+        ],
+        padding: { x: 6, y: 3 },
+        borderRadius: 4,
+        borderColor: lineColor,
+        borderWidth: 1,
+      },
+      enter({ element }) { element.options.borderWidth = lw + 1.5; },
+      leave({ element }) { element.options.borderWidth = lw; },
+    };
+  });
 
-// ── Title bar ────────────────────────────────────────
-ctx.fillStyle = tc.borderBox;
-ctx.fillRect(LEFT, TOP - (isMobile ? 22 : 26), chartW, isMobile ? 18 : 22);
-ctx.fillStyle = '#00c8f0';
-ctx.font = `bold ${isMobile ? 8 : 10}px 'Syne',sans-serif`;
-ctx.textAlign = 'left';
-ctx.fillText(isMobile ? 'S/R ZONE CHART' : 'SUPPORT / RESISTANCE ZONE CHART', LEFT + 5, TOP - (isMobile ? 9 : 11));
-if (!isMobile) {
-ctx.fillStyle = tc.dimLabel;
-ctx.font = `9px 'IBM Plex Mono',monospace`;
-ctx.textAlign = 'right';
-ctx.fillText('🟢 Support  🔴 Resistance  🟡 Confluence  ◈ Major', LEFT + chartW - 4, TOP - 11);
-}
-ctx.textAlign = 'left';
+  // Current price annotation (left side — no collision needed)
+  annotations['current_price_line'] = {
+    type: 'line',
+    yMin: price, yMax: price,
+    borderColor: col.current,
+    borderWidth: 3,
+    label: {
+      display: true,
+      content: [`▶ ${fmtPrice(price)}`, 'CURRENT PRICE'],
+      position: 'start',
+      xAdjust: 8,
+      yAdjust: 0,
+      backgroundColor: col.current,
+      color: '#060a0f',
+      font: [
+        { family: "'IBM Plex Mono', monospace", size: 12, weight: '800' },
+        { family: "'IBM Plex Mono', monospace", size: 9,  weight: '500' },
+      ],
+      padding: { x: 7, y: 4 },
+      borderRadius: 4,
+    },
+  };
+
+  // ── Chart.js config ──────────────────────────────────────────────────────────
+  const ctx2d = canvas.getContext('2d');
+
+  _srChartInstance = new Chart(ctx2d, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        data: levels.map(lv => ({ x: 0.5, y: lv.price })),
+        pointRadius: 0,
+        pointHoverRadius: 0,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400, easing: 'easeOutCubic' },
+      layout: { padding: { right: 20, top: 10, bottom: 10 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: isLight ? 'rgba(10,20,40,0.94)' : 'rgba(6,12,22,0.96)',
+          titleColor: col.current,
+          bodyColor: '#d0e2f0',
+          borderColor: 'rgba(0,200,240,0.3)',
+          borderWidth: 1,
+          titleFont: { family: "'Syne', sans-serif", size: 13, weight: '700' },
+          bodyFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            title: (items) => {
+              const lv = levels[items[0].dataIndex];
+              return lv ? `${lv.label}  ${fmtPrice(lv.price)}` : '';
+            },
+            body: (items) => {
+              const lv = levels[items[0].dataIndex];
+              if (!lv) return '';
+              const typeTag = lv.type === 'support' ? '🟢 Support' : lv.type === 'resistance' ? '🔴 Resistance' : '⚡ Current';
+              return [
+                `${typeTag}`,
+                `Distance: ${lv.distPct >= 0 ? '+' : ''}${lv.distPct.toFixed(2)}%`,
+                `Confluence: ${lv.confluence}× ${lv.confluence >= 3 ? '⭐ Major' : lv.confluence >= 2 ? '✅ Strong' : ''}`,
+                lv.source === 'pivot' ? 'Source: Pivot Point' : 'Source: Manual Level',
+              ];
+            },
+          },
+        },
+        annotation: { annotations },
+        // Crosshair-style hover line
+        crosshair: false,
+      },
+      scales: {
+        x: {
+          type: 'linear', min: 0, max: 1,
+          display: false,
+          grid: { display: false },
+        },
+        y: {
+          type: 'linear', min: yMin, max: yMax,
+          position: 'left',
+          grid: {
+            display: true,
+            color: col.gridLine,
+            drawTicks: false,
+            lineWidth: 1,
+          },
+          border: { display: false, dash: [4, 3] },
+          ticks: {
+            color: col.axisText,
+            font: { family: "'IBM Plex Mono', monospace", size: 10 },
+            maxTicksLimit: 10,
+            padding: 8,
+            callback: (v) => fmtPrice(v),
+          },
+        },
+      },
+      interaction: {
+        mode: 'nearest',
+        intersect: false,
+        axis: 'y',
+      },
+      onHover: (event, elements, chart) => {
+        chart.canvas.style.cursor = elements.length ? 'crosshair' : 'default';
+      },
+    },
+    plugins: [{
+      // Subtle horizontal hover crosshair
+      id: 'srHoverLine',
+      afterDraw(chart) {
+        const { ctx: c, chartArea: area, scales: { y } } = chart;
+        const meta = chart.getDatasetMeta(0);
+        if (!meta._parsed) return;
+        // Draw a faint horizontal guide when hovering
+        if (chart._hoverY != null) {
+          c.save();
+          c.strokeStyle = isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.12)';
+          c.lineWidth = 1;
+          c.setLineDash([4, 4]);
+          c.beginPath();
+          c.moveTo(area.left, chart._hoverY);
+          c.lineTo(area.right, chart._hoverY);
+          c.stroke();
+          // Price tag on axis
+          const pVal = y.getValueForPixel(chart._hoverY);
+          c.fillStyle = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)';
+          c.fillRect(0, chart._hoverY - 8, area.left - 2, 16);
+          c.fillStyle = col.axisText;
+          c.font = "9px 'IBM Plex Mono', monospace";
+          c.textAlign = 'right';
+          c.fillText(fmtPrice(pVal), area.left - 5, chart._hoverY + 3);
+          c.restore();
+        }
+      },
+      beforeEvent(chart, args) {
+        const e = args.event;
+        if (e.type === 'mousemove') {
+          chart._hoverY = e.y;
+          chart.draw();
+        } else if (e.type === 'mouseout') {
+          chart._hoverY = null;
+          chart.draw();
+        }
+      },
+    }],
+  });
 }
 
 function renderSRAnalysis(price, levels) {

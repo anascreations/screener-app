@@ -518,7 +518,7 @@ display: none;
 padding: 1rem;
 flex-direction: column;
 gap: 1rem;
-max-width: 980px;
+max-width: 2000px;
 margin: 0 auto;
 width: 100%;
 }
@@ -4863,8 +4863,9 @@ line-height: 1.5;
 .img-preview-actions {
 	display: flex;
 	flex-direction: column;
-	gap: .3rem;
+	gap: .35rem;
 	flex: 1;
+	min-width: 0;
 }
 .img-fname {
 	font-size: 11px;
@@ -4872,7 +4873,26 @@ line-height: 1.5;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	max-width: 180px;
+	max-width: 100%;
+}
+/* Buttons row — side by side, auto-sized, not full width */
+.img-preview-actions .img-btn-row {
+	display: flex;
+	gap: .45rem;
+	flex-wrap: wrap;
+}
+.img-preview-actions .btn {
+	flex: 0 0 auto;       /* don't stretch */
+	width: auto !important;
+	font-size: 11px;
+	padding: .35rem .85rem;
+	letter-spacing: .07em;
+	border-radius: 6px;
+	height: 30px;
+	display: inline-flex;
+	align-items: center;
+	gap: .3rem;
+	white-space: nowrap;
 }
 
 /* Status */
@@ -4925,4 +4945,568 @@ line-height: 1.5;
 }
 [data-theme="light"] .img-field-filled {
 	animation: img-field-flash-light 3s ease-out forwards !important;
+}
+/* ═══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE OVERHAUL + LIGHT THEME TEXT FIXES
+   Appended patch — overrides and extends existing rules
+═══════════════════════════════════════════════════════ */
+
+/* ── Base font scaling ─────────────────────────────── */
+@media (max-width: 600px) {
+  body { font-size: 15px; }
+}
+
+/* ── Header — compact on mobile ────────────────────── */
+@media (max-width: 600px) {
+  .tm-header {
+    height: 48px;
+    padding: 0 .65rem;
+    gap: .4rem;
+  }
+  .tm-logo {
+    font-size: 17px;
+    gap: .3rem;
+  }
+  .tm-logo-dot { width: 6px; height: 6px; }
+  .tm-clock {
+    display: none; /* hide UTC clock on small screens */
+  }
+  .tm-session {
+    font-size: 9px;
+    padding: .15rem .4rem;
+    letter-spacing: .06em;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tm-header-right { gap: .3rem; }
+  .tm-user-pill { gap: .3rem; padding: .2rem .5rem; }
+  .tm-user-name { display: none; }
+}
+@media (max-width: 380px) {
+  .tm-session { display: none; }
+}
+
+/* ── Tab bar — smaller on mobile ────────────────────── */
+.tab-bar { top: 52px; }
+@media (max-width: 600px) {
+  .tab-bar { top: 48px; }
+  .tab-btn {
+    font-size: 10px;
+    padding: .6rem .75rem;
+    letter-spacing: .06em;
+  }
+}
+
+/* ── Panel padding ───────────────────────────────────── */
+@media (max-width: 600px) {
+  .panel { padding: .65rem .5rem; gap: .65rem; }
+}
+@media (max-width: 380px) {
+  .panel { padding: .5rem .35rem; gap: .5rem; }
+}
+
+/* ── Cards ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .card-hdr {
+    font-size: 11px;
+    padding: .55rem .75rem;
+    letter-spacing: .08em;
+  }
+  .card-body { padding: .65rem .6rem; }
+}
+@media (max-width: 380px) {
+  .card-hdr { font-size: 10px; padding: .45rem .6rem; }
+  .card-body { padding: .5rem .45rem; }
+}
+
+/* ── Form grid ───────────────────────────────────────── */
+@media (max-width: 600px) {
+  .fg { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .5rem; }
+}
+@media (max-width: 420px) {
+  .fg { grid-template-columns: 1fr 1fr; gap: .4rem; }
+}
+
+/* ── Field labels ────────────────────────────────────── */
+@media (max-width: 600px) {
+  .fld label { font-size: 8px; letter-spacing: .1em; }
+  input, select { font-size: 13px; padding: .45rem .6rem; }
+  .btn { font-size: 13px; padding: .5rem 1rem; }
+  .form-actions { gap: .4rem; }
+  .form-actions .btn { flex: 1; }
+}
+
+/* ── Section labels ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .sec-label { font-size: 10px; padding: .3rem 0; letter-spacing: .1em; }
+  .opt-tag, .req-tag, .badge-new { font-size: 9px; }
+}
+
+/* ── Decision strip ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .decision-strip { padding: .65rem .75rem; gap: .4rem; }
+  .d-badge { font-size: 14px; padding: .2rem .65rem; }
+  .risk-pill, .grade-badge { font-size: 11px; padding: .15rem .55rem; }
+}
+@media (max-width: 420px) {
+  .decision-strip { flex-direction: column; align-items: flex-start; }
+  .d-badge { font-size: 13px; }
+}
+
+/* ── Check rows ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .check-row {
+    font-size: 12px;
+    padding: .3rem .5rem;
+    gap: .4rem;
+    flex-wrap: wrap;
+  }
+  .check-label { font-size: 11px; letter-spacing: .04em; min-width: 0; }
+  .check-val { font-size: 10px; }
+  .check-pass, .check-fail, .check-neutral { font-size: 12px; }
+}
+
+/* ── Chart layout — stack on mobile ─────────────────── */
+@media (max-width: 560px) {
+  .chart-layout { grid-template-columns: 1fr; }
+  .pie-svg { width: 130px; height: 130px; }
+  .dial-svg { width: 130px; height: 78px; }
+}
+
+/* ── Stat grid ───────────────────────────────────────── */
+@media (max-width: 420px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .stat-value { font-size: 12px; }
+  .stat-label { font-size: 8px; }
+}
+
+/* ── Price block (trade plan rows) ─────────────────── */
+@media (max-width: 600px) {
+  .prow {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    padding: .45rem .6rem;
+    font-size: 10px;
+    gap: .25rem .4rem;
+  }
+  .prow-label { font-size: 9.5px; grid-column: 1; grid-row: 1; }
+  .prow-val   { font-size: 12px;  font-weight: 700; grid-column: 2; grid-row: 1; text-align: right; }
+  .prow-note  { font-size: 9px; grid-column: 1 / -1; grid-row: 2; color: var(--dim); }
+}
+
+/* ── Kelly block ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .kelly-title { font-size: 11px; }
+  .kelly-row { font-size: 10px; padding: .2rem 0; }
+  .kelly-label, .kelly-val { font-size: 10px; }
+}
+
+/* ── Advice box ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .advice-box { font-size: 12px; padding: .6rem .75rem; line-height: 1.6; }
+}
+
+/* ── Signal meter ────────────────────────────────────── */
+@media (max-width: 600px) {
+  .signal-meter { height: 5px; }
+  .signal-seg { height: 5px; }
+}
+
+/* ── Range track ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .range-wrap { padding: .3rem 0; }
+}
+
+/* ── TT Session card ─────────────────────────────────── */
+@media (max-width: 600px) {
+  .tt-live-row { flex-direction: column; gap: .35rem; }
+  .tt-session-badge { font-size: 13px; padding: .25rem .7rem; }
+  .tt-myt-clock { font-size: 18px; }
+  .tt-rec-tf { font-size: 11px; }
+  .tt-live-sub { font-size: 9px; }
+  .tt-windows { gap: .35rem; }
+  .tt-win {
+    font-size: 10px;
+    padding: .35rem .5rem;
+    gap: .25rem;
+    flex-wrap: wrap;
+  }
+  .tt-win-tag { font-size: 10px; }
+  .tt-win-time { font-size: 10px; }
+  .tt-win-tf-badge { font-size: 9px; }
+  .tt-win-note { font-size: 9.5px; }
+  .tt-timeline-canvas { height: 28px !important; }
+}
+
+/* ── SM Dashboard ────────────────────────────────────── */
+@media (max-width: 500px) {
+  .sm-top-row { grid-template-columns: 1fr; }
+  .sm-bias-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .sm-box-label { font-size: 9px; }
+  .sm-section-label { font-size: 10px; }
+  .sm-collapse-btn { font-size: 10px; padding: .15rem .4rem; }
+}
+
+/* ── Fib note ────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .fib-note { font-size: 11px; padding: .35rem .55rem; }
+}
+
+/* ── Gold banner ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .gold-banner { padding: .65rem .75rem; gap: .6rem; }
+  .gold-banner-title { font-size: 17px; }
+  .gold-banner-sub { font-size: 11px; }
+  .gold-banner-icon { font-size: 24px; }
+  .gold-session-info { text-align: left; margin-left: 0; }
+  .gold-session-status { font-size: 14px; }
+  .gold-session-time { font-size: 11px; }
+}
+
+/* ── Ref grid ────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .ref-row { font-size: 10px; }
+  .ref-panel-hdr { font-size: 10px; padding: .3rem .55rem; }
+}
+
+/* ── TF Selector ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .tf-pill { font-size: 10px; padding: .25rem .55rem; }
+  .tf-sel-label { font-size: 9px; }
+  .tf-ctx { font-size: 9px; }
+}
+
+/* ── MTF grid ────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .mtf-inp, .mtf-sel { font-size: 11px; padding: .3rem .4rem; }
+  .mtf-row-label { font-size: 10px; }
+  .mtf-header-row { font-size: 9.5px; }
+}
+
+/* ── SR panel ────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .sr-lb, .sr-lv { font-size: 12px; padding: .4rem .55rem; }
+  .sr-zones-row { font-size: 10px; }
+}
+
+/* ── IPO panel ───────────────────────────────────────── */
+@media (max-width: 600px) {
+  .ipo-score-row { font-size: 11px; }
+}
+
+/* ── Guide ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .guide-step { gap: .6rem; }
+  .step-num { font-size: 13px; width: 28px; height: 28px; }
+  .step-title { font-size: 12px; }
+  .step-desc { font-size: 11px; }
+  .step-rule { font-size: 10px; }
+  .gds-block { grid-template-columns: 54px 1fr; gap: .5rem; padding: .55rem; }
+  .gds-time { font-size: 9.5px; }
+  .gds-block-title { font-size: 12px; }
+  .gds-item { font-size: 10.5px; }
+  .gds-sub-row { grid-template-columns: 80px 1fr; font-size: 10px; }
+  .gds-sub-label { display: none; }
+  .gds-summary-box { padding: .55rem .65rem; }
+}
+
+/* ── Login overlay on mobile ─────────────────────────── */
+@media (max-width: 500px) {
+  .tm-login-box {
+    padding: 1.75rem 1.25rem 1.5rem;
+    margin: 1rem;
+    width: calc(100% - 2rem);
+    max-width: 100%;
+  }
+  .tm-login-logo { font-size: 21px; }
+  .tm-login-sub { font-size: 10px; }
+  .tm-login-input { font-size: 15px; padding: .55rem .75rem; }
+  .tm-login-btn { font-size: 15px; padding: .7rem; }
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT THEME — COMPREHENSIVE TEXT VISIBILITY FIXES
+══════════════════════════════════════════════════════ */
+
+/* Body text */
+[data-theme="light"] body { color: #0d1e2d; }
+
+/* Field labels — explicitly dark in light mode */
+[data-theme="light"] .fld label { color: #1a3a52 !important; font-weight: 600; }
+[data-theme="light"] .sec-label { color: #1a3a52 !important; }
+[data-theme="light"] .opt-tag   { color: #2a5a78 !important; background: rgba(0,120,180,0.1); }
+[data-theme="light"] .req-tag   { color: #0055aa !important; }
+
+/* Card body text */
+[data-theme="light"] .card-body { color: #0d1e2d; }
+
+/* Check rows */
+[data-theme="light"] .check-row  { background: #f8fafc; border-color: #dce8f0; color: #0d1e2d; }
+[data-theme="light"] .check-label { color: #1a3a52 !important; }
+[data-theme="light"] .check-val  { color: #2a4a62; }
+[data-theme="light"] .check-val.pass { color: #007a40 !important; }
+[data-theme="light"] .check-val.fail { color: #c0000a !important; }
+[data-theme="light"] .check-val.warn { color: #8a6000 !important; }
+[data-theme="light"] .check-pass { color: #007a40 !important; }
+[data-theme="light"] .check-fail { color: #c0000a !important; }
+[data-theme="light"] .check-neutral { color: #5a7a94 !important; }
+
+/* Stat cells */
+[data-theme="light"] .stat-cell   { background: #f5f8fc; border-color: #d1dce8; }
+[data-theme="light"] .stat-label  { color: #3a5a72 !important; }
+[data-theme="light"] .stat-value  { color: #0d1e2d !important; }
+[data-theme="light"] .stat-value.green  { color: #007a40 !important; }
+[data-theme="light"] .stat-value.red    { color: #c0000a !important; }
+[data-theme="light"] .stat-value.yellow { color: #7a5500 !important; }
+[data-theme="light"] .stat-value.accent { color: #0066aa !important; }
+[data-theme="light"] .stat-value.gold   { color: #7a5500 !important; }
+[data-theme="light"] .stat-value.orange { color: #8a3a00 !important; }
+
+/* Price block rows */
+[data-theme="light"] .prow { background: #f5f8fc; border-color: #d1dce8; color: #0d1e2d; }
+[data-theme="light"] .prow-label { color: #1a3a52 !important; }
+[data-theme="light"] .prow-note  { color: #5a7a94 !important; }
+[data-theme="light"] .prow-val.accent { color: #005a99 !important; }
+[data-theme="light"] .prow-val.red    { color: #c0000a !important; }
+[data-theme="light"] .prow-val.green  { color: #007a40 !important; }
+[data-theme="light"] .prow-val.g2     { color: #005a99 !important; }
+[data-theme="light"] .prow-val.g3     { color: #7a5500 !important; }
+[data-theme="light"] .prow-val.gold   { color: #7a5500 !important; }
+
+/* Kelly block */
+[data-theme="light"] .kelly-block  { background: #f0f6fc; border-color: #d1dce8; }
+[data-theme="light"] .kelly-title  { color: #0d1e2d !important; }
+[data-theme="light"] .kelly-label  { color: #3a5a72 !important; }
+[data-theme="light"] .kelly-val    { color: #0d1e2d !important; }
+[data-theme="light"] .kelly-val.green  { color: #007a40 !important; }
+[data-theme="light"] .kelly-val.yellow { color: #7a5500 !important; }
+[data-theme="light"] .kelly-val.red    { color: #c0000a !important; }
+
+/* Advice boxes */
+[data-theme="light"] .advice-box         { background: #f8fafc; border-color: #c2d1e0; color: #0d1e2d; }
+[data-theme="light"] .advice-box.green   { background: rgba(0,180,90,0.05);  color: #004a20; border-left-color: #00aa55 !important; }
+[data-theme="light"] .advice-box.yellow  { background: rgba(200,150,0,0.05); color: #5a3c00; border-left-color: #c8a000 !important; }
+[data-theme="light"] .advice-box.red     { background: rgba(200,0,10,0.05);  color: #800008; border-left-color: #dd0010 !important; }
+[data-theme="light"] .advice-box.gold    { background: rgba(200,160,0,0.06); color: #5a4000; border-left-color: #c8a000 !important; }
+
+/* Decision strip text */
+[data-theme="light"] .d-meta { color: #1a3a52 !important; }
+[data-theme="light"] .decision-strip .d-meta span { color: #1a3a52; }
+
+/* Badge/chips in light mode — ensure dark readable colors */
+[data-theme="light"] .d-badge.proceed { color: #005a99 !important; background: rgba(0,90,153,0.1) !important; }
+[data-theme="light"] .d-badge.skip    { color: #aa0010 !important; background: rgba(170,0,16,0.1) !important; }
+[data-theme="light"] .d-badge.watch   { color: #7a5500 !important; background: rgba(122,85,0,0.1) !important; }
+[data-theme="light"] .risk-low    { color: #007a40 !important; border-color: rgba(0,122,64,0.3) !important; }
+[data-theme="light"] .risk-medium { color: #7a5500 !important; border-color: rgba(122,85,0,0.3) !important; }
+[data-theme="light"] .risk-high   { color: #aa0010 !important; border-color: rgba(170,0,16,0.3) !important; }
+[data-theme="light"] .grade-spp   { color: #007a40 !important; border-color: rgba(0,122,64,0.25) !important; }
+[data-theme="light"] .grade-a     { color: #005a99 !important; border-color: rgba(0,90,153,0.25) !important; }
+[data-theme="light"] .grade-b     { color: #7a5500 !important; border-color: rgba(122,85,0,0.25) !important; }
+[data-theme="light"] .grade-c     { color: #8a3a00 !important; border-color: rgba(138,58,0,0.25) !important; }
+[data-theme="light"] .grade-x     { color: #aa0010 !important; border-color: rgba(170,0,16,0.25) !important; }
+[data-theme="light"] .session-chip { color: #7a5500 !important; border-color: rgba(122,85,0,0.3) !important; }
+
+/* Fib note */
+[data-theme="light"] .fib-note { color: #3a5a72; background: rgba(200,160,0,0.04); border-color: rgba(200,160,0,0.15); }
+
+/* Legend items */
+[data-theme="light"] .legend-item  { background: #f5f8fc; border-color: #d1dce8; }
+[data-theme="light"] .legend-label { color: #3a5a72; }
+[data-theme="light"] .legend-pct   { color: #5a7a94; }
+
+/* Gold/Bursa/Swing hero banners */
+[data-theme="light"] .bursa-banner .bursa-banner-title  { color: #005a28; }
+[data-theme="light"] .bursa-banner .bursa-banner-sub    { color: #3a7a52; }
+[data-theme="light"] .swing-hero .swing-hero-title      { color: #5a1aaa; }
+
+/* Generic dim text in light = readable dark gray */
+[data-theme="light"] .dim-text,
+[data-theme="light"] [style*="color:var(--dim)"] { color: #3a5a72 !important; }
+
+/* Ref row values */
+[data-theme="light"] .ref-row span:first-child { color: #3a5a72; }
+[data-theme="light"] .ref-row span:last-child   { color: #0d1e2d !important; font-weight: 600; }
+
+/* IPO / Swing check items */
+[data-theme="light"] .check-item { color: #1a3a52; }
+[data-theme="light"] .ck-label   { color: #0d1e2d !important; font-weight: 600; }
+[data-theme="light"] .ck-note    { color: #5a7a94 !important; }
+
+/* Summary box text */
+[data-theme="light"] .gds-sum-label { color: #5a7a94 !important; }
+[data-theme="light"] .gds-sum-val   { color: #0d1e2d !important; }
+[data-theme="light"] .gds-sum-prime { color: #005a99 !important; }
+[data-theme="light"] .gds-sum-power { color: #7a5500 !important; }
+[data-theme="light"] .gds-sub-label { color: #0d1e2d !important; }
+[data-theme="light"] .gds-sub-note  { color: #5a7a94 !important; }
+
+/* GDS timeline */
+[data-theme="light"] .gds-item       { color: #3a5a72 !important; }
+[data-theme="light"] .gds-block-title { color: #0d1e2d !important; }
+[data-theme="light"] .gds-dur        { color: #5a7a94 !important; }
+[data-theme="light"] .gds-time       { color: #0d1e2d !important; }
+[data-theme="light"] .gds-gate       { color: #7a5500 !important; background: rgba(200,150,0,0.06); }
+[data-theme="light"] .gds-warn       { color: #8a3a00 !important; }
+[data-theme="light"] .gds-tip        { color: #005a99 !important; }
+
+/* MTF cells */
+[data-theme="light"] .mtf-cell       { color: #0d1e2d; }
+[data-theme="light"] .mtf-row-label  { color: #3a5a72 !important; }
+[data-theme="light"] .mtf-header-row { color: #1a3a52 !important; }
+
+/* SR labels */
+[data-theme="light"] .sr-zones-hdr  { color: #3a5a72 !important; }
+[data-theme="light"] .sr-bar-label  { color: #0d1e2d !important; }
+[data-theme="light"] .sr-stat-label { color: #3a5a72 !important; }
+[data-theme="light"] .sr-conf-row   { color: #3a5a72 !important; }
+[data-theme="light"] .sr-ep-label   { color: #3a5a72 !important; }
+[data-theme="light"] .sr-ep-note    { color: #5a7a94 !important; }
+
+/* Swing panel */
+[data-theme="light"] .rvs-label     { color: #3a5a72 !important; }
+[data-theme="light"] .rvs-val       { color: #0d1e2d !important; }
+
+/* Guide cards */
+[data-theme="light"] .pb-title      { color: #0d1e2d !important; font-weight: 700; }
+[data-theme="light"] .rule-card p   { color: #3a5a72; }
+[data-theme="light"] .ind-desc      { color: #3a5a72 !important; }
+
+/* Clock always readable */
+[data-theme="light"] .tm-clock      { color: #3a5a72 !important; }
+
+/* Session badge in header */
+[data-theme="light"] .tm-session    { font-weight: 600; }
+
+/* Tooltip always dark — confirmed dark */
+.tm-tooltip { z-index: 9999; }
+
+/* ═══════════════════════════════════════════════════════
+   IMPROVED CHECK-ITEM for mobile visibility
+═══════════════════════════════════════════════════════ */
+.check-item { transition: border-color .15s; }
+@media (max-width: 600px) {
+  .check-item { padding: .35rem .55rem; }
+  .ck-label { font-size: 11px; }
+  .ck-note  { font-size: 9.5px; }
+}
+
+/* ── Overflow helpers ─────────────────────────────────── */
+.tm-overflow-safe {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+@media (max-width: 600px) {
+  .prow-note { white-space: normal; word-break: break-word; }
+  .advice-box { word-break: break-word; }
+  .check-label { word-break: break-word; white-space: normal; }
+}
+
+/* ── Gold session info responsive ───────────────────── */
+@media (max-width: 480px) {
+  .gold-session-info { margin-left: 0; width: 100%; }
+  .gold-banner { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── Bursa/Swing banner responsive ──────────────────── */
+@media (max-width: 500px) {
+  .bursa-banner, .swing-hero, .mtf-hero { padding: .65rem .75rem; }
+}
+
+/* ── Login overlay – force correct width on all devices ── */
+.tm-login-overlay {
+  padding: 1rem;
+}
+.tm-login-box {
+  max-width: 420px;
+  width: 100%;
+}
+
+/* ── Ensure no horizontal page overflow ─────────────── */
+html, body { overflow-x: hidden; max-width: 100vw; }
+.panel { box-sizing: border-box; }
+
+/* ── Fix: check-row label text truncation ──────────────
+   Long DMI/ADX labels were clipping. Force wrap.       */
+.check-row {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.check-label {
+  min-width: 0;
+  white-space: normal !important;
+  word-break: break-word;
+  line-height: 1.45;
+  flex: 1 1 0;
+}
+.check-pass,
+.check-fail,
+.check-neutral {
+  flex-shrink: 0;
+  margin-top: 1px; /* align icon to first line of wrapped text */
+}
+.check-val {
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: auto;
+  padding-left: .4rem;
+}
+/* On very narrow screens stack val below label */
+@media (max-width: 420px) {
+  .check-val {
+    width: 100%;
+    margin-left: 1.6rem; /* indent past icon */
+    padding-left: 0;
+    font-size: 9.5px;
+  }
+}
+
+/* ── Wider panel layout — use more screen real estate ── */
+.panel {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+@media (min-width: 1200px) {
+  .panel {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+@media (min-width: 1600px) {
+  .panel {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+/* On large screens, use 2-column card layout where it makes sense */
+@media (min-width: 1280px) {
+  .tt-windows {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ── Chart.js Dial & Pie containers ─────────────────── */
+.cjs-dial-outer {
+  position: relative;
+  width: 180px;
+  height: 110px;
+  margin: 0 auto;
+}
+.cjs-dial-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.cjs-pie-canvas {
+  width: 140px !important;
+  height: 140px !important;
+  display: block;
+  margin: 0 auto;
+}
+@media (max-width: 500px) {
+  .cjs-dial-outer { width: 150px; height: 92px; }
+  .cjs-pie-canvas { width: 120px !important; height: 120px !important; }
 }
