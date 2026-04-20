@@ -62,6 +62,7 @@ try { resetMTF(); }     catch(e) {}
 try { smReset(); }      catch(e) {}
 // Switch back to first tab
 try { switchTab('ma'); } catch(e) {}
+try { resetEnhance(); } catch(e) {}
 }
 
 function tmShowApp(username) {
