@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>TradeMatrix Pro</title>
+<title>TradeMatrix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="tradematrix.css"/>
@@ -17,7 +17,7 @@
   <div class="tm-login-box">
     <div class="tm-login-logo">
       <div class="tm-logo-dot" style="width:10px;height:10px"></div>
-      TradeMatrix <span style="color:var(--accent2);font-size:12px;font-weight:600;margin-left:3px">PRO</span>
+      TradeMatrix <span style="color:var(--accent2);font-size:12px;font-weight:600;margin-left:3px">.</span>
     </div>
     <div class="tm-login-sub">Secure Access — Professional Trading Suite</div>
 
@@ -65,7 +65,7 @@
 <div class="tm-header">
   <div class="tm-logo">
     <div class="tm-logo-dot"></div>
-    TradeMatrix <span style="color:var(--accent2);font-size:11px;font-weight:600;margin-left:2px">PRO</span>
+    TradeMatrix <span style="color:var(--accent2);font-size:11px;font-weight:600;margin-left:2px">.</span>
   </div>
   <div class="tm-header-right">
   <button class="tm-theme-btn" id="tm-theme-btn" onclick="tmToggleTheme()" title="Toggle light / dark theme" aria-label="Toggle theme">🌙</button>
@@ -267,7 +267,7 @@
 <!-- ── Screenshot Auto-Fill Card (MA) ── -->
 <div class="card img-upload-card" id="img-card-ma">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('ma')">
-    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-ma">▼</span>
   </div>
   <div class="img-card-body" id="img-body-ma">
@@ -285,7 +285,8 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-ma"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractFromImage('ma')">⚡ Extract &amp; Fill</button>
+          <button class="btn btn-primary" onclick="tmExtractWithClaude('ma')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
+          <button class="btn btn-secondary" onclick="tmExtractFromImage('ma')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
           <button class="btn btn-secondary" onclick="tmClearImage('ma')">RESET</button>
         </div>
       </div>
@@ -537,7 +538,7 @@
 <!-- ── Screenshot Auto-Fill Card (EMA) ── -->
 <div class="card img-upload-card" id="img-card-ema">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('ema')">
-    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-ema">▼</span>
   </div>
   <div class="img-card-body" id="img-body-ema">
@@ -555,7 +556,8 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-ema"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractFromImage('ema')">⚡ Extract &amp; Fill</button>
+          <button class="btn btn-primary" onclick="tmExtractWithClaude('ema')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
+          <button class="btn btn-secondary" onclick="tmExtractFromImage('ema')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
           <button class="btn btn-secondary" onclick="tmClearImage('ema')">RESET</button>
         </div>
       </div>
@@ -846,7 +848,7 @@
 <!-- ── Screenshot Auto-Fill Card (Gold) ── -->
 <div class="card img-upload-card" id="img-card-gold">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('gold')">
-    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-gold">▼</span>
   </div>
   <div class="img-card-body" id="img-body-gold">
@@ -864,7 +866,8 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-gold"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractFromImage('gold')">⚡ Extract &amp; Fill</button>
+          <button class="btn btn-primary" onclick="tmExtractWithClaude('gold')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
+          <button class="btn btn-secondary" onclick="tmExtractFromImage('gold')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
           <button class="btn btn-secondary" onclick="tmClearImage('gold')">RESET</button>
         </div>
       </div>
@@ -1199,7 +1202,7 @@
 <!-- ── Screenshot Auto-Fill Card (Bursa) ── -->
 <div class="card img-upload-card" id="img-card-bu">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('bu')">
-    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-bu">▼</span>
   </div>
   <div class="img-card-body" id="img-body-bu">
@@ -1217,7 +1220,8 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-bu"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractFromImage('bu')">⚡ Extract &amp; Fill</button>
+          <button class="btn btn-primary" onclick="tmExtractWithClaude('bu')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
+          <button class="btn btn-secondary" onclick="tmExtractFromImage('bu')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
           <button class="btn btn-secondary" onclick="tmClearImage('bu')">RESET</button>
         </div>
       </div>
@@ -1540,7 +1544,7 @@
 <!-- ── Screenshot Auto-Fill Card (Swing) ── -->
 <div class="card img-upload-card" id="img-card-sw">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('sw')">
-    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-sw">▼</span>
   </div>
   <div class="img-card-body" id="img-body-sw">
@@ -1558,7 +1562,8 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-sw"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractFromImage('sw')">⚡ Extract &amp; Fill</button>
+          <button class="btn btn-primary" onclick="tmExtractWithClaude('sw')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
+          <button class="btn btn-secondary" onclick="tmExtractFromImage('sw')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
           <button class="btn btn-secondary" onclick="tmClearImage('sw')">RESET</button>
         </div>
       </div>
