@@ -1,28 +1,3 @@
-/* ════════════════════════════════════════════════════════════════
-   tradematrix-enhance.js  —  TradeMatrix Pro  ·  Enhancement Pack
-   ────────────────────────────────────────────────────────────────
-   MODULES:
-     1. Supertrend Auto-Calculator   (calcSTAuto)
-     2. Rule-Based Trend Forecast    (calcForecastRules)
-     3. Momentum Entry Zone          (calcEntryZone)
-
-   INTEGRATION — 3 steps:
-   ① Include after tradematrix.js in index.html:
-        <script src="tradematrix-enhance.js"></script>
-
-   ② In tradematrix.js → tmClearAllResults(), add:
-        try { resetEnhance(); } catch(e) {}
-
-   ③ Paste tradematrix-enhance-panel.html into index.html:
-        Tab button → inside .tab-bar, before the Guide tab button
-        Panel div  → before closing </body> tag
-
-   NO other changes to existing files are needed.
-════════════════════════════════════════════════════════════════ */
-
-/* ──────────────────────────────────────────────────────────────
-   SUB-TAB CONTROLLER
-────────────────────────────────────────────────────────────── */
 function switchEnhTab(id) {
     document.querySelectorAll('.enh-tab-btn').forEach(t =>
         t.classList.toggle('active', t.dataset.et === id));
@@ -30,9 +5,6 @@ function switchEnhTab(id) {
         p.classList.toggle('active', p.id === 'enh-pnl-' + id));
 }
 
-/* ──────────────────────────────────────────────────────────────
-   RESET (called from tmClearAllResults)
-────────────────────────────────────────────────────────────── */
 function resetEnhance() {
     const ids = [
         'enh-st-h','enh-st-l','enh-st-c','enh-st-atr','enh-st-mult',
@@ -52,11 +24,7 @@ function resetEnhance() {
     switchEnhTab('st');
 }
 
-/* ──────────────────────────────────────────────────────────────
-   "SEND TO FORECAST" BUTTONS
-   Injects a small button into the MA and EMA result areas so the
-   user can transfer all indicator values in one click.
-────────────────────────────────────────────────────────────── */
+
 function fillForecastFromMA() {
     const map = {
         'ma-price' : 'enh-fc-price', 'ma-ma5'  : 'enh-fc-ma5',
@@ -120,14 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     injectBtn('ema-result', fillForecastFromEMA, '→ Send to Smart Tools Forecast');
 });
 
-/* ════════════════════════════════════════════════════════════════
-   MODULE 1 — SUPERTREND AUTO-CALCULATOR
-   Formula: HL2 = (H+L)/2
-            Upper Band (Bear ST) = HL2 + Multiplier × ATR
-            Lower Band (Bull ST) = HL2 − Multiplier × ATR
-   Direction: Close ≥ HL2  →  Bullish  →  Active ST = Lower Band
-              Close <  HL2  →  Bearish  →  Active ST = Upper Band
-════════════════════════════════════════════════════════════════ */
+
 function calcSTAuto() {
     const H    = num('enh-st-h'),   L   = num('enh-st-l');
     const C    = num('enh-st-c'),   ATR = num('enh-st-atr');
@@ -541,15 +502,7 @@ function calcForecastRules() {
       </div>`;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   MODULE 3 — MOMENTUM MEAN ENTRY ZONE OPTIMIZER
-   5-condition confluence scoring (20% each):
-     C1  Support Proximity  — price within 2.5×ATR of MA20
-     C2  Momentum           — KDJ fresh cross / oversold / MACD hist
-     C3  Trend Strength     — ADX ≥ 22 with PDI > MDI
-     C4  Volume             — ratio ≥ 1.3×
-     C5  Price Structure    — MA5 > MA20 and price > MA5
-════════════════════════════════════════════════════════════════ */
+
 function calcEntryZone() {
     const price = num('enh-en-price');
     const ma20  = num('enh-en-ma20');
@@ -770,10 +723,6 @@ function calcEntryZone() {
       </div>`;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   HELPER — fmt wrapper (uses the system's existing fmt/fmtPrice)
-   Falls back gracefully if called before main script loads.
-════════════════════════════════════════════════════════════════ */
 function fmt(v, d) {
     if (v == null) return '—';
     d = d ?? (v > 100 ? 2 : v > 1 ? 4 : 6);
