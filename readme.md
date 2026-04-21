@@ -1,4 +1,4 @@
-# 🏆 TradeMatrix Pro — Trading Guide
+# 🏆 TradeMatrix — Trading Guide
 ---
 
 ## 📋 Table of Contents
