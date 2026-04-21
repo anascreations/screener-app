@@ -580,7 +580,7 @@ function rwyCalc() {
   const rows = [];
   let assets = totalAssets;
   let depleteAge = null;
-  const currentYear = new Date().getFullYear();
+  const CY = new Date().getFullYear(); // current calendar year
 
   for (let yr = age; yr <= lifeExp + 5; yr++) {
     const yearsAhead = yr - age;
@@ -596,7 +596,7 @@ function rwyCalc() {
                    assets < annualExpInflated * 3 ? 'LOW' : 'HEALTHY';
     if (assets <= 0 && !depleteAge) depleteAge = yr;
 
-    rows.push({ age: yr, year: currentYear + yearsAhead, assets: Math.max(0, assets), annualIncome, annualExpInflated, netFlow, status });
+    rows.push({ age: yr, year: CY + yearsAhead, assets: Math.max(0, assets), annualIncome, annualExpInflated, netFlow, status });
     if (assets <= 0) break;
   }
 
@@ -619,32 +619,64 @@ function rwyCalc() {
       `<div class="advice-box red" style="font-size:13px">🔴 Assets deplete at age ${depleteAge} — ${gapYears} years short of life expectancy ${lifeExp}. Action required: increase trading income to RM ${Math.ceil((annualExp-passive*12-epfMo*12)/12).toLocaleString()}/month, grow assets to ${fmtRM(safeNegg,0)}, or reduce expenses.</div>` :
       `<div class="advice-box green" style="font-size:13px">✅ Assets projected to last beyond age ${lifeExp}. Runway is ${depleteAge?depleteAge-age:lifeExp-age}+ years. Keep building EPF and diversifying.</div>`}`;
 
-  // EPF bridge
+  // ── Dynamic year / age milestones ──────────────────────────────
+  const CY            = new Date().getFullYear();        // e.g. 2026
+  const birthYear     = CY - age;                       // e.g. 1980
+  const yearAt = (targetAge) => birthYear + targetAge;  // year user turns targetAge
+
+  // EPF standard milestone ages (Malaysian EPF rules)
+  const epfAge2    = 50;   // Account 2 partial withdrawal
+  const epfAge1    = 55;   // Account 1 full access
+  const epfPayAge  = 60;   // Monthly payout eligibility
+
   const epfCard = $b('rwy-epf-card'); if(epfCard) epfCard.style.display = '';
   $b('rwy-epf-body').innerHTML = `
     <div class="biz-networth-grid">
-      <div class="biz-nw-row"><span>EPF Current Balance</span><strong>${fmtRM(epf,0)}</strong></div>
-      <div class="biz-nw-row"><span>EPF Account 2 (age 50)</span><strong style="color:var(--accent)">Withdraw 30% → est. ${fmtRM(epf*0.3,0)}</strong></div>
-      <div class="biz-nw-row"><span>EPF Account 1 (age 55)</span><strong style="color:var(--accent)">Full access → remaining balance</strong></div>
-      <div class="biz-nw-row"><span>EPF Monthly Payout (age 60)</span><strong style="color:var(--green)">${fmtRM(epfMo,0)}/month entered</strong></div>
-      <div class="biz-nw-row" style="color:var(--dim);font-size:12px"><span colspan="2">💡 Akaun Fleksibel allows withdrawals anytime. Keep EPF invested until 55 for maximum compounding.</span></div>
+      <div class="biz-nw-row">
+        <span>EPF Current Balance (${CY})</span>
+        <strong>${fmtRM(epf,0)}</strong>
+      </div>
+      <div class="biz-nw-row">
+        <span>Account 2 withdrawal — Age ${epfAge2} (${yearAt(epfAge2)})</span>
+        <strong style="color:var(--accent)">Withdraw 30% → est. ${fmtRM(epf*0.3,0)}${age >= epfAge2 ? ' <span style="color:var(--green)">● NOW ELIGIBLE</span>' : ''}</strong>
+      </div>
+      <div class="biz-nw-row">
+        <span>Account 1 full access — Age ${epfAge1} (${yearAt(epfAge1)})</span>
+        <strong style="color:var(--accent)">Full balance → remaining 70%${age >= epfAge1 ? ' <span style="color:var(--green)">● NOW ELIGIBLE</span>' : ''}</strong>
+      </div>
+      <div class="biz-nw-row">
+        <span>Monthly payout — Age ${epfPayAge} (${yearAt(epfPayAge)})</span>
+        <strong style="color:var(--green)">${epfMo > 0 ? fmtRM(epfMo,0)+'/month' : 'Enter estimate above'}${age >= epfPayAge ? ' <span style="color:var(--green)">● NOW ELIGIBLE</span>' : ''}</strong>
+      </div>
+      <div class="biz-nw-row" style="color:var(--dim);font-size:12px">
+        💡 Akaun Fleksibel allows withdrawals anytime. Keep EPF invested until age ${epfAge1} (${yearAt(epfAge1)}) for maximum compounding.
+      </div>
     </div>`;
 
-  // Action plan
+  // Action plan — retire age is dynamic from retAge input
   const actCard = $b('rwy-action-card'); if(actCard) actCard.style.display = '';
-  const needed = Math.max(0, safeNegg - totalAssets);
-  const yearsTo55 = Math.max(1, 55 - age);
-  const neededPerYear = needed / yearsTo55;
+  const needed        = Math.max(0, safeNegg - totalAssets);
+  const yearsToRetire = Math.max(1, retAge - age);
+  const neededPerYear = needed / yearsToRetire;
   $b('rwy-action-body').innerHTML = `
     <div class="biz-networth-grid">
-      <div class="biz-nw-row"><span>Gap to Safe Nest Egg</span><strong style="color:${needed<=0?'var(--green)':'var(--red)'}">${needed<=0?'✅ Achieved':fmtRM(needed,0)}</strong></div>
+      <div class="biz-nw-row">
+        <span>Gap to Safe Nest Egg</span>
+        <strong style="color:${needed<=0?'var(--green)':'var(--red)'}">${needed<=0?'✅ Achieved':fmtRM(needed,0)}</strong>
+      </div>
       ${needed > 0 ? `
-      <div class="biz-nw-row"><span>Needed per year (to age 55)</span><strong>${fmtRM(neededPerYear,0)}/yr</strong></div>
-      <div class="biz-nw-row"><span>Needed from trading income</span><strong style="color:var(--accent)">${fmtRM(neededPerYear/12,0)}/month net</strong></div>` : ''}
-      <div class="biz-nw-row"><span>🥇 Priority 1</span><span>Sell 25% physical gold (~225g) → lock in gains at all-time highs</span></div>
-      <div class="biz-nw-row"><span>🥈 Priority 2</span><span>Build cash buffer to 12 months expenses = ${fmtRM(expMo*12,0)}</span></div>
-      <div class="biz-nw-row"><span>🥉 Priority 3</span><span>Diversify into dividend REITs for passive income stream</span></div>
-      <div class="biz-nw-row"><span>💡 Priority 4</span><span>Check EPF Account 2 withdrawal eligibility at age 50</span></div>
+      <div class="biz-nw-row">
+        <span>Needed per year (now → age ${retAge} in ${yearAt(retAge)})</span>
+        <strong>${fmtRM(neededPerYear,0)}/yr over ${yearsToRetire} year${yearsToRetire!==1?'s':''}</strong>
+      </div>
+      <div class="biz-nw-row">
+        <span>Needed from trading income</span>
+        <strong style="color:var(--accent)">${fmtRM(neededPerYear/12,0)}/month net</strong>
+      </div>` : ''}
+      <div class="biz-nw-row"><span>🥇 Priority 1 (${CY})</span><span>Sell 25% physical gold → lock in gains at all-time highs</span></div>
+      <div class="biz-nw-row"><span>🥈 Priority 2 (${CY})</span><span>Build cash buffer to 12 months expenses = ${fmtRM(expMo*12,0)}</span></div>
+      <div class="biz-nw-row"><span>🥉 Priority 3 (${CY+1})</span><span>Diversify into dividend REITs for passive income stream</span></div>
+      <div class="biz-nw-row"><span>💡 Priority 4 (${yearAt(epfAge2)})</span><span>EPF Account 2 withdrawal at age ${epfAge2}</span></div>
     </div>`;
 
   // Projection table
@@ -766,6 +798,12 @@ function szReset() {
 // ══════════════════════════════════════════════════════════════════
 
 function gatesRender() {
+  // ── Dynamic year labels ───────────────────────────────────────
+  const CY = new Date().getFullYear();
+  const s1El = $b('gate-s1-period'); if(s1El) s1El.textContent = `Now → Dec ${CY}`;
+  const s2El = $b('gate-s2-period'); if(s2El) s2El.textContent = `Mid ${CY + 1}`;
+  const s3El = $b('gate-s3-period'); if(s3El) s3El.textContent = `${CY + 2}+`;
+  // ─────────────────────────────────────────────────────────────
   const trades   = jLoadTrades();
   const st       = jCalcStats(trades);
   const capTotal = dbGet('cap_total', 0);
