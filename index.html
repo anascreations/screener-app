@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>TradeMatrix</title>
+<title>TradeMatrix Pro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="tradematrix.css"/>
@@ -17,7 +17,7 @@
   <div class="tm-login-box">
     <div class="tm-login-logo">
       <div class="tm-logo-dot" style="width:10px;height:10px"></div>
-      TradeMatrix <span style="color:var(--accent2);font-size:12px;font-weight:600;margin-left:3px">.</span>
+      TradeMatrix <span style="color:var(--accent2);font-size:12px;font-weight:600;margin-left:3px">PRO</span>
     </div>
     <div class="tm-login-sub">Secure Access — Professional Trading Suite</div>
 
@@ -65,7 +65,7 @@
 <div class="tm-header">
   <div class="tm-logo">
     <div class="tm-logo-dot"></div>
-    TradeMatrix <span style="color:var(--accent2);font-size:11px;font-weight:600;margin-left:2px">.</span>
+    TradeMatrix <span style="color:var(--accent2);font-size:11px;font-weight:600;margin-left:2px">PRO</span>
   </div>
   <div class="tm-header-right">
   <button class="tm-theme-btn" id="tm-theme-btn" onclick="tmToggleTheme()" title="Toggle light / dark theme" aria-label="Toggle theme">🌙</button>
@@ -93,6 +93,13 @@
   <button class="tab-btn mtf-tab" data-tab="mtf" onclick="switchTab('mtf')">🔥 MTF Momentum</button>
   <button class="tab-btn enhance-tab" data-tab="enhance" onclick="switchTab('enhance')">🔮 Smart Tools</button>
   <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
+  <button class="tab-btn journal-tab" data-tab="journal" onclick="switchTab('journal')">📒 Journal</button>
+  <button class="tab-btn capital-tab" data-tab="capital" onclick="switchTab('capital')">💰 Capital</button>
+  <button class="tab-btn pnl-tab" data-tab="pnl" onclick="switchTab('pnl')">📈 P&amp;L</button>
+  <button class="tab-btn runway-tab" data-tab="runway" onclick="switchTab('runway')">🏁 Runway</button>
+  <button class="tab-btn sizer-tab" data-tab="sizer" onclick="switchTab('sizer')">🎯 Sizer</button>
+  <button class="tab-btn gates-tab" data-tab="gates" onclick="switchTab('gates')">✅ Gates</button>
+  <button class="tab-btn income-tab" data-tab="income" onclick="switchTab('income')">💼 Income</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -267,7 +274,7 @@
 <!-- ── Screenshot Auto-Fill Card (MA) ── -->
 <div class="card img-upload-card" id="img-card-ma">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('ma')">
-    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-ma">▼</span>
   </div>
   <div class="img-card-body" id="img-body-ma">
@@ -285,8 +292,7 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-ma"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractWithClaude('ma')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
-          <button class="btn btn-secondary" onclick="tmExtractFromImage('ma')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
+          <button class="btn btn-primary" onclick="tmExtractFromImage('ma')">⚡ Extract &amp; Fill</button>
           <button class="btn btn-secondary" onclick="tmClearImage('ma')">RESET</button>
         </div>
       </div>
@@ -538,7 +544,7 @@
 <!-- ── Screenshot Auto-Fill Card (EMA) ── -->
 <div class="card img-upload-card" id="img-card-ema">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('ema')">
-    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-ema">▼</span>
   </div>
   <div class="img-card-body" id="img-body-ema">
@@ -556,8 +562,7 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-ema"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractWithClaude('ema')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
-          <button class="btn btn-secondary" onclick="tmExtractFromImage('ema')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
+          <button class="btn btn-primary" onclick="tmExtractFromImage('ema')">⚡ Extract &amp; Fill</button>
           <button class="btn btn-secondary" onclick="tmClearImage('ema')">RESET</button>
         </div>
       </div>
@@ -848,7 +853,7 @@
 <!-- ── Screenshot Auto-Fill Card (Gold) ── -->
 <div class="card img-upload-card" id="img-card-gold">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('gold')">
-    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-gold">▼</span>
   </div>
   <div class="img-card-body" id="img-body-gold">
@@ -866,8 +871,7 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-gold"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractWithClaude('gold')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
-          <button class="btn btn-secondary" onclick="tmExtractFromImage('gold')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
+          <button class="btn btn-primary" onclick="tmExtractFromImage('gold')">⚡ Extract &amp; Fill</button>
           <button class="btn btn-secondary" onclick="tmClearImage('gold')">RESET</button>
         </div>
       </div>
@@ -1202,7 +1206,7 @@
 <!-- ── Screenshot Auto-Fill Card (Bursa) ── -->
 <div class="card img-upload-card" id="img-card-bu">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('bu')">
-    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-bu">▼</span>
   </div>
   <div class="img-card-body" id="img-body-bu">
@@ -1220,8 +1224,7 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-bu"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractWithClaude('bu')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
-          <button class="btn btn-secondary" onclick="tmExtractFromImage('bu')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
+          <button class="btn btn-primary" onclick="tmExtractFromImage('bu')">⚡ Extract &amp; Fill</button>
           <button class="btn btn-secondary" onclick="tmClearImage('bu')">RESET</button>
         </div>
       </div>
@@ -1544,7 +1547,7 @@
 <!-- ── Screenshot Auto-Fill Card (Swing) ── -->
 <div class="card img-upload-card" id="img-card-sw">
   <div class="card-hdr img-card-hdr" onclick="tmToggleUpload('sw')">
-    <span class="ci img-ci">📷</span> SCREENSHOT <span class="badge-new">OCR</span>
+    <span class="ci img-ci">📷</span> Auto-Fill <span class="badge-new">OCR</span>
     <span class="img-toggle-arrow" id="img-arrow-sw">▼</span>
   </div>
   <div class="img-card-body" id="img-body-sw">
@@ -1562,8 +1565,7 @@
       <div class="img-preview-actions">
         <div class="img-fname" id="img-fname-sw"></div>
         <div class="img-btn-row">
-          <button class="btn btn-primary" onclick="tmExtractWithClaude('sw')" title="Use Claude AI Vision — most accurate" style="background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;">🤖 AI(Sooner)</button>
-          <button class="btn btn-secondary" onclick="tmExtractFromImage('sw')" title="Fallback: local Tesseract OCR engine" style="font-size:11px;">⚡ OCR</button>
+          <button class="btn btn-primary" onclick="tmExtractFromImage('sw')">⚡ Extract &amp; Fill</button>
           <button class="btn btn-secondary" onclick="tmClearImage('sw')">RESET</button>
         </div>
       </div>
@@ -3380,5 +3382,607 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
 <script src="tradematrix.js"></script>
 <script src="tradematrix-enhance.js"></script>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: TRADE JOURNAL
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-journal">
+  <div class="biz-hero journal-hero">
+    <div class="biz-hero-icon">📒</div>
+    <div>
+      <div class="biz-hero-title">Trade Journal</div>
+      <div class="biz-hero-sub">Log every trade · Build your 6-month P&L evidence · Prove trading works</div>
+    </div>
+    <div class="biz-hero-stat" id="j-hero-stats">
+      <div class="biz-stat-box"><div class="biz-stat-val" id="j-total-trades">0</div><div class="biz-stat-lbl">Trades</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val green" id="j-win-rate">—</div><div class="biz-stat-lbl">Win Rate</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="j-total-pnl">RM 0</div><div class="biz-stat-lbl">Total P&L</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="j-expectancy">—</div><div class="biz-stat-lbl">Expectancy</div></div>
+    </div>
+  </div>
+
+  <!-- Add Trade -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">➕</span> Log New Trade</div>
+    <div class="card-body">
+      <div class="fg" style="margin-bottom:.75rem">
+        <div class="fld"><label>Stock Code</label><input type="text" id="j-code" placeholder="e.g. GREATEC" style="text-transform:uppercase"/></div>
+        <div class="fld"><label>Direction</label>
+          <select id="j-dir"><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select>
+        </div>
+        <div class="fld"><label>Strategy</label>
+          <select id="j-strat">
+            <option value="MA">MA Stack</option>
+            <option value="EMA">EMA Stack</option>
+            <option value="Swing">Swing Reversal</option>
+            <option value="MTF">MTF Momentum</option>
+            <option value="SR">S/R Breakout</option>
+            <option value="IPO">IPO</option>
+            <option value="Gold">Gold/ETF</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="fld"><label>Timeframe</label>
+          <select id="j-tf"><option>1m</option><option>5m</option><option>15m</option><option>1H</option><option>4H</option><option selected>Daily</option><option>Weekly</option></select>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:.75rem">
+        <div class="fld"><label>Entry Price (RM)</label><input type="number" id="j-entry" step="0.0001" placeholder="2.170"/></div>
+        <div class="fld"><label>Exit Price (RM)</label><input type="number" id="j-exit" step="0.0001" placeholder="2.350"/></div>
+        <div class="fld"><label>Lots / Units</label><input type="number" id="j-lots" step="1" placeholder="10000"/></div>
+        <div class="fld"><label>Entry Date</label><input type="date" id="j-edate"/></div>
+        <div class="fld"><label>Exit Date</label><input type="date" id="j-xdate"/></div>
+        <div class="fld"><label>Setup Score (0-100)</label><input type="number" id="j-score" step="1" min="0" max="100" placeholder="75"/></div>
+      </div>
+      <div class="fg" style="margin-bottom:.75rem">
+        <div class="fld"><label>R:R Planned</label><input type="number" id="j-rr-plan" step="0.1" placeholder="2.5"/></div>
+        <div class="fld"><label>Stop Loss (RM)</label><input type="number" id="j-sl" step="0.0001" placeholder="2.110"/></div>
+        <div class="fld"><label>Target 1 (RM)</label><input type="number" id="j-tp1" step="0.0001" placeholder="2.350"/></div>
+        <div class="fld"><label>Emotion Tag</label>
+          <select id="j-emotion">
+            <option value="Disciplined">😎 Disciplined</option>
+            <option value="Patient">🧘 Patient</option>
+            <option value="FOMO">😰 FOMO</option>
+            <option value="Revenge">😤 Revenge</option>
+            <option value="Oversize">⚠️ Oversized</option>
+            <option value="Missed SL">❌ Missed SL</option>
+          </select>
+        </div>
+      </div>
+      <div class="fld" style="margin-bottom:.75rem">
+        <label>Notes</label>
+        <input type="text" id="j-notes" placeholder="Why this setup? What went right/wrong?"/>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="jAddTrade()">💾 Log Trade</button>
+        <button class="btn btn-secondary" onclick="jClearForm()">Clear</button>
+      </div>
+      <div id="j-form-msg" style="display:none;margin-top:.5rem;font-size:13px"></div>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="biz-stats-row" id="j-stats-row" style="display:none">
+    <div class="biz-kpi-card">
+      <div class="biz-kpi-label">Win Rate</div>
+      <div class="biz-kpi-val" id="j-wr">—</div>
+      <div class="biz-kpi-sub" id="j-wr-sub">Need 10+ trades</div>
+    </div>
+    <div class="biz-kpi-card">
+      <div class="biz-kpi-label">Avg Win</div>
+      <div class="biz-kpi-val green" id="j-avg-win">—</div>
+      <div class="biz-kpi-sub" id="j-avg-win-sub">per trade</div>
+    </div>
+    <div class="biz-kpi-card">
+      <div class="biz-kpi-label">Avg Loss</div>
+      <div class="biz-kpi-val red" id="j-avg-loss">—</div>
+      <div class="biz-kpi-sub">per trade</div>
+    </div>
+    <div class="biz-kpi-card">
+      <div class="biz-kpi-label">Expectancy</div>
+      <div class="biz-kpi-val" id="j-exp">—</div>
+      <div class="biz-kpi-sub">per RM risked</div>
+    </div>
+    <div class="biz-kpi-card">
+      <div class="biz-kpi-label">Profit Factor</div>
+      <div class="biz-kpi-val" id="j-pf">—</div>
+      <div class="biz-kpi-sub">gross win/loss</div>
+    </div>
+    <div class="biz-kpi-card">
+      <div class="biz-kpi-label">Max Streak</div>
+      <div class="biz-kpi-val red" id="j-streak">—</div>
+      <div class="biz-kpi-sub">loss streak</div>
+    </div>
+    <div class="biz-kpi-card">
+      <div class="biz-kpi-label">Best Strategy</div>
+      <div class="biz-kpi-val accent" id="j-best-strat">—</div>
+      <div class="biz-kpi-sub">by win rate</div>
+    </div>
+    <div class="biz-kpi-card">
+      <div class="biz-kpi-label">Worst Emotion</div>
+      <div class="biz-kpi-val red" id="j-worst-emo">—</div>
+      <div class="biz-kpi-sub">by avg P&L</div>
+    </div>
+  </div>
+
+  <!-- Trade History Table -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="ci">📋</span> Trade History
+      <span style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
+        <select id="j-filter-strat" onchange="jRenderTable()" style="font-size:11px;padding:.2rem .5rem;width:auto">
+          <option value="">All Strategies</option>
+          <option value="MA">MA</option><option value="EMA">EMA</option>
+          <option value="Swing">Swing</option><option value="MTF">MTF</option>
+          <option value="SR">SR</option><option value="Gold">Gold</option>
+        </select>
+        <select id="j-filter-result" onchange="jRenderTable()" style="font-size:11px;padding:.2rem .5rem;width:auto">
+          <option value="">All Results</option>
+          <option value="WIN">Wins</option>
+          <option value="LOSS">Losses</option>
+        </select>
+        <button class="btn btn-secondary" style="font-size:11px;padding:.25rem .6rem" onclick="jExportCSV()">⬇ CSV</button>
+      </span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="biz-table" id="j-table">
+        <thead><tr>
+          <th>Date</th><th>Code</th><th>Dir</th><th>Strategy</th><th>TF</th>
+          <th>Entry</th><th>Exit</th><th>Units</th><th>P&L (RM)</th><th>P&L %</th>
+          <th>R:R Act</th><th>Score</th><th>Emotion</th><th>Notes</th><th>Del</th>
+        </tr></thead>
+        <tbody id="j-tbody">
+          <tr><td colspan="15" style="text-align:center;color:var(--dim);padding:2rem">No trades logged yet. Add your first trade above.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: CAPITAL MANAGER
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-capital">
+  <div class="biz-hero capital-hero">
+    <div class="biz-hero-icon">💰</div>
+    <div>
+      <div class="biz-hero-title">Capital Manager</div>
+      <div class="biz-hero-sub">Separate trading capital from retirement capital · Never trade your retirement money</div>
+    </div>
+  </div>
+
+  <div class="biz-two-col">
+    <!-- Trading Capital -->
+    <div class="card">
+      <div class="card-hdr" style="color:var(--accent);border-color:rgba(0,200,240,.2);background:rgba(0,200,240,.04)">
+        <span class="ci">⚡</span> Trading Capital — Active
+      </div>
+      <div class="card-body">
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Dedicated Trading Capital (RM)</label><input type="number" id="cap-trade" placeholder="150000" oninput="capCalc()"/></div>
+          <div class="fld"><label>Risk Per Trade (%)</label><input type="number" id="cap-risk-pct" placeholder="1" step="0.1" oninput="capCalc()"/></div>
+          <div class="fld"><label>Current Month P&L (RM)</label><input type="number" id="cap-month-pnl" placeholder="0" oninput="capCalc()"/></div>
+          <div class="fld"><label>Current Drawdown (RM)</label><input type="number" id="cap-dd" placeholder="0" oninput="capCalc()"/></div>
+        </div>
+        <div id="cap-trade-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Retirement Capital -->
+    <div class="card">
+      <div class="card-hdr" style="color:var(--gold);border-color:rgba(255,215,0,.2);background:rgba(255,215,0,.04)">
+        <span style="color:var(--gold)">🏦</span> Retirement Capital — Protected
+      </div>
+      <div class="card-body">
+        <div class="sec-label">Precious Metals</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Physical Gold (grams)</label><input type="number" id="cap-gold-g" placeholder="898" oninput="capCalc()"/></div>
+          <div class="fld"><label>Gold Price (RM/gram)</label><input type="number" id="cap-gold-p" placeholder="683" oninput="capCalc()"/></div>
+          <div class="fld"><label>GOLDETF Units</label><input type="number" id="cap-goldetf-u" placeholder="16400" oninput="capCalc()"/></div>
+          <div class="fld"><label>GOLDETF Price (RM)</label><input type="number" id="cap-goldetf-p" placeholder="5.41" step="0.01" oninput="capCalc()"/></div>
+        </div>
+        <div class="sec-label">Equities &amp; Cash</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>FSM Units</label><input type="number" id="cap-fsm-u" placeholder="2230" oninput="capCalc()"/></div>
+          <div class="fld"><label>FSM Price (USD)</label><input type="number" id="cap-fsm-p" placeholder="9.52" step="0.01" oninput="capCalc()"/></div>
+          <div class="fld"><label>USD/MYR Rate</label><input type="number" id="cap-usdmyr" placeholder="4.42" step="0.01" oninput="capCalc()"/></div>
+          <div class="fld"><label>Cash Reserve (USD)</label><input type="number" id="cap-cash-usd" placeholder="22950" oninput="capCalc()"/></div>
+        </div>
+        <div class="sec-label">EPF &amp; Other</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>EPF Balance (RM)</label><input type="number" id="cap-epf" placeholder="0" oninput="capCalc()"/></div>
+          <div class="fld"><label>Property Value (RM)</label><input type="number" id="cap-property" placeholder="0" oninput="capCalc()"/></div>
+          <div class="fld"><label>Property Loan (RM)</label><input type="number" id="cap-loan" placeholder="0" oninput="capCalc()"/></div>
+          <div class="fld"><label>Other Assets (RM)</label><input type="number" id="cap-other" placeholder="0" oninput="capCalc()"/></div>
+        </div>
+        <div id="cap-retire-result" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portfolio Concentration -->
+  <div class="card" id="cap-concentration-card" style="display:none">
+    <div class="card-hdr"><span class="ci">📊</span> Portfolio Concentration &amp; Rebalancing Alert</div>
+    <div class="card-body" id="cap-concentration-body"></div>
+  </div>
+
+  <!-- Combined Net Worth -->
+  <div class="card" id="cap-networth-card" style="display:none">
+    <div class="card-hdr"><span class="ci">🧾</span> Total Net Worth Summary</div>
+    <div class="card-body" id="cap-networth-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: P&L DASHBOARD
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-pnl">
+  <div class="biz-hero pnl-hero">
+    <div class="biz-hero-icon">📈</div>
+    <div>
+      <div class="biz-hero-title">P&L Dashboard</div>
+      <div class="biz-hero-sub">6-month performance tracker · Builds Stage 1 exit evidence · Auto-sourced from Journal</div>
+    </div>
+    <div class="biz-hero-stat">
+      <div class="biz-stat-box"><div class="biz-stat-val green" id="pnl-6mo">RM 0</div><div class="biz-stat-lbl">6-Month P&L</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="pnl-monthly-avg">RM 0</div><div class="biz-stat-lbl">Monthly Avg</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="pnl-pos-months">0/6</div><div class="biz-stat-lbl">Positive Months</div></div>
+    </div>
+  </div>
+
+  <!-- Monthly Chart -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">📊</span> Monthly P&L — Auto from Journal
+      <span style="margin-left:auto;font-size:11px;color:var(--dim)">Trailing 12 months</span>
+    </div>
+    <div class="card-body">
+      <canvas id="pnl-chart" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Monthly Breakdown Table -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">📅</span> Monthly Breakdown</div>
+    <div style="overflow-x:auto">
+      <table class="biz-table" id="pnl-monthly-table">
+        <thead><tr>
+          <th>Month</th><th>Trades</th><th>Wins</th><th>Losses</th><th>Win%</th>
+          <th>Gross Profit</th><th>Gross Loss</th><th>Net P&L</th><th>Cumulative</th><th>Stage 1</th>
+        </tr></thead>
+        <tbody id="pnl-monthly-tbody">
+          <tr><td colspan="10" style="text-align:center;color:var(--dim);padding:2rem">Log trades in Journal to see monthly breakdown.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Strategy Breakdown -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">🎯</span> Strategy Performance</div>
+    <div class="card-body">
+      <div style="overflow-x:auto">
+        <table class="biz-table" id="pnl-strat-table">
+          <thead><tr><th>Strategy</th><th>Trades</th><th>Win%</th><th>Avg Win</th><th>Avg Loss</th><th>Net P&L</th><th>Expectancy</th><th>Rating</th></tr></thead>
+          <tbody id="pnl-strat-tbody">
+            <tr><td colspan="8" style="text-align:center;color:var(--dim);padding:1.5rem">No data yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 1 Evidence Card -->
+  <div class="card" id="pnl-stage1-card">
+    <div class="card-hdr" style="color:var(--green);background:rgba(0,232,122,.04);border-color:rgba(0,232,122,.2)">
+      <span style="color:var(--green)">🎯</span> Stage 1 Exit Gate — 6-Month Evidence
+    </div>
+    <div class="card-body" id="pnl-stage1-body">
+      <div style="color:var(--dim);font-size:13px">Log at least 6 months of trades to generate exit evidence report.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: RETIREMENT RUNWAY
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-runway">
+  <div class="biz-hero runway-hero">
+    <div class="biz-hero-icon">🏁</div>
+    <div>
+      <div class="biz-hero-title">Retirement Runway</div>
+      <div class="biz-hero-sub">How long your assets last · EPF bridge planner · Inflation-adjusted projection</div>
+    </div>
+    <div class="biz-hero-stat">
+      <div class="biz-stat-box"><div class="biz-stat-val" id="rwy-total-rm">RM —</div><div class="biz-stat-lbl">Net Worth</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="rwy-depletes-age">Age —</div><div class="biz-stat-lbl">Assets Deplete</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="rwy-safe-amount">RM —</div><div class="biz-stat-lbl">Safe Nest Egg</div></div>
+    </div>
+  </div>
+
+  <div class="biz-two-col">
+    <div class="card">
+      <div class="card-hdr"><span class="ci">🧮</span> Inputs</div>
+      <div class="card-body">
+        <div class="sec-label">Your Profile</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Current Age</label><input type="number" id="rwy-age" value="46" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>Target Retirement Age</label><input type="number" id="rwy-ret-age" value="55" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>Life Expectancy</label><input type="number" id="rwy-life" value="80" oninput="rwyCalc()"/></div>
+        </div>
+        <div class="sec-label">Net Worth (RM)</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Physical Gold (RM)</label><input type="number" id="rwy-gold" placeholder="614000" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>GOLDETF (RM)</label><input type="number" id="rwy-goldetf" placeholder="88724" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>FSM / Other Stocks (RM)</label><input type="number" id="rwy-stocks" placeholder="93726" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>Cash (RM)</label><input type="number" id="rwy-cash" placeholder="101000" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>EPF Balance (RM)</label><input type="number" id="rwy-epf" placeholder="0" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>Property Equity (RM)</label><input type="number" id="rwy-prop" placeholder="0" oninput="rwyCalc()"/></div>
+        </div>
+        <div class="sec-label">Monthly Cashflows (RM)</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Monthly Expenses (RM)</label><input type="number" id="rwy-exp" value="5000" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>Trading Income (RM/mo)</label><input type="number" id="rwy-trade-inc" placeholder="0" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>Other Passive Income</label><input type="number" id="rwy-passive" placeholder="0" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>Salary (while employed)</label><input type="number" id="rwy-salary" placeholder="0" oninput="rwyCalc()"/></div>
+        </div>
+        <div class="sec-label">Assumptions</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Inflation Rate (%)</label><input type="number" id="rwy-infl" value="4" step="0.5" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>Asset Growth Rate (%)</label><input type="number" id="rwy-growth" value="5" step="0.5" oninput="rwyCalc()"/></div>
+          <div class="fld"><label>EPF Monthly from Age 60 (RM)</label><input type="number" id="rwy-epf-mo" placeholder="0" oninput="rwyCalc()"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <!-- Runway Summary -->
+      <div class="card" id="rwy-summary-card" style="display:none">
+        <div class="card-hdr"><span class="ci">📊</span> Runway Summary</div>
+        <div class="card-body" id="rwy-summary-body"></div>
+      </div>
+      <!-- EPF Bridge -->
+      <div class="card" id="rwy-epf-card" style="display:none">
+        <div class="card-hdr"><span class="ci">🌉</span> EPF Bridge Plan</div>
+        <div class="card-body" id="rwy-epf-body"></div>
+      </div>
+      <!-- Action Plan -->
+      <div class="card" id="rwy-action-card" style="display:none">
+        <div class="card-hdr" style="color:var(--green);background:rgba(0,232,122,.04);border-color:rgba(0,232,122,.2)"><span style="color:var(--green)">✅</span> Action Plan to Reach Safe Runway</div>
+        <div class="card-body" id="rwy-action-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Projection Table -->
+  <div class="card" id="rwy-proj-card" style="display:none">
+    <div class="card-hdr"><span class="ci">📅</span> Year-by-Year Projection</div>
+    <div style="overflow-x:auto">
+      <table class="biz-table">
+        <thead><tr><th>Age</th><th>Year</th><th>Assets (RM)</th><th>Annual Income</th><th>Annual Spend</th><th>Net Flow</th><th>Status</th></tr></thead>
+        <tbody id="rwy-proj-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: POSITION SIZER
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-sizer">
+  <div class="biz-hero sizer-hero">
+    <div class="biz-hero-icon">🎯</div>
+    <div>
+      <div class="biz-hero-title">Position Sizer</div>
+      <div class="biz-hero-sub">Risk-first position sizing · ATR-based stops · R:R calculator · Never oversize again</div>
+    </div>
+  </div>
+
+  <div class="biz-two-col">
+    <div class="card">
+      <div class="card-hdr"><span class="ci">🔢</span> Size Your Trade</div>
+      <div class="card-body">
+        <div class="sec-label">Account Settings</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Account Size (RM)</label><input type="number" id="sz-acct" placeholder="150000" oninput="szCalc()"/></div>
+          <div class="fld"><label>Max Risk Per Trade (%)</label><input type="number" id="sz-risk-pct" value="1" step="0.1" oninput="szCalc()"/></div>
+          <div class="fld"><label>Max Capital Per Trade (%)</label><input type="number" id="sz-max-pct" value="20" step="1" oninput="szCalc()"/></div>
+        </div>
+        <div class="sec-label">Trade Setup</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Entry Price (RM)</label><input type="number" id="sz-entry" step="0.0001" placeholder="2.170" oninput="szCalc()"/></div>
+          <div class="fld"><label>Stop Loss (RM)</label><input type="number" id="sz-sl" step="0.0001" placeholder="2.110" oninput="szCalc()"/></div>
+          <div class="fld"><label>Target 1 (RM)</label><input type="number" id="sz-tp1" step="0.0001" placeholder="2.350" oninput="szCalc()"/></div>
+          <div class="fld"><label>Target 2 (RM)</label><input type="number" id="sz-tp2" step="0.0001" placeholder="2.500" oninput="szCalc()"/></div>
+          <div class="fld"><label>ATR Value</label><input type="number" id="sz-atr" step="0.0001" placeholder="0.088" oninput="szCalc()"/></div>
+          <div class="fld"><label>ATR Multiplier (SL)</label><input type="number" id="sz-atr-mult" value="1.5" step="0.1" oninput="szCalc()"/></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="szCalc()">CALCULATE ▶</button>
+          <button class="btn btn-secondary" onclick="szReset()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="sz-result-card" style="display:none">
+      <div class="card-hdr"><span class="ci">📐</span> Sizing Result</div>
+      <div class="card-body" id="sz-result-body"></div>
+    </div>
+  </div>
+
+  <!-- ATR Stop Reference -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">📏</span> ATR Stop Distance Reference</div>
+    <div class="card-body">
+      <div style="font-size:13px;color:var(--dim);margin-bottom:.75rem">Based on current ATR input. Use as a guide for setting logical stops relative to recent volatility.</div>
+      <div id="sz-atr-ref" style="display:none"></div>
+      <div id="sz-atr-ref-empty" style="color:var(--dim);font-size:13px">Enter Entry Price and ATR to see stop reference table.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: STAGE GATES
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-gates">
+  <div class="biz-hero gates-hero">
+    <div class="biz-hero-icon">✅</div>
+    <div>
+      <div class="biz-hero-title">Exit Readiness Gates</div>
+      <div class="biz-hero-sub">Objective criteria · Removes emotion from the biggest decision of your career</div>
+    </div>
+    <div class="biz-hero-stat">
+      <div class="biz-stat-box"><div class="biz-stat-val" id="gate-s1-pct">0%</div><div class="biz-stat-lbl">Stage 1</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="gate-s2-pct">0%</div><div class="biz-stat-lbl">Stage 2</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="gate-s3-pct">0%</div><div class="biz-stat-lbl">Stage 3</div></div>
+    </div>
+  </div>
+
+  <!-- Stage 1 -->
+  <div class="card">
+    <div class="card-hdr" style="background:rgba(0,200,240,.04);border-color:rgba(0,200,240,.2)">
+      <span class="ci">📋</span> Stage 1 — Build Evidence (Now → Dec)
+      <span class="biz-gate-badge" id="gate-s1-badge">NOT STARTED</span>
+    </div>
+    <div class="card-body">
+      <div class="biz-gate-grid" id="gate-s1-grid"></div>
+      <div class="biz-gate-override-note">Auto-populated from Journal &amp; Capital tabs where possible. Manual items below.</div>
+      <div id="gate-s1-manual"></div>
+    </div>
+  </div>
+
+  <!-- Stage 2 -->
+  <div class="card">
+    <div class="card-hdr" style="background:rgba(245,200,66,.04);border-color:rgba(245,200,66,.2)">
+      <span style="color:var(--yellow)">🚪</span> Stage 2 — Gate (Mid)
+      <span class="biz-gate-badge yellow" id="gate-s2-badge">LOCKED</span>
+    </div>
+    <div class="card-body">
+      <div class="biz-gate-grid" id="gate-s2-grid"></div>
+      <div id="gate-s2-manual"></div>
+    </div>
+  </div>
+
+  <!-- Stage 3 -->
+  <div class="card">
+    <div class="card-hdr" style="background:rgba(0,232,122,.04);border-color:rgba(0,232,122,.2)">
+      <span style="color:var(--green)">🏆</span> Stage 3 — Business Sustainability
+      <span class="biz-gate-badge green" id="gate-s3-badge">LOCKED</span>
+    </div>
+    <div class="card-body">
+      <div class="biz-gate-grid" id="gate-s3-grid"></div>
+      <div id="gate-s3-manual"></div>
+    </div>
+  </div>
+
+  <!-- Estimated Ready Date -->
+  <div class="card" id="gate-eta-card">
+    <div class="card-hdr"><span class="ci">📅</span> Estimated Readiness</div>
+    <div class="card-body" id="gate-eta-body">
+      <div style="color:var(--dim);font-size:13px">Fill in Capital, Journal and manual gate items to calculate your estimated ready date.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: INCOME STREAMS
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-income">
+  <div class="biz-hero income-hero">
+    <div class="biz-hero-icon">💼</div>
+    <div>
+      <div class="biz-hero-title">Income Streams</div>
+      <div class="biz-hero-sub">Track all income sources · Target: 3 streams each covering 40% of expenses · Reduce single-stream dependency</div>
+    </div>
+    <div class="biz-hero-stat">
+      <div class="biz-stat-box"><div class="biz-stat-val green" id="inc-total-mo">RM 0</div><div class="biz-stat-lbl">This Month</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="inc-avg-mo">RM 0</div><div class="biz-stat-lbl">12mo Average</div></div>
+      <div class="biz-stat-box"><div class="biz-stat-val" id="inc-streams-active">0</div><div class="biz-stat-lbl">Active Streams</div></div>
+    </div>
+  </div>
+
+  <!-- Monthly Expenses Target -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">🎯</span> Monthly Targets</div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fld"><label>Monthly Expenses (RM)</label><input type="number" id="inc-exp" placeholder="5000" oninput="incCalc()"/></div>
+        <div class="fld"><label>Safety Multiplier</label><input type="number" id="inc-mult" value="1.3" step="0.1" oninput="incCalc()"/></div>
+        <div class="fld"><label>Target Income (RM) — auto</label><input type="number" id="inc-target" readonly style="color:var(--accent);background:rgba(0,200,240,.05)"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stream Management -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">➕</span> Income Streams</div>
+    <div class="card-body">
+      <div id="inc-streams-list"></div>
+      <div class="form-actions" style="margin-top:.75rem">
+        <button class="btn btn-primary" onclick="incAddStream()">+ Add Stream</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Log -->
+  <div class="card">
+    <div class="card-hdr">
+      <span class="ci">📅</span> Monthly Income Log
+      <span style="margin-left:auto">
+        <select id="inc-log-month" onchange="incRenderLog()" style="font-size:11px;padding:.2rem .5rem;width:auto">
+        </select>
+      </span>
+    </div>
+    <div class="card-body" id="inc-log-body">
+      <div style="color:var(--dim);font-size:13px">Add income streams first, then log monthly amounts.</div>
+    </div>
+  </div>
+
+  <!-- Dependency Chart -->
+  <div class="card">
+    <div class="card-hdr"><span class="ci">🍩</span> Stream Dependency — 12 Month Average</div>
+    <div class="card-body">
+      <canvas id="inc-chart" height="200"></canvas>
+      <div id="inc-dependency-warn" style="margin-top:.75rem;display:none"></div>
+    </div>
+  </div>
+
+  <!-- TradeMatrix as Product -->
+  <div class="card">
+    <div class="card-hdr" style="color:var(--accent);background:rgba(0,200,240,.04);border-color:rgba(0,200,240,.2)">
+      <span class="ci">🚀</span> TradeMatrix as a Product — Future Income Stream
+    </div>
+    <div class="card-body">
+      <div class="biz-product-grid">
+        <div class="biz-product-card">
+          <div class="biz-product-icon">💳</div>
+          <div class="biz-product-title">SaaS Subscription</div>
+          <div class="biz-product-desc">RM 29–49/month per user. 100 users = RM 3,500–5,000/month passive income.</div>
+          <div class="biz-product-action">Requires Spring Boot migration + multi-user auth</div>
+        </div>
+        <div class="biz-product-card">
+          <div class="biz-product-icon">📢</div>
+          <div class="biz-product-title">Signal Channel</div>
+          <div class="biz-product-desc">Paid Telegram/WhatsApp signals channel. Your screened setups sent daily.</div>
+          <div class="biz-product-action">Start with 50 subscribers at RM 50/month = RM 2,500/month</div>
+        </div>
+        <div class="biz-product-card">
+          <div class="biz-product-icon">🎓</div>
+          <div class="biz-product-title">1-on-1 Coaching</div>
+          <div class="biz-product-desc">IT + trading expertise combination is rare. RM 200–500/hour.</div>
+          <div class="biz-product-action">4 sessions/month = RM 800–2,000 part-time</div>
+        </div>
+        <div class="biz-product-card">
+          <div class="biz-product-icon">🏢</div>
+          <div class="biz-product-title">Enterprise Licence</div>
+          <div class="biz-product-desc">Sell to remisiers, trading firms, fund managers. Spring Boot backend required.</div>
+          <div class="biz-product-action">RM 500–2,000/month per firm · High barrier · High reward</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="tradematrix-business.js"></script>
+
 </body>
 </html>
