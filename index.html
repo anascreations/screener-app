@@ -100,6 +100,7 @@
   <button class="tab-btn sizer-tab" data-tab="sizer" onclick="switchTab('sizer')">🎯 Sizer</button>
   <button class="tab-btn gates-tab" data-tab="gates" onclick="switchTab('gates')">✅ Gates</button>
   <button class="tab-btn income-tab" data-tab="income" onclick="switchTab('income')">💼 Income</button>
+  <button class="tab-btn moomoo-tab" data-tab="moomoo" onclick="switchTab('moomoo')">📱 Moomoo Fix</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -3983,6 +3984,365 @@
 </div>
 
 <script src="tradematrix-business.js"></script>
+
+<!-- ══════════════════════════════════════════════════════
+     PANEL: MOOMOO MALAYSIA — SETUP GUIDE & VALUE DERIVER
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-moomoo">
+
+  <!-- Hero -->
+  <div class="biz-hero moomoo-hero">
+    <div class="biz-hero-icon">📱</div>
+    <div>
+      <div class="biz-hero-title">Moomoo Malaysia — Fix Missing Values</div>
+      <div class="biz-hero-sub">Chart setup guide · Value deriver · Dual-screenshot OCR · Alternative source map</div>
+    </div>
+  </div>
+
+  <!-- Sub-tab nav -->
+  <div class="mm-tabs">
+    <button class="mm-tab active" onclick="mmSwitch('setup',this)">🔧 Chart Setup</button>
+    <button class="mm-tab" onclick="mmSwitch('derive',this)">🧮 Value Deriver</button>
+    <button class="mm-tab" onclick="mmSwitch('ocr',this)">📷 Dual OCR</button>
+    <button class="mm-tab" onclick="mmSwitch('map',this)">🗺️ Source Map</button>
+  </div>
+
+  <!-- ── SUB: Chart Setup Guide ── -->
+  <div class="mm-panel active" id="mm-setup">
+
+    <div class="card">
+      <div class="card-hdr"><span class="ci">🎯</span> Why Values Go Missing — Root Causes</div>
+      <div class="card-body">
+        <div class="mm-cause-grid">
+          <div class="mm-cause"><span class="mm-cause-icon red">❌</span><div><strong>Indicator not added</strong><br><span class="mm-cause-desc">ATR, DMI, KDJ not on chart by default. Must be added manually.</span></div></div>
+          <div class="mm-cause"><span class="mm-cause-icon yellow">⚠️</span><div><strong>Wrong parameter period</strong><br><span class="mm-cause-desc">MA period mismatch — Moomoo default MA10 vs TradeMatrix needs MA5/20/50/200.</span></div></div>
+          <div class="mm-cause"><span class="mm-cause-icon yellow">⚠️</span><div><strong>Value off-screen</strong><br><span class="mm-cause-desc">Volume Ratio is in stock INFO page, not chart. OCR misses it from chart-only screenshot.</span></div></div>
+          <div class="mm-cause"><span class="mm-cause-icon red">❌</span><div><strong>Annotation text blocking</strong><br><span class="mm-cause-desc">"THIS IS MA5, MA20…" label overlaps the value. OCR reads label, not number.</span></div></div>
+          <div class="mm-cause"><span class="mm-cause-icon yellow">⚠️</span><div><strong>Screenshot too small</strong><br><span class="mm-cause-desc">Low-DPI or compressed screenshot causes OCR digit misreads (5→S, 0→O).</span></div></div>
+          <div class="mm-cause"><span class="mm-cause-icon red">❌</span><div><strong>Indicator label cut off</strong><br><span class="mm-cause-desc">Chart zoomed too far — indicator row shows "MA5:…" but value is truncated.</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><span class="ci">📐</span> Step-by-Step Moomoo Chart Configuration</div>
+      <div class="card-body">
+
+        <div class="mm-step-list">
+
+          <div class="mm-step">
+            <div class="mm-step-num">1</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title">Set MA Indicator — correct periods</div>
+              <div class="mm-step-desc">Tap chart → Indicators (bottom bar) → <strong>MA</strong> → Settings → set periods to <strong>5, 20, 50, 200</strong>. Remove defaults (10, 30, 60 etc). Enable all 4 lines.</div>
+              <div class="mm-step-path">Chart → ⚙️ → Indicators → MA → Period 1: 5, Period 2: 20, Period 3: 50, Period 4: 200</div>
+              <div class="mm-step-values">Gives: <code>MA5 · MA20 · MA50 · MA200</code></div>
+            </div>
+          </div>
+
+          <div class="mm-step">
+            <div class="mm-step-num">2</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title">Add EMA Indicator (separate from MA)</div>
+              <div class="mm-step-desc">Tap Indicators → <strong>EMA</strong> → set periods to <strong>8, 21, 55, 200</strong>. Keep MA and EMA as separate indicators on chart.</div>
+              <div class="mm-step-path">Chart → ⚙️ → Indicators → EMA → Period 1: 8, Period 2: 21, Period 3: 55, Period 4: 200</div>
+              <div class="mm-step-values">Gives: <code>EMA8 · EMA21 · EMA55 · EMA200</code></div>
+            </div>
+          </div>
+
+          <div class="mm-step">
+            <div class="mm-step-num">3</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title">Add KDJ Indicator</div>
+              <div class="mm-step-desc">Indicators → <strong>KDJ</strong> → leave default parameters (9, 3, 3). Moomoo Malaysia supports this natively. It appears in a sub-panel below the main chart.</div>
+              <div class="mm-step-path">Chart → ⚙️ → Indicators → KDJ(9,3,3)</div>
+              <div class="mm-step-values">Gives: <code>K · D · J</code></div>
+            </div>
+          </div>
+
+          <div class="mm-step">
+            <div class="mm-step-num">4</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title">Add MACD Indicator</div>
+              <div class="mm-step-desc">Indicators → <strong>MACD</strong> → parameters (12, 26, 9). Shows DIF line, DEA signal line, and histogram bars in sub-panel.</div>
+              <div class="mm-step-path">Chart → ⚙️ → Indicators → MACD(12,26,9)</div>
+              <div class="mm-step-values">Gives: <code>DIF · DEA · MACD Histogram</code></div>
+            </div>
+          </div>
+
+          <div class="mm-step">
+            <div class="mm-step-num">5</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title">Add ATR Indicator ⚠️ Missing most often</div>
+              <div class="mm-step-desc">Indicators → scroll down → <strong>ATR</strong> → period <strong>1</strong> (Moomoo uses ATR1 by default). This is the most commonly missed indicator. Without it, the Value Deriver tab can calculate it from OHLC.</div>
+              <div class="mm-step-path">Chart → ⚙️ → Indicators → ATR → Period: 1</div>
+              <div class="mm-step-values">Gives: <code>ATR1</code></div>
+            </div>
+          </div>
+
+          <div class="mm-step">
+            <div class="mm-step-num">6</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title">Add DMI / ADX Indicator ⚠️ Missing most often</div>
+              <div class="mm-step-desc">Indicators → <strong>DMI</strong> → parameters (14, 6). Shows PDI (+DI), MDI (−DI), ADX and ADXR lines. Tap the indicator row to see current values.</div>
+              <div class="mm-step-path">Chart → ⚙️ → Indicators → DMI(14,6)</div>
+              <div class="mm-step-values">Gives: <code>PDI · MDI · ADX · ADXR</code></div>
+            </div>
+          </div>
+
+          <div class="mm-step">
+            <div class="mm-step-num">7</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title">Add RSI Indicator</div>
+              <div class="mm-step-desc">Indicators → <strong>RSI</strong> → period <strong>14</strong> (standard). Moomoo may default to RSI6 — change to 14 for alignment with TradeMatrix calculations.</div>
+              <div class="mm-step-path">Chart → ⚙️ → Indicators → RSI → Period: 14</div>
+              <div class="mm-step-values">Gives: <code>RSI14</code></div>
+            </div>
+          </div>
+
+          <div class="mm-step">
+            <div class="mm-step-num">8</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title">Add Bollinger Bands</div>
+              <div class="mm-step-desc">Indicators → <strong>BOLL</strong> → parameters (20, 2). Shows Upper, MID and Lower bands on the main chart overlay.</div>
+              <div class="mm-step-path">Chart → ⚙️ → Indicators → BOLL(20,2)</div>
+              <div class="mm-step-values">Gives: <code>BB Upper · BB Lower · MID</code></div>
+            </div>
+          </div>
+
+          <div class="mm-step mm-step-special">
+            <div class="mm-step-num" style="background:rgba(255,215,0,.2);color:var(--gold)">★</div>
+            <div class="mm-step-body">
+              <div class="mm-step-title" style="color:var(--gold)">Volume Ratio — MUST use stock info page, not chart</div>
+              <div class="mm-step-desc">Volume Ratio is <strong>not on the chart</strong>. It is only visible on the stock detail/quote page. Go to the stock page → scroll to the data grid → find "Volume Ratio" field. Screenshot the <em>entire</em> stock info page, not just the chart.</div>
+              <div class="mm-step-path">Stock page → Quote tab → scroll to data grid → "Volume Ratio: X.XX"</div>
+              <div class="mm-step-values">Gives: <code>Volume Ratio</code> — use Dual OCR tab to upload info page + chart separately</div>
+            </div>
+          </div>
+
+        </div><!-- /mm-step-list -->
+
+        <!-- Screenshot tip -->
+        <div class="mm-tip-box">
+          <div class="mm-tip-title">📸 Screenshot Best Practices</div>
+          <div class="mm-tip-grid">
+            <div class="mm-tip-item green">✅ Use full-screen screenshot — do not crop</div>
+            <div class="mm-tip-item green">✅ Ensure indicator labels fully visible (scroll chart slightly left)</div>
+            <div class="mm-tip-item green">✅ Use portrait mode — wider indicator label area</div>
+            <div class="mm-tip-item green">✅ Tap the latest candle so all indicator values update to current bar</div>
+            <div class="mm-tip-item red">❌ Do not zoom in — this cuts off indicator rows</div>
+            <div class="mm-tip-item red">❌ Do not use dark theme + low brightness — OCR accuracy drops</div>
+            <div class="mm-tip-item red">❌ Do not screenshot mid-scroll — values may be from wrong candle</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /mm-setup -->
+
+  <!-- ── SUB: Value Deriver ── -->
+  <div class="mm-panel" id="mm-derive">
+
+    <div class="card">
+      <div class="card-hdr"><span class="ci">📏</span> ATR Calculator — from OHLC (when ATR not visible)</div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--dim);margin-bottom:.85rem">
+          ATR (Average True Range) = average of True Range over N periods. True Range = max(High−Low, |High−PrevClose|, |Low−PrevClose|). Enter the last 5–14 candles to calculate.
+        </div>
+        <div id="mm-atr-rows"></div>
+        <div class="form-actions" style="margin-top:.75rem">
+          <button class="btn btn-primary" onclick="mmCalcATR()">CALCULATE ATR ▶</button>
+          <button class="btn btn-secondary" onclick="mmAddATRRow()">+ Add Candle</button>
+          <button class="btn btn-secondary" onclick="mmResetATR()">Reset</button>
+        </div>
+        <div id="mm-atr-result" style="display:none;margin-top:.85rem"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><span class="ci">📊</span> MA Calculator — from Close Prices (when MA not shown)</div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--dim);margin-bottom:.85rem">
+          Enter recent closing prices (newest first). MA5 needs 5, MA20 needs 20 etc. Paste from Moomoo price history.
+        </div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>MA Period</label>
+            <select id="mm-ma-period">
+              <option value="5">MA5</option>
+              <option value="20">MA20</option>
+              <option value="50">MA50</option>
+              <option value="200">MA200</option>
+            </select>
+          </div>
+          <div class="fld" style="grid-column:span 3">
+            <label>Close Prices — comma separated, newest first (e.g. 2.170, 2.150, 2.130…)</label>
+            <input type="text" id="mm-ma-prices" placeholder="2.170, 2.150, 2.130, 2.120, 2.100"/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="mmCalcMA()">CALCULATE MA ▶</button>
+        </div>
+        <div id="mm-ma-result" style="display:none;margin-top:.75rem"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><span class="ci">🎚️</span> RSI Calculator — from Close Prices</div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--dim);margin-bottom:.85rem">
+          Needs at least 15 closing prices for RSI14. Enter newest first.</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>RSI Period</label><input type="number" id="mm-rsi-period" value="14" min="2" max="50"/></div>
+          <div class="fld" style="grid-column:span 3">
+            <label>Close Prices — comma separated, newest first</label>
+            <input type="text" id="mm-rsi-prices" placeholder="2.170, 2.150, 2.130, 2.120…"/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="mmCalcRSI()">CALCULATE RSI ▶</button>
+        </div>
+        <div id="mm-rsi-result" style="display:none;margin-top:.75rem"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><span class="ci">🔢</span> Volume Ratio Estimator — from Volume Data</div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--dim);margin-bottom:.85rem">
+          Volume Ratio = Today's Volume ÷ Average Volume (20-day). Enter from Moomoo's volume panel.</div>
+        <div class="fg" style="margin-bottom:.75rem">
+          <div class="fld"><label>Today's Volume</label><input type="number" id="mm-vol-today" placeholder="1070000"/></div>
+          <div class="fld"><label>Avg Daily Volume (20d) <span class="opt-tag">OPT</span></label><input type="number" id="mm-vol-avg" placeholder="leave blank = auto from history"/></div>
+          <div class="fld" style="grid-column:span 2">
+            <label>Last 20 Volume readings — comma separated (if no avg)</label>
+            <input type="text" id="mm-vol-hist" placeholder="1070000, 850000, 920000…"/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="mmCalcVolRatio()">CALCULATE VOL RATIO ▶</button>
+        </div>
+        <div id="mm-vol-result" style="display:none;margin-top:.75rem"></div>
+      </div>
+    </div>
+
+  </div><!-- /mm-derive -->
+
+  <!-- ── SUB: Dual OCR ── -->
+  <div class="mm-panel" id="mm-ocr">
+    <div class="card">
+      <div class="card-hdr"><span class="ci">📷</span> Dual Screenshot OCR — Stock Info + Chart</div>
+      <div class="card-body">
+        <div class="advice-box yellow" style="margin-bottom:.85rem;font-size:13px">
+          💡 <strong>Why two screenshots?</strong> Volume Ratio and stock stats (Open, Prev Close, 52wk High/Low, Beta) live on the stock INFO page. Chart indicators (MA, KDJ, MACD, DMI, ATR) live on the CHART page. One screenshot alone misses half the values.
+        </div>
+
+        <div class="mm-dual-row">
+          <div class="mm-dual-box">
+            <div class="mm-dual-title">📄 Screenshot 1 — Stock Info Page</div>
+            <div class="mm-dual-desc">The quote/detail page showing price, Volume Ratio, Open, High, Low, Prev Close, 52wk data, Beta, P/E etc.</div>
+            <div class="mm-dual-drop" id="mm-drop-info" onclick="$b('mm-file-info').click()"
+              ondragover="event.preventDefault()" ondrop="mmFileDrop(event,'info')">
+              <div class="mm-drop-icon">📊</div>
+              <div>Tap to upload Stock Info screenshot</div>
+              <div style="font-size:11px;color:var(--dim)">Moomoo stock quote page</div>
+            </div>
+            <div class="mm-dual-preview" id="mm-prev-info" style="display:none">
+              <img id="mm-thumb-info" src="" style="max-width:100%;border-radius:6px"/>
+              <button class="btn btn-secondary" style="font-size:11px;margin-top:.4rem" onclick="mmClearDual('info')">Clear</button>
+            </div>
+            <input type="file" id="mm-file-info" accept="image/*" style="display:none" onchange="mmDualSelected('info',this)"/>
+          </div>
+
+          <div class="mm-dual-box">
+            <div class="mm-dual-title">📈 Screenshot 2 — Chart Page</div>
+            <div class="mm-dual-desc">The chart page showing MA, EMA, KDJ, MACD, RSI, ATR, DMI, Bollinger indicator values.</div>
+            <div class="mm-dual-drop" id="mm-drop-chart" onclick="$b('mm-file-chart').click()"
+              ondragover="event.preventDefault()" ondrop="mmFileDrop(event,'chart')">
+              <div class="mm-drop-icon">📉</div>
+              <div>Tap to upload Chart screenshot</div>
+              <div style="font-size:11px;color:var(--dim)">Moomoo chart with indicators</div>
+            </div>
+            <div class="mm-dual-preview" id="mm-prev-chart" style="display:none">
+              <img id="mm-thumb-chart" src="" style="max-width:100%;border-radius:6px"/>
+              <button class="btn btn-secondary" style="font-size:11px;margin-top:.4rem" onclick="mmClearDual('chart')">Clear</button>
+            </div>
+            <input type="file" id="mm-file-chart" accept="image/*" style="display:none" onchange="mmDualSelected('chart',this)"/>
+          </div>
+        </div>
+
+        <div style="margin-top:.85rem">
+          <div class="sec-label">Send to Tab</div>
+          <div class="fg" style="margin-bottom:.75rem">
+            <div class="fld">
+              <label>Fill values into which tab?</label>
+              <select id="mm-dual-target">
+                <option value="ma">∿ MA</option>
+                <option value="ema">≋ EMA</option>
+                <option value="gold">◈ XAUUSD</option>
+                <option value="bu">🇲🇾 ETF</option>
+                <option value="sw">🔄 Swing</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="mmDualExtract()">⚡ Extract Both &amp; Fill ▶</button>
+            <button class="btn btn-secondary" onclick="mmClearDual('info');mmClearDual('chart')">Clear All</button>
+          </div>
+          <div id="mm-dual-status" style="display:none;margin-top:.65rem"></div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /mm-ocr -->
+
+  <!-- ── SUB: Source Map ── -->
+  <div class="mm-panel" id="mm-map">
+    <div class="card">
+      <div class="card-hdr"><span class="ci">🗺️</span> Where to Find Every Value in Moomoo Malaysia</div>
+      <div class="card-body">
+        <div style="overflow-x:auto">
+          <table class="biz-table">
+            <thead><tr>
+              <th>TradeMatrix Field</th>
+              <th>Moomoo Location</th>
+              <th>Page / Tab</th>
+              <th>How to Get It</th>
+              <th>If Missing</th>
+            </tr></thead>
+            <tbody>
+              <tr><td><strong>Market Price</strong></td><td>Top of stock page — large green/red number</td><td>Quote page</td><td>Auto — always visible</td><td style="color:var(--green)">Never missing</td></tr>
+              <tr><td><strong>MA5 / MA20 / MA50 / MA200</strong></td><td>Indicator row above chart: "MA MA5:X.XX MA20:X.XX…"</td><td>Chart</td><td>Add MA indicator, set periods 5,20,50,200</td><td>Use MA Calculator in Deriver tab</td></tr>
+              <tr><td><strong>EMA8 / EMA21 / EMA55 / EMA200</strong></td><td>Indicator row: "EMA EMA8:X.XX…"</td><td>Chart</td><td>Add separate EMA indicator, set periods 8,21,55,200</td><td>Use MA Calculator (EMA mode)</td></tr>
+              <tr><td><strong>BB Upper / Lower</strong></td><td>"BOLL(2,0) MID:X UPPER:X LOWER:X" on chart</td><td>Chart</td><td>Add BOLL(20,2) indicator</td><td>Optional — skip for MA tab</td></tr>
+              <tr><td><strong>RSI</strong></td><td>Sub-panel: "RSI RSI1:XX.XXX"</td><td>Chart</td><td>Add RSI indicator, period 14</td><td>Use RSI Calculator in Deriver tab</td></tr>
+              <tr><td><strong>KDJ (K, D, J)</strong></td><td>Sub-panel: "KDJ(9,3,3) K:XX D:XX J:XX"</td><td>Chart</td><td>Add KDJ indicator, default (9,3,3)</td><td style="color:var(--yellow)">No easy manual calc — use 50/50/50 as neutral</td></tr>
+              <tr><td><strong>MACD (DIF, DEA, HIST)</strong></td><td>Sub-panel: "MACD(12,26,9) DIF:X DEA:X MACD:X"</td><td>Chart</td><td>Add MACD indicator, default (12,26,9)</td><td style="color:var(--yellow)">Optional — note: bullish if DIF > DEA</td></tr>
+              <tr><td><strong style="color:var(--gold)">Volume Ratio ★</strong></td><td>Stock data grid: "Volume Ratio: 1.72"</td><td><strong>Quote page (not chart!)</strong></td><td>Screenshot quote page separately. Use Dual OCR.</td><td>Use Vol Ratio Estimator in Deriver tab</td></tr>
+              <tr><td><strong style="color:var(--red)">ATR ★</strong></td><td>Sub-panel: "ATR ATR1:X.XXX"</td><td>Chart</td><td>Add ATR indicator, period 1</td><td>Use ATR Calculator in Deriver tab (OHLC method)</td></tr>
+              <tr><td><strong style="color:var(--red)">PDI / MDI / ADX / ADXR ★</strong></td><td>Sub-panel: "DMI(14,6) PDI:XX MDI:XX ADX:XX ADXR:XX"</td><td>Chart</td><td>Add DMI indicator, params (14,6)</td><td>Enter ADX=25 as neutral if truly unavailable</td></tr>
+              <tr><td><strong>Open</strong></td><td>Stock data grid: "Open: X.XXX"</td><td>Quote page</td><td>Screenshot quote page</td><td>Use Prev Close as approximation</td></tr>
+              <tr><td><strong>High / Low</strong></td><td>Top-right of stock page: "High: X.XXX Low: X.XXX"</td><td>Quote page</td><td>Always visible on quote page</td><td style="color:var(--green)">Always available</td></tr>
+              <tr><td><strong>Prev Close</strong></td><td>Stock data grid: "Prev Close: X.XXX"</td><td>Quote page</td><td>Screenshot quote page</td><td style="color:var(--green)">Always available</td></tr>
+              <tr><td><strong>52wk High / Low</strong></td><td>Stock data grid: "52wk High / Low"</td><td>Quote page</td><td>Screenshot quote page</td><td>Optional — skip for calculation</td></tr>
+              <tr><td><strong>Beta</strong></td><td>Stock data grid: "Beta: X.XXX"</td><td>Quote page</td><td>Screenshot quote page</td><td>Optional — informational only</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mm-tip-box" style="margin-top:.85rem">
+          <div class="mm-tip-title">★ = Most Frequently Missing — Action Required</div>
+          <div class="mm-tip-grid">
+            <div class="mm-tip-item yellow">⭐ ATR — Add ATR(1) indicator to chart NOW. It's used for stop loss and position sizing.</div>
+            <div class="mm-tip-item yellow">⭐ DMI/ADX — Add DMI(14,6) indicator. ADX confirms trend strength. Without it score is incomplete.</div>
+            <div class="mm-tip-item yellow">⭐ Volume Ratio — Always screenshot the quote PAGE not just the chart. Use Dual OCR.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /mm-map -->
+
+</div><!-- /panel-moomoo -->
+
+<script src="tradematrix-moomoo.js"></script>
 
 </body>
 </html>
