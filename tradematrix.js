@@ -5538,7 +5538,27 @@ async function tmExtractFromImage(tab) {
 // ── Regex Parser — Moomoo indicator format ─────────────
 function tmParseIndicators(text) {
 	const v = {};
-	const t = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+
+	// ── Step 1: Normalise raw OCR text ───────────────────────────
+	// Collapse newlines, fix common Tesseract digit↔letter misreads,
+	// and strip Moomoo's inline annotation strings that break patterns.
+	let t = text.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+
+	// FIX (MA5): Tesseract often reads digit "5" as letter "S" → "MAS:"
+	// Also handles spaces inserted mid-token: "MA 5", "MA 20", "MA 200"
+	t = t.replace(/\bMAS\b/g,    'MA5')
+	     .replace(/\bMA\s+5\b/g,   'MA5')
+	     .replace(/\bMA\s+20\b/g,  'MA20')
+	     .replace(/\bMA\s+50\b/g,  'MA50')
+	     .replace(/\bMA\s+200\b/g, 'MA200')
+	     .replace(/\bEMA\s+(\d+)\b/g, 'EMA$1');
+
+	// FIX (Volume Ratio): Moomoo injects "THIS IS VOLUME RATIO" annotation
+	// text between the "Volume Ratio" label and its actual number value.
+	// Strip it so the value sits directly after the label.
+	t = t.replace(/THIS\s+IS\s+VOLUME\s+RATIO/gi, '')
+	     .replace(/THIS\s+IS\s+MA[^\d]*/gi, '')
+	     .replace(/\s+/g, ' '); // re-collapse any new double-spaces
 
 	const grab = (pattern) => {
 		const m = t.match(pattern);
@@ -5547,28 +5567,42 @@ function tmParseIndicators(text) {
 		return isNaN(n) ? null : n;
 	};
 
-	// Price — look for standalone price near top (large number, 2–6 digits before decimal)
-	// Moomoo shows price as "21.550" or "0.950" prominently
-	const priceM = t.match(/^\s*[\d,]+\.?\d*\s*[↑↓]?\s*[+\-]?[\d.]+%/);
+	// ── Step 2: Price extraction ─────────────────────────────────
+	// FIX (Price): Old regex used /^\s*.../ anchor — required the price to
+	// be the very first character of OCR output. Moomoo screenshots always
+	// start with the stock code + name header (e.g. "0208 GREATEC Trading
+	// Apr 20 09:47:09") so the price was NEVER at position 0 → always null.
+	//
+	// Primary: find "2.170 +0.020 +0.93%" anywhere in the text
+	const priceM = t.match(/\b(\d[\d,]*\.\d{2,4})\s+[+\-][\d.,]+\s+[+\-][\d.]+%/);
 	if (priceM) {
-		const pn = parseFloat(priceM[0].replace(/[^\d.]/g, ''));
+		const pn = parseFloat(priceM[1].replace(/,/g,''));
 		if (!isNaN(pn) && pn > 0) v.PRICE = pn;
 	}
-	// Fallback: look for "High XX Low XX" pattern and extract nearby price
+	// Fallback A: price sitting just before "High X.XXX" in same sentence
+	if (!v.PRICE) {
+		const pm2 = t.match(/\b(\d[\d,]*\.\d{2,4})\b(?=.{0,80}High\s+[\d.]+)/i);
+		if (pm2) {
+			const pn = parseFloat(pm2[1].replace(/,/g,''));
+			if (!isNaN(pn) && pn > 0) v.PRICE = pn;
+		}
+	}
+	// Fallback B: average of day High / Low (last resort)
 	if (!v.PRICE) {
 		const hm = t.match(/High\s+([\d.,]+)/i);
 		const lm = t.match(/Low\s+([\d.,]+)/i);
 		if (hm && lm) {
-			const h = parseFloat(hm[1]), l = parseFloat(lm[1]);
-			if (!isNaN(h) && !isNaN(l)) v.PRICE = ((h + l) / 2);
+			const h = parseFloat(hm[1].replace(/,/g,'')), l = parseFloat(lm[1].replace(/,/g,''));
+			if (!isNaN(h) && !isNaN(l) && h > l) v.PRICE = +((h + l) / 2).toFixed(4);
 		}
 	}
 
 	// MA values: "MA MA5:16.484 MA20:15.523 MA50:15.450 MA200:15.119"
-	const ma5   = grab(/MA5[:\s]([\d.]+)/i);
-	const ma20  = grab(/MA20[:\s]([\d.]+)/i);
-	const ma50  = grab(/MA50[:\s]([\d.]+)/i);
-	const ma200 = grab(/MA200[:\s]([\d.]+)/i);
+	// (normalisation above already corrected MAS→MA5 misreads)
+	const ma5   = grab(/\bMA5[:\s]([\d.]+)/i);
+	const ma20  = grab(/\bMA20[:\s]([\d.]+)/i);
+	const ma50  = grab(/\bMA50[:\s]([\d.]+)/i);
+	const ma200 = grab(/\bMA200[:\s]([\d.]+)/i);
 	if (ma5)   v.MA5   = ma5;
 	if (ma20)  v.MA20  = ma20;
 	if (ma50)  v.MA50  = ma50;
@@ -5620,10 +5654,20 @@ function tmParseIndicators(text) {
 	if (dea  != null) v.DEA  = dea;
 	if (hist != null) v.HIST = hist;
 
-	// Volume: "Volume Ratio 1.57" or "VOL:25.36M" — prefer Volume Ratio
-	const volRatio = grab(/Volume\s+Ratio[:\s]*([\d.]+)/i) ||
-	                 grab(/Vol(?:ume)?\s+Ratio[:\s]*([\d.]+)/i) ||
-	                 grab(/VOL\s*Ratio[:\s]*([\d.]+)/i);
+	// Volume Ratio: after stripping "THIS IS VOLUME RATIO" annotation above,
+	// the text should now read "Volume Ratio 1.72" and match cleanly.
+	// Safety-net: also allow up to 60 non-numeric chars gap in case any
+	// other annotation text appears between the label and value.
+	const volRatio = (() => {
+		let m = t.match(/Volume\s+Ratio[:\s]*([\d.]+)/i);
+		if (m) { const n = parseFloat(m[1]); if (!isNaN(n) && n > 0 && n < 100) return n; }
+		// Safety net — allow noise between label and number
+		m = t.match(/Volume\s+Ratio[^0-9]{0,60}([\d.]+)/i);
+		if (m) { const n = parseFloat(m[1]); if (!isNaN(n) && n > 0 && n < 100) return n; }
+		m = t.match(/Vol\s*Ratio[^0-9]{0,60}([\d.]+)/i);
+		if (m) { const n = parseFloat(m[1]); if (!isNaN(n) && n > 0 && n < 100) return n; }
+		return null;
+	})();
 	if (volRatio) v.VOL_RATIO = volRatio;
 
 	// ATR: "ATR ATR1:0.753" or "ATR:0.753"
