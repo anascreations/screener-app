@@ -309,6 +309,6 @@ https://tradematrix-pro.onrender.com
 - Repo safe for public hosting
 
 ---
-
-© TradeMatrix Pro v3
+## Disclaimer
+TradeMatrix For Educational Purpose Only
    
