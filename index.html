@@ -101,7 +101,7 @@
   <button class="tab-btn gates-tab" data-tab="gates" onclick="switchTab('gates')">✅ Gates</button>
   <button class="tab-btn income-tab" data-tab="income" onclick="switchTab('income')">💼 Income</button>
   <button class="tab-btn moomoo-tab" data-tab="moomoo" onclick="switchTab('moomoo')">📱 Moomoo Fix</button>
-  <button class="tab-btn scalp-tab"  data-tab="scalp"  onclick="switchTab('scalp')">📈 Scalp Guide</button>
+  <button class="tab-btn scalp-tab" data-tab="scalp" onclick="switchTab('scalp')">📈 Scalp Guide</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -4345,1680 +4345,937 @@
 
 <div class="panel" id="panel-scalp">
 <style>
-:root {
-    --bg: #f8fafc;
-    --bg2: #ffffff;
-    --bg3: #f1f5f9;
-    --border: #e2e8f0;
-    --border2: #cbd5e1;
-    --green: #16a34a;
-    --green2: #15803d;
-    --green-dim: #dcfce7;
-    --red: #dc2626;
-    --red-dim: #fee2e2;
-    --amber: #d97706;
-    --amber-dim: #fef3c7;
-    --blue: #2563eb;
-    --blue-dim: #dbeafe;
-    --cyan: #0891b2;
-    --text: #1e293b;
-    --text-dim: #94a3b8;
-    --text-mid: #64748b;
-    --mono: 'JetBrains Mono', monospace;
-    --display: 'Inter', sans-serif;
-    --body: 'Inter', sans-serif;
-  }#panel-scalp { margin: 0; padding: 0; box-sizing: border-box; }#panel-scalp { scroll-behavior: smooth; }#panel-scalp {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--body);
-    font-size: 15px;
-    overflow-x: hidden;
-  }#panel-scalp /* Subtle dot grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
-    background-size: 28px 28px;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }#panel-scalp::after { display: none; }#panel-scalp /* ===== HEADER ===== */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border2);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }#panel-scalp .logo {
-    font-family: var(--display);
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 4px;
-    color: var(--cyan);
-  }#panel-scalp .logo span { color: var(--green); }#panel-scalp .header-meta {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    font-family: var(--mono);
-    font-size: 11px;
-  }#panel-scalp .live-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: blink 1.4s infinite;
-  }#panel-scalp .session-badge {
-    padding: 3px 10px;
-    border: 1px solid var(--green);
-    color: var(--green);
-    font-size: 10px;
-    letter-spacing: 2px;
-    font-family: var(--mono);
-  }#panel-scalp /* ===== NAV TABS ===== */
-  nav {
-    position: sticky;
-    top: 56px;
-    z-index: 99;
-    background: rgba(255,255,255,0.97);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding: 0 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }#panel-scalp nav::-webkit-scrollbar { display: none; }#panel-scalp .nav-tab {
-    padding: 14px 20px;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: block;
-  }#panel-scalp .nav-tab:hover { color: var(--blue); border-bottom-color: var(--blue); }#panel-scalp .nav-tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }#panel-scalp /* ===== MAIN ===== */
-  main {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 32px 20px 80px;
-  }#panel-scalp /* ===== SECTION ===== */
-  section {
-    margin-bottom: 56px;
-    scroll-margin-top: 120px;
-  }#panel-scalp .section-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-  }#panel-scalp .section-num {
-    font-family: var(--display);
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--cyan);
-    letter-spacing: 3px;
-    opacity: 0.6;
-  }#panel-scalp .section-title {
-    font-family: var(--display);
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--text);
-  }#panel-scalp .section-badge {
-    margin-left: auto;
-    padding: 3px 12px;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 2px;
-  }#panel-scalp /* ===== CARDS ===== */
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 20px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }#panel-scalp .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px; height: 100%;
-  }#panel-scalp .card-green::before { background: var(--green); }#panel-scalp .card-red::before { background: var(--red); }#panel-scalp .card-amber::before { background: var(--amber); }#panel-scalp .card-blue::before { background: var(--blue); }#panel-scalp .card-cyan::before { background: var(--cyan); }#panel-scalp .card:hover { border-color: var(--border2); }#panel-scalp .card-title {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 3px;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }#panel-scalp /* ===== GRID ===== */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }#panel-scalp .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+/* ── Scalp Guide — scoped to #panel-scalp ──────────────────────── */
+/* Uses tradematrix CSS vars exclusively so dark/light theme works  */
 
-  @media (max-width: 700px) {#panel-scalp .grid-2, #panel-scalp .grid-3 { grid-template-columns: 1fr; }
-  }#panel-scalp /* ===== TF PANELS ===== */
-  .tf-panel {
-    border: 1px solid var(--border2);
-    overflow: hidden;
-    margin-bottom: 16px;
-  }#panel-scalp .tf-header {
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid var(--border);
-  }#panel-scalp .tf-label {
-    font-family: var(--display);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 3px;
-  }#panel-scalp .tf-5m .tf-header { background: rgba(0,170,255,0.08); }#panel-scalp .tf-5m .tf-label { color: var(--blue); }#panel-scalp .tf-1m .tf-header { background: rgba(0,255,136,0.08); }#panel-scalp .tf-1m .tf-label { color: var(--green); }#panel-scalp .tf-body { padding: 20px; }#panel-scalp /* ===== RULE ROWS ===== */
-  .rule-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }#panel-scalp .rule-row:last-child { border-bottom: none; }#panel-scalp .rule-icon {
-    width: 28px;
-    text-align: center;
-    flex-shrink: 0;
-    font-size: 16px;
-    margin-top: 1px;
-  }#panel-scalp .rule-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--amber);
-    letter-spacing: 1px;
-    min-width: 120px;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }#panel-scalp .rule-desc { color: var(--text); line-height: 1.5; flex: 1; }#panel-scalp .rule-desc strong { color: var(--cyan); font-weight: 600; }#panel-scalp .rule-desc .yes { color: var(--green); }#panel-scalp .rule-desc .no { color: var(--red); }#panel-scalp .rule-desc .warn { color: var(--amber); }#panel-scalp /* ===== SCENARIO CARDS ===== */
-  .scenario {
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-    overflow: hidden;
-  }#panel-scalp .scenario-header {
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-  }#panel-scalp .scenario-name {
-    font-family: var(--display);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 2px;
-  }#panel-scalp .verdict {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 2px;
-    padding: 4px 14px;
-    border: 1px solid;
-  }#panel-scalp .verdict-go { color: var(--green); border-color: var(--green); background: var(--green-dim); }#panel-scalp .verdict-no { color: var(--red); border-color: var(--red); background: var(--red-dim); }#panel-scalp .verdict-wait { color: var(--amber); border-color: var(--amber); background: var(--amber-dim); }#panel-scalp .scenario-body { padding: 16px 20px; }#panel-scalp .condition-list { list-style: none; margin-bottom: 12px; }#panel-scalp .condition-list li {
-    padding: 5px 0;
-    font-size: 13px;
-    color: var(--text-mid);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }#panel-scalp .condition-list li::before {
-    content: '▸';
-    color: var(--text-dim);
-    flex-shrink: 0;
-  }#panel-scalp .condition-list li.met { color: var(--text); }#panel-scalp .condition-list li.met::before { content: '✓'; color: var(--green); }#panel-scalp .condition-list li.fail { color: var(--text-dim); }#panel-scalp .condition-list li.fail::before { content: '✗'; color: var(--red); }#panel-scalp .condition-list li.warn::before { content: '⚠'; color: var(--amber); }#panel-scalp .action-box {
-    padding: 12px 16px;
-    font-size: 13px;
-    font-family: var(--mono);
-    letter-spacing: 1px;
-    border-left: 3px solid;
-    margin-top: 10px;
-  }#panel-scalp .action-go { border-color: var(--green); background: var(--green-dim); color: #14532d; }#panel-scalp .action-no { border-color: var(--red); background: var(--red-dim); color: #7f1d1d; }#panel-scalp .action-wait { border-color: var(--amber); background: var(--amber-dim); color: #78350f; }#panel-scalp /* ===== TABLE ===== */
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    font-family: var(--body);
-  }#panel-scalp .data-table th {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-align: left;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border2);
-    background: var(--bg3);
-  }#panel-scalp .data-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    vertical-align: top;
-  }#panel-scalp .data-table tr:last-child td { border-bottom: none; }#panel-scalp .data-table tr:hover td { background: rgba(0,170,255,0.04); }#panel-scalp /* ===== CHECKLIST ===== */
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
-  }#panel-scalp .check-item:hover { border-color: var(--border2); background: rgba(0,170,255,0.03); }#panel-scalp .check-item.checked {
-    border-color: var(--green);
-    background: var(--green-dim);
-  }#panel-scalp .check-item.blocked {
-    border-color: var(--red);
-    background: var(--red-dim);
-    opacity: 0.6;
-    cursor: not-allowed;
-  }#panel-scalp .check-box {
-    width: 20px; height: 20px;
-    border: 1px solid var(--border2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    flex-shrink: 0;
-    transition: all 0.2s;
-  }#panel-scalp .check-item.checked .check-box {
-    border-color: var(--green);
-    background: var(--green);
-    color: #000;
-  }#panel-scalp .check-text { font-size: 14px; flex: 1; }#panel-scalp .check-tag {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 2px;
-    padding: 2px 8px;
-    border: 1px solid var(--border2);
-    color: var(--text-dim);
-  }#panel-scalp .check-item.checked .check-tag {
-    border-color: var(--green);
-    color: var(--green);
-  }#panel-scalp /* ===== STATS BAR ===== */
-  .stats-bar {
-    display: flex;
-    gap: 2px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 16px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 16px;
-  }#panel-scalp .stat-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }#panel-scalp .stat-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-  }#panel-scalp .stat-value {
-    font-family: var(--display);
-    font-size: 18px;
-    font-weight: 700;
-  }#panel-scalp /* ===== FLOW DIAGRAM ===== */
-  .flow-step {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin-bottom: 0;
-  }#panel-scalp .flow-box {
-    padding: 10px 16px;
-    border: 1px solid;
-    font-size: 12px;
-    font-family: var(--mono);
-    letter-spacing: 1px;
-    text-align: center;
-    flex: 1;
-  }#panel-scalp .flow-arrow {
-    font-size: 18px;
-    padding: 0 8px;
-    color: var(--text-dim);
-    flex-shrink: 0;
-  }#panel-scalp /* ===== TAGS ===== */
-  .tag {
-    display: inline-block;
-    padding: 2px 10px;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 2px;
-    border: 1px solid;
-    margin: 2px;
-  }#panel-scalp .tag-green { color: var(--green); border-color: var(--green); background: var(--green-dim); }#panel-scalp .tag-red { color: var(--red); border-color: var(--red); background: var(--red-dim); }#panel-scalp .tag-amber { color: var(--amber); border-color: var(--amber); background: var(--amber-dim); }#panel-scalp .tag-blue { color: var(--blue); border-color: var(--blue); background: var(--blue-dim); }#panel-scalp .tag-cyan { color: var(--cyan); border-color: var(--cyan); }#panel-scalp /* ===== ALERT ===== */
-  .alert {
-    padding: 14px 18px;
-    border-left: 3px solid;
-    margin-bottom: 16px;
-    font-size: 13px;
-    line-height: 1.6;
-  }#panel-scalp .alert-green { border-color: var(--green); background: var(--green-dim); color: #14532d; }#panel-scalp .alert-red { border-color: var(--red); background: var(--red-dim); color: #7f1d1d; }#panel-scalp .alert-amber { border-color: var(--amber); background: var(--amber-dim); color: #78350f; }#panel-scalp .alert-blue { border-color: var(--blue); background: var(--blue-dim); color: #1e3a8a; }#panel-scalp /* ===== RR VISUALIZER ===== */
-  .rr-bar {
-    display: flex;
-    height: 32px;
-    margin: 12px 0;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    position: relative;
-  }#panel-scalp .rr-entry {
-    width: 4px;
-    background: var(--amber);
-    position: relative;
-    z-index: 2;
-  }#panel-scalp .rr-stop {
-    background: repeating-linear-gradient(90deg, var(--red-dim), var(--red-dim) 8px, transparent 8px, transparent 16px);
-    border-right: 2px dashed var(--red);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--red);
-    letter-spacing: 1px;
-  }#panel-scalp .rr-target {
-    background: repeating-linear-gradient(90deg, var(--green-dim), var(--green-dim) 8px, transparent 8px, transparent 16px);
-    border-right: 2px dashed var(--green);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--green);
-    letter-spacing: 1px;
-  }#panel-scalp /* ===== CHECKLIST RESULT ===== */
-  #checklist-result {
-    padding: 16px;
-    border: 1px solid var(--border);
-    text-align: center;
-    font-family: var(--mono);
-    letter-spacing: 2px;
-    font-size: 13px;
-    display: none;
-    margin-top: 16px;
-    transition: all 0.3s;
-  }#panel-scalp /* ===== MISC ===== */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 24px 0;
-  }#panel-scalp .muted { color: var(--text-dim); font-size: 12px; font-family: var(--mono); letter-spacing: 1px; }#panel-scalp .highlight { color: var(--cyan); }#panel-scalp .highlight-green { color: var(--green); }#panel-scalp .highlight-red { color: var(--red); }#panel-scalp .highlight-amber { color: var(--amber); }#panel-scalp /* ===== CANDLE VISUAL ===== */
-  .candle-visual {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    height: 80px;
-    padding: 8px 12px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }#panel-scalp .candle {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    flex: 1;
-    height: 100%;
-    justify-content: flex-end;
-    position: relative;
-  }#panel-scalp .candle-wick {
-    width: 1px;
-    background: currentColor;
-    position: absolute;
-  }#panel-scalp .candle-body {
-    width: 70%;
-    border-radius: 1px;
-    position: absolute;
-  }
+#panel-scalp { padding: 16px; }
 
-  /* ===== ANIMATIONS ===== */
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
-  }
+/* NAV */
+#panel-scalp .sg-nav {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 6px; padding: 10px 0 14px; border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+#panel-scalp .sg-nav a {
+  padding: 4px 13px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 2px; color: var(--dim); text-decoration: none;
+  border: 1px solid var(--border); border-radius: 20px; transition: all .2s;
+}
+#panel-scalp .sg-nav a:hover,
+#panel-scalp .sg-nav a.active {
+  color: var(--accent); border-color: var(--accent); background: var(--glow);
+}
+#panel-scalp .sg-clock-wrap {
+  margin-left: auto; display: flex; align-items: center;
+  gap: 7px; font-family: var(--mono); font-size: 11px; color: var(--dim);
+}
+#panel-scalp .sg-live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  animation: sgBlink 1.4s infinite;
+}
+@keyframes sgBlink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+/* SECTION */
+#panel-scalp .sg-sec { margin-bottom: 48px; scroll-margin-top: 60px; }
+#panel-scalp .sg-sec-hdr {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+#panel-scalp .sg-sec-num  { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 3px; opacity: .5; }
+#panel-scalp .sg-sec-title{ font-family: var(--head, sans-serif); font-size: 15px; font-weight: 700; letter-spacing: 2px; color: var(--text); }
+#panel-scalp .sg-badge {
+  margin-left: auto; padding: 2px 10px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1px; border: 1px solid; border-radius: 20px;
+}
 
-  @keyframes glow {
-    0%, 100% { box-shadow: 0 0 5px currentColor; }
-    50% { box-shadow: 0 0 20px currentColor; }
-  }#panel-scalp section { animation: fadeInUp 0.5s ease both; }#panel-scalp section:nth-child(1) { animation-delay: 0.05s; }#panel-scalp section:nth-child(2) { animation-delay: 0.1s; }#panel-scalp section:nth-child(3) { animation-delay: 0.15s; }#panel-scalp section:nth-child(4) { animation-delay: 0.2s; }#panel-scalp section:nth-child(5) { animation-delay: 0.25s; }#panel-scalp section:nth-child(6) { animation-delay: 0.3s; }#panel-scalp section:nth-child(7) { animation-delay: 0.35s; }#panel-scalp /* Clock */
-  #clock { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }#panel-scalp .progress-ring {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 12px;
-  }#panel-scalp .progress-track {
-    flex: 1;
-    height: 4px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-  }#panel-scalp .progress-fill {
-    height: 100%;
-    transition: width 0.3s ease;
-  }#panel-scalp /* Reset btn */
-  .btn {
-    padding: 10px 24px;
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    border: 1px solid;
-    background: transparent;
-    transition: all 0.2s;
-  }#panel-scalp .btn-green { color: var(--green); border-color: var(--green); }#panel-scalp .btn-green:hover { background: var(--green-dim); box-shadow: 0 0 20px var(--green-dim); }#panel-scalp .btn-red { color: var(--red); border-color: var(--red); }#panel-scalp .btn-red:hover { background: var(--red-dim); }#panel-scalp /* ===== EMA STACK VISUAL ===== */
-  .ema-stack {
-    padding: 16px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    position: relative;
-  }#panel-scalp .ema-layer {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    margin-bottom: 2px;
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 1px;
-    border-left: 3px solid;
-    gap: 10px;
-  }#panel-scalp .ema-layer .ema-name { min-width: 80px; }#panel-scalp .ema-layer .ema-desc { color: var(--text-dim); font-size: 11px; flex: 1; }#panel-scalp .ema-layer .ema-role {
-    padding: 2px 8px;
-    font-size: 10px;
-    border: 1px solid currentColor;
-  }#panel-scalp /* Time session badge */
-  .session-timeline {
-    display: flex;
-    gap: 0;
-    margin: 16px 0;
-  }#panel-scalp .session-slot {
-    padding: 8px 12px;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-align: center;
-    border: 1px solid var(--border);
-    flex: 1;
-  }#panel-scalp .session-slot.hot { border-color: var(--green); background: var(--green-dim); color: #14532d; }#panel-scalp .session-slot.cold { border-color: var(--border); color: var(--text-dim); background: var(--bg2); }#panel-scalp .session-slot.warm { border-color: var(--amber); background: var(--amber-dim); color: #78350f; }#panel-scalp /* Scenario number badge */
-  .s-num {
-    font-family: var(--display);
-    font-size: 22px;
-    font-weight: 900;
-    color: var(--text-dim);
-    margin-right: 8px;
-  }
+/* STATS BAR */
+#panel-scalp .sg-stats {
+  display: flex; flex-wrap: wrap; gap: 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 18px; margin-bottom: 16px;
+}
+#panel-scalp .sg-stat { display: flex; flex-direction: column; gap: 3px; }
+#panel-scalp .sg-stat-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 3px; color: var(--dim); }
+#panel-scalp .sg-stat-val { font-size: 20px; font-weight: 700; }
 
-#panel-scalp .sg-main { padding: 0 4px; }
+/* ALERTS */
+#panel-scalp .sg-alert {
+  padding: 12px 15px; border-left: 3px solid;
+  border-radius: 0 var(--r) var(--r) 0;
+  margin-bottom: 14px; font-size: 13px; line-height: 1.6;
+}
+#panel-scalp .sg-alert-blue   { border-color: var(--accent); background: var(--glow);          color: var(--text); }
+#panel-scalp .sg-alert-green  { border-color: var(--green);  background: rgba(0,232,122,.07);  color: var(--text); }
+#panel-scalp .sg-alert-amber  { border-color: var(--yellow); background: rgba(245,200,66,.07); color: var(--text); }
+#panel-scalp .sg-alert-red    { border-color: var(--red);    background: rgba(240,58,74,.07);  color: var(--text); }
+
+/* GRIDS */
+#panel-scalp .sg-g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+#panel-scalp .sg-g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media(max-width:680px){ #panel-scalp .sg-g2, #panel-scalp .sg-g3 { grid-template-columns: 1fr; } }
+
+/* RULE ROWS */
+#panel-scalp .sg-rules { padding: 4px 0; }
+#panel-scalp .sg-rr {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+#panel-scalp .sg-rr:last-child { border-bottom: none; }
+#panel-scalp .sg-rr-icon  { width: 26px; text-align: center; flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+#panel-scalp .sg-rr-lbl   { font-family: var(--mono); font-size: 10px; color: var(--yellow); letter-spacing: 1px; min-width: 110px; flex-shrink: 0; margin-top: 2px; }
+#panel-scalp .sg-rr-desc  { color: var(--text); line-height: 1.55; flex: 1; }
+#panel-scalp .sg-rr-desc strong { color: var(--accent); }
+#panel-scalp .c-go   { color: var(--green); }
+#panel-scalp .c-no   { color: var(--red);   }
+#panel-scalp .c-warn { color: var(--yellow);}
+
+/* TF PANELS */
+#panel-scalp .sg-tf {
+  border: 1px solid var(--border); border-radius: var(--r);
+  overflow: hidden; margin-bottom: 16px;
+}
+#panel-scalp .sg-tf-hdr {
+  padding: 9px 16px; display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+#panel-scalp .sg-tf-lbl { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 3px; }
+#panel-scalp .sg-tf-5m .sg-tf-hdr { background: rgba(0,136,255,.07); }
+#panel-scalp .sg-tf-5m .sg-tf-lbl { color: var(--accent); }
+#panel-scalp .sg-tf-1m .sg-tf-hdr { background: rgba(0,232,122,.07); }
+#panel-scalp .sg-tf-1m .sg-tf-lbl { color: var(--green); }
+#panel-scalp .sg-tf-body { padding: 12px 16px; }
+
+/* EMA STACK */
+#panel-scalp .sg-ema-stack {
+  padding: 12px; background: var(--card2,var(--card));
+  border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 0;
+}
+#panel-scalp .sg-ema-layer {
+  display: flex; align-items: center; padding: 7px 10px; margin-bottom: 3px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 1px;
+  border-left: 3px solid; border-radius: 0 4px 4px 0; gap: 10px;
+}
+#panel-scalp .sg-ema-name  { min-width: 68px; font-weight: 600; }
+#panel-scalp .sg-ema-desc  { color: var(--dim); font-size: 11px; flex: 1; }
+#panel-scalp .sg-ema-role  { padding: 2px 7px; font-size: 10px; border: 1px solid currentColor; border-radius: 3px; }
+
+/* SESSION TIMELINE */
+#panel-scalp .sg-sess { display: flex; flex-direction: column; gap: 4px; margin: 10px 0; }
+#panel-scalp .sg-slot {
+  padding: 7px 12px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1px; border: 1px solid var(--border); border-radius: 4px;
+}
+#panel-scalp .sg-slot.hot  { border-color: var(--green);  background: rgba(0,232,122,.08);  color: var(--green); }
+#panel-scalp .sg-slot.cold { color: var(--dim); }
+#panel-scalp .sg-slot.warm { border-color: var(--yellow); background: rgba(245,200,66,.08); color: var(--yellow); }
+
+/* SCENARIOS */
+#panel-scalp .sg-scenario {
+  border: 1px solid var(--border); border-radius: var(--r);
+  margin-bottom: 16px; overflow: hidden;
+}
+#panel-scalp .sg-sc-hdr {
+  padding: 12px 16px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid var(--border);
+  background: var(--card2, var(--card));
+}
+#panel-scalp .sg-sc-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; }
+#panel-scalp .sg-sc-num   { font-size: 20px; font-weight: 900; color: var(--dim); margin-right: 8px; }
+#panel-scalp .sg-verdict  {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+  padding: 3px 11px; border: 1px solid; border-radius: 3px;
+}
+#panel-scalp .sg-v-go   { color: var(--green);  border-color: var(--green);  background: rgba(0,232,122,.1); }
+#panel-scalp .sg-v-no   { color: var(--red);    border-color: var(--red);    background: rgba(240,58,74,.1); }
+#panel-scalp .sg-v-wait { color: var(--yellow); border-color: var(--yellow); background: rgba(245,200,66,.1); }
+#panel-scalp .sg-sc-body{ padding: 14px 16px; }
+#panel-scalp .sg-sc-desc{ color: var(--dim); font-size: 13px; margin-bottom: 12px; }
+
+/* CONDITION LIST */
+#panel-scalp .sg-conds { list-style: none; margin-bottom: 12px; }
+#panel-scalp .sg-conds li {
+  padding: 5px 0; font-size: 13px; color: var(--dim);
+  display: flex; align-items: center; gap: 10px;
+}
+#panel-scalp .sg-conds li::before { content: '▸'; color: var(--dim); flex-shrink: 0; }
+#panel-scalp .sg-conds li.met     { color: var(--text); }
+#panel-scalp .sg-conds li.met::before  { content: '✓'; color: var(--green); }
+#panel-scalp .sg-conds li.fail::before { content: '✗'; color: var(--red); }
+#panel-scalp .sg-conds li.warn::before { content: '⚠'; color: var(--yellow); }
+
+/* ACTION BOX */
+#panel-scalp .sg-action {
+  padding: 10px 14px; font-size: 12px; font-family: var(--mono);
+  letter-spacing: .5px; border-left: 3px solid;
+  border-radius: 0 4px 4px 0; margin-top: 10px; line-height: 1.8;
+}
+#panel-scalp .sg-a-go   { border-color: var(--green);  background: rgba(0,232,122,.06);  color: var(--green); }
+#panel-scalp .sg-a-no   { border-color: var(--red);    background: rgba(240,58,74,.06);  color: var(--red); }
+#panel-scalp .sg-a-wait { border-color: var(--yellow); background: rgba(245,200,66,.06); color: var(--yellow); }
+
+/* RR VISUALIZER */
+#panel-scalp .sg-rr-bar {
+  display: flex; height: 28px; margin: 10px 0;
+  border: 1px solid var(--border); border-radius: 3px; overflow: hidden;
+}
+#panel-scalp .sg-rr-entry  { width: 4px; background: var(--yellow); }
+#panel-scalp .sg-rr-stop   {
+  background: repeating-linear-gradient(90deg, rgba(240,58,74,.12), rgba(240,58,74,.12) 8px, transparent 8px, transparent 16px);
+  border-right: 2px dashed var(--red); display: flex; align-items: center;
+  justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--red);
+}
+#panel-scalp .sg-rr-target {
+  background: repeating-linear-gradient(90deg, rgba(0,232,122,.10), rgba(0,232,122,.10) 8px, transparent 8px, transparent 16px);
+  border-right: 2px dashed var(--green); display: flex; align-items: center;
+  justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--green);
+}
+
+/* FORMULA BLOCK */
+#panel-scalp .sg-formula {
+  background: var(--card2, var(--card)); border: 1px solid var(--border);
+  padding: 16px 18px; font-family: var(--mono); font-size: 13px;
+  line-height: 2.2; border-radius: var(--r); margin-bottom: 14px;
+}
+#panel-scalp .sg-formula .lbl {
+  font-size: 9px; color: var(--dim); letter-spacing: 3px;
+  display: block; margin-bottom: 8px;
+}
+
+/* TABLE */
+#panel-scalp .sg-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+#panel-scalp .sg-table th {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--dim);
+  text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border);
+  background: var(--card2, var(--card));
+}
+#panel-scalp .sg-table td {
+  padding: 9px 12px; border-bottom: 1px solid var(--border);
+  color: var(--text); vertical-align: top;
+}
+#panel-scalp .sg-table tr:last-child td { border-bottom: none; }
+#panel-scalp .sg-table tr:hover td     { background: var(--glow); }
+
+/* CHECKLIST */
+#panel-scalp .sg-ci {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 7px;
+  cursor: pointer; transition: all .2s; user-select: none;
+}
+#panel-scalp .sg-ci:hover { border-color: var(--accent); background: var(--glow); }
+#panel-scalp .sg-ci.checked { border-color: var(--green); background: rgba(0,232,122,.06); }
+#panel-scalp .sg-ci-box {
+  width: 20px; height: 20px; border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; border-radius: 3px; transition: all .2s;
+}
+#panel-scalp .sg-ci.checked .sg-ci-box { border-color: var(--green); background: var(--green); color: #000; }
+#panel-scalp .sg-ci-text { font-size: 13px; flex: 1; color: var(--text); }
+#panel-scalp .sg-ci-tag  {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  padding: 2px 8px; border: 1px solid var(--border); border-radius: 3px;
+  color: var(--dim); white-space: nowrap;
+}
+#panel-scalp .sg-ci.checked .sg-ci-tag { border-color: var(--green); color: var(--green); }
+
+#panel-scalp .sg-prog-wrap { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+#panel-scalp .sg-prog-track {
+  flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden;
+}
+#panel-scalp .sg-prog-fill { height: 100%; transition: width .3s ease; border-radius: 3px; }
+
+#panel-scalp .sg-cl-result {
+  padding: 13px; border: 1px solid var(--border); text-align: center;
+  font-family: var(--mono); letter-spacing: 1px; font-size: 12px;
+  display: none; margin-top: 12px; border-radius: var(--r);
+}
+
+/* BTNS */
+#panel-scalp .sg-btn {
+  padding: 8px 20px; font-family: var(--mono); font-size: 11px;
+  letter-spacing: 2px; cursor: pointer; border: 1px solid;
+  border-radius: var(--r); background: transparent; transition: all .2s;
+}
+#panel-scalp .sg-btn-go  { color: var(--green);  border-color: var(--green); }
+#panel-scalp .sg-btn-go:hover  { background: rgba(0,232,122,.12); }
+#panel-scalp .sg-btn-red { color: var(--red);    border-color: var(--red); }
+#panel-scalp .sg-btn-red:hover { background: rgba(240,58,74,.12); }
+
+/* INLINE TAG CHIPS */
+#panel-scalp .sg-chip {
+  display: inline-block; padding: 2px 9px; font-family: var(--mono);
+  font-size: 10px; letter-spacing: 1px; border: 1px solid;
+  border-radius: 3px;
+}
+#panel-scalp .sg-chip-go   { color: var(--green);  border-color: var(--green);  background: rgba(0,232,122,.1); }
+#panel-scalp .sg-chip-no   { color: var(--red);    border-color: var(--red);    background: rgba(240,58,74,.1); }
+#panel-scalp .sg-chip-warn { color: var(--yellow); border-color: var(--yellow); background: rgba(245,200,66,.1); }
+#panel-scalp .sg-chip-blue { color: var(--accent); border-color: var(--accent); background: var(--glow); }
+
+/* KPI BOXES */
+#panel-scalp .sg-kpi {
+  text-align: center; padding: 12px;
+  border: 1px solid var(--border); border-radius: var(--r);
+  background: var(--card);
+}
+#panel-scalp .sg-kpi-lbl { font-family: var(--mono); font-size: 9px; color: var(--dim); letter-spacing: 2px; margin-bottom: 8px; }
+#panel-scalp .sg-kpi-val { font-size: 20px; font-weight: 700; color: var(--green); }
+#panel-scalp .sg-kpi-sub { font-family: var(--mono); font-size: 9px; color: var(--dim); }
+
+/* STACK VISUAL */
+#panel-scalp .sg-stack-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-family: var(--mono); font-size: 12px; }
+#panel-scalp .sg-stack-row .arrow { font-size: 14px; }
+#panel-scalp .sg-stack-row .lbl   { color: var(--dim); min-width: 55px; }
+#panel-scalp .sg-stack-row .val   { margin-left: auto; font-size: 11px; }
+
+/* LIGHT THEME OVERRIDES */
+[data-theme="light"] #panel-scalp .sg-ema-stack { background: #f5f7fb; }
+[data-theme="light"] #panel-scalp .sg-formula   { background: #f5f7fb; }
+[data-theme="light"] #panel-scalp .sg-sc-hdr    { background: #f5f7fb; }
+[data-theme="light"] #panel-scalp .sg-tf-5m .sg-tf-hdr { background: rgba(0,100,200,.05); }
+[data-theme="light"] #panel-scalp .sg-tf-1m .sg-tf-hdr { background: rgba(0,180,80,.05); }
+[data-theme="light"] #panel-scalp .sg-ci { background: #fff; }
+[data-theme="light"] #panel-scalp .sg-ci:hover { background: rgba(0,136,187,.04); }
+[data-theme="light"] #panel-scalp .sg-ci.checked { background: rgba(0,180,100,.06); }
+[data-theme="light"] #panel-scalp .sg-ci-text { color: #0d1e2d; }
+[data-theme="light"] #panel-scalp .sg-rr-desc  { color: #0d1e2d; }
+[data-theme="light"] #panel-scalp .sg-conds li.met { color: #0d1e2d; }
+[data-theme="light"] #panel-scalp .sg-sc-desc  { color: #5a7a94; }
+[data-theme="light"] #panel-scalp .sg-alert-blue  { background: rgba(0,136,187,.07); }
+[data-theme="light"] #panel-scalp .sg-alert-green { background: rgba(0,160,80,.06);  }
+[data-theme="light"] #panel-scalp .sg-alert-amber { background: rgba(180,120,0,.05); }
+[data-theme="light"] #panel-scalp .sg-alert-red   { background: rgba(200,0,0,.05);   }
+[data-theme="light"] #panel-scalp .sg-a-go   { background: rgba(0,160,80,.06);  }
+[data-theme="light"] #panel-scalp .sg-a-no   { background: rgba(200,0,0,.05);   }
+[data-theme="light"] #panel-scalp .sg-a-wait { background: rgba(180,120,0,.05); }
 </style>
-<!-- HEADER -->
-
 
 <!-- NAV -->
-<nav>
-  <a class="nav-tab active" href="#sg-overview">OVERVIEW</a>
-  <a class="nav-tab" href="#sg-setup">SETUP TOOLS</a>
-  <a class="nav-tab" href="#sg-tf5m">TF5M FILTER</a>
-  <a class="nav-tab" href="#sg-tf1m">TF1M ENTRY</a>
-  <a class="nav-tab" href="#sg-scenarios">SENARIO</a>
-  <a class="nav-tab" href="#sg-management">TRADE MGMT</a>
-  <a class="nav-tab" href="#sg-checklist">CHECKLIST</a>
-  <a class="nav-tab" href="#sg-mistakes">KESILAPAN</a>
-  <span id="sg-clock" style="margin-left:auto;font-size:11px;font-weight:600;letter-spacing:1px;color:#64748b;padding:0 8px;white-space:nowrap;">--:--:-- ET</span>
-  <span class="session-badge" style="font-size:10px;padding:3px 8px;border:1px solid #94a3b8;border-radius:4px;color:#94a3b8;white-space:nowrap;">TF1M · TF5M</span>
-</nav>
+<div class="sg-nav">
+  <a class="active" href="#sg-overview">OVERVIEW</a>
+  <a href="#sg-setup">SETUP</a>
+  <a href="#sg-tf5m">TF5M FILTER</a>
+  <a href="#sg-tf1m">TF1M ENTRY</a>
+  <a href="#sg-scenarios">SCENARIOS</a>
+  <a href="#sg-management">TRADE MGMT</a>
+  <a href="#sg-checklist">CHECKLIST</a>
+  <a href="#sg-mistakes">MISTAKES</a>
+  <div class="sg-clock-wrap">
+    <div class="sg-live-dot"></div>
+    <span id="sg-clock">--:--:-- ET</span>
+  </div>
+</div>
 
-<div class="sg-main">
-
-<!-- ===== OVERVIEW ===== -->
-<section id="sg-overview">
-  <div class="section-header">
-    <span class="section-num">01</span>
-    <span class="section-title">SISTEM OVERVIEW</span>
-    <span class="section-badge tag-cyan">SCALP SYSTEM v2.0</span>
+<!-- ═══════════════════════════════════════ 01 OVERVIEW -->
+<div class="sg-sec" id="sg-overview">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">01</span>
+    <span class="sg-sec-title">SYSTEM OVERVIEW</span>
+    <span class="sg-badge" style="color:var(--accent);border-color:var(--accent)">SCALP SYSTEM v2.0</span>
   </div>
 
-  <div class="stats-bar">
-    <div class="stat-item">
-      <span class="stat-label">TIMEFRAME UTAMA</span>
-      <span class="stat-value highlight">1M</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-label">TIMEFRAME FILTER</span>
-      <span class="stat-value highlight-amber">5M</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-label">MIN RR RATIO</span>
-      <span class="stat-value highlight-green">2:1</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-label">MAX RISK / TRADE</span>
-      <span class="stat-value highlight-red">1%</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-label">ADX MIN</span>
-      <span class="stat-value highlight-amber">28</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-label">SESSION</span>
-      <span class="stat-value" style="font-size:14px;color:var(--cyan)">9:30–10:30</span>
-    </div>
+  <div class="sg-stats">
+    <div class="sg-stat"><span class="sg-stat-lbl">PRIMARY TF</span><span class="sg-stat-val" style="color:var(--accent)">1M</span></div>
+    <div class="sg-stat"><span class="sg-stat-lbl">FILTER TF</span><span class="sg-stat-val" style="color:var(--yellow)">5M</span></div>
+    <div class="sg-stat"><span class="sg-stat-lbl">MIN RR RATIO</span><span class="sg-stat-val" style="color:var(--green)">2:1</span></div>
+    <div class="sg-stat"><span class="sg-stat-lbl">MAX RISK/TRADE</span><span class="sg-stat-val" style="color:var(--red)">1%</span></div>
+    <div class="sg-stat"><span class="sg-stat-lbl">ADX MINIMUM</span><span class="sg-stat-val" style="color:var(--yellow)">28</span></div>
+    <div class="sg-stat"><span class="sg-stat-lbl">PRIME SESSION</span><span class="sg-stat-val" style="color:var(--accent);font-size:14px">9:30–10:30 ET</span></div>
   </div>
 
-  <div class="alert alert-blue">
-    <strong>🎯 FALSAFAH SISTEM:</strong> Cari momentum sebenar menggunakan TF5M sebagai filter trend, kemudian masuk tepat pada TF1M. Hanya trade apabila SEMUA syarat terpenuhi. Satu trade berkualiti lebih baik dari 10 trade sampah.
+  <div class="sg-alert sg-alert-blue">
+    <strong>🎯 SYSTEM PHILOSOPHY:</strong> Find real momentum using TF5M as the trend filter, then enter precisely on TF1M. Only trade when ALL conditions are met. One quality trade beats ten mediocre ones.
   </div>
 
-  <div class="grid-2">
-    <div class="card card-blue">
-      <div class="card-title" style="color:var(--blue)">📘 PRINSIP ASAS</div>
-      <div class="rule-row">
-        <div class="rule-icon">🔭</div>
-        <div class="rule-desc">Gunakan <strong>TF5M</strong> untuk tahu arah trend sebenar</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">🎯</div>
-        <div class="rule-desc">Gunakan <strong>TF1M</strong> untuk entry yang tepat dan berketepatan tinggi</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">⛔</div>
-        <div class="rule-desc">Jangan sekali-kali <span class="no">lawan trend TF5M</span></div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">💰</div>
-        <div class="rule-desc">Protect capital dulu, profit will follow</div>
+  <div class="sg-g2">
+    <div class="card">
+      <div class="card-hdr" style="color:var(--accent)">📘 CORE PRINCIPLES</div>
+      <div class="sg-rules">
+        <div class="sg-rr"><div class="sg-rr-icon">🔭</div><div class="sg-rr-desc">Use <strong>TF5M</strong> to identify the true trend direction</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">🎯</div><div class="sg-rr-desc">Use <strong>TF1M</strong> for precise, high-probability entry timing</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">⛔</div><div class="sg-rr-desc">Never <span class="c-no">trade against the TF5M trend</span></div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">💰</div><div class="sg-rr-desc">Protect capital first — profits follow discipline</div></div>
       </div>
     </div>
-    <div class="card card-amber">
-      <div class="card-title" style="color:var(--amber)">⏰ WAKTU TERBAIK (ET)</div>
-      <div class="session-timeline" style="flex-direction:column;gap:4px;">
-        <div class="session-slot hot">9:30 – 10:30 AM &nbsp; ★★★ PRIME SESSION</div>
-        <div class="session-slot cold">10:30 – 11:30 AM &nbsp; ☆ SLOW — BERHATI-HATI</div>
-        <div class="session-slot cold">11:30 AM – 2:00 PM &nbsp; ✕ AVOID — LUNCH CHOP</div>
-        <div class="session-slot cold">2:00 – 3:00 PM &nbsp; ☆ MODERATE</div>
-        <div class="session-slot warm">3:00 – 4:00 PM &nbsp; ★★ CLOSING MOMENTUM</div>
+    <div class="card">
+      <div class="card-hdr" style="color:var(--yellow)">⏰ BEST TRADING HOURS (ET)</div>
+      <div class="sg-sess">
+        <div class="sg-slot hot">9:30 – 10:30 AM &nbsp;★★★ PRIME SESSION</div>
+        <div class="sg-slot cold">10:30 – 11:30 AM &nbsp;☆ SLOW — USE CAUTION</div>
+        <div class="sg-slot cold">11:30 AM – 2:00 PM &nbsp;✕ AVOID — LUNCH CHOP</div>
+        <div class="sg-slot cold">2:00 – 3:00 PM &nbsp;☆ MODERATE</div>
+        <div class="sg-slot warm">3:00 – 4:00 PM &nbsp;★★ CLOSING MOMENTUM</div>
       </div>
-      <div class="muted" style="margin-top:8px;">Malaysia: 9:30 PM – 4:00 AM waktu tempatan</div>
+      <div style="color:var(--dim);font-size:11px;font-family:var(--mono);margin-top:6px;">Malaysia local time: 9:30 PM – 4:00 AM</div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ===== SETUP TOOLS ===== -->
-<section id="sg-setup">
-  <div class="section-header">
-    <span class="section-num">02</span>
-    <span class="section-title">SETUP TOOLS — MOOMOO</span>
-    <span class="section-badge tag-amber">MULTI-EMA PANEL</span>
+<!-- ═══════════════════════════════════════ 02 SETUP TOOLS -->
+<div class="sg-sec" id="sg-setup">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">02</span>
+    <span class="sg-sec-title">SETUP TOOLS — MOOMOO</span>
+    <span class="sg-badge" style="color:var(--yellow);border-color:var(--yellow)">MULTI-EMA PANEL</span>
   </div>
 
-  <div class="card card-cyan">
-    <div class="card-title" style="color:var(--cyan)">📊 INDICATORS WAJIB PASANG</div>
-    <div class="ema-stack">
-      <div class="ema-layer" style="border-color:var(--green);background:rgba(0,255,136,0.05)">
-        <span class="ema-name highlight-green">EMA 8</span>
-        <span class="ema-desc">Fast EMA — trailing stop & momentum tracker</span>
-        <span class="ema-role" style="color:var(--green)">DYNAMIC STOP</span>
-      </div>
-      <div class="ema-layer" style="border-color:var(--blue);background:rgba(0,170,255,0.05)">
-        <span class="ema-name highlight">EMA 21</span>
-        <span class="ema-desc">Medium EMA — trend support, bounce zone utama</span>
-        <span class="ema-role" style="color:var(--blue)">SUPPORT LINE</span>
-      </div>
-      <div class="ema-layer" style="border-color:var(--amber);background:rgba(255,179,0,0.05)">
-        <span class="ema-name highlight-amber">VWAP</span>
-        <span class="ema-desc">Volume-weighted average — fair value harian</span>
-        <span class="ema-role" style="color:var(--amber)">FAIR VALUE</span>
-      </div>
-      <div class="ema-layer" style="border-color:var(--red);background:rgba(255,51,85,0.05)">
-        <span class="ema-name highlight-red">ADX</span>
-        <span class="ema-desc">Average Directional Index — ukur kekuatan trend</span>
-        <span class="ema-role" style="color:var(--red)">TREND POWER</span>
-      </div>
-      <div class="ema-layer" style="border-color:#9b59b6;background:rgba(155,89,182,0.05)">
-        <span class="ema-name" style="color:#c39bd3">TD SEQ</span>
-        <span class="ema-desc">Tom DeMark Sequential — exhaustion countdown</span>
-        <span class="ema-role" style="color:#c39bd3">EXHAUSTION</span>
-      </div>
-      <div class="ema-layer" style="border-color:var(--border2)">
-        <span class="ema-name" style="color:var(--text-mid)">VOLUME</span>
-        <span class="ema-desc">Volume bars + moving average volume — confirmation</span>
-        <span class="ema-role" style="color:var(--text-mid)">CONFIRM</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid-2">
-    <div class="card card-green">
-      <div class="card-title" style="color:var(--green)">✅ SUSUNAN TANGGA NAIK (BULLISH STACK)</div>
-      <div style="font-family:var(--mono);font-size:13px;line-height:2.2;padding:8px 0;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--green);font-size:18px;">▲</span>
-          <span style="color:var(--text-dim)">HARGA</span>
-          <span style="color:var(--green);margin-left:auto">PALING TINGGI</span>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-hdr" style="color:var(--accent)">📊 REQUIRED INDICATORS</div>
+    <div style="padding:12px">
+      <div class="sg-ema-stack">
+        <div class="sg-ema-layer" style="border-color:var(--green);background:rgba(0,232,122,.05)">
+          <span class="sg-ema-name" style="color:var(--green)">EMA 8</span>
+          <span class="sg-ema-desc">Fast EMA — trailing stop &amp; momentum tracker</span>
+          <span class="sg-ema-role" style="color:var(--green)">DYNAMIC STOP</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--green);font-size:14px;">↑</span>
-          <span style="color:var(--text-dim)">EMA 8</span>
-          <span style="color:var(--green);margin-left:auto;">BAWAH HARGA</span>
+        <div class="sg-ema-layer" style="border-color:var(--accent);background:rgba(0,200,240,.05)">
+          <span class="sg-ema-name" style="color:var(--accent)">EMA 21</span>
+          <span class="sg-ema-desc">Medium EMA — trend support &amp; main bounce zone</span>
+          <span class="sg-ema-role" style="color:var(--accent)">SUPPORT LINE</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--blue);font-size:14px;">↑</span>
-          <span style="color:var(--text-dim)">EMA 21</span>
-          <span style="color:var(--blue);margin-left:auto;">BAWAH EMA 8</span>
+        <div class="sg-ema-layer" style="border-color:var(--yellow);background:rgba(245,200,66,.05)">
+          <span class="sg-ema-name" style="color:var(--yellow)">VWAP</span>
+          <span class="sg-ema-desc">Volume-weighted average price — intraday fair value</span>
+          <span class="sg-ema-role" style="color:var(--yellow)">FAIR VALUE</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--amber);font-size:14px;">→</span>
-          <span style="color:var(--text-dim)">VWAP</span>
-          <span style="color:var(--amber);margin-left:auto;">PALING BAWAH</span>
+        <div class="sg-ema-layer" style="border-color:var(--red);background:rgba(240,58,74,.05)">
+          <span class="sg-ema-name" style="color:var(--red)">ADX</span>
+          <span class="sg-ema-desc">Average Directional Index — measures trend strength</span>
+          <span class="sg-ema-role" style="color:var(--red)">TREND POWER</span>
+        </div>
+        <div class="sg-ema-layer" style="border-color:#9b59b6;background:rgba(155,89,182,.05)">
+          <span class="sg-ema-name" style="color:#c39bd3">TD SEQ</span>
+          <span class="sg-ema-desc">Tom DeMark Sequential — exhaustion countdown (1–9)</span>
+          <span class="sg-ema-role" style="color:#c39bd3">EXHAUSTION</span>
+        </div>
+        <div class="sg-ema-layer" style="border-color:var(--border)">
+          <span class="sg-ema-name" style="color:var(--dim)">VOLUME</span>
+          <span class="sg-ema-desc">Volume bars + volume MA — confirms breakout strength</span>
+          <span class="sg-ema-role" style="color:var(--dim)">CONFIRM</span>
         </div>
       </div>
-      <div class="alert alert-green" style="margin-top:8px;margin-bottom:0;font-size:12px;">
-        Harga > EMA8 > EMA21 > VWAP = LAMPU HIJAU 🟢
-      </div>
-    </div>
-    <div class="card card-red">
-      <div class="card-title" style="color:var(--red)">⛔ SUSUNAN TANGGA TURUN (BEARISH / SKIP)</div>
-      <div style="font-family:var(--mono);font-size:13px;line-height:2.2;padding:8px 0;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--amber);font-size:14px;">→</span>
-          <span style="color:var(--text-dim)">VWAP</span>
-          <span style="color:var(--amber);margin-left:auto;">PALING ATAS</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--blue);font-size:14px;">↓</span>
-          <span style="color:var(--text-dim)">EMA 21</span>
-          <span style="color:var(--red);margin-left:auto;">BAWAH VWAP</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--green);font-size:14px;">↓</span>
-          <span style="color:var(--text-dim)">EMA 8</span>
-          <span style="color:var(--red);margin-left:auto;">BAWAH EMA 21</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="color:var(--red);font-size:18px;">▼</span>
-          <span style="color:var(--text-dim)">HARGA</span>
-          <span style="color:var(--red);margin-left:auto;">PALING BAWAH</span>
-        </div>
-      </div>
-      <div class="alert alert-red" style="margin-top:8px;margin-bottom:0;font-size:12px;">
-        JANGAN BELI dalam susunan ini. Tunggu reversal sahaja.
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== TF5M ===== -->
-<section id="sg-tf5m">
-  <div class="section-header">
-    <span class="section-num">03</span>
-    <span class="section-title">TF5M — TREND FILTER</span>
-    <span class="section-badge tag-blue">HIGHER TIMEFRAME</span>
-  </div>
-
-  <div class="alert alert-blue">
-    <strong>📌 PERATURAN PALING PENTING:</strong> Semak TF5M DULU sebelum tengok TF1M. TF5M adalah "big picture" — kalau 5M bearish, semua setup 1M bullish adalah perangkap!
-  </div>
-
-  <div class="tf-panel tf-5m">
-    <div class="tf-header">
-      <div class="tf-label">TF 5 MINIT</div>
-      <span class="tag tag-blue">TREND DIRECTION FILTER</span>
-    </div>
-    <div class="tf-body">
-      <div class="rule-row">
-        <div class="rule-icon">1️⃣</div>
-        <div class="rule-label">TREND CHECK</div>
-        <div class="rule-desc">Harga mesti <strong>di atas VWAP</strong> pada TF5M. Kalau bawah VWAP 5M — <span class="no">SKIP semua long entry</span></div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">2️⃣</div>
-        <div class="rule-label">EMA STACK 5M</div>
-        <div class="rule-desc">EMA8 5M mesti <strong>di atas EMA21 5M</strong>. Dua EMA mesti dalam susunan bullish dan condong ke atas</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">3️⃣</div>
-        <div class="rule-label">ADX 5M</div>
-        <div class="rule-desc">ADX pada TF5M mesti <strong>&gt; 20</strong> — tanda trend wujud. Kalau ADX 5M rendah, trend lemah dan tidak sesuai untuk scalp</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">4️⃣</div>
-        <div class="rule-label">ARAH CANDLE 5M</div>
-        <div class="rule-desc">Candle 5M semasa mesti <span class="yes">hijau atau badan kecil selepas pullback</span>. Candle merah besar pada 5M = momentum bearish, tunggu</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">5️⃣</div>
-        <div class="rule-label">ORB HIGH 5M</div>
-        <div class="rule-desc">Catat <strong>High candle pertama 9:30–9:35 AM ET</strong> (Opening Range High). Breakout di atas paras ini pada 5M = isyarat kuat</div>
-      </div>
     </div>
   </div>
 
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>SITUASI TF5M</th>
-        <th>MAKSUD</th>
-        <th>TINDAKAN TF1M</th>
-      </tr>
-    </thead>
+  <div class="sg-g2">
+    <div class="card">
+      <div class="card-hdr" style="color:var(--green)">✅ BULLISH STACK ORDER</div>
+      <div style="padding:12px 14px">
+        <div class="sg-stack-row"><span class="arrow" style="color:var(--green)">▲</span><span class="lbl">PRICE</span><span class="val" style="color:var(--green)">HIGHEST</span></div>
+        <div class="sg-stack-row"><span class="arrow" style="color:var(--green)">↑</span><span class="lbl">EMA 8</span><span class="val" style="color:var(--green)">BELOW PRICE</span></div>
+        <div class="sg-stack-row"><span class="arrow" style="color:var(--accent)">↑</span><span class="lbl">EMA 21</span><span class="val" style="color:var(--accent)">BELOW EMA 8</span></div>
+        <div class="sg-stack-row"><span class="arrow" style="color:var(--yellow)">→</span><span class="lbl">VWAP</span><span class="val" style="color:var(--yellow)">LOWEST</span></div>
+        <div class="sg-alert sg-alert-green" style="margin:10px 0 0;font-size:12px">Price &gt; EMA8 &gt; EMA21 &gt; VWAP = 🟢 GREEN LIGHT</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="color:var(--red)">⛔ BEARISH STACK — SKIP LONGS</div>
+      <div style="padding:12px 14px">
+        <div class="sg-stack-row"><span class="arrow" style="color:var(--yellow)">→</span><span class="lbl">VWAP</span><span class="val" style="color:var(--yellow)">HIGHEST</span></div>
+        <div class="sg-stack-row"><span class="arrow" style="color:var(--red)">↓</span><span class="lbl">EMA 21</span><span class="val" style="color:var(--red)">BELOW VWAP</span></div>
+        <div class="sg-stack-row"><span class="arrow" style="color:var(--red)">↓</span><span class="lbl">EMA 8</span><span class="val" style="color:var(--red)">BELOW EMA 21</span></div>
+        <div class="sg-stack-row"><span class="arrow" style="color:var(--red)">▼</span><span class="lbl">PRICE</span><span class="val" style="color:var(--red)">LOWEST</span></div>
+        <div class="sg-alert sg-alert-red" style="margin:10px 0 0;font-size:12px">DO NOT BUY in this order. Wait for reversal only.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ 03 TF5M -->
+<div class="sg-sec" id="sg-tf5m">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">03</span>
+    <span class="sg-sec-title">TF5M — TREND FILTER</span>
+    <span class="sg-badge" style="color:var(--accent);border-color:var(--accent)">HIGHER TIMEFRAME</span>
+  </div>
+
+  <div class="sg-alert sg-alert-blue">
+    <strong>📌 MOST IMPORTANT RULE:</strong> Always check TF5M FIRST before looking at TF1M. The 5-minute chart is the "big picture" — if 5M is bearish, every bullish 1M setup is a trap!
+  </div>
+
+  <div class="sg-tf sg-tf-5m">
+    <div class="sg-tf-hdr">
+      <div class="sg-tf-lbl">5 MINUTE TIMEFRAME</div>
+      <span class="sg-chip sg-chip-blue">TREND DIRECTION FILTER</span>
+    </div>
+    <div class="sg-tf-body sg-rules">
+      <div class="sg-rr"><div class="sg-rr-icon">1️⃣</div><div class="sg-rr-lbl">TREND CHECK</div><div class="sg-rr-desc">Price must be <strong>above VWAP</strong> on TF5M. If below 5M VWAP — <span class="c-no">SKIP all long entries</span></div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">2️⃣</div><div class="sg-rr-lbl">EMA STACK 5M</div><div class="sg-rr-desc">EMA8 5M must be <strong>above EMA21 5M</strong>. Both EMAs must be in bullish order and sloping upward</div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">3️⃣</div><div class="sg-rr-lbl">ADX 5M</div><div class="sg-rr-desc">ADX on TF5M must be <strong>&gt; 20</strong>. Low ADX 5M means weak or no trend — not suitable for scalping</div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">4️⃣</div><div class="sg-rr-lbl">CANDLE DIR</div><div class="sg-rr-desc">Current 5M candle must be <span class="c-go">green or small body after pullback</span>. Large red 5M candle = bearish momentum, wait</div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">5️⃣</div><div class="sg-rr-lbl">ORB HIGH 5M</div><div class="sg-rr-desc">Mark the <strong>High of the 9:30–9:35 AM ET candle</strong> (Opening Range High). Breakout above this on 5M = strong signal</div></div>
+    </div>
+  </div>
+
+  <table class="sg-table">
+    <thead><tr><th>TF5M CONDITION</th><th>MEANING</th><th>TF1M ACTION</th></tr></thead>
     <tbody>
-      <tr>
-        <td><span class="tag tag-green">HARGA ATAS VWAP + EMA STACK BULLISH</span></td>
-        <td style="color:var(--green)">Trend kuat ke atas</td>
-        <td><span class="yes">✓ Cari entry long TF1M</span></td>
-      </tr>
-      <tr>
-        <td><span class="tag tag-amber">HARGA ATAS VWAP TAPI EMA FLAT</span></td>
-        <td style="color:var(--amber)">Trend lemah / choppy</td>
-        <td><span class="warn">⚠ Berhati-hati, reduce size</span></td>
-      </tr>
-      <tr>
-        <td><span class="tag tag-red">HARGA BAWAH VWAP</span></td>
-        <td style="color:var(--red)">Bearish / downtrend</td>
-        <td><span class="no">✕ JANGAN LONG — tunggu atau short</span></td>
-      </tr>
-      <tr>
-        <td><span class="tag tag-red">ADX 5M &lt; 20</span></td>
-        <td style="color:var(--red)">Tiada trend</td>
-        <td><span class="no">✕ SKIP — sideways market</span></td>
-      </tr>
-      <tr>
-        <td><span class="tag tag-green">ORB BREAKOUT KE ATAS</span></td>
-        <td style="color:var(--green)">Momentum pembukaan kuat</td>
-        <td><span class="yes">✓ Setup terbaik hari ini</span></td>
-      </tr>
+      <tr><td><span class="sg-chip sg-chip-go">PRICE ABOVE VWAP + BULLISH EMA STACK</span></td><td class="c-go">Strong uptrend</td><td><span class="c-go">✓ Look for TF1M long entries</span></td></tr>
+      <tr><td><span class="sg-chip sg-chip-warn">PRICE ABOVE VWAP BUT EMA FLAT</span></td><td class="c-warn">Weak / choppy</td><td><span class="c-warn">⚠ Caution, reduce size</span></td></tr>
+      <tr><td><span class="sg-chip sg-chip-no">PRICE BELOW VWAP</span></td><td class="c-no">Bearish / downtrend</td><td><span class="c-no">✕ NO LONGS — wait or short only</span></td></tr>
+      <tr><td><span class="sg-chip sg-chip-no">ADX 5M &lt; 20</span></td><td class="c-no">No trend</td><td><span class="c-no">✕ SKIP — sideways market</span></td></tr>
+      <tr><td><span class="sg-chip sg-chip-go">ORB BREAKOUT ABOVE HIGH</span></td><td class="c-go">Strong opening momentum</td><td><span class="c-go">✓ Best setup of the day</span></td></tr>
     </tbody>
   </table>
-</section>
+</div>
 
-<!-- ===== TF1M ===== -->
-<section id="sg-tf1m">
-  <div class="section-header">
-    <span class="section-num">04</span>
-    <span class="section-title">TF1M — ENTRY PRECISION</span>
-    <span class="section-badge tag-green">EXECUTION TIMEFRAME</span>
+<!-- ═══════════════════════════════════════ 04 TF1M -->
+<div class="sg-sec" id="sg-tf1m">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">04</span>
+    <span class="sg-sec-title">TF1M — ENTRY PRECISION</span>
+    <span class="sg-badge" style="color:var(--green);border-color:var(--green)">EXECUTION TIMEFRAME</span>
   </div>
 
-  <div class="alert alert-green">
-    <strong>✅ SYARAT:</strong> TF5M mesti sudah confirm bullish DULU. Baru gunakan TF1M untuk cari entry tepat dengan risiko minimum.
+  <div class="sg-alert sg-alert-green">
+    <strong>✅ PREREQUISITE:</strong> TF5M must already confirm bullish FIRST. Only then use TF1M to pinpoint a precise entry with minimum risk.
   </div>
 
-  <div class="tf-panel tf-1m">
-    <div class="tf-header">
-      <div class="tf-label">TF 1 MINIT</div>
-      <span class="tag tag-green">ENTRY TRIGGER</span>
+  <div class="sg-tf sg-tf-1m">
+    <div class="sg-tf-hdr">
+      <div class="sg-tf-lbl">1 MINUTE TIMEFRAME</div>
+      <span class="sg-chip sg-chip-go">ENTRY TRIGGER</span>
     </div>
-    <div class="tf-body">
-      <div class="rule-row">
-        <div class="rule-icon">1️⃣</div>
-        <div class="rule-label">EMA STACK 1M</div>
-        <div class="rule-desc">Harga > EMA8 > EMA21 > VWAP pada TF1M — <strong>"tangga naik ke langit"</strong>. Semua mesti dalam susunan betul</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">2️⃣</div>
-        <div class="rule-label">ADX 1M</div>
-        <div class="rule-desc">ADX mesti <strong>&gt; 28 DAN mendongak</strong> (slope naik). ADX mendatar atau turun walaupun &gt; 28 = momentum lemah</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">3️⃣</div>
-        <div class="rule-label">TD SEQUENTIAL</div>
-        <div class="rule-desc">TD count mesti <strong>1–4</strong> (fresh momentum). <span class="no">Elak entry di TD 7–9</span> (exhaustion zone). Tiada TD number = neutral, ok jika semua lain OK</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">4️⃣</div>
-        <div class="rule-label">VOLUME SPIKE</div>
-        <div class="rule-desc">Volume candle entry <strong>mesti lebih tinggi</strong> dari average. Volume kecil pada breakout = fake move, skip!</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">5️⃣</div>
-        <div class="rule-label">CANDLE BODY</div>
-        <div class="rule-desc">Candle mesti <span class="yes">tutup (close) di atas EMA8</span> — bukan sekadar wick. Body candle mesti > 60% dari total range candle</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">6️⃣</div>
-        <div class="rule-label">JARAK DARI VWAP</div>
-        <div class="rule-desc">Harga tidak lebih dari <strong>0.4%</strong> di atas VWAP. Kalau terlalu jauh dari VWAP, risk/reward dah tidak bagus — <span class="warn">tunggu pullback</span></div>
-      </div>
+    <div class="sg-tf-body sg-rules">
+      <div class="sg-rr"><div class="sg-rr-icon">1️⃣</div><div class="sg-rr-lbl">EMA STACK 1M</div><div class="sg-rr-desc">Price &gt; EMA8 &gt; EMA21 &gt; VWAP on TF1M — <strong>the full bullish staircase</strong>. All must be in correct order</div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">2️⃣</div><div class="sg-rr-lbl">ADX 1M</div><div class="sg-rr-desc">ADX must be <strong>&gt; 28 AND rising</strong> (positive slope). Flat or falling ADX even if &gt; 28 = fading momentum</div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">3️⃣</div><div class="sg-rr-lbl">TD SEQUENTIAL</div><div class="sg-rr-desc">TD count must be <strong>1–4</strong> (fresh momentum). <span class="c-no">Avoid entries at TD 7–9</span> (exhaustion zone). No TD number = neutral, OK if all else passes</div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">4️⃣</div><div class="sg-rr-lbl">VOLUME SPIKE</div><div class="sg-rr-desc">Entry candle volume <strong>must be above average</strong>. Low volume on a breakout = fake move — skip!</div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">5️⃣</div><div class="sg-rr-lbl">CANDLE BODY</div><div class="sg-rr-desc">Candle must <span class="c-go">CLOSE above EMA8</span> — not just a wick touch. Body must be &gt; 60% of total candle range</div></div>
+      <div class="sg-rr"><div class="sg-rr-icon">6️⃣</div><div class="sg-rr-lbl">VWAP DISTANCE</div><div class="sg-rr-desc">Price must not exceed <strong>0.4% above VWAP</strong>. If too extended from VWAP, risk/reward is unfavorable — <span class="c-warn">wait for pullback</span></div></div>
     </div>
   </div>
 
-  <div class="grid-2">
-    <div class="card card-green">
-      <div class="card-title" style="color:var(--green)">🎯 ENTRY TRIGGER (PILIH 1)</div>
-      <div class="rule-row">
-        <div class="rule-icon">A</div>
-        <div class="rule-desc"><strong>ORB Breakout:</strong> Harga pecah di atas High candle 9:30–9:35 AM ET dengan volume</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">B</div>
-        <div class="rule-desc"><strong>EMA8 Bounce:</strong> Harga pull back ke EMA8, melantun, candle seterusnya hijau dengan badan kuat</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">C</div>
-        <div class="rule-desc"><strong>EMA21 Bounce:</strong> Pullback lebih dalam ke EMA21, melantun kuat, bullish engulfing candle</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">D</div>
-        <div class="rule-desc"><strong>VWAP Reclaim:</strong> Harga jatuh bawah VWAP, recover dan tutup semula atas VWAP dengan volume</div>
+  <div class="sg-g2">
+    <div class="card">
+      <div class="card-hdr" style="color:var(--green)">🎯 ENTRY TRIGGERS — PICK ONE</div>
+      <div class="sg-rules">
+        <div class="sg-rr"><div class="sg-rr-icon">A</div><div class="sg-rr-desc"><strong>ORB Breakout:</strong> Price breaks above High of 9:30–9:35 AM ET candle with volume</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">B</div><div class="sg-rr-desc"><strong>EMA8 Bounce:</strong> Price pulls back to EMA8, bounces, next candle closes green with strong body</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">C</div><div class="sg-rr-desc"><strong>EMA21 Bounce:</strong> Deeper pullback to EMA21, strong bounce, bullish engulfing candle</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">D</div><div class="sg-rr-desc"><strong>VWAP Reclaim:</strong> Price dips below VWAP, recovers and closes back above with volume</div></div>
       </div>
     </div>
-    <div class="card card-amber">
-      <div class="card-title" style="color:var(--amber)">⚠️ ELAK ENTRY JIKA...</div>
-      <div class="rule-row">
-        <div class="rule-icon">✗</div>
-        <div class="rule-desc"><span class="no">TD count 7, 8, atau 9</span> — exhaustion imminent</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">✗</div>
-        <div class="rule-desc"><span class="no">ADX turun</span> walaupun masih di atas 28</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">✗</div>
-        <div class="rule-desc"><span class="no">Harga lebih 0.5% dari VWAP</span> — terlewat masuk</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">✗</div>
-        <div class="rule-desc"><span class="no">Candle dengan upper wick panjang</span> — rejection oleh seller</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">✗</div>
-        <div class="rule-desc"><span class="no">Volume jatuh</span> pada setiap candle hijau berturutan</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">✗</div>
-        <div class="rule-desc"><span class="no">TF5M bearish</span> atau harga bawah VWAP 5M</div>
+    <div class="card">
+      <div class="card-hdr" style="color:var(--yellow)">⚠️ AVOID ENTRY IF...</div>
+      <div class="sg-rules">
+        <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">TD count is 7, 8, or 9</span> — exhaustion imminent</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">ADX is falling</span> even if still above 28</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">Price more than 0.5% above VWAP</span> — too late to chase</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">Long upper wick on candle</span> — seller rejection above</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">Volume declining</span> on consecutive green candles</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">TF5M is bearish</span> or price below 5M VWAP</div></div>
       </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ===== SCENARIOS ===== -->
-<section id="sg-scenarios">
-  <div class="section-header">
-    <span class="section-num">05</span>
-    <span class="section-title">SEMUA SENARIO</span>
-    <span class="section-badge tag-amber">8 SCENARIOS</span>
+<!-- ═══════════════════════════════════════ 05 SCENARIOS -->
+<div class="sg-sec" id="sg-scenarios">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">05</span>
+    <span class="sg-sec-title">ALL SCENARIOS</span>
+    <span class="sg-badge" style="color:var(--yellow);border-color:var(--yellow)">8 SCENARIOS</span>
   </div>
 
-  <!-- SENARIO 1 -->
-  <div class="scenario">
-    <div class="scenario-header" style="background:rgba(0,255,136,0.05)">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="s-num">01</span>
-        <span class="scenario-name highlight-green">ORB BREAKOUT — SETUP TERBAIK</span>
-      </div>
-      <span class="verdict verdict-go">✓ ENTRY</span>
-    </div>
-    <div class="scenario-body">
-      <ul class="condition-list">
-        <li class="met">TF5M bullish — harga atas VWAP dan EMA stack</li>
-        <li class="met">ADX 5M &gt; 20, ADX 1M &gt; 28 mendongak</li>
-        <li class="met">Harga pecah atas High candle 9:30–9:35 AM pada TF1M</li>
-        <li class="met">Volume spike pada candle breakout</li>
-        <li class="met">Candle close atas semua EMA (tangga naik)</li>
-        <li class="met">TD count 1–4 atau tiada number</li>
+  <!-- S1 -->
+  <div class="sg-scenario">
+    <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num">01</span><span class="sg-sc-title c-go">ORB BREAKOUT — BEST SETUP</span></div><span class="sg-verdict sg-v-go">✓ ENTRY</span></div>
+    <div class="sg-sc-body">
+      <ul class="sg-conds">
+        <li class="met">TF5M bullish — price above VWAP and EMA stack in order</li>
+        <li class="met">ADX 5M &gt; 20, ADX 1M &gt; 28 and rising</li>
+        <li class="met">Price breaks above High of 9:30–9:35 AM ET candle on TF1M</li>
+        <li class="met">Volume spike on breakout candle</li>
+        <li class="met">Candle closes above all EMAs (full bullish stack)</li>
+        <li class="met">TD count 1–4 or no number showing</li>
       </ul>
-      <div class="action-box action-go">
-        ✓ MASUK: Limit order tepat di atas High candle breakout / Market order pada close candle breakout<br>
-        ✓ STOP: Bawah Low candle breakout atau bawah EMA21<br>
-        ✓ TARGET: 2× atau 3× jarak stop (TP1 = 2R, TP2 = 3R)
-      </div>
+      <div class="sg-action sg-a-go">✓ ENTRY: Limit order just above breakout candle High, or market on candle close<br>✓ STOP: Below breakout candle Low or below EMA21<br>✓ TARGET: TP1 = 2R &nbsp;|&nbsp; TP2 = 3R</div>
     </div>
   </div>
 
-  <!-- SENARIO 2 -->
-  <div class="scenario">
-    <div class="scenario-header" style="background:rgba(0,255,136,0.04)">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="s-num">02</span>
-        <span class="scenario-name highlight-green">EMA8 PULLBACK BOUNCE</span>
-      </div>
-      <span class="verdict verdict-go">✓ ENTRY</span>
-    </div>
-    <div class="scenario-body">
-      <p style="color:var(--text-mid);font-size:13px;margin-bottom:12px;">Harga dalam uptrend, pull back ke EMA8, kemudian bounce semula. Candle hijau tanpa TD number — ini normal dalam mid-trend.</p>
-      <ul class="condition-list">
-        <li class="met">TF5M masih bullish</li>
-        <li class="met">Harga menyentuh atau menghampiri EMA8 pada TF1M</li>
-        <li class="met">Candle bounce dengan badan hijau &gt; 60% dari range</li>
-        <li class="met">Volume pada candle bounce lebih tinggi dari average</li>
-        <li class="met">EMA8 slope masih condong ke atas</li>
-        <li class="warn">TD number mungkin tiada — ini OK selagi syarat lain terpenuhi</li>
+  <!-- S2 -->
+  <div class="sg-scenario">
+    <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num">02</span><span class="sg-sc-title c-go">EMA8 PULLBACK BOUNCE</span></div><span class="sg-verdict sg-v-go">✓ ENTRY</span></div>
+    <div class="sg-sc-body">
+      <p class="sg-sc-desc">Price is in an uptrend, pulls back to EMA8, then bounces. Green candle without a TD count — normal mid-trend behavior.</p>
+      <ul class="sg-conds">
+        <li class="met">TF5M still bullish</li>
+        <li class="met">Price touches or approaches EMA8 on TF1M</li>
+        <li class="met">Bounce candle green body &gt; 60% of range</li>
+        <li class="met">Volume on bounce candle above average</li>
+        <li class="met">EMA8 slope still pointing up</li>
+        <li class="warn">No TD count showing — OK if all other conditions met</li>
       </ul>
-      <div class="action-box action-go">
-        ✓ MASUK: Close candle bounce yang kuat di atas EMA8<br>
-        ✓ STOP: Bawah Low candle bounce (atau -0.15%)<br>
-        ✓ TARGET: Swing High sebelumnya atau 2R minimum
-      </div>
+      <div class="sg-action sg-a-go">✓ ENTRY: Close of strong bounce candle above EMA8<br>✓ STOP: Below bounce candle Low (or –0.15%)<br>✓ TARGET: Previous swing high or minimum 2R</div>
     </div>
   </div>
 
-  <!-- SENARIO 3 -->
-  <div class="scenario">
-    <div class="scenario-header" style="background:rgba(0,255,136,0.03)">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="s-num">03</span>
-        <span class="scenario-name highlight-green">EMA21 DEEP PULLBACK BOUNCE</span>
-      </div>
-      <span class="verdict verdict-go">✓ ENTRY (REDUCE SIZE)</span>
-    </div>
-    <div class="scenario-body">
-      <p style="color:var(--text-mid);font-size:13px;margin-bottom:12px;">Pullback lebih dalam — harga tembus EMA8 tapi melantun kuat di EMA21. Ini adalah "second chance" entry.</p>
-      <ul class="condition-list">
-        <li class="met">TF5M masih bullish (WAJIB)</li>
-        <li class="met">Harga turun bawah EMA8 tapi TIDAK tutup bawah EMA21</li>
-        <li class="met">Candle bounce bullish kuat di EMA21 (engulfing atau hammer)</li>
-        <li class="met">Volume meningkat pada candle bounce</li>
-        <li class="warn">Reduce position size 50% — risiko lebih tinggi</li>
-        <li class="fail">TF5M bearish? SKIP terus — jangan masuk</li>
+  <!-- S3 -->
+  <div class="sg-scenario">
+    <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num">03</span><span class="sg-sc-title c-go">EMA21 DEEP PULLBACK BOUNCE</span></div><span class="sg-verdict sg-v-go">✓ ENTRY (REDUCE SIZE)</span></div>
+    <div class="sg-sc-body">
+      <p class="sg-sc-desc">Deeper pullback — price pierces EMA8 but bounces strongly at EMA21. A "second chance" entry with higher risk.</p>
+      <ul class="sg-conds">
+        <li class="met">TF5M still bullish (REQUIRED)</li>
+        <li class="met">Price drops below EMA8 but does NOT close below EMA21</li>
+        <li class="met">Strong bullish bounce candle at EMA21 (engulfing or hammer)</li>
+        <li class="met">Volume increases on bounce candle</li>
+        <li class="warn">Reduce position size 50% — this is a higher risk setup</li>
+        <li class="fail">TF5M bearish? SKIP entirely — do not enter</li>
       </ul>
-      <div class="action-box action-go">
-        ✓ MASUK: Close candle yang recover atas EMA8 semula<br>
-        ✓ STOP: Close 1M bawah EMA21 = keluar serta-merta<br>
-        ✓ SIZE: 50% dari saiz biasa — ini setup lebih berisiko
-      </div>
+      <div class="sg-action sg-a-go">✓ ENTRY: Close of candle that recovers back above EMA8<br>✓ STOP: 1M close below EMA21 = exit immediately<br>✓ SIZE: 50% of normal — elevated risk</div>
     </div>
   </div>
 
-  <!-- SENARIO 4 -->
-  <div class="scenario">
-    <div class="scenario-header" style="background:rgba(0,229,255,0.04)">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="s-num">04</span>
-        <span class="scenario-name" style="color:var(--cyan)">CANDLE HIJAU TANPA TD NUMBER</span>
-      </div>
-      <span class="verdict verdict-go">✓ BOLEH ENTRY</span>
-    </div>
-    <div class="scenario-body">
-      <p style="color:var(--text-mid);font-size:13px;margin-bottom:12px;">TD number hanya muncul pada candle 1 (mula count) dan candle 9 (exhaustion). Mid-trend candles (2–8) tiada number — ini NORMAL.</p>
-      <ul class="condition-list">
-        <li class="met">Candle hijau bersiri tanpa TD number</li>
-        <li class="met">Harga atas semua EMA dan VWAP</li>
-        <li class="met">Volume tidak mengecut pada tiap candle</li>
-        <li class="met">EMA8 slope masih mendongak</li>
-        <li class="warn">Body candle mesti &gt; 60% range — elak candle kecil/doji</li>
-        <li class="fail">Volume shrinking pada 3 candle berturutan? Jangan kejar</li>
+  <!-- S4 -->
+  <div class="sg-scenario">
+    <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num">04</span><span class="sg-sc-title" style="color:var(--accent)">GREEN CANDLE — NO TD COUNT</span></div><span class="sg-verdict sg-v-go">✓ CAN ENTER</span></div>
+    <div class="sg-sc-body">
+      <p class="sg-sc-desc">TD numbers only appear on candle 1 (count start) and candle 9 (exhaustion). Mid-trend candles 2–8 show no number — this is NORMAL.</p>
+      <ul class="sg-conds">
+        <li class="met">Consecutive green candles with no TD number showing</li>
+        <li class="met">Price above all EMAs and VWAP</li>
+        <li class="met">Volume not shrinking on each candle</li>
+        <li class="met">EMA8 slope still pointing up</li>
+        <li class="warn">Candle body must be &gt; 60% of range — avoid doji / small bodies</li>
+        <li class="fail">Volume shrinking 3 consecutive candles? Don't chase</li>
       </ul>
-      <div class="action-box action-go">
-        ✓ GUNA: Kualiti candle + volume sebagai replacement untuk TD signal<br>
-        ✓ MASUK: Candle close di atas EMA8 dengan badan kuat<br>
-        ✓ STOP: Bawah EMA8 atau bawah Low candle entry
-      </div>
+      <div class="sg-action sg-a-go">✓ USE: Candle quality + volume as replacement for TD signal<br>✓ ENTRY: Candle close above EMA8 with strong body<br>✓ STOP: Below EMA8 or below entry candle Low</div>
     </div>
   </div>
 
-  <!-- SENARIO 5 -->
-  <div class="scenario">
-    <div class="scenario-header" style="background:rgba(255,179,0,0.05)">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="s-num">05</span>
-        <span class="scenario-name highlight-amber">TD COUNT 7–9 — EXHAUSTION ZONE</span>
-      </div>
-      <span class="verdict verdict-wait">⏳ TUNGGU</span>
-    </div>
-    <div class="scenario-body">
-      <p style="color:var(--text-mid);font-size:13px;margin-bottom:12px;">TD 9 adalah isyarat potensi reversal atau pause. Harga boleh terus naik selepas TD 9 tapi risiko lebih tinggi.</p>
-      <ul class="condition-list">
-        <li class="fail">TD count berada di 7, 8, atau 9</li>
-        <li class="warn">Ini bukan "jangan trade langsung" — ini "tunggu reset"</li>
-        <li class="met">Selepas TD 9 print, tunggu pullback ke EMA8/EMA21</li>
-        <li class="met">Cari TD 1 baru selepas reset untuk entry segar</li>
-        <li class="fail">Jangan kejar breakout selepas TD 9 — high risk</li>
+  <!-- S5 -->
+  <div class="sg-scenario">
+    <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num">05</span><span class="sg-sc-title c-warn">TD COUNT 7–9 — EXHAUSTION ZONE</span></div><span class="sg-verdict sg-v-wait">⏳ WAIT</span></div>
+    <div class="sg-sc-body">
+      <p class="sg-sc-desc">TD 9 signals a potential reversal or pause. Price can still push higher after TD 9 but risk is significantly elevated.</p>
+      <ul class="sg-conds">
+        <li class="fail">TD count is at 7, 8, or 9</li>
+        <li class="warn">This means "wait for reset" — not "never trade"</li>
+        <li class="met">After TD 9 prints, wait for pullback to EMA8 or EMA21</li>
+        <li class="met">Look for a fresh TD 1 after the reset for a clean entry</li>
+        <li class="fail">Do not chase breakouts after TD 9 — high risk</li>
       </ul>
-      <div class="action-box action-wait">
-        ⏳ TUNGGU TD reset (turun ke TD 1 semula)<br>
-        ⏳ Kalau masih pegang position, pertimbang jual separuh (TP1)<br>
-        ⏳ Jangan masuk position baru sampai TD count mulai semula
-      </div>
+      <div class="sg-action sg-a-wait">⏳ WAIT for TD reset (count returns to TD 1)<br>⏳ If holding position, consider selling half at TP1<br>⏳ No new entries until TD count restarts</div>
     </div>
   </div>
 
-  <!-- SENARIO 6 -->
-  <div class="scenario">
-    <div class="scenario-header" style="background:rgba(255,51,85,0.05)">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="s-num">06</span>
-        <span class="scenario-name highlight-red">ADX RENDAH / SIDEWAYS MARKET</span>
-      </div>
-      <span class="verdict verdict-no">✕ SKIP</span>
-    </div>
-    <div class="scenario-body">
-      <p style="color:var(--text-mid);font-size:13px;margin-bottom:12px;">ADX di bawah 25 bermakna tiada trend. Harga bergerak sideways — candle hijau dan merah berselang-seli tanpa arah jelas.</p>
-      <ul class="condition-list">
-        <li class="fail">ADX 1M di bawah 25</li>
-        <li class="fail">ADX 5M di bawah 20</li>
-        <li class="warn">Candle hijau muncul tapi cepat dibalas candle merah</li>
-        <li class="warn">EMA8 dan EMA21 hampir bertemu atau crossover kerap</li>
-        <li class="fail">Volume rendah dan tidak konsisten</li>
+  <!-- S6 -->
+  <div class="sg-scenario">
+    <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num">06</span><span class="sg-sc-title c-no">LOW ADX / SIDEWAYS MARKET</span></div><span class="sg-verdict sg-v-no">✕ SKIP</span></div>
+    <div class="sg-sc-body">
+      <p class="sg-sc-desc">ADX below 25 means no trend exists. Price moves sideways — green and red candles alternate with no clear direction.</p>
+      <ul class="sg-conds">
+        <li class="fail">ADX 1M below 25</li>
+        <li class="fail">ADX 5M below 20</li>
+        <li class="warn">Green candles appear but are quickly reversed by red</li>
+        <li class="warn">EMA8 and EMA21 nearly touching or frequently crossing</li>
+        <li class="fail">Volume low and inconsistent</li>
       </ul>
-      <div class="action-box action-no">
-        ✕ JANGAN TRADE — ini adalah "Chop Zone"<br>
-        ✕ Tunggu ADX melebihi 28 dan mendongak<br>
-        ✕ Gunakan masa ini untuk: note down levels, bersedia untuk breakout seterusnya
-      </div>
+      <div class="sg-action sg-a-no">✕ DO NOT TRADE — this is the "Chop Zone"<br>✕ Wait for ADX to exceed 28 and slope upward<br>✕ Use this time to mark key levels and prepare for the next breakout</div>
     </div>
   </div>
 
-  <!-- SENARIO 7 -->
-  <div class="scenario">
-    <div class="scenario-header" style="background:rgba(255,51,85,0.06)">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="s-num">07</span>
-        <span class="scenario-name highlight-red">HARGA BAWAH VWAP — DOWNTREND</span>
-      </div>
-      <span class="verdict verdict-no">✕ NO LONG</span>
-    </div>
-    <div class="scenario-body">
-      <p style="color:var(--text-mid);font-size:13px;margin-bottom:12px;">Harga di bawah VWAP bermakna seller lebih kuat. Semua candle hijau dalam situasi ini adalah "dead cat bounce" atau perangkap bull.</p>
-      <ul class="condition-list">
-        <li class="fail">Harga di bawah VWAP pada TF5M</li>
-        <li class="fail">EMA stack terbalik (bearish order)</li>
-        <li class="warn">Ada candle hijau tapi dalam downtrend besar</li>
-        <li class="warn">VWAP menjadi resistance di atas</li>
+  <!-- S7 -->
+  <div class="sg-scenario">
+    <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num">07</span><span class="sg-sc-title c-no">PRICE BELOW VWAP — DOWNTREND</span></div><span class="sg-verdict sg-v-no">✕ NO LONG</span></div>
+    <div class="sg-sc-body">
+      <p class="sg-sc-desc">Price below VWAP means sellers are in control. Any green candles here are dead cat bounces or bull traps.</p>
+      <ul class="sg-conds">
+        <li class="fail">Price below VWAP on TF5M</li>
+        <li class="fail">EMA stack inverted (bearish order)</li>
+        <li class="warn">Green candles appear within the larger downtrend</li>
+        <li class="warn">VWAP acting as resistance overhead</li>
       </ul>
-      <div class="action-box action-no">
-        ✕ JANGAN LONG dalam situasi ini<br>
-        → Pilihan 1: SKIP dan tunggu VWAP reclaim<br>
-        → Pilihan 2: Short setup (jika sistem anda cover short)<br>
-        → Pilihan 3: Tunggu harga recover atas VWAP + confirm dengan volume
-      </div>
+      <div class="sg-action sg-a-no">✕ DO NOT GO LONG in this condition<br>→ Option 1: SKIP — wait for VWAP reclaim<br>→ Option 2: Short setup (if your system covers shorting)<br>→ Option 3: Wait for price to reclaim VWAP and confirm with volume</div>
     </div>
   </div>
 
-  <!-- SENARIO 8 -->
-  <div class="scenario">
-    <div class="scenario-header" style="background:rgba(0,255,136,0.04)">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="s-num">08</span>
-        <span class="scenario-name highlight-green">VWAP RECLAIM — RECOVERY SETUP</span>
-      </div>
-      <span class="verdict verdict-go">✓ ENTRY (WAIT CONFIRM)</span>
-    </div>
-    <div class="scenario-body">
-      <p style="color:var(--text-mid);font-size:13px;margin-bottom:12px;">Harga jatuh bawah VWAP, kemudian recover dan tutup semula atas VWAP. Ini adalah "reversal ke bullish" setup yang powerful.</p>
-      <ul class="condition-list">
-        <li class="met">Harga jatuh bawah VWAP kemudian naik semula</li>
-        <li class="met">Candle 1M TUTUP di atas VWAP (bukan sekadar wick)</li>
-        <li class="met">Volume spike pada candle reclaim</li>
-        <li class="met">TF5M menunjukkan tanda pembalikan (candle hijau kuat)</li>
-        <li class="warn">Tunggu 1–2 candle confirm selepas reclaim</li>
-        <li class="fail">Jangan masuk pada candle pertama reclaim — terlalu awal</li>
+  <!-- S8 -->
+  <div class="sg-scenario">
+    <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num">08</span><span class="sg-sc-title c-go">VWAP RECLAIM — RECOVERY SETUP</span></div><span class="sg-verdict sg-v-go">✓ WAIT CONFIRM</span></div>
+    <div class="sg-sc-body">
+      <p class="sg-sc-desc">Price dips below VWAP then recovers and closes back above it. A powerful bullish reversal setup.</p>
+      <ul class="sg-conds">
+        <li class="met">Price dips below VWAP then climbs back</li>
+        <li class="met">1M candle CLOSES above VWAP — not just a wick</li>
+        <li class="met">Volume spike on the reclaim candle</li>
+        <li class="met">TF5M shows signs of reversal (strong green candle)</li>
+        <li class="warn">Wait 1–2 confirmation candles after the reclaim</li>
+        <li class="fail">Do not enter on the very first reclaim candle — too early</li>
       </ul>
-      <div class="action-box action-go">
-        ✓ MASUK: Candle ke-2 atau ke-3 selepas VWAP reclaim confirm<br>
-        ✓ STOP: Bawah VWAP (kalau tutup bawah VWAP = trade invalid)<br>
-        ✓ TARGET: Previous swing high atau 2R minimum
-      </div>
+      <div class="sg-action sg-a-go">✓ ENTRY: 2nd or 3rd candle after confirmed VWAP reclaim<br>✓ STOP: Below VWAP (price closing back below = trade invalid)<br>✓ TARGET: Previous swing high or minimum 2R</div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ===== TRADE MANAGEMENT ===== -->
-<section id="sg-management">
-  <div class="section-header">
-    <span class="section-num">06</span>
-    <span class="section-title">TRADE MANAGEMENT</span>
-    <span class="section-badge tag-red">RISK CONTROL</span>
+<!-- ═══════════════════════════════════════ 06 TRADE MANAGEMENT -->
+<div class="sg-sec" id="sg-management">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">06</span>
+    <span class="sg-sec-title">TRADE MANAGEMENT</span>
+    <span class="sg-badge" style="color:var(--red);border-color:var(--red)">RISK CONTROL</span>
   </div>
 
-  <div class="alert alert-amber">
-    <strong>⚠️ KEBENARAN PAHIT:</strong> 70% scalper kalah bukan kerana salah entry — tapi kerana salah MANAGE trade. Stop loss yang betul dan target yang jelas adalah perbezaan antara untung dan rugi jangka panjang.
+  <div class="sg-alert sg-alert-amber">
+    <strong>⚠️ HARSH TRUTH:</strong> 70% of scalpers lose not because of bad entries — but because of poor trade management. A correct stop loss and clear targets are the difference between long-term profit and slow ruin.
   </div>
 
-  <!-- RR Visualizer -->
-  <div class="card card-amber">
-    <div class="card-title" style="color:var(--amber)">📏 RISK:REWARD VISUALIZER — CONTOH TRADE</div>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:8px;">
-      CONTOH: Harga entry $6.50, stop $6.40, target1 $6.70, target2 $6.80
-    </div>
-    <div class="rr-bar">
-      <div class="rr-stop" style="width:30%">STOP -$0.10</div>
-      <div class="rr-entry"></div>
-      <div class="rr-target" style="width:35%;border-color:var(--amber)">TP1 +$0.20 (2R)</div>
-      <div class="rr-target" style="width:35%">TP2 +$0.30 (3R)</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:4px;">
-      <span style="color:var(--red)">← RISK ZONE</span>
-      <span style="color:var(--amber)">ENTRY →</span>
-      <span style="color:var(--green)">← PROFIT ZONE →</span>
-    </div>
-  </div>
-
-  <div class="grid-2">
-    <!-- Stop Loss -->
-    <div class="card card-red">
-      <div class="card-title" style="color:var(--red)">🛑 STOP LOSS RULES</div>
-      <div class="rule-row">
-        <div class="rule-icon">📍</div>
-        <div class="rule-label">INITIAL STOP</div>
-        <div class="rule-desc">Bawah <strong>Low candle entry</strong> ATAU bawah <strong>EMA21</strong> — pilih yang lebih dekat</div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-hdr" style="color:var(--yellow)">📏 RISK:REWARD VISUALIZER — EXAMPLE TRADE</div>
+    <div style="padding:14px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:8px">EXAMPLE: Entry $6.50 · Stop $6.40 · TP1 $6.70 · TP2 $6.80</div>
+      <div class="sg-rr-bar">
+        <div class="sg-rr-stop" style="width:28%">STOP –$0.10</div>
+        <div class="sg-rr-entry"></div>
+        <div class="sg-rr-target" style="width:36%;border-color:var(--yellow)">TP1 +$0.20 (2R)</div>
+        <div class="sg-rr-target" style="width:36%">TP2 +$0.30 (3R)</div>
       </div>
-      <div class="rule-row">
-        <div class="rule-icon">📏</div>
-        <div class="rule-label">MAX JARAK</div>
-        <div class="rule-desc">Tidak lebih dari <strong>0.20% dari harga entry</strong>. Kalau stop terlalu jauh, skip trade</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">🔄</div>
-        <div class="rule-label">TRAILING STOP</div>
-        <div class="rule-desc">Selepas untung 1R, gerak stop ke <strong>breakeven</strong>. Selepas 2R, trail stop di bawah EMA8</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">⚡</div>
-        <div class="rule-label">CANDLE EXIT</div>
-        <div class="rule-desc"><span class="no">Candle 1M TUTUP bawah EMA21</span> = keluar serta-merta tanpa soal</div>
-      </div>
-    </div>
-
-    <!-- Profit Target -->
-    <div class="card card-green">
-      <div class="card-title" style="color:var(--green)">🎯 PROFIT TARGET RULES</div>
-      <div class="rule-row">
-        <div class="rule-icon">1️⃣</div>
-        <div class="rule-label">TP1 (50%)</div>
-        <div class="rule-desc">Jual <strong>50% position</strong> pada 2R. Lock-in profit, gerak stop ke breakeven</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">2️⃣</div>
-        <div class="rule-label">TP2 (30%)</div>
-        <div class="rule-desc">Jual <strong>30% lagi</strong> pada 3R atau dekat swing high / resistance level</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">3️⃣</div>
-        <div class="rule-label">RUNNER (20%)</div>
-        <div class="rule-desc">Biar <strong>20% lagi berjalan</strong> dengan trailing stop di EMA8 — untuk trade exceptional</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">🏁</div>
-        <div class="rule-label">FULL EXIT</div>
-        <div class="rule-desc">Keluar semua kalau <span class="no">candle tutup bawah EMA21</span> pada bila-bila masa</div>
+      <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:5px">
+        <span class="c-no">← RISK ZONE</span><span class="c-warn">ENTRY →</span><span class="c-go">← PROFIT ZONE →</span>
       </div>
     </div>
   </div>
 
-  <!-- Position Sizing -->
-  <div class="card card-blue">
-    <div class="card-title" style="color:var(--blue)">💰 POSITION SIZING — FORMULA</div>
-    <div style="background:var(--bg3);border:1px solid var(--border2);padding:20px;font-family:var(--mono);font-size:14px;line-height:2.4;margin-bottom:16px;">
-      <div style="color:var(--text-dim);font-size:11px;margin-bottom:8px;letter-spacing:2px;">KIRAAN SAIZ POSITION:</div>
-      <div><span style="color:var(--cyan)">MAX RISK</span> = Akaun × 1% &nbsp;&nbsp;&nbsp; <span style="color:var(--text-dim)">(contoh: $10,000 × 1% = $100)</span></div>
-      <div><span style="color:var(--amber)">STOP DISTANCE</span> = Entry Price - Stop Price &nbsp;&nbsp;&nbsp; <span style="color:var(--text-dim)">(contoh: $6.50 - $6.40 = $0.10)</span></div>
-      <div><span style="color:var(--green)">SHARES</span> = MAX RISK ÷ STOP DISTANCE &nbsp;&nbsp;&nbsp; <span style="color:var(--text-dim)">(contoh: $100 ÷ $0.10 = 1,000 shares)</span></div>
+  <div class="sg-g2">
+    <div class="card">
+      <div class="card-hdr" style="color:var(--red)">🛑 STOP LOSS RULES</div>
+      <div class="sg-rules">
+        <div class="sg-rr"><div class="sg-rr-icon">📍</div><div class="sg-rr-lbl">INITIAL STOP</div><div class="sg-rr-desc">Below <strong>entry candle Low</strong> OR below <strong>EMA21</strong> — whichever is closer</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">📏</div><div class="sg-rr-lbl">MAX DISTANCE</div><div class="sg-rr-desc">No more than <strong>0.20% from entry price</strong>. If stop is too wide, skip the trade</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">🔄</div><div class="sg-rr-lbl">TRAIL STOP</div><div class="sg-rr-desc">After 1R profit, move stop to <strong>breakeven</strong>. After 2R, trail stop below EMA8</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">⚡</div><div class="sg-rr-lbl">CANDLE EXIT</div><div class="sg-rr-desc"><span class="c-no">1M candle CLOSES below EMA21</span> = exit immediately, no exceptions</div></div>
+      </div>
     </div>
-    <div class="grid-3">
-      <div style="text-align:center;padding:12px;border:1px solid var(--border);background:var(--bg3)">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px;">AKAUN $5K</div>
-        <div style="font-family:var(--display);font-size:20px;color:var(--green)">$50</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim)">MAX RISK</div>
-      </div>
-      <div style="text-align:center;padding:12px;border:1px solid var(--border);background:var(--bg3)">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px;">AKAUN $10K</div>
-        <div style="font-family:var(--display);font-size:20px;color:var(--green)">$100</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim)">MAX RISK</div>
-      </div>
-      <div style="text-align:center;padding:12px;border:1px solid var(--border);background:var(--bg3)">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px;">AKAUN $25K</div>
-        <div style="font-family:var(--display);font-size:20px;color:var(--green)">$250</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim)">MAX RISK</div>
+    <div class="card">
+      <div class="card-hdr" style="color:var(--green)">🎯 PROFIT TARGET RULES</div>
+      <div class="sg-rules">
+        <div class="sg-rr"><div class="sg-rr-icon">1️⃣</div><div class="sg-rr-lbl">TP1 — 50%</div><div class="sg-rr-desc">Sell <strong>50% of position</strong> at 2R. Lock in profit, move stop to breakeven</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">2️⃣</div><div class="sg-rr-lbl">TP2 — 30%</div><div class="sg-rr-desc">Sell <strong>another 30%</strong> at 3R or near swing high / resistance</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">3️⃣</div><div class="sg-rr-lbl">RUNNER — 20%</div><div class="sg-rr-desc">Let <strong>the remaining 20% run</strong> with a trailing stop at EMA8</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">🏁</div><div class="sg-rr-lbl">FULL EXIT</div><div class="sg-rr-desc">Exit everything if <span class="c-no">any candle closes below EMA21</span></div></div>
       </div>
     </div>
   </div>
 
-  <!-- Hold Rules -->
-  <div class="card card-cyan">
-    <div class="card-title" style="color:var(--cyan)">⏸ HOLD vs EXIT — DECISION TREE</div>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>SITUASI</th>
-          <th>TINDAKAN</th>
-          <th>SEBAB</th>
-        </tr>
-      </thead>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-hdr" style="color:var(--accent)">💰 POSITION SIZING FORMULA</div>
+    <div style="padding:14px">
+      <div class="sg-formula">
+        <span class="lbl">CALCULATION:</span>
+        <div><span style="color:var(--accent)">MAX RISK</span> = Account × 1% &nbsp;<span style="color:var(--dim);font-size:11px">(e.g. $10,000 × 1% = $100)</span></div>
+        <div><span style="color:var(--yellow)">STOP DISTANCE</span> = Entry − Stop &nbsp;<span style="color:var(--dim);font-size:11px">(e.g. $6.50 − $6.40 = $0.10)</span></div>
+        <div><span style="color:var(--green)">SHARES</span> = MAX RISK ÷ STOP DISTANCE &nbsp;<span style="color:var(--dim);font-size:11px">(e.g. $100 ÷ $0.10 = 1,000 shares)</span></div>
+      </div>
+      <div class="sg-g3">
+        <div class="sg-kpi"><div class="sg-kpi-lbl">$5K ACCOUNT</div><div class="sg-kpi-val">$50</div><div class="sg-kpi-sub">MAX RISK/TRADE</div></div>
+        <div class="sg-kpi"><div class="sg-kpi-lbl">$10K ACCOUNT</div><div class="sg-kpi-val">$100</div><div class="sg-kpi-sub">MAX RISK/TRADE</div></div>
+        <div class="sg-kpi"><div class="sg-kpi-lbl">$25K ACCOUNT</div><div class="sg-kpi-val">$250</div><div class="sg-kpi-sub">MAX RISK/TRADE</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" style="color:var(--accent)">⏸ HOLD vs EXIT — DECISION TREE</div>
+    <table class="sg-table">
+      <thead><tr><th>SITUATION</th><th>ACTION</th><th>REASON</th></tr></thead>
       <tbody>
-        <tr>
-          <td>Harga atas EMA8, candle hijau berturutan</td>
-          <td><span class="yes">✓ HOLD — duduk diam</span></td>
-          <td>Trend masih kuat, bagi ia berjalan</td>
-        </tr>
-        <tr>
-          <td>Harga turun ke EMA8, wick tapi tidak tutup bawah</td>
-          <td><span class="warn">⏸ HOLD — awasi</span></td>
-          <td>Test support, belum break</td>
-        </tr>
-        <tr>
-          <td>Harga tutup 1M bawah EMA8, bounce di EMA21</td>
-          <td><span class="warn">⚠ HOLD tapi waspada tinggi</span></td>
-          <td>Pullback dalam, jual separuh jika risiko tinggi</td>
-        </tr>
-        <tr>
-          <td>Harga TUTUP 1M bawah EMA21</td>
-          <td><span class="no">✕ EXIT SEMUA</span></td>
-          <td>Trend break — trade tidak valid</td>
-        </tr>
-        <tr>
-          <td>TD count mencecah 9</td>
-          <td><span class="warn">⚠ JUAL SEPARUH (TP1)</span></td>
-          <td>Exhaustion signal — protect profit</td>
-        </tr>
-        <tr>
-          <td>ADX mula turun drastik</td>
-          <td><span class="warn">⚠ PERTIMBANG EXIT</span></td>
-          <td>Momentum hilang, harga akan slow</td>
-        </tr>
-        <tr>
-          <td>Dah capai TP1 (2R)</td>
-          <td><span class="yes">✓ JUAL 50%, STOP → BE</span></td>
-          <td>Free trade — tiada risiko kerugian</td>
-        </tr>
+        <tr><td>Price above EMA8, consecutive green candles</td><td><span class="c-go">✓ HOLD — stay in</span></td><td>Trend intact, let it run</td></tr>
+        <tr><td>Price drops to EMA8, wick but no close below</td><td><span class="c-warn">⏸ HOLD — watch closely</span></td><td>Testing support, not broken yet</td></tr>
+        <tr><td>Price closes 1M below EMA8, bounces at EMA21</td><td><span class="c-warn">⚠ HIGH ALERT — consider half exit</span></td><td>Deep pullback, elevated risk</td></tr>
+        <tr><td>Price CLOSES 1M below EMA21</td><td><span class="c-no">✕ EXIT ALL IMMEDIATELY</span></td><td>Trend broken — trade invalid</td></tr>
+        <tr><td>TD count reaches 9</td><td><span class="c-warn">⚠ SELL HALF (TP1)</span></td><td>Exhaustion signal — protect profit</td></tr>
+        <tr><td>ADX starts falling sharply</td><td><span class="c-warn">⚠ CONSIDER FULL EXIT</span></td><td>Momentum fading</td></tr>
+        <tr><td>Reached TP1 (2R)</td><td><span class="c-go">✓ SELL 50%, MOVE STOP → BE</span></td><td>Risk-free trade</td></tr>
       </tbody>
     </table>
   </div>
-</section>
-
-<!-- ===== INTERACTIVE CHECKLIST ===== -->
-<section id="sg-checklist">
-  <div class="section-header">
-    <span class="section-num">07</span>
-    <span class="section-title">LIVE TRADE CHECKLIST</span>
-    <span class="section-badge tag-green">INTERACTIVE</span>
-  </div>
-
-  <div class="alert alert-green">
-    Tandakan setiap syarat SEBELUM tekan butang beli. Semua syarat wajib (🔴) mesti check. Semua optional (🟡) tambah markah.
-  </div>
-
-  <div id="sg-checklist-progress" class="progress-ring">
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:2px;">PROGRESS</span>
-    <div class="progress-track" style="flex:1">
-      <div class="progress-fill" id="sg-prog-fill" style="width:0%;background:var(--green)"></div>
-    </div>
-    <span id="sg-prog-text" style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">0/12</span>
-  </div>
-
-  <div style="margin-bottom:8px;margin-top:16px;font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:2px;">▶ TF5M SYARAT (WAJIB)</div>
-
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c1">
-    <div class="check-box">✓</div>
-    <div class="check-text">TF5M: Harga di atas VWAP pada 5 minit</div>
-    <span class="check-tag">5M · WAJIB</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c2">
-    <div class="check-box">✓</div>
-    <div class="check-text">TF5M: EMA8 di atas EMA21, kedua-dua mendongak naik</div>
-    <span class="check-tag">5M · WAJIB</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c3">
-    <div class="check-box">✓</div>
-    <div class="check-text">TF5M: ADX di atas 20 atau trend jelas kelihatan</div>
-    <span class="check-tag">5M · WAJIB</span>
-  </div>
-
-  <div style="margin-bottom:8px;margin-top:20px;font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:2px;">▶ TF1M SYARAT (WAJIB)</div>
-
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c4">
-    <div class="check-box">✓</div>
-    <div class="check-text">TF1M: Harga &gt; EMA8 &gt; EMA21 &gt; VWAP — tangga naik lengkap</div>
-    <span class="check-tag">1M · WAJIB</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c5">
-    <div class="check-box">✓</div>
-    <div class="check-text">TF1M: ADX di atas 28 dan slope ADX sedang naik (mendongak)</div>
-    <span class="check-tag">1M · WAJIB</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c6">
-    <div class="check-box">✓</div>
-    <div class="check-text">TF1M: TD count bukan 7, 8, atau 9 (exhaustion zone)</div>
-    <span class="check-tag">1M · WAJIB</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c7">
-    <div class="check-box">✓</div>
-    <div class="check-text">Volume candle entry lebih tinggi dari purata volume</div>
-    <span class="check-tag">VOL · WAJIB</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c8">
-    <div class="check-box">✓</div>
-    <div class="check-text">Candle TUTUP (close) di atas EMA8 — bukan sekadar wick</div>
-    <span class="check-tag">CANDLE · WAJIB</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'req')" data-id="sg-c9">
-    <div class="check-box">✓</div>
-    <div class="check-text">Waktu trade: 9:30–10:30 AM ET atau 3:00–4:00 PM ET</div>
-    <span class="check-tag">TIME · WAJIB</span>
-  </div>
-
-  <div style="margin-bottom:8px;margin-top:20px;font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:2px;">▶ KUALITI TAMBAHAN (OPTIONAL — TAMBAH KEYAKINAN)</div>
-
-  <div class="check-item" onclick="sgToggleCheck(this,'opt')" data-id="sg-c10">
-    <div class="check-box">✓</div>
-    <div class="check-text">TD count berada di 1–4 (fresh momentum, bukan mid atau late)</div>
-    <span class="check-tag" style="color:var(--amber);border-color:var(--amber)">OPTIONAL</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'opt')" data-id="sg-c11">
-    <div class="check-box">✓</div>
-    <div class="check-text">Candle body melebihi 60% dari total range candle (badan besar)</div>
-    <span class="check-tag" style="color:var(--amber);border-color:var(--amber)">OPTIONAL</span>
-  </div>
-  <div class="check-item" onclick="sgToggleCheck(this,'opt')" data-id="sg-c12">
-    <div class="check-box">✓</div>
-    <div class="check-text">Harga dalam jarak 0.4% dari VWAP (bukan terlalu jauh)</div>
-    <span class="check-tag" style="color:var(--amber);border-color:var(--amber)">OPTIONAL</span>
-  </div>
-
-  <div id="sg-checklist-result"></div>
-
-  <div style="display:flex;gap:12px;margin-top:16px;">
-    <button class="btn btn-green" onclick="sgEvaluateChecklist()">▶ EVALUATE TRADE</button>
-    <button class="btn btn-red" onclick="sgResetChecklist()">↺ RESET</button>
-  </div>
-</section>
-
-<!-- ===== KESILAPAN ===== -->
-<section id="sg-mistakes">
-  <div class="section-header">
-    <span class="section-num">08</span>
-    <span class="section-title">KESILAPAN LAZIM</span>
-    <span class="section-badge tag-red">AVOID THIS</span>
-  </div>
-
-  <div class="grid-2">
-    <div class="card card-red">
-      <div class="card-title" style="color:var(--red)">💀 KESILAPAN MEMATIKAN</div>
-      <div class="rule-row">
-        <div class="rule-icon">1</div>
-        <div class="rule-desc"><span class="no">Trading tanpa semak TF5M dulu</span> — masuk dalam downtrend tanpa sedar</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">2</div>
-        <div class="rule-desc"><span class="no">Tiada stop loss</span> — satu trade boleh hapus 10 trade yang menang</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">3</div>
-        <div class="rule-desc"><span class="no">Kejar breakout selepas TD 9</span> — beli tepat sebelum reversal</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">4</div>
-        <div class="rule-desc"><span class="no">Trade masa lunch (11:30–2:00 PM)</span> — volume rendah, fake moves</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">5</div>
-        <div class="rule-desc"><span class="no">Average down tanpa plan</span> — menambah saiz pada trade yang kalah</div>
-      </div>
-    </div>
-    <div class="card card-amber">
-      <div class="card-title" style="color:var(--amber)">🧠 KESILAPAN PSIKOLOGI</div>
-      <div class="rule-row">
-        <div class="rule-icon">1</div>
-        <div class="rule-desc"><span class="warn">Jual terlalu awal</span> kerana takut — padahal trend masih kuat</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">2</div>
-        <div class="rule-desc"><span class="warn">FOMO entry</span> — masuk lambat selepas candle dah naik banyak</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">3</div>
-        <div class="rule-desc"><span class="warn">Revenge trade</span> — masuk segera selepas rugi untuk "recover"</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">4</div>
-        <div class="rule-desc"><span class="warn">Overtrading</span> — trade terlalu banyak sehari, kena slippage dan komisyen</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-icon">5</div>
-        <div class="rule-desc"><span class="warn">Ignore stop loss</span> — "sekejap je, nanti recover" — ini cara rugi besar</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="alert alert-green" style="margin-top:8px;">
-    <strong>🎯 PERATURAN EMAS:</strong> Kalau ada keraguan — JANGAN masuk. Trade seterusnya sentiasa ada. Modal yang habis tidak kembali. <em>"When in doubt, stay out."</em>
-  </div>
-</section>
-
 </div>
 
-<!-- FOOTER -->
-<div style="position:relative;z-index:1;border-top:1px solid var(--border);padding:16px 24px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:2px;">
-  SCALP PRO v2.0 &nbsp;·&nbsp; US EQUITIES &nbsp;·&nbsp; TF1M + TF5M &nbsp;·&nbsp; MOOMOO MULTI-EMA &nbsp;·&nbsp; FOR EDUCATIONAL PURPOSES ONLY
+<!-- ═══════════════════════════════════════ 07 CHECKLIST -->
+<div class="sg-sec" id="sg-checklist">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">07</span>
+    <span class="sg-sec-title">LIVE TRADE CHECKLIST</span>
+    <span class="sg-badge" style="color:var(--green);border-color:var(--green)">INTERACTIVE</span>
+  </div>
+
+  <div class="sg-alert sg-alert-green">Tick each condition BEFORE hitting buy. All <strong>REQUIRED</strong> items must be checked. Optional items boost confidence.</div>
+
+  <div class="sg-prog-wrap">
+    <span style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px">PROGRESS</span>
+    <div class="sg-prog-track"><div class="sg-prog-fill" id="sg-prog-fill" style="width:0%;background:var(--green)"></div></div>
+    <span id="sg-prog-text" style="font-family:var(--mono);font-size:10px;color:var(--dim)">0/12</span>
+  </div>
+
+  <div style="margin:16px 0 8px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px">▶ TF5M CONDITIONS — REQUIRED</div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c1"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: Price is above VWAP on the 5-minute chart</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c2"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: EMA8 is above EMA21, both slopes pointing up</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c3"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: ADX above 20 or clear trend is visible</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
+
+  <div style="margin:18px 0 8px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px">▶ TF1M CONDITIONS — REQUIRED</div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c4"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: Price &gt; EMA8 &gt; EMA21 &gt; VWAP — full bullish stack</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c5"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: ADX above 28 and slope is rising</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c6"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: TD count is NOT 7, 8, or 9 (exhaustion zone)</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c7"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Entry candle volume is above average</div><span class="sg-ci-tag">VOL · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c8"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Candle CLOSES above EMA8 — not just a wick touch</div><span class="sg-ci-tag">CANDLE · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c9"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Trade time: 9:30–10:30 AM ET or 3:00–4:00 PM ET</div><span class="sg-ci-tag">TIME · REQUIRED</span></div>
+
+  <div style="margin:18px 0 8px;font-family:var(--mono);font-size:10px;color:var(--yellow);letter-spacing:2px">▶ QUALITY BOOSTERS — OPTIONAL</div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c10"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TD count is 1–4 (fresh momentum, early in the cycle)</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c11"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Candle body exceeds 60% of total candle range</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c12"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Price within 0.4% of VWAP (not over-extended)</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
+
+  <div id="sg-checklist-result" class="sg-cl-result"></div>
+  <div style="display:flex;gap:12px;margin-top:14px">
+    <button class="sg-btn sg-btn-go" onclick="sgEvaluateChecklist()">▶ EVALUATE TRADE</button>
+    <button class="sg-btn sg-btn-red" onclick="sgResetChecklist()">↺ RESET</button>
+  </div>
 </div>
 
-<script>
-  // Clock
-  function updateClock() {
-    const now = new Date();
-    const et = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
-    const h = String(et.getHours()).padStart(2,'0');
-    const m = String(et.getMinutes()).padStart(2,'0');
-    const s = String(et.getSeconds()).padStart(2,'0');
-    document.getElementById('clock').textContent = `${h}:${m}:${s} ET`;
+<!-- ═══════════════════════════════════════ 08 MISTAKES -->
+<div class="sg-sec" id="sg-mistakes">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">08</span>
+    <span class="sg-sec-title">COMMON MISTAKES</span>
+    <span class="sg-badge" style="color:var(--red);border-color:var(--red)">AVOID THESE</span>
+  </div>
 
-    // Session indicator
-    const totalMin = et.getHours() * 60 + et.getMinutes();
-    const badge = document.querySelector('.session-badge');
-    if (totalMin >= 570 && totalMin < 630) {
-      badge.style.borderColor = 'var(--green)';
-      badge.style.color = 'var(--green)';
-      badge.textContent = '🟢 PRIME SESSION';
-    } else if (totalMin >= 900 && totalMin < 960) {
-      badge.style.borderColor = 'var(--amber)';
-      badge.style.color = 'var(--amber)';
-      badge.textContent = '🟡 CLOSING SESSION';
-    } else {
-      badge.style.borderColor = 'var(--text-dim)';
-      badge.style.color = 'var(--text-dim)';
-      badge.textContent = 'TF1M · TF5M';
-    }
-  }
+  <div class="sg-g2">
+    <div class="card">
+      <div class="card-hdr" style="color:var(--red)">💀 FATAL MISTAKES</div>
+      <div class="sg-rules">
+        <div class="sg-rr"><div class="sg-rr-icon">1</div><div class="sg-rr-desc"><span class="c-no">Trading without checking TF5M first</span> — entering a downtrend without realising it</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">2</div><div class="sg-rr-desc"><span class="c-no">No stop loss</span> — one trade can wipe out 10 winners</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">3</div><div class="sg-rr-desc"><span class="c-no">Chasing breakouts after TD 9</span> — buying right before a reversal</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">4</div><div class="sg-rr-desc"><span class="c-no">Trading during lunch (11:30 AM–2:00 PM ET)</span> — low volume, fake moves everywhere</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">5</div><div class="sg-rr-desc"><span class="c-no">Averaging down without a plan</span> — adding size to a losing position</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="color:var(--yellow)">🧠 PSYCHOLOGY MISTAKES</div>
+      <div class="sg-rules">
+        <div class="sg-rr"><div class="sg-rr-icon">1</div><div class="sg-rr-desc"><span class="c-warn">Exiting too early out of fear</span> — when the trend is still perfectly intact</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">2</div><div class="sg-rr-desc"><span class="c-warn">FOMO entry</span> — chasing after the candle has already moved far</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">3</div><div class="sg-rr-desc"><span class="c-warn">Revenge trading</span> — immediately re-entering after a loss to "recover"</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">4</div><div class="sg-rr-desc"><span class="c-warn">Overtrading</span> — too many trades per day, slippage and commissions kill the edge</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">5</div><div class="sg-rr-desc"><span class="c-warn">Moving the stop loss</span> — "just a bit longer, it'll recover" — this is how large losses happen</div></div>
+      </div>
+    </div>
+  </div>
 
-  setInterval(updateClock, 1000);
-  updateClock();
+  <div class="sg-alert sg-alert-green" style="margin-top:8px">
+    <strong>🎯 GOLDEN RULE:</strong> If in doubt — STAY OUT. The next setup is always coming. Lost capital never comes back. <em>"When in doubt, stay out."</em>
+  </div>
+</div>
 
-  // Nav active state on scroll
-  const sections = document.querySelectorAll('section');
-  const navTabs = document.querySelectorAll('.nav-tab');
+<!-- Footer -->
+<div style="border-top:1px solid var(--border);padding:12px 0;text-align:center;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px;margin-top:16px">
+  SCALP PRO v2.0 &nbsp;·&nbsp; US EQUITIES &nbsp;·&nbsp; TF1M + TF5M &nbsp;·&nbsp; MOOMOO MULTI-EMA &nbsp;·&nbsp; EDUCATIONAL PURPOSES ONLY
+</div>
 
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => {
-      if (window.scrollY >= s.offsetTop - 140) current = s.id;
-    });
-    navTabs.forEach(tab => {
-      tab.classList.remove('active');
-      if (tab.getAttribute('href') === '#' + current) tab.classList.add('active');
-    });
-  });
-
-  // Checklist
-  let checkedReq = new Set();
-  let checkedOpt = new Set();
-  const totalReq = 9;
-
-  function sgToggleCheck(el, type) {
-    if (el.classList.contains('blocked')) return;
-    const id = el.dataset.id;
-    const isChecked = el.classList.toggle('checked');
-
-    if (type === 'req') {
-      isChecked ? checkedReq.add(id) : checkedReq.delete(id);
-    } else {
-      isChecked ? checkedOpt.add(id) : checkedOpt.delete(id);
-    }
-
-    const total = checkedReq.size + checkedOpt.size;
-    const maxTotal = 12;
-    const pct = Math.round((total / maxTotal) * 100);
-    document.getElementById('prog-fill').style.width = pct + '%';
-    document.getElementById('prog-text').textContent = total + '/12';
-
-    // Color based on req
-    const fill = document.getElementById('prog-fill');
-    if (checkedReq.size === totalReq) fill.style.background = 'var(--green)';
-    else if (checkedReq.size >= 6) fill.style.background = 'var(--amber)';
-    else fill.style.background = 'var(--red)';
-  }
-
-  function sgEvaluateChecklist() {
-    const result = document.getElementById('checklist-result');
-    result.style.display = 'block';
-
-    if (checkedReq.size === totalReq && checkedOpt.size === 3) {
-      result.style.border = '1px solid var(--green)';
-      result.style.background = 'var(--green-dim)';
-      result.style.color = '#14532d';
-      result.innerHTML = '✅ &nbsp; SEMUA 12/12 CHECK — SETUP SEMPURNA! MASUK DENGAN FULL SIZE';
-    } else if (checkedReq.size === totalReq) {
-      result.style.border = '1px solid var(--green)';
-      result.style.background = 'var(--green-dim)';
-      result.style.color = '#14532d';
-      result.innerHTML = '✅ &nbsp; SEMUA SYARAT WAJIB TERPENUHI (' + checkedOpt.size + '/3 optional) — BOLEH MASUK';
-    } else {
-      const missing = totalReq - checkedReq.size;
-      result.style.border = '1px solid var(--red)';
-      result.style.background = 'var(--red-dim)';
-      result.style.color = '#7f1d1d';
-      result.innerHTML = '⛔ &nbsp; ' + missing + ' SYARAT WAJIB BELUM TERPENUHI — JANGAN MASUK';
-    }
-  }
-
-  function sgResetChecklist() {
-    checkedReq.clear();
-    checkedOpt.clear();
-    document.querySelectorAll('.check-item').forEach(el => el.classList.remove('checked', 'blocked'));
-    document.getElementById('prog-fill').style.width = '0%';
-    document.getElementById('prog-text').textContent = '0/12';
-    document.getElementById('prog-fill').style.background = 'var(--green)';
-    const result = document.getElementById('checklist-result');
-    result.style.display = 'none';
-  }
-</script>
 <script>
 (function() {
-
-  // Clock
+  // ET clock
   function sgUpdateClock() {
-    const now = new Date();
-    const et = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
-    const h = String(et.getHours()).padStart(2,'0');
-    const m = String(et.getMinutes()).padStart(2,'0');
-    const s = String(et.getSeconds()).padStart(2,'0');
-    document.getElementById('sg-clock').textContent = `${h}:${m}:${s} ET`;
-
-    // Session indicator
-    const totalMin = et.getHours() * 60 + et.getMinutes();
-    const badge = document.querySelector('#panel-scalp .session-badge');
-    if (totalMin >= 570 && totalMin < 630) {
-      badge.style.borderColor = 'var(--green)';
-      badge.style.color = 'var(--green)';
-      badge.textContent = '🟢 PRIME SESSION';
-    } else if (totalMin >= 900 && totalMin < 960) {
-      badge.style.borderColor = 'var(--amber)';
-      badge.style.color = 'var(--amber)';
-      badge.textContent = '🟡 CLOSING SESSION';
-    } else {
-      badge.style.borderColor = 'var(--text-dim)';
-      badge.style.color = 'var(--text-dim)';
-      badge.textContent = 'TF1M · TF5M';
-    }
+    try {
+      var et = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      var h = String(et.getHours()).padStart(2,'0');
+      var m = String(et.getMinutes()).padStart(2,'0');
+      var s = String(et.getSeconds()).padStart(2,'0');
+      var el = document.getElementById('sg-clock');
+      if (el) el.textContent = h+':'+m+':'+s+' ET';
+    } catch(e) {}
   }
-
-  setInterval(updateClock, 1000);
+  setInterval(sgUpdateClock, 1000);
   sgUpdateClock();
 
-  // Nav active state on scroll
-  const sections = document.querySelectorAll('#panel-scalp section');
-  const navTabs = document.querySelectorAll('#panel-scalp .nav-tab');
-
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => {
-      if (window.scrollY >= s.offsetTop - 140) current = s.id;
-    });
-    navTabs.forEach(tab => {
-      tab.classList.remove('active');
-      if (tab.getAttribute('href') === '#' + current) tab.classList.add('active');
+  // Scroll-spy nav (uses offsetTop within document, works in scrollable panel)
+  document.querySelectorAll('#panel-scalp .sg-nav a').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      var id = this.getAttribute('href').slice(1);
+      var target = document.getElementById(id);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
+  function sgUpdateNav() {
+    var secs = document.querySelectorAll('#panel-scalp .sg-sec');
+    var tabs = document.querySelectorAll('#panel-scalp .sg-nav a');
+    var cur = '';
+    secs.forEach(function(s) {
+      var rect = s.getBoundingClientRect();
+      if (rect.top <= 120) cur = s.id;
+    });
+    tabs.forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('href') === '#' + cur);
+    });
+  }
+  window.addEventListener('scroll', sgUpdateNav, { passive: true });
+
   // Checklist
-  let checkedReq = new Set();
-  let checkedOpt = new Set();
-  const totalReq = 9;
+  var checkedReq = new Set();
+  var checkedOpt = new Set();
 
-  function sgToggleCheck(el, type) {
+  window.sgToggleCheck = function(el, type) {
     if (el.classList.contains('blocked')) return;
-    const id = el.dataset.id;
-    const isChecked = el.classList.toggle('checked');
-
-    if (type === 'req') {
-      isChecked ? checkedReq.add(id) : checkedReq.delete(id);
-    } else {
-      isChecked ? checkedOpt.add(id) : checkedOpt.delete(id);
+    var id = el.dataset.id;
+    var on = el.classList.toggle('checked');
+    if (type === 'req') { on ? checkedReq.add(id) : checkedReq.delete(id); }
+    else                { on ? checkedOpt.add(id) : checkedOpt.delete(id); }
+    var total = checkedReq.size + checkedOpt.size;
+    var fill  = document.getElementById('sg-prog-fill');
+    var txt   = document.getElementById('sg-prog-text');
+    if (fill) {
+      fill.style.width = Math.round(total / 12 * 100) + '%';
+      fill.style.background = checkedReq.size === 9 ? 'var(--green)' : checkedReq.size >= 6 ? 'var(--yellow)' : 'var(--red)';
     }
+    if (txt) txt.textContent = total + '/12';
+  };
 
-    const total = checkedReq.size + checkedOpt.size;
-    const maxTotal = 12;
-    const pct = Math.round((total / maxTotal) * 100);
-    document.getElementById('sg-prog-fill').style.width = pct + '%';
-    document.getElementById('sg-prog-text').textContent = total + '/12';
-
-    // Color based on req
-    const fill = document.getElementById('sg-prog-fill');
-    if (checkedReq.size === totalReq) fill.style.background = 'var(--green)';
-    else if (checkedReq.size >= 6) fill.style.background = 'var(--amber)';
-    else fill.style.background = 'var(--red)';
-  }
-
-  function sgEvaluateChecklist() {
-    const result = document.getElementById('sg-checklist-result');
-    result.style.display = 'block';
-
-    if (checkedReq.size === totalReq && checkedOpt.size === 3) {
-      result.style.border = '1px solid var(--green)';
-      result.style.background = 'var(--green-dim)';
-      result.style.color = '#14532d';
-      result.innerHTML = '✅ &nbsp; SEMUA 12/12 CHECK — SETUP SEMPURNA! MASUK DENGAN FULL SIZE';
-    } else if (checkedReq.size === totalReq) {
-      result.style.border = '1px solid var(--green)';
-      result.style.background = 'var(--green-dim)';
-      result.style.color = '#14532d';
-      result.innerHTML = '✅ &nbsp; SEMUA SYARAT WAJIB TERPENUHI (' + checkedOpt.size + '/3 optional) — BOLEH MASUK';
+  window.sgEvaluateChecklist = function() {
+    var res = document.getElementById('sg-checklist-result');
+    if (!res) return;
+    res.style.display = 'block';
+    if (checkedReq.size === 9 && checkedOpt.size === 3) {
+      res.style.cssText = 'display:block;border:1px solid var(--green);background:rgba(0,232,122,.1);color:var(--green)';
+      res.innerHTML = '✅ &nbsp; ALL 12/12 CHECKED — PERFECT SETUP! ENTER WITH FULL SIZE';
+    } else if (checkedReq.size === 9) {
+      res.style.cssText = 'display:block;border:1px solid var(--green);background:rgba(0,232,122,.07);color:var(--green)';
+      res.innerHTML = '✅ &nbsp; ALL REQUIRED CONDITIONS MET (' + checkedOpt.size + '/3 optional) — OK TO ENTER';
     } else {
-      const missing = totalReq - checkedReq.size;
-      result.style.border = '1px solid var(--red)';
-      result.style.background = 'var(--red-dim)';
-      result.style.color = '#7f1d1d';
-      result.innerHTML = '⛔ &nbsp; ' + missing + ' SYARAT WAJIB BELUM TERPENUHI — JANGAN MASUK';
+      var missing = 9 - checkedReq.size;
+      res.style.cssText = 'display:block;border:1px solid var(--red);background:rgba(240,58,74,.07);color:var(--red)';
+      res.innerHTML = '⛔ &nbsp; ' + missing + ' REQUIRED CONDITION(S) NOT MET — DO NOT ENTER';
     }
-  }
+    // re-apply shared styles
+    res.style.padding = '13px';
+    res.style.textAlign = 'center';
+    res.style.fontFamily = 'var(--mono)';
+    res.style.letterSpacing = '1px';
+    res.style.fontSize = '12px';
+    res.style.borderRadius = 'var(--r)';
+    res.style.marginTop = '12px';
+  };
 
-  function sgResetChecklist() {
-    checkedReq.clear();
-    checkedOpt.clear();
-    document.querySelectorAll('#panel-scalp .check-item').forEach(el => el.classList.remove('checked', 'blocked'));
-    document.getElementById('sg-prog-fill').style.width = '0%';
-    document.getElementById('sg-prog-text').textContent = '0/12';
-    document.getElementById('sg-prog-fill').style.background = 'var(--green)';
-    const result = document.getElementById('sg-checklist-result');
-    result.style.display = 'none';
-  }
-
+  window.sgResetChecklist = function() {
+    checkedReq.clear(); checkedOpt.clear();
+    document.querySelectorAll('#panel-scalp .sg-ci').forEach(function(el) {
+      el.classList.remove('checked','blocked');
+    });
+    var fill = document.getElementById('sg-prog-fill');
+    var txt  = document.getElementById('sg-prog-text');
+    var res  = document.getElementById('sg-checklist-result');
+    if (fill) { fill.style.width = '0%'; fill.style.background = 'var(--green)'; }
+    if (txt)  txt.textContent = '0/12';
+    if (res)  res.style.display = 'none';
+  };
 })();
 </script>
+
 </div><!-- /panel-scalp -->
+
 
 <script src="tradematrix-moomoo.js"></script>
 
