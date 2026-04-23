@@ -620,7 +620,7 @@ function rwyCalc() {
       `<div class="advice-box green" style="font-size:13px">✅ Assets projected to last beyond age ${lifeExp}. Runway is ${depleteAge?depleteAge-age:lifeExp-age}+ years. Keep building EPF and diversifying.</div>`}`;
 
   // ── Dynamic year / age milestones ──────────────────────────────
-  const CY            = new Date().getFullYear();        // e.g. 2026
+  // CY already declared above (line ~583) — reuse it here
   const birthYear     = CY - age;                       // e.g. 1980
   const yearAt = (targetAge) => birthYear + targetAge;  // year user turns targetAge
 
