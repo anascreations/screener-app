@@ -87,7 +87,7 @@
   <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA</button>
   <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAUUSD</button>
   <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 ETF</button>
-     <button class="tab-btn scalp-tab" data-tab="scalp" onclick="switchTab('scalp')">📈 Scalp Guide</button>
+      <button class="tab-btn scalp-tab" data-tab="scalp" onclick="switchTab('scalp')">📈 Scalp Guide</button>
   <button class="tab-btn swing-tab" data-tab="swing" onclick="switchTab('swing')">🔄 Swing Reversal</button>
   <button class="tab-btn ipo-tab" data-tab="ipo" onclick="switchTab('ipo')">🏷️ IPO</button>
   <button class="tab-btn sr-tab" data-tab="sr" onclick="switchTab('sr')">📊 S/R Zones</button>
@@ -3382,6 +3382,7 @@
 <script src="https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="tradematrix.js"></script>
 <script src="tradematrix-enhance.js"></script>
 
@@ -4822,87 +4823,12 @@
 
 
 
-<div class="card" style="margin-bottom:20px"><div class="card-hdr" style="color:var(--accent);font-size:11px">📊 CHART 1 — TF5M BULLISH SETUP</div><div style="padding:10px 8px 8px"><svg viewBox="0 0 700 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;max-width:700px">
-<style>
-.sg-chart-bg {fill:#0d1419} .sg-chart-grid {stroke:#1a2b3c;stroke-width:0.5}
-[data-theme="light"] .sg-chart-bg {fill:#f0f4f8}
-[data-theme="light"] .sg-chart-grid {stroke:#d1dce8}
-[data-theme="light"] .sg-chart-txt  {fill:#3a5a72}
-[data-theme="light"] .sg-chart-dim  {fill:#5a7a94}
-</style>
-<rect width="700" height="330" rx="8" class="sg-chart-bg"/>
-<rect x="50" y="42" width="540" height="230" fill="none" stroke="#1a2b3c" stroke-width="1"/>
-<text x="50" y="16" font-family="monospace" font-size="10" letter-spacing="1.5" fill="#4e6d88" class="sg-chart-dim">CHART 1 — TF5M BULLISH SETUP  (Entry Confirmed)</text>
-<text x="50" y="30" font-family="monospace" font-size="9" fill="#00c8f0" class="sg-chart-dim" opacity="0.85">✓ Price above VWAP  |  EMA8 > EMA21  |  ADX rising  |  Entry zone = green shaded</text>
-<line x1="50" y1="88.0" x2="590" y2="88.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="91.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.896</text>
-<line x1="50" y1="134.0" x2="590" y2="134.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="137.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.822</text>
-<line x1="50" y1="180.0" x2="590" y2="180.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="183.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.748</text>
-<line x1="50" y1="226.0" x2="590" y2="226.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="229.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.674</text>
-<rect x="50.0" y="42" width="162.0" height="230" fill="#f03a4a" opacity="0.08"/>
-<text x="131.0" y="52" font-family="monospace" font-size="8" fill="#f03a4a" text-anchor="middle" opacity="0.7">BELOW VWAP — NO TRADE</text>
-<rect x="212.0" y="42" width="378.0" height="230" fill="#00e87a" opacity="0.08"/>
-<text x="401.0" y="52" font-family="monospace" font-size="8" fill="#00e87a" text-anchor="middle" opacity="0.7">ABOVE VWAP ✓</text>
-<polyline points="63.5,209.8 90.5,197.4 117.5,185.0 144.5,172.5 171.5,172.5 198.5,160.1 225.5,147.7 252.5,129.0 279.5,122.8 306.5,116.6 333.5,104.2 360.5,85.5 387.5,79.3 414.5,73.1 441.5,60.6 468.5,54.4 495.5,54.4 522.5,54.4 549.5,60.6 576.5,66.9" fill="none" stroke="#00955a" stroke-width="1.5" opacity="0.6"/>
-<polyline points="63.5,309.3 90.5,309.3 117.5,303.1 144.5,303.1 171.5,296.9 198.5,290.6 225.5,284.4 252.5,272.0 279.5,265.8 306.5,259.6 333.5,247.1 360.5,240.9 387.5,228.5 414.5,222.3 441.5,216.1 468.5,203.6 495.5,197.4 522.5,191.2 549.5,185.0 576.5,185.0" fill="none" stroke="#00955a" stroke-width="1.5" opacity="0.6"/>
-<line x1="50" y1="185.0" x2="590" y2="185.0" stroke="#f59e0b" stroke-width="2" stroke-dasharray="7,4" opacity="0.9"/>
-<text x="595" y="189.0" font-family="monospace" font-size="9" font-weight="700" fill="#f59e0b">VWAP</text>
-<polyline points="63.5,272.0 90.5,272.0 117.5,265.8 144.5,259.6 171.5,253.4 198.5,240.9 225.5,228.5 252.5,216.1 279.5,209.8 306.5,203.6 333.5,191.2 360.5,178.8 387.5,166.3 414.5,160.1 441.5,147.7 468.5,135.2 495.5,129.0 522.5,122.8 549.5,116.6 576.5,116.6" fill="none" stroke="#00c8f0" stroke-width="2" opacity="0.85"/>
-<polyline points="63.5,265.8 90.5,253.4 117.5,240.9 144.5,222.3 171.5,216.1 198.5,203.6 225.5,191.2 252.5,172.5 279.5,172.5 306.5,166.3 333.5,153.9 360.5,135.2 387.5,129.0 414.5,116.6 441.5,104.2 468.5,97.9 495.5,91.7 522.5,85.5 549.5,85.5 576.5,85.5" fill="none" stroke="#3b82f6" stroke-width="2.5" opacity="0.9"/>
-<rect x="55.5" y="253.4" width="16" height="6.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="82.5" y="240.9" width="16" height="12.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="109.5" y="222.3" width="16" height="18.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="136.5" y="203.6" width="16" height="18.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="163.5" y="203.6" width="16" height="6.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="190.5" y="191.2" width="16" height="18.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="217.5" y="172.5" width="16" height="18.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="244.5" y="160.1" width="16" height="12.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="271.5" y="160.1" width="16" height="6.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<line x1="306.5" y1="141.5" x2="306.5" y2="147.7" stroke="#00e87a" stroke-width="1.5"/>
-<line x1="306.5" y1="166.3" x2="306.5" y2="172.5" stroke="#00e87a" stroke-width="1.5"/>
-<rect x="298.5" y="147.7" width="16" height="18.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="325.5" y="129.0" width="16" height="18.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="352.5" y="110.4" width="16" height="18.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="379.5" y="110.4" width="16" height="6.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="406.5" y="97.9" width="16" height="18.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="433.5" y="85.5" width="16" height="12.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="460.5" y="79.3" width="16" height="6.2" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="487.5" y="79.3" width="16" height="6.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="514.5" y="73.1" width="16" height="12.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="541.5" y="73.1" width="16" height="6.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="568.5" y="79.3" width="16" height="2.5" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<text x="333.5" y="166.9" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">1</text>
-<text x="360.5" y="148.2" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">2</text>
-<text x="387.5" y="135.8" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">3</text>
-<text x="414.5" y="135.8" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">4</text>
-<text x="441.5" y="117.2" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">5</text>
-<text x="468.5" y="110.9" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">6</text>
-<text x="495.5" y="104.7" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">7</text>
-<text x="522.5" y="110.9" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">8</text>
-<text x="549.5" y="98.5" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">9</text>
-<line x1="306.5" y1="272.0" x2="306.5" y2="276.0" stroke="#00e87a" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="306.5,274 288.5,294.0 324.5,294.0" fill="#00e87a" opacity="0.9"/>
-<text x="306.5" y="307.0" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">▲ ENTRY</text>
-<line x1="549.5" y1="42.0" x2="549.5" y2="39.0" stroke="#f03a4a" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="549.5,40 533.5,24.0 565.5,24.0" fill="#f03a4a" opacity="0.9"/>
-<text x="549.5" y="19.0" font-family="monospace" font-size="9" font-weight="700" fill="#f03a4a" text-anchor="middle">TD9 — SELL HALF</text>
-<text x="595" y="89.5" font-family="monospace" font-size="9" font-weight="700" fill="#3b82f6">EMA8</text>
-<text x="595" y="120.6" font-family="monospace" font-size="9" font-weight="700" fill="#00c8f0">EMA21</text>
-<text x="595" y="70.9" font-family="monospace" font-size="8" fill="#00955a">BB+</text>
-<text x="595" y="189.0" font-family="monospace" font-size="8" fill="#00955a">BB–</text>
-<rect x="495" y="203" width="90" height="64" fill="#0d1419" stroke="#1a2b3c" rx="3" opacity="0.92"/>
-<line x1="500" y1="213" x2="517" y2="213" stroke="#3b82f6" stroke-width="2.5"/>
-<text x="521" y="216" font-family="monospace" font-size="8.5" fill="#d0e2f0">EMA 8</text>
-<line x1="500" y1="227" x2="517" y2="227" stroke="#00c8f0" stroke-width="2.5"/>
-<text x="521" y="230" font-family="monospace" font-size="8.5" fill="#d0e2f0">EMA 21</text>
-<line x1="500" y1="241" x2="517" y2="241" stroke="#00955a" stroke-width="2.5"/>
-<text x="521" y="244" font-family="monospace" font-size="8.5" fill="#d0e2f0">BB Bands</text>
-<line x1="500" y1="255" x2="517" y2="255" stroke="#f59e0b" stroke-width="2.5"/>
-<text x="521" y="258" font-family="monospace" font-size="8.5" fill="#d0e2f0">VWAP</text>
-</svg></div></div>
+
+<div class="card" style="margin-bottom:20px">
+  <div class="card-hdr" style="color:var(--accent);font-size:11px">📊 CHART 1 — TF5M BULLISH SETUP <span style="color:var(--dim);font-size:9px;font-weight:400">· TradingView Lightweight Charts</span></div>
+  <div style="padding:4px 10px 2px;font-family:var(--mono);font-size:9px;color:var(--dim)">✓ Price above VWAP &nbsp;|&nbsp; EMA8 &gt; EMA21 &nbsp;|&nbsp; ADX rising &nbsp;|&nbsp; TD count 1→9 shown in pink circles</div>
+  <div id="sg-lc1" style="height:240px;margin:6px 8px 8px"></div>
+</div>
 <div class="sg-sec" id="sg-tf1m">
   <div class="sg-sec-hdr">
     <span class="sg-sec-num">04</span>
@@ -4959,182 +4885,18 @@
 
 
 
-<div class="card" style="margin-bottom:20px"><div class="card-hdr" style="color:var(--green);font-size:11px">📊 CHART 2 — TF1M ORB BREAKOUT ENTRY</div><div style="padding:10px 8px 8px"><svg viewBox="0 0 700 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;max-width:700px">
-<style>
-.sg-chart-bg {fill:#0d1419} .sg-chart-grid {stroke:#1a2b3c;stroke-width:0.5}
-[data-theme="light"] .sg-chart-bg {fill:#f0f4f8}
-[data-theme="light"] .sg-chart-grid {stroke:#d1dce8}
-[data-theme="light"] .sg-chart-txt  {fill:#3a5a72}
-[data-theme="light"] .sg-chart-dim  {fill:#5a7a94}
-</style>
-<rect width="700" height="330" rx="8" class="sg-chart-bg"/>
-<rect x="50" y="42" width="540" height="230" fill="none" stroke="#1a2b3c" stroke-width="1"/>
-<text x="50" y="16" font-family="monospace" font-size="10" letter-spacing="1.5" fill="#4e6d88" class="sg-chart-dim">CHART 2 — TF1M ORB BREAKOUT ENTRY</text>
-<text x="50" y="30" font-family="monospace" font-size="9" fill="#00c8f0" class="sg-chart-dim" opacity="0.85">✓ Wait for candle CLOSE above ORB High  |  Volume must spike  |  Enter on breakout close</text>
-<line x1="50" y1="88.0" x2="590" y2="88.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="91.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.920</text>
-<line x1="50" y1="134.0" x2="590" y2="134.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="137.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.860</text>
-<line x1="50" y1="180.0" x2="590" y2="180.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="183.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.800</text>
-<line x1="50" y1="226.0" x2="590" y2="226.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="229.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.740</text>
-<rect x="80.0" y="42" width="210.0" height="230" fill="#f59e0b" opacity="0.08"/>
-<text x="185.0" y="52" font-family="monospace" font-size="8" fill="#f59e0b" text-anchor="middle" opacity="0.7">CONSOLIDATION</text>
-<rect x="290.0" y="42" width="180.0" height="230" fill="#00e87a" opacity="0.08"/>
-<text x="380.0" y="52" font-family="monospace" font-size="8" fill="#00e87a" text-anchor="middle" opacity="0.7">MOMENTUM ZONE</text>
-<polyline points="65.0,118.7 95.0,134.0 125.0,141.7 155.0,141.7 185.0,141.7 215.0,141.7 245.0,141.7 275.0,141.7 305.0,118.7 335.0,95.7 365.0,80.3 395.0,65.0 425.0,65.0 455.0,57.3 485.0,57.3 515.0,57.3 545.0,72.7 575.0,88.0" fill="none" stroke="#00955a" stroke-width="1.5" opacity="0.6"/>
-<polyline points="65.0,256.7 95.0,256.7 125.0,256.7 155.0,256.7 185.0,256.7 215.0,256.7 245.0,256.7 275.0,256.7 305.0,249.0 335.0,241.3 365.0,233.7 395.0,226.0 425.0,218.3 455.0,210.7 485.0,203.0 515.0,195.3 545.0,195.3 575.0,203.0" fill="none" stroke="#00955a" stroke-width="1.5" opacity="0.6"/>
-<line x1="50" y1="164.7" x2="590" y2="164.7" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="5,3" opacity="0.9"/>
-<text x="595" y="168.7" font-family="monospace" font-size="9" font-weight="700" fill="#f59e0b">ORB HIGH</text>
-<line x1="50" y1="187.7" x2="590" y2="187.7" stroke="#f03a4a" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.9"/>
-<text x="595" y="191.7" font-family="monospace" font-size="9" font-weight="700" fill="#f03a4a">STOP</text>
-<line x1="50" y1="88.0" x2="590" y2="88.0" stroke="#f5c842" stroke-width="1.2" stroke-dasharray="4,2" opacity="0.9"/>
-<text x="595" y="92.0" font-family="monospace" font-size="9" font-weight="700" fill="#f5c842">TP1 (2R)</text>
-<line x1="50" y1="57.3" x2="590" y2="57.3" stroke="#00e87a" stroke-width="1.2" stroke-dasharray="4,2" opacity="0.9"/>
-<text x="595" y="61.3" font-family="monospace" font-size="9" font-weight="700" fill="#00e87a">TP2 (3R)</text>
-<line x1="50" y1="210.7" x2="590" y2="210.7" stroke="#f59e0b" stroke-width="2" stroke-dasharray="7,4" opacity="0.9"/>
-<text x="595" y="214.7" font-family="monospace" font-size="9" font-weight="700" fill="#f59e0b">VWAP</text>
-<polyline points="65.0,256.7 95.0,256.7 125.0,249.0 155.0,249.0 185.0,241.3 215.0,241.3 245.0,233.7 275.0,233.7 305.0,226.0 335.0,210.7 365.0,203.0 395.0,187.7 425.0,180.0 455.0,172.3 485.0,164.7 515.0,157.0 545.0,157.0 575.0,164.7" fill="none" stroke="#00c8f0" stroke-width="2" opacity="0.85"/>
-<polyline points="65.0,241.3 95.0,226.0 125.0,218.3 155.0,218.3 185.0,218.3 215.0,210.7 245.0,210.7 275.0,203.0 305.0,187.7 335.0,164.7 365.0,149.3 395.0,126.3 425.0,126.3 455.0,118.7 485.0,111.0 515.0,111.0 545.0,118.7 575.0,126.3" fill="none" stroke="#3b82f6" stroke-width="2.5" opacity="0.9"/>
-<line x1="65.0" y1="164.7" x2="65.0" y2="180.0" stroke="#00e87a" stroke-width="1.5"/>
-<line x1="65.0" y1="256.7" x2="65.0" y2="272.0" stroke="#00e87a" stroke-width="1.5"/>
-<rect x="56.0" y="180.0" width="18" height="76.7" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="86.0" y="180.0" width="18" height="15.3" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="116.0" y="195.3" width="18" height="2.5" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="146.0" y="187.7" width="18" height="7.7" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="176.0" y="187.7" width="18" height="7.7" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="206.0" y="172.3" width="18" height="23.0" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="236.0" y="172.3" width="18" height="7.7" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="266.0" y="172.3" width="18" height="7.7" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<line x1="305.0" y1="126.3" x2="305.0" y2="134.0" stroke="#00e87a" stroke-width="1.5"/>
-<line x1="305.0" y1="172.3" x2="305.0" y2="180.0" stroke="#00e87a" stroke-width="1.5"/>
-<rect x="296.0" y="134.0" width="18" height="38.3" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="326.0" y="118.7" width="18" height="15.3" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="356.0" y="103.3" width="18" height="15.3" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="386.0" y="88.0" width="18" height="15.3" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="416.0" y="88.0" width="18" height="7.7" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="446.0" y="80.3" width="18" height="15.3" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="476.0" y="80.3" width="18" height="2.5" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="506.0" y="80.3" width="18" height="23.0" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="536.0" y="103.3" width="18" height="23.0" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="566.0" y="126.3" width="18" height="15.3" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<text x="335.0" y="154.7" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">1</text>
-<text x="365.0" y="139.3" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">2</text>
-<text x="395.0" y="124.0" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">3</text>
-<text x="455.0" y="116.3" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">4</text>
-<text x="485.0" y="108.7" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">5</text>
-<line x1="305.0" y1="272.0" x2="305.0" y2="276.0" stroke="#00e87a" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="305.0,274 287.0,294.0 323.0,294.0" fill="#00e87a" opacity="0.9"/>
-<text x="305.0" y="307.0" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">▲ ENTRY</text>
-<line x1="485.0" y1="42.0" x2="485.0" y2="39.0" stroke="#f5c842" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="485.0,40 469.0,24.0 501.0,24.0" fill="#f5c842" opacity="0.9"/>
-<text x="485.0" y="19.0" font-family="monospace" font-size="9" font-weight="700" fill="#f5c842" text-anchor="middle">TP1 SELL 50%</text>
-<line x1="545.0" y1="42.0" x2="545.0" y2="39.0" stroke="#f03a4a" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="545.0,40 529.0,24.0 561.0,24.0" fill="#f03a4a" opacity="0.9"/>
-<text x="545.0" y="19.0" font-family="monospace" font-size="9" font-weight="700" fill="#f03a4a" text-anchor="middle">TRAIL EXIT</text>
-<text x="595" y="130.3" font-family="monospace" font-size="9" font-weight="700" fill="#3b82f6">EMA8</text>
-<text x="595" y="168.7" font-family="monospace" font-size="9" font-weight="700" fill="#00c8f0">EMA21</text>
-<text x="595" y="92.0" font-family="monospace" font-size="8" fill="#00955a">BB+</text>
-<text x="595" y="207.0" font-family="monospace" font-size="8" fill="#00955a">BB–</text>
-<rect x="495" y="203" width="90" height="64" fill="#0d1419" stroke="#1a2b3c" rx="3" opacity="0.92"/>
-<line x1="500" y1="213" x2="517" y2="213" stroke="#3b82f6" stroke-width="2.5"/>
-<text x="521" y="216" font-family="monospace" font-size="8.5" fill="#d0e2f0">EMA 8</text>
-<line x1="500" y1="227" x2="517" y2="227" stroke="#00c8f0" stroke-width="2.5"/>
-<text x="521" y="230" font-family="monospace" font-size="8.5" fill="#d0e2f0">EMA 21</text>
-<line x1="500" y1="241" x2="517" y2="241" stroke="#00955a" stroke-width="2.5"/>
-<text x="521" y="244" font-family="monospace" font-size="8.5" fill="#d0e2f0">BB Bands</text>
-<line x1="500" y1="255" x2="517" y2="255" stroke="#f59e0b" stroke-width="2.5"/>
-<text x="521" y="258" font-family="monospace" font-size="8.5" fill="#d0e2f0">VWAP / ORB</text>
-</svg></div></div>
-<div class="card" style="margin-bottom:20px"><div class="card-hdr" style="color:var(--green);font-size:11px">📊 CHART 3 — TF1M EMA8 PULLBACK BOUNCE</div><div style="padding:10px 8px 8px"><svg viewBox="0 0 700 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;max-width:700px">
-<style>
-.sg-chart-bg {fill:#0d1419} .sg-chart-grid {stroke:#1a2b3c;stroke-width:0.5}
-[data-theme="light"] .sg-chart-bg {fill:#f0f4f8}
-[data-theme="light"] .sg-chart-grid {stroke:#d1dce8}
-[data-theme="light"] .sg-chart-txt  {fill:#3a5a72}
-[data-theme="light"] .sg-chart-dim  {fill:#5a7a94}
-</style>
-<rect width="700" height="330" rx="8" class="sg-chart-bg"/>
-<rect x="50" y="42" width="540" height="230" fill="none" stroke="#1a2b3c" stroke-width="1"/>
-<text x="50" y="16" font-family="monospace" font-size="10" letter-spacing="1.5" fill="#4e6d88" class="sg-chart-dim">CHART 3 — TF1M EMA8 PULLBACK BOUNCE  (Mid-Trend Re-Entry)</text>
-<text x="50" y="30" font-family="monospace" font-size="9" fill="#00c8f0" class="sg-chart-dim" opacity="0.85">✓ Wait for pullback to EMA8 + bounce candle CLOSES above EMA8 + volume above average</text>
-<line x1="50" y1="88.0" x2="590" y2="88.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="91.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.920</text>
-<line x1="50" y1="134.0" x2="590" y2="134.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="137.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.870</text>
-<line x1="50" y1="180.0" x2="590" y2="180.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="183.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.820</text>
-<line x1="50" y1="226.0" x2="590" y2="226.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="229.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.770</text>
-<rect x="131.0" y="42" width="81.0" height="230" fill="#f03a4a" opacity="0.08"/>
-<text x="171.5" y="52" font-family="monospace" font-size="8" fill="#f03a4a" text-anchor="middle" opacity="0.7">PULLBACK</text>
-<rect x="347.0" y="42" width="54.0" height="230" fill="#f03a4a" opacity="0.08"/>
-<text x="374.0" y="52" font-family="monospace" font-size="8" fill="#f03a4a" text-anchor="middle" opacity="0.7">PULLBACK</text>
-<polyline points="63.5,143.2 90.5,115.6 117.5,97.2 144.5,88.0 171.5,97.2 198.5,106.4 225.5,106.4 252.5,97.2 279.5,78.8 306.5,60.4 333.5,60.4 360.5,69.6 387.5,78.8 414.5,69.6 441.5,51.2 468.5,42.0 495.5,42.0 522.5,51.2 549.5,60.4 576.5,78.8" fill="none" stroke="#00955a" stroke-width="1.5" opacity="0.6"/>
-<polyline points="63.5,262.8 90.5,262.8 117.5,262.8 144.5,262.8 171.5,262.8 198.5,272.0 225.5,272.0 252.5,262.8 279.5,253.6 306.5,244.4 333.5,235.2 360.5,235.2 387.5,235.2 414.5,235.2 441.5,226.0 468.5,216.8 495.5,207.6 522.5,207.6 549.5,216.8 576.5,226.0" fill="none" stroke="#00955a" stroke-width="1.5" opacity="0.6"/>
-<line x1="50" y1="198.4" x2="590" y2="198.4" stroke="#f03a4a" stroke-width="1.2" stroke-dasharray="3,2" opacity="0.9"/>
-<text x="595" y="202.4" font-family="monospace" font-size="9" font-weight="700" fill="#f03a4a">STOP</text>
-<line x1="50" y1="88.0" x2="590" y2="88.0" stroke="#f5c842" stroke-width="1.2" stroke-dasharray="4,2" opacity="0.9"/>
-<text x="595" y="92.0" font-family="monospace" font-size="9" font-weight="700" fill="#f5c842">TP1 (2R)</text>
-<line x1="50" y1="60.4" x2="590" y2="60.4" stroke="#00e87a" stroke-width="1.2" stroke-dasharray="4,2" opacity="0.9"/>
-<text x="595" y="64.4" font-family="monospace" font-size="9" font-weight="700" fill="#00e87a">TP2 (3R)</text>
-<line x1="50" y1="226.0" x2="590" y2="226.0" stroke="#f59e0b" stroke-width="2" stroke-dasharray="7,4" opacity="0.9"/>
-<text x="595" y="230.0" font-family="monospace" font-size="9" font-weight="700" fill="#f59e0b">VWAP</text>
-<polyline points="63.5,253.6 90.5,244.4 117.5,235.2 144.5,226.0 171.5,226.0 198.5,226.0 225.5,226.0 252.5,216.8 279.5,207.6 306.5,198.4 333.5,189.2 360.5,189.2 387.5,189.2 414.5,189.2 441.5,180.0 468.5,170.8 495.5,161.6 522.5,161.6 549.5,170.8 576.5,170.8" fill="none" stroke="#00c8f0" stroke-width="2" opacity="0.85"/>
-<polyline points="63.5,216.8 90.5,198.4 117.5,180.0 144.5,170.8 171.5,180.0 198.5,189.2 225.5,189.2 252.5,170.8 279.5,152.4 306.5,134.0 333.5,134.0 360.5,134.0 387.5,134.0 414.5,134.0 441.5,115.6 468.5,97.2 495.5,97.2 522.5,106.4 549.5,115.6 576.5,124.8" fill="none" stroke="#3b82f6" stroke-width="2.5" opacity="0.9"/>
-<rect x="55.5" y="198.4" width="16" height="18.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="82.5" y="170.8" width="16" height="27.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="109.5" y="152.4" width="16" height="18.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="136.5" y="152.4" width="16" height="9.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="163.5" y="161.6" width="16" height="18.4" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="190.5" y="180.0" width="16" height="9.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<line x1="225.5" y1="152.4" x2="225.5" y2="161.6" stroke="#00e87a" stroke-width="1.5"/>
-<line x1="225.5" y1="189.2" x2="225.5" y2="198.4" stroke="#00e87a" stroke-width="1.5"/>
-<rect x="217.5" y="161.6" width="16" height="27.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="244.5" y="134.0" width="16" height="27.6" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="271.5" y="115.6" width="16" height="18.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="298.5" y="97.2" width="16" height="18.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="325.5" y="97.2" width="16" height="18.4" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="352.5" y="115.6" width="16" height="9.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="379.5" y="124.8" width="16" height="9.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<line x1="414.5" y1="88.0" x2="414.5" y2="97.2" stroke="#00e87a" stroke-width="1.5"/>
-<line x1="414.5" y1="134.0" x2="414.5" y2="143.2" stroke="#00e87a" stroke-width="1.5"/>
-<rect x="406.5" y="97.2" width="16" height="36.8" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="433.5" y="78.8" width="16" height="18.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="460.5" y="60.4" width="16" height="18.4" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="487.5" y="60.4" width="16" height="27.6" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="514.5" y="88.0" width="16" height="27.6" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="541.5" y="115.6" width="16" height="27.6" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="568.5" y="143.2" width="16" height="9.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<text x="252.5" y="183.8" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">1</text>
-<text x="279.5" y="156.2" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">2</text>
-<text x="306.5" y="137.8" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">3</text>
-<text x="441.5" y="119.4" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">1</text>
-<text x="468.5" y="101.0" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">2</text>
-<line x1="225.5" y1="272.0" x2="225.5" y2="276.0" stroke="#00e87a" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="225.5,274 207.5,294.0 243.5,294.0" fill="#00e87a" opacity="0.9"/>
-<text x="225.5" y="307.0" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">▲ ENTRY</text>
-<line x1="306.5" y1="42.0" x2="306.5" y2="39.0" stroke="#f5c842" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="306.5,40 290.5,24.0 322.5,24.0" fill="#f5c842" opacity="0.9"/>
-<text x="306.5" y="19.0" font-family="monospace" font-size="9" font-weight="700" fill="#f5c842" text-anchor="middle">TP1 (2R)</text>
-<line x1="468.5" y1="42.0" x2="468.5" y2="39.0" stroke="#00e87a" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="468.5,40 452.5,24.0 484.5,24.0" fill="#00e87a" opacity="0.9"/>
-<text x="468.5" y="19.0" font-family="monospace" font-size="9" font-weight="700" fill="#00e87a" text-anchor="middle">TP2 (3R)</text>
-<text x="595" y="128.8" font-family="monospace" font-size="9" font-weight="700" fill="#3b82f6">EMA8</text>
-<text x="595" y="174.8" font-family="monospace" font-size="9" font-weight="700" fill="#00c8f0">EMA21</text>
-<text x="595" y="82.8" font-family="monospace" font-size="8" fill="#00955a">BB+</text>
-<text x="595" y="230.0" font-family="monospace" font-size="8" fill="#00955a">BB–</text>
-<rect x="495" y="203" width="90" height="64" fill="#0d1419" stroke="#1a2b3c" rx="3" opacity="0.92"/>
-<line x1="500" y1="213" x2="517" y2="213" stroke="#3b82f6" stroke-width="2.5"/>
-<text x="521" y="216" font-family="monospace" font-size="8.5" fill="#d0e2f0">EMA 8</text>
-<line x1="500" y1="227" x2="517" y2="227" stroke="#00c8f0" stroke-width="2.5"/>
-<text x="521" y="230" font-family="monospace" font-size="8.5" fill="#d0e2f0">EMA 21</text>
-<line x1="500" y1="241" x2="517" y2="241" stroke="#00955a" stroke-width="2.5"/>
-<text x="521" y="244" font-family="monospace" font-size="8.5" fill="#d0e2f0">BB Bands</text>
-<line x1="500" y1="255" x2="517" y2="255" stroke="#f59e0b" stroke-width="2.5"/>
-<text x="521" y="258" font-family="monospace" font-size="8.5" fill="#d0e2f0">VWAP</text>
-<line x1="414.5" y1="272.0" x2="414.5" y2="276.0" stroke="#00e87a" stroke-width="1.5" stroke-dasharray="3,2"/><polygon points="414.5,272 396.5,290 432.5,290" fill="#00e87a" opacity="0.9"/><text x="414.5" y="304" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">▲ 2nd ENTRY</text></svg></div></div>
+
+<div class="card" style="margin-bottom:20px">
+  <div class="card-hdr" style="color:var(--green);font-size:11px">📊 CHART 2 — TF1M ORB BREAKOUT ENTRY <span style="color:var(--dim);font-size:9px;font-weight:400">· TradingView Lightweight Charts</span></div>
+  <div style="padding:4px 10px 2px;font-family:var(--mono);font-size:9px;color:var(--dim)">✓ Wait for CLOSE above ORB High &nbsp;|&nbsp; STOP / TP levels shown as price lines &nbsp;|&nbsp; Sell markers above candles</div>
+  <div id="sg-lc2" style="height:240px;margin:6px 8px 8px"></div>
+</div>
+
+<div class="card" style="margin-bottom:20px">
+  <div class="card-hdr" style="color:var(--green);font-size:11px">📊 CHART 3 — TF1M EMA8 PULLBACK BOUNCE <span style="color:var(--dim);font-size:9px;font-weight:400">· TradingView Lightweight Charts</span></div>
+  <div style="padding:4px 10px 2px;font-family:var(--mono);font-size:9px;color:var(--dim)">✓ Two entry examples shown &nbsp;|&nbsp; Bounce candle closes above EMA8 &nbsp;|&nbsp; TP1 at 2R, TP2 at 3R</div>
+  <div id="sg-lc3" style="height:240px;margin:6px 8px 8px"></div>
+</div>
 <div class="sg-sec" id="sg-scenarios">
   <div class="sg-sec-hdr">
     <span class="sg-sec-num">05</span>
@@ -5361,98 +5123,12 @@
 
 
 
-<div class="card" style="margin-bottom:20px"><div class="card-hdr" style="color:var(--red);font-size:11px">📊 CHART 4 — EXIT SIGNALS</div><div style="padding:10px 8px 8px"><svg viewBox="0 0 700 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;max-width:700px">
-<style>
-.sg-chart-bg {fill:#0d1419} .sg-chart-grid {stroke:#1a2b3c;stroke-width:0.5}
-[data-theme="light"] .sg-chart-bg {fill:#f0f4f8}
-[data-theme="light"] .sg-chart-grid {stroke:#d1dce8}
-[data-theme="light"] .sg-chart-txt  {fill:#3a5a72}
-[data-theme="light"] .sg-chart-dim  {fill:#5a7a94}
-</style>
-<rect width="700" height="330" rx="8" class="sg-chart-bg"/>
-<rect x="50" y="42" width="540" height="230" fill="none" stroke="#1a2b3c" stroke-width="1"/>
-<text x="50" y="16" font-family="monospace" font-size="10" letter-spacing="1.5" fill="#4e6d88" class="sg-chart-dim">CHART 4 — EXIT SIGNALS  (When to Close Position)</text>
-<text x="50" y="30" font-family="monospace" font-size="9" fill="#00c8f0" class="sg-chart-dim" opacity="0.85">⚠ TD9 = Sell 50% immediately  |  1M close BELOW EMA21 = Exit ALL remaining position</text>
-<line x1="50" y1="88.0" x2="590" y2="88.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="91.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.884</text>
-<line x1="50" y1="134.0" x2="590" y2="134.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="137.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.808</text>
-<line x1="50" y1="180.0" x2="590" y2="180.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="183.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.732</text>
-<line x1="50" y1="226.0" x2="590" y2="226.0" class="sg-chart-grid" stroke-dasharray="3,4"/>
-<text x="47" y="229.0" font-family="monospace" font-size="8.5" fill="#4e6d88" text-anchor="end" class="sg-chart-dim">7.656</text>
-<rect x="50.0" y="42" width="220.9" height="230" fill="#00e87a" opacity="0.08"/>
-<text x="160.5" y="52" font-family="monospace" font-size="8" fill="#00e87a" text-anchor="middle" opacity="0.7">UPTREND (TD 1→9)</text>
-<rect x="270.9" y="42" width="319.1" height="230" fill="#f03a4a" opacity="0.08"/>
-<text x="430.5" y="52" font-family="monospace" font-size="8" fill="#f03a4a" text-anchor="middle" opacity="0.7">DOWNTREND AFTER REVERSAL</text>
-<polyline points="62.3,157.0 86.8,144.9 111.4,132.8 135.9,114.6 160.5,96.5 185.0,84.4 209.5,72.3 234.1,60.2 258.6,54.1 283.2,54.1 307.7,60.2 332.3,72.3 356.8,84.4 381.4,96.5 405.9,108.6 430.5,126.7 455.0,144.9 479.5,157.0 504.1,169.1 528.6,181.2 553.2,187.3 577.7,199.4" fill="none" stroke="#00955a" stroke-width="1.5" opacity="0.6"/>
-<polyline points="62.3,259.9 86.8,259.9 111.4,259.9 135.9,253.8 160.5,247.8 185.0,241.7 209.5,235.7 234.1,229.6 258.6,217.5 283.2,211.5 307.7,211.5 332.3,217.5 356.8,223.6 381.4,229.6 405.9,241.7 430.5,253.8 455.0,265.9 479.5,272.0 504.1,272.0 528.6,272.0 553.2,272.0 577.7,278.1" fill="none" stroke="#00955a" stroke-width="1.5" opacity="0.6"/>
-<line x1="50" y1="144.9" x2="590" y2="144.9" stroke="#f59e0b" stroke-width="2" stroke-dasharray="7,4" opacity="0.9"/>
-<text x="595" y="148.9" font-family="monospace" font-size="9" font-weight="700" fill="#f59e0b">VWAP</text>
-<polyline points="62.3,223.6 86.8,217.5 111.4,211.5 135.9,199.4 160.5,187.3 185.0,181.2 209.5,169.1 234.1,157.0 258.6,144.9 283.2,144.9 307.7,144.9 332.3,150.9 356.8,157.0 381.4,163.1 405.9,169.1 430.5,175.2 455.0,187.3 479.5,199.4 504.1,205.4 528.6,211.5 553.2,217.5 577.7,229.6" fill="none" stroke="#00c8f0" stroke-width="2" opacity="0.85"/>
-<polyline points="62.3,199.4 86.8,193.3 111.4,181.2 135.9,163.1 160.5,150.9 185.0,132.8 209.5,120.7 234.1,108.6 258.6,96.5 283.2,102.5 307.7,114.6 332.3,126.7 356.8,138.8 381.4,150.9 405.9,163.1 430.5,181.2 455.0,193.3 479.5,205.4 504.1,211.5 528.6,217.5 553.2,223.6 577.7,235.7" fill="none" stroke="#3b82f6" stroke-width="2.5" opacity="0.9"/>
-<rect x="55.3" y="187.3" width="15" height="12.1" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="79.8" y="175.2" width="15" height="12.1" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="104.4" y="157.0" width="15" height="18.2" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="128.9" y="144.9" width="15" height="12.1" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="153.5" y="126.7" width="15" height="18.2" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="178.0" y="114.6" width="15" height="12.1" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="202.5" y="102.5" width="15" height="12.1" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="227.1" y="90.4" width="15" height="12.1" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<line x1="258.6" y1="72.3" x2="258.6" y2="78.3" stroke="#00e87a" stroke-width="1.5"/>
-<line x1="258.6" y1="90.4" x2="258.6" y2="102.5" stroke="#00e87a" stroke-width="1.5"/>
-<rect x="251.6" y="78.3" width="15" height="12.1" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<line x1="283.2" y1="72.3" x2="283.2" y2="78.3" stroke="#f03a4a" stroke-width="1.5"/>
-<line x1="283.2" y1="102.5" x2="283.2" y2="108.6" stroke="#f03a4a" stroke-width="1.5"/>
-<rect x="276.2" y="78.3" width="15" height="24.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="300.7" y="102.5" width="15" height="18.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="325.3" y="120.7" width="15" height="12.1" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="349.8" y="132.8" width="15" height="12.1" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="374.4" y="144.9" width="15" height="12.1" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<line x1="405.9" y1="150.9" x2="405.9" y2="157.0" stroke="#f03a4a" stroke-width="1.5"/>
-<line x1="405.9" y1="175.2" x2="405.9" y2="181.2" stroke="#f03a4a" stroke-width="1.5"/>
-<rect x="398.9" y="157.0" width="15" height="18.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="423.5" y="175.2" width="15" height="18.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="448.0" y="193.3" width="15" height="18.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="472.5" y="211.5" width="15" height="18.2" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="497.1" y="223.6" width="15" height="6.1" fill="#003b1f" stroke="#00e87a" stroke-width="1.8" rx="1"/>
-<rect x="521.6" y="223.6" width="15" height="12.1" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="546.2" y="235.7" width="15" height="12.1" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<rect x="570.7" y="247.8" width="15" height="6.1" fill="#f03a4a" stroke="#f03a4a" stroke-width="1" rx="1"/>
-<text x="62.3" y="218.4" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">1</text>
-<text x="86.8" y="206.3" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">2</text>
-<text x="111.4" y="194.2" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">3</text>
-<text x="135.9" y="176.1" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">4</text>
-<text x="160.5" y="163.9" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">5</text>
-<text x="185.0" y="145.8" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">6</text>
-<text x="209.5" y="133.7" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">7</text>
-<text x="234.1" y="121.6" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">8</text>
-<text x="258.6" y="115.5" font-family="monospace" font-size="10" font-weight="700" fill="#ff69b4" text-anchor="middle">9</text>
-<text x="356.8" y="120.7" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">1</text>
-<text x="381.4" y="132.8" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">2</text>
-<text x="405.9" y="144.9" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">3</text>
-<text x="430.5" y="163.1" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">4</text>
-<text x="455.0" y="175.2" font-family="monospace" font-size="10" font-weight="700" fill="#00e87a" text-anchor="middle">5</text>
-<line x1="258.6" y1="42.0" x2="258.6" y2="39.0" stroke="#f5c842" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="258.6,40 242.6,24.0 274.6,24.0" fill="#f5c842" opacity="0.9"/>
-<text x="258.6" y="19.0" font-family="monospace" font-size="9" font-weight="700" fill="#f5c842" text-anchor="middle">TD9 SELL 50%</text>
-<line x1="405.9" y1="42.0" x2="405.9" y2="39.0" stroke="#f03a4a" stroke-width="1.5" stroke-dasharray="3,2"/>
-<polygon points="405.9,40 389.9,24.0 421.9,24.0" fill="#f03a4a" opacity="0.9"/>
-<text x="405.9" y="19.0" font-family="monospace" font-size="9" font-weight="700" fill="#f03a4a" text-anchor="middle">EMA21 BREAK EXIT ALL</text>
-<text x="595" y="239.7" font-family="monospace" font-size="9" font-weight="700" fill="#3b82f6">EMA8</text>
-<text x="595" y="233.6" font-family="monospace" font-size="9" font-weight="700" fill="#00c8f0">EMA21</text>
-<text x="595" y="203.4" font-family="monospace" font-size="8" fill="#00955a">BB+</text>
-<text x="595" y="282.1" font-family="monospace" font-size="8" fill="#00955a">BB–</text>
-<rect x="495" y="203" width="90" height="64" fill="#0d1419" stroke="#1a2b3c" rx="3" opacity="0.92"/>
-<line x1="500" y1="213" x2="517" y2="213" stroke="#3b82f6" stroke-width="2.5"/>
-<text x="521" y="216" font-family="monospace" font-size="8.5" fill="#d0e2f0">EMA 8</text>
-<line x1="500" y1="227" x2="517" y2="227" stroke="#00c8f0" stroke-width="2.5"/>
-<text x="521" y="230" font-family="monospace" font-size="8.5" fill="#d0e2f0">EMA 21</text>
-<line x1="500" y1="241" x2="517" y2="241" stroke="#00955a" stroke-width="2.5"/>
-<text x="521" y="244" font-family="monospace" font-size="8.5" fill="#d0e2f0">BB Bands</text>
-<line x1="500" y1="255" x2="517" y2="255" stroke="#ff69b4" stroke-width="2.5"/>
-<text x="521" y="258" font-family="monospace" font-size="8.5" fill="#d0e2f0">TD Count</text>
-</svg></div></div>
+
+<div class="card" style="margin-bottom:20px">
+  <div class="card-hdr" style="color:var(--red);font-size:11px">📊 CHART 4 — EXIT SIGNALS <span style="color:var(--dim);font-size:9px;font-weight:400">· TradingView Lightweight Charts</span></div>
+  <div style="padding:4px 10px 2px;font-family:var(--mono);font-size:9px;color:var(--dim)">⚠ TD9 = Sell 50% immediately &nbsp;|&nbsp; Close &lt; EMA8 = warning &nbsp;|&nbsp; Close &lt; EMA21 = EXIT ALL</div>
+  <div id="sg-lc4" style="height:240px;margin:6px 8px 8px"></div>
+</div>
 <div class="sg-sec" id="sg-checklist">
   <div class="sg-sec-hdr">
     <span class="sg-sec-num">07</span>
@@ -5631,6 +5307,406 @@
     if (txt)  txt.textContent = '0/12';
     if (res)  res.style.display = 'none';
   };
+})();
+</script>
+
+
+<script>
+/* ── Scalp Guide Charts — TradingView Lightweight Charts ─────────────────── */
+(function() {
+
+/* Helper: detect current theme */
+function sgIsLight() {
+  return document.documentElement.getAttribute('data-theme') === 'light';
+}
+
+/* Chart theme tokens */
+function sgTheme() {
+  var light = sgIsLight();
+  return {
+    bg:        light ? '#ffffff' : '#0d1419',
+    bg2:       light ? '#f5f7fb' : '#111b24',
+    border:    light ? '#d1dce8' : '#1a2b3c',
+    text:      light ? '#0d1e2d' : '#d0e2f0',
+    dim:       light ? '#5a7a94' : '#4e6d88',
+    grid:      light ? '#e4ecf4' : '#141f28',
+  };
+}
+
+var LW = window.LightweightCharts;
+if (!LW) { console.warn('LightweightCharts not loaded'); return; }
+
+/* ── Shared palette ──────────────────────────────────────────────────────── */
+var GREEN   = '#00e87a';
+var RED     = '#f03a4a';
+var BLUE    = '#3b82f6';  // EMA8
+var CYAN    = '#00c8f0';  // EMA21
+var AMBER   = '#f59e0b';  // VWAP
+var DKGRN   = '#00955a';  // BB bands
+var MAGENTA = '#ff69b4';  // TD Sequential
+var YELLOW  = '#f5c842';
+
+/* ── Factory: creates a chart with shared options ────────────────────────── */
+function mkChart(containerId) {
+  var t = sgTheme();
+  var el = document.getElementById(containerId);
+  if (!el) return null;
+  return LW.createChart(el, {
+    width:  el.clientWidth || 600,
+    height: 240,
+    layout:      { background: { color: t.bg }, textColor: t.text },
+    grid:        { vertLines: { color: t.grid }, horzLines: { color: t.grid } },
+    crosshair:   { mode: LW.CrosshairMode.Magnet },
+    rightPriceScale: { borderColor: t.border },
+    timeScale:   { borderColor: t.border, timeVisible: false, tickMarkFormatter: function(t) { return ''; } },
+    handleScroll:  { mouseWheel: false, pressedMouseMove: false },
+    handleScale:   { mouseWheel: false, pinch: false, axisPressedMouseMove: false },
+  });
+}
+
+function mkCandles(chart, upColor, downColor) {
+  return chart.addCandlestickSeries({
+    upColor:         upColor   || GREEN,
+    downColor:       downColor || RED,
+    borderUpColor:   upColor   || GREEN,
+    borderDownColor: downColor || RED,
+    wickUpColor:     upColor   || GREEN,
+    wickDownColor:   downColor || RED,
+  });
+}
+
+function mkLine(chart, color, width, dash) {
+  return chart.addLineSeries({
+    color: color, lineWidth: width || 2,
+    lineStyle: dash ? LW.LineStyle.Dashed : LW.LineStyle.Solid,
+    priceLineVisible: false, lastValueVisible: false,
+    crosshairMarkerVisible: false,
+  });
+}
+
+/* time = integer 1..N */
+function t(n) { return n; }
+
+/* ════════════════════════════════════════════════════════
+   CHART 1 — TF5M Bullish Setup
+   ════════════════════════════════════════════════════════ */
+var c1 = mkChart('sg-lc1');
+if (c1) {
+  var cs1 = mkCandles(c1);
+  cs1.setData([
+    {time:1,  open:7.620,high:7.650,low:7.600,close:7.630},
+    {time:2,  open:7.630,high:7.660,low:7.610,close:7.650},
+    {time:3,  open:7.650,high:7.690,low:7.630,close:7.680},
+    {time:4,  open:7.680,high:7.720,low:7.660,close:7.710},
+    {time:5,  open:7.710,high:7.730,low:7.690,close:7.700},
+    {time:6,  open:7.700,high:7.740,low:7.680,close:7.730},  // VWAP cross
+    {time:7,  open:7.730,high:7.770,low:7.710,close:7.760},
+    {time:8,  open:7.760,high:7.790,low:7.740,close:7.780},
+    {time:9,  open:7.780,high:7.800,low:7.760,close:7.770},
+    {time:10, open:7.770,high:7.810,low:7.755,close:7.800},  // EMA8 bounce ← ENTRY
+    {time:11, open:7.800,high:7.840,low:7.790,close:7.830},
+    {time:12, open:7.830,high:7.870,low:7.820,close:7.860},
+    {time:13, open:7.860,high:7.880,low:7.840,close:7.850},
+    {time:14, open:7.850,high:7.890,low:7.840,close:7.880},
+    {time:15, open:7.880,high:7.910,low:7.870,close:7.900},
+    {time:16, open:7.900,high:7.920,low:7.880,close:7.910},
+    {time:17, open:7.910,high:7.930,low:7.890,close:7.900},
+    {time:18, open:7.900,high:7.930,low:7.880,close:7.920},  // TD9
+    {time:19, open:7.920,high:7.940,low:7.900,close:7.910},
+    {time:20, open:7.910,high:7.930,low:7.890,close:7.905},
+  ]);
+
+  // EMA8
+  var e8_1 = mkLine(c1, BLUE, 2);
+  e8_1.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i,j){
+    var vals=[7.610,7.630,7.650,7.680,7.690,7.710,7.730,7.760,7.760,7.770,7.790,7.820,7.830,7.850,7.870,7.880,7.890,7.900,7.900,7.900];
+    return {time:i,value:vals[j]};
+  }));
+  // EMA21
+  var e21_1 = mkLine(c1, CYAN, 2);
+  e21_1.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i,j){
+    var vals=[7.600,7.600,7.610,7.620,7.630,7.650,7.670,7.690,7.700,7.710,7.730,7.750,7.770,7.780,7.800,7.820,7.830,7.840,7.850,7.850];
+    return {time:i,value:vals[j]};
+  }));
+  // BB upper
+  var bbu1 = mkLine(c1, DKGRN, 1.5);
+  bbu1.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i,j){
+    var v=[7.70,7.72,7.74,7.76,7.76,7.78,7.80,7.83,7.84,7.85,7.87,7.90,7.91,7.92,7.94,7.95,7.95,7.95,7.94,7.93];
+    return {time:i,value:v[j]};
+  }));
+  // BB lower
+  var bbd1 = mkLine(c1, DKGRN, 1.5);
+  bbd1.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i,j){
+    var v=[7.54,7.54,7.55,7.55,7.56,7.57,7.58,7.60,7.61,7.62,7.64,7.65,7.67,7.68,7.69,7.71,7.72,7.73,7.74,7.74];
+    return {time:i,value:v[j]};
+  }));
+  // VWAP price line
+  cs1.createPriceLine({price:7.74, color:AMBER, lineWidth:1.5, lineStyle:LW.LineStyle.Dashed, title:'VWAP 7.740'});
+  // Markers
+  cs1.setMarkers([
+    {time:6,  position:'belowBar', color:CYAN,    shape:'arrowUp',   text:'VWAP Cross'},
+    {time:10, position:'belowBar', color:GREEN,   shape:'arrowUp',   text:'▲ ENTRY — EMA8 Bounce'},
+    {time:18, position:'aboveBar', color:YELLOW,  shape:'arrowDown', text:'TD9 — Sell 50%'},
+  ]);
+  c1.timeScale().fitContent();
+}
+
+/* ════════════════════════════════════════════════════════
+   CHART 2 — TF1M ORB Breakout Entry
+   ════════════════════════════════════════════════════════ */
+var c2 = mkChart('sg-lc2');
+if (c2) {
+  var cs2 = mkCandles(c2);
+  cs2.setData([
+    {time:1,  open:7.700,high:7.820,low:7.680,close:7.800},  // ORB candle
+    {time:2,  open:7.800,high:7.810,low:7.770,close:7.780},  // consolidation
+    {time:3,  open:7.780,high:7.800,low:7.760,close:7.780},
+    {time:4,  open:7.780,high:7.800,low:7.760,close:7.790},
+    {time:5,  open:7.790,high:7.810,low:7.770,close:7.780},
+    {time:6,  open:7.780,high:7.820,low:7.770,close:7.810},
+    {time:7,  open:7.810,high:7.820,low:7.790,close:7.800},
+    {time:8,  open:7.800,high:7.820,low:7.790,close:7.810},
+    {time:9,  open:7.810,high:7.870,low:7.800,close:7.860},  // BREAKOUT candle
+    {time:10, open:7.860,high:7.890,low:7.850,close:7.880},  // TD1
+    {time:11, open:7.880,high:7.910,low:7.870,close:7.900},  // TD2
+    {time:12, open:7.900,high:7.930,low:7.890,close:7.920},  // TD3
+    {time:13, open:7.920,high:7.940,low:7.900,close:7.910},
+    {time:14, open:7.910,high:7.940,low:7.900,close:7.930},  // TD4
+    {time:15, open:7.930,high:7.950,low:7.910,close:7.930},  // TD5 — TP1
+    {time:16, open:7.930,high:7.950,low:7.890,close:7.900},  // reversal
+    {time:17, open:7.900,high:7.910,low:7.860,close:7.870},  // TRAIL EXIT
+    {time:18, open:7.870,high:7.880,low:7.840,close:7.850},
+  ]);
+
+  var e8_2 = mkLine(c2, BLUE, 2);
+  e8_2.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18].map(function(i,j){
+    var v=[7.720,7.740,7.750,7.750,7.750,7.760,7.760,7.770,7.790,7.820,7.840,7.870,7.870,7.880,7.890,7.890,7.880,7.870];
+    return {time:i,value:v[j]};
+  }));
+  var e21_2 = mkLine(c2, CYAN, 2);
+  e21_2.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18].map(function(i,j){
+    var v=[7.700,7.700,7.710,7.710,7.720,7.720,7.730,7.730,7.740,7.760,7.770,7.790,7.800,7.810,7.820,7.830,7.830,7.820];
+    return {time:i,value:v[j]};
+  }));
+  var bbu2 = mkLine(c2, DKGRN, 1.5);
+  bbu2.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18].map(function(i,j){
+    var v=[7.88,7.86,7.85,7.85,7.85,7.85,7.85,7.85,7.88,7.91,7.93,7.95,7.95,7.96,7.96,7.96,7.94,7.92];
+    return {time:i,value:v[j]};
+  }));
+  var bbd2 = mkLine(c2, DKGRN, 1.5);
+  bbd2.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18].map(function(i,j){
+    var v=[7.70,7.70,7.70,7.70,7.70,7.70,7.70,7.70,7.71,7.72,7.73,7.74,7.75,7.76,7.77,7.78,7.78,7.77];
+    return {time:i,value:v[j]};
+  }));
+
+  // Key horizontal price lines
+  cs2.createPriceLine({price:7.820, color:AMBER,  lineWidth:1.5, lineStyle:LW.LineStyle.Dashed, title:'ORB HIGH 7.820'});
+  cs2.createPriceLine({price:7.790, color:RED,    lineWidth:1.5, lineStyle:LW.LineStyle.Dashed, title:'STOP 7.790'});
+  cs2.createPriceLine({price:7.920, color:YELLOW, lineWidth:1.5, lineStyle:LW.LineStyle.Dashed, title:'TP1 (2R) 7.920'});
+  cs2.createPriceLine({price:7.960, color:GREEN,  lineWidth:1.5, lineStyle:LW.LineStyle.Dashed, title:'TP2 (3R) 7.960'});
+  cs2.createPriceLine({price:7.760, color:AMBER,  lineWidth:1,   lineStyle:LW.LineStyle.Dotted,  title:'VWAP 7.760'});
+
+  cs2.setMarkers([
+    {time:1,  position:'aboveBar', color:AMBER,   shape:'circle',    text:'ORB Candle'},
+    {time:9,  position:'belowBar', color:GREEN,   shape:'arrowUp',   text:'▲ BREAKOUT ENTRY'},
+    {time:10, position:'belowBar', color:MAGENTA, shape:'circle',    text:'1'},
+    {time:11, position:'belowBar', color:MAGENTA, shape:'circle',    text:'2'},
+    {time:12, position:'belowBar', color:MAGENTA, shape:'circle',    text:'3'},
+    {time:14, position:'belowBar', color:MAGENTA, shape:'circle',    text:'4'},
+    {time:15, position:'aboveBar', color:YELLOW,  shape:'arrowDown', text:'TP1 — Sell 50%'},
+    {time:17, position:'aboveBar', color:RED,     shape:'arrowDown', text:'Trail Exit'},
+  ]);
+  c2.timeScale().fitContent();
+}
+
+/* ════════════════════════════════════════════════════════
+   CHART 3 — TF1M EMA8 Pullback Bounce
+   ════════════════════════════════════════════════════════ */
+var c3 = mkChart('sg-lc3');
+if (c3) {
+  var cs3 = mkCandles(c3);
+  cs3.setData([
+    {time:1,  open:7.780,high:7.810,low:7.770,close:7.800},
+    {time:2,  open:7.800,high:7.840,low:7.790,close:7.830},
+    {time:3,  open:7.830,high:7.860,low:7.810,close:7.850},
+    {time:4,  open:7.850,high:7.870,low:7.830,close:7.840},  // pullback starts
+    {time:5,  open:7.840,high:7.850,low:7.810,close:7.820},
+    {time:6,  open:7.820,high:7.830,low:7.800,close:7.810},  // touches EMA8
+    {time:7,  open:7.810,high:7.850,low:7.800,close:7.840},  // BOUNCE ← ENTRY 1
+    {time:8,  open:7.840,high:7.880,low:7.830,close:7.870},  // TD1
+    {time:9,  open:7.870,high:7.900,low:7.860,close:7.890},  // TD2
+    {time:10, open:7.890,high:7.920,low:7.880,close:7.910},  // TD3 → TP1
+    {time:11, open:7.910,high:7.920,low:7.880,close:7.890},  // small red
+    {time:12, open:7.890,high:7.910,low:7.870,close:7.880},  // 2nd pullback
+    {time:13, open:7.880,high:7.890,low:7.860,close:7.870},  // touches EMA8
+    {time:14, open:7.870,high:7.920,low:7.860,close:7.910},  // BOUNCE ← ENTRY 2
+    {time:15, open:7.910,high:7.940,low:7.900,close:7.930},  // TD1
+    {time:16, open:7.930,high:7.960,low:7.920,close:7.950},  // TD2 → TP2
+    {time:17, open:7.950,high:7.960,low:7.910,close:7.920},  // reversal
+    {time:18, open:7.920,high:7.930,low:7.880,close:7.890},
+    {time:19, open:7.890,high:7.900,low:7.850,close:7.860},
+    {time:20, open:7.860,high:7.880,low:7.840,close:7.850},
+  ]);
+
+  var e8_3 = mkLine(c3, BLUE, 2);
+  e8_3.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i,j){
+    var v=[7.780,7.800,7.820,7.830,7.820,7.810,7.810,7.830,7.850,7.870,7.870,7.870,7.870,7.870,7.890,7.910,7.910,7.900,7.890,7.880];
+    return {time:i,value:v[j]};
+  }));
+  var e21_3 = mkLine(c3, CYAN, 2);
+  e21_3.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i,j){
+    var v=[7.740,7.750,7.760,7.770,7.770,7.770,7.770,7.780,7.790,7.800,7.810,7.810,7.810,7.810,7.820,7.830,7.840,7.840,7.830,7.830];
+    return {time:i,value:v[j]};
+  }));
+  var bbu3 = mkLine(c3, DKGRN, 1.5);
+  bbu3.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i,j){
+    var v=[7.86,7.89,7.91,7.92,7.91,7.90,7.90,7.91,7.93,7.95,7.95,7.94,7.93,7.94,7.96,7.97,7.97,7.96,7.95,7.93];
+    return {time:i,value:v[j]};
+  }));
+  var bbd3 = mkLine(c3, DKGRN, 1.5);
+  bbd3.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i,j){
+    var v=[7.73,7.73,7.73,7.73,7.73,7.72,7.72,7.73,7.74,7.75,7.76,7.76,7.76,7.76,7.77,7.78,7.79,7.79,7.78,7.77];
+    return {time:i,value:v[j]};
+  }));
+
+  cs3.createPriceLine({price:7.800, color:RED,    lineWidth:1.5, lineStyle:LW.LineStyle.Dashed, title:'STOP 7.800'});
+  cs3.createPriceLine({price:7.910, color:YELLOW, lineWidth:1.5, lineStyle:LW.LineStyle.Dashed, title:'TP1 (2R)'});
+  cs3.createPriceLine({price:7.950, color:GREEN,  lineWidth:1.5, lineStyle:LW.LineStyle.Dashed, title:'TP2 (3R)'});
+  cs3.createPriceLine({price:7.770, color:AMBER,  lineWidth:1,   lineStyle:LW.LineStyle.Dotted,  title:'VWAP'});
+
+  cs3.setMarkers([
+    {time:7,  position:'belowBar', color:GREEN,   shape:'arrowUp',   text:'▲ ENTRY 1 — EMA8 Bounce'},
+    {time:8,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'1'},
+    {time:9,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'2'},
+    {time:10, position:'aboveBar', color:YELLOW,  shape:'arrowDown', text:'TP1 (2R)'},
+    {time:14, position:'belowBar', color:GREEN,   shape:'arrowUp',   text:'▲ ENTRY 2 — EMA8 Bounce'},
+    {time:15, position:'belowBar', color:MAGENTA, shape:'circle',    text:'1'},
+    {time:16, position:'aboveBar', color:GREEN,   shape:'arrowDown', text:'TP2 (3R)'},
+  ]);
+  c3.timeScale().fitContent();
+}
+
+/* ════════════════════════════════════════════════════════
+   CHART 4 — Exit Signals
+   ════════════════════════════════════════════════════════ */
+var c4 = mkChart('sg-lc4');
+if (c4) {
+  var cs4 = mkCandles(c4);
+  cs4.setData([
+    {time:1,  open:7.700,high:7.730,low:7.690,close:7.720},  // TD1
+    {time:2,  open:7.720,high:7.750,low:7.710,close:7.740},  // TD2
+    {time:3,  open:7.740,high:7.780,low:7.730,close:7.770},  // TD3
+    {time:4,  open:7.770,high:7.800,low:7.760,close:7.790},  // TD4
+    {time:5,  open:7.790,high:7.830,low:7.780,close:7.820},  // TD5
+    {time:6,  open:7.820,high:7.850,low:7.810,close:7.840},  // TD6
+    {time:7,  open:7.840,high:7.870,low:7.830,close:7.860},  // TD7
+    {time:8,  open:7.860,high:7.890,low:7.850,close:7.880},  // TD8
+    {time:9,  open:7.880,high:7.910,low:7.860,close:7.900},  // TD9 ← SELL HALF
+    {time:10, open:7.900,high:7.910,low:7.850,close:7.860},  // reversal
+    {time:11, open:7.860,high:7.870,low:7.820,close:7.830},
+    {time:12, open:7.830,high:7.840,low:7.800,close:7.810},  // close < EMA8 ← WARNING
+    {time:13, open:7.810,high:7.820,low:7.780,close:7.790},
+    {time:14, open:7.790,high:7.800,low:7.760,close:7.770},
+    {time:15, open:7.770,high:7.780,low:7.730,close:7.740},  // close < EMA21 ← EXIT ALL
+    {time:16, open:7.740,high:7.750,low:7.700,close:7.710},
+    {time:17, open:7.710,high:7.730,low:7.670,close:7.680},
+    {time:18, open:7.680,high:7.700,low:7.640,close:7.650},
+    {time:19, open:7.650,high:7.680,low:7.620,close:7.660},  // small bounce
+    {time:20, open:7.660,high:7.680,low:7.630,close:7.640},
+    {time:21, open:7.640,high:7.660,low:7.610,close:7.620},
+    {time:22, open:7.620,high:7.640,low:7.600,close:7.610},
+  ]);
+
+  var e8_4 = mkLine(c4, BLUE, 2);
+  e8_4.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(function(i,j){
+    var v=[7.700,7.710,7.730,7.760,7.780,7.810,7.830,7.850,7.870,7.860,7.840,7.820,7.800,7.780,7.760,7.730,7.710,7.690,7.680,7.670,7.660,7.640];
+    return {time:i,value:v[j]};
+  }));
+  var e21_4 = mkLine(c4, CYAN, 2);
+  e21_4.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(function(i,j){
+    var v=[7.660,7.670,7.680,7.700,7.720,7.730,7.750,7.770,7.790,7.790,7.790,7.780,7.770,7.760,7.750,7.740,7.720,7.700,7.690,7.680,7.670,7.650];
+    return {time:i,value:v[j]};
+  }));
+  var bbu4 = mkLine(c4, DKGRN, 1.5);
+  bbu4.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(function(i,j){
+    var v=[7.77,7.79,7.81,7.84,7.87,7.89,7.91,7.93,7.94,7.94,7.93,7.91,7.89,7.87,7.85,7.82,7.79,7.77,7.75,7.73,7.72,7.70];
+    return {time:i,value:v[j]};
+  }));
+  var bbd4 = mkLine(c4, DKGRN, 1.5);
+  bbd4.setData([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(function(i,j){
+    var v=[7.60,7.60,7.60,7.61,7.62,7.63,7.64,7.65,7.67,7.68,7.68,7.67,7.66,7.65,7.63,7.61,7.59,7.58,7.58,7.58,7.58,7.57];
+    return {time:i,value:v[j]};
+  }));
+
+  cs4.createPriceLine({price:7.790, color:AMBER, lineWidth:1, lineStyle:LW.LineStyle.Dotted, title:'VWAP 7.790'});
+
+  cs4.setMarkers([
+    {time:1,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'1'},
+    {time:2,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'2'},
+    {time:3,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'3'},
+    {time:4,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'4'},
+    {time:5,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'5'},
+    {time:6,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'6'},
+    {time:7,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'7'},
+    {time:8,  position:'belowBar', color:MAGENTA, shape:'circle',    text:'8'},
+    {time:9,  position:'aboveBar', color:MAGENTA, shape:'circle',    text:'9'},
+    {time:9,  position:'aboveBar', color:YELLOW,  shape:'arrowDown', text:'TD9 — Sell 50%'},
+    {time:12, position:'aboveBar', color:YELLOW,  shape:'arrowDown', text:'Close < EMA8 ⚠'},
+    {time:15, position:'aboveBar', color:RED,     shape:'arrowDown', text:'Close < EMA21 — EXIT ALL'},
+  ]);
+  c4.timeScale().fitContent();
+}
+
+/* ── Resize charts when panel becomes visible ───────────────────────────── */
+var sgChartsInited = false;
+function sgResizeCharts() {
+  [
+    {id:'sg-lc1', chart:c1},
+    {id:'sg-lc2', chart:c2},
+    {id:'sg-lc3', chart:c3},
+    {id:'sg-lc4', chart:c4},
+  ].forEach(function(item) {
+    if (!item.chart) return;
+    var el = document.getElementById(item.id);
+    if (el && el.clientWidth > 0) item.chart.resize(el.clientWidth, 240);
+  });
+}
+
+/* ── Theme sync ──────────────────────────────────────────────────────────── */
+function sgApplyTheme() {
+  var t = sgTheme();
+  [c1, c2, c3, c4].forEach(function(c) {
+    if (!c) return;
+    c.applyOptions({
+      layout: { background: { color: t.bg }, textColor: t.text },
+      grid:   { vertLines: { color: t.grid }, horzLines: { color: t.grid } },
+    });
+  });
+}
+
+/* Watch for tab switch and theme toggle */
+var origSwitch = window.switchTab;
+window.switchTab = function(tab) {
+  if (origSwitch) origSwitch.apply(this, arguments);
+  if (tab === 'scalp') {
+    setTimeout(function() { sgResizeCharts(); sgApplyTheme(); }, 80);
+  }
+};
+
+/* Theme toggle override */
+var origToggle = window.tmToggleTheme;
+window.tmToggleTheme = function() {
+  if (origToggle) origToggle.apply(this, arguments);
+  setTimeout(sgApplyTheme, 50);
+};
+
+window.addEventListener('resize', function() {
+  if (document.getElementById('panel-scalp') &&
+      document.getElementById('panel-scalp').style.display !== 'none') {
+    sgResizeCharts();
+  }
+});
+
 })();
 </script>
 
