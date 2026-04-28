@@ -5686,11 +5686,14 @@ window.addEventListener('resize',function(){
 ══════════════════════════════════════ -->
 <div class="panel" id="panel-tv">
   <div class="card" style="padding:0;overflow:hidden;">
+
+    <!-- Header controls -->
     <div class="card-hdr" style="padding:12px 18px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
       <span class="ci">📺</span> TradingView Live Chart
       <span style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <input id="tv-symbol-input" type="text" value="FX:XAUUSD"
           placeholder="e.g. NASDAQ:AAPL"
+          onkeydown="if(event.key==='Enter')tvLoad()"
           style="background:var(--bg2,#1a1a2e);color:var(--txt);border:1px solid var(--border,#333);
                  border-radius:6px;padding:4px 10px;font-size:12px;font-family:inherit;width:150px;"/>
         <select id="tv-interval-select"
@@ -5720,6 +5723,7 @@ window.addEventListener('resize',function(){
       </span>
     </div>
 
+    <!-- Quick symbol buttons -->
     <div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 18px;border-bottom:1px solid var(--border,#333);">
       <span style="font-size:11px;color:var(--txt-muted,#888);align-self:center;margin-right:4px;">Quick:</span>
       <button class="tv-quick-btn" onclick="tvQuick('FX:XAUUSD','D')">XAUUSD</button>
@@ -5737,33 +5741,17 @@ window.addEventListener('resize',function(){
       <button class="tv-quick-btn" onclick="tvQuick('NASDAQ:NDX','D')">NASDAQ 100</button>
     </div>
 
+    <!-- Chart container — TradingView Advanced Widget renders here -->
     <div id="tv-chart-wrap" style="width:100%;height:620px;position:relative;">
-      <iframe id="tv-iframe"
-        src=""
-        style="width:100%;height:100%;border:none;display:block;"
-        allowtransparency="true"
-        allowfullscreen="">
-      </iframe>
-      <div id="tv-placeholder"
-        style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-               justify-content:center;gap:12px;background:var(--bg2,#0d0d1a);color:var(--txt-muted,#888);">
-        <div style="font-size:48px;">📺</div>
-        <div style="font-size:15px;font-weight:600;color:var(--txt);">TradingView Live Chart</div>
-        <div style="font-size:12px;">Select a symbol above or click a Quick button, then press Load</div>
-        <button onclick="tvLoad()"
-          style="margin-top:8px;background:var(--accent,#7c3aed);color:#fff;border:none;
-                 border-radius:8px;padding:8px 22px;font-size:13px;cursor:pointer;font-weight:600;">
-          ▶ Load Chart
-        </button>
-      </div>
+      <div id="tv-widget-container" style="width:100%;height:100%;"></div>
     </div>
 
+    <!-- Footer -->
     <div style="padding:10px 18px;font-size:11px;color:var(--txt-muted,#888);border-top:1px solid var(--border,#333);">
-      ℹ️ Powered by <strong>TradingView</strong> (free widget — no login required).
+      ℹ️ Powered by <strong>TradingView</strong> Advanced Chart Widget (free).
       Format: <code style="background:var(--bg3,#222);padding:1px 5px;border-radius:3px;">EXCHANGE:SYMBOL</code>
-      e.g. <code style="background:var(--bg3,#222);padding:1px 5px;border-radius:3px;">MYX:5347</code> for Bursa stocks.
-      For saved drawings &amp; alerts,
-      <a href="https://www.tradingview.com" target="_blank" style="color:var(--accent2,#38bdf8);">sign in at TradingView.com</a>.
+      &nbsp;e.g. <code style="background:var(--bg3,#222);padding:1px 5px;border-radius:3px;">MYX:5347</code> for Bursa &nbsp;|&nbsp;
+      <a href="https://www.tradingview.com" target="_blank" style="color:var(--accent2,#38bdf8);">Open TradingView.com</a> for full features.
     </div>
   </div>
 </div>
@@ -5787,53 +5775,48 @@ window.addEventListener('resize',function(){
 }
 </style>
 
+<!-- TradingView official widget library -->
+<script src="https://s3.tradingview.com/tv.js"></script>
 <script>
 (function(){
-  /* Build TradingView Advanced Chart URL — uses /advanced_chart/ which
-     correctly honours the symbol param unlike the legacy widgetembed */
-  function tvBuildUrl(symbol, interval, style) {
-    var isDark = !document.body.classList.contains('tm-light');
-    var theme  = isDark ? 'dark' : 'light';
-    /* Map numeric style to TV chart type string */
-    var typeMap = {'1':'candlestick','2':'line','3':'bar','8':'Heikin-Ashi'};
-    var chartType = typeMap[style] || 'candlestick';
-    return 'https://s.tradingview.com/widgetembed/?'
-      + 'symbol='            + encodeURIComponent(symbol)
-      + '&interval='         + encodeURIComponent(interval)
-      + '&theme='            + theme
-      + '&style='            + style
-      + '&locale=en'
-      + '&timezone=Asia%2FKuala_Lumpur'
-      + '&toolbar_bg='       + (isDark ? '%231a1a2e' : '%23f5f5f5')
-      + '&enable_publishing=0'
-      + '&hide_top_toolbar=0'
-      + '&hide_legend=0'
-      + '&save_image=1'
-      + '&hide_side_toolbar=0'
-      + '&allow_symbol_change=1';
-  }
+  var _tvWidget = null;
 
   window.tvLoad = function() {
-    var symbol   = (document.getElementById('tv-symbol-input').value || 'FX:XAUUSD').trim();
+    var symbol   = (document.getElementById('tv-symbol-input').value || 'FX:XAUUSD').trim().toUpperCase();
     var interval = document.getElementById('tv-interval-select').value;
     var style    = document.getElementById('tv-style-select').value;
-    var wrap     = document.getElementById('tv-chart-wrap');
-    var ph       = document.getElementById('tv-placeholder');
+    var isDark   = !document.body.classList.contains('tm-light');
 
-    /* Remove old iframe and container contents, rebuild fresh so TV
-       does not cache/restore a previous symbol from its own session */
-    var existing = document.getElementById('tv-iframe');
-    if (existing) existing.parentNode.removeChild(existing);
+    var container = document.getElementById('tv-widget-container');
+    container.innerHTML = ''; /* clear previous widget */
 
-    var iframe = document.createElement('iframe');
-    iframe.id  = 'tv-iframe';
-    iframe.setAttribute('allowtransparency','true');
-    iframe.setAttribute('allowfullscreen','');
-    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
-    iframe.src = tvBuildUrl(symbol, interval, style);
-    wrap.insertBefore(iframe, ph);
+    /* Destroy old widget instance if exists */
+    if (_tvWidget && typeof _tvWidget.remove === 'function') {
+      try { _tvWidget.remove(); } catch(e){}
+    }
 
-    if (ph) ph.style.display = 'none';
+    _tvWidget = new TradingView.widget({
+      container_id:      'tv-widget-container',
+      width:             '100%',
+      height:            620,
+      symbol:            symbol,
+      interval:          interval,
+      timezone:          'Asia/Kuala_Lumpur',
+      theme:             isDark ? 'dark' : 'light',
+      style:             style,
+      locale:            'en',
+      toolbar_bg:        isDark ? '#1a1a2e' : '#f5f5f5',
+      enable_publishing: false,
+      hide_top_toolbar:  false,
+      hide_legend:       false,
+      save_image:        true,
+      allow_symbol_change: true,
+      studies:           [],
+      show_popup_button: false,   /* suppress "open in TV" popup button */
+      popup_width:       '1000',
+      popup_height:      '650',
+      no_referral_id:    true,
+    });
   };
 
   window.tvQuick = function(symbol, interval) {
@@ -5842,31 +5825,21 @@ window.addEventListener('resize',function(){
     window.tvLoad();
   };
 
-  /* Re-theme chart on dark/light toggle */
+  /* Re-theme on dark/light toggle */
   var _origToggle = window.tmToggleTheme;
   window.tmToggleTheme = function() {
     if (_origToggle) _origToggle.apply(this, arguments);
-    var ph = document.getElementById('tv-placeholder');
-    if (ph && ph.style.display === 'none') {
-      setTimeout(window.tvLoad, 80);
-    }
+    if (_tvWidget) setTimeout(window.tvLoad, 80);
   };
 
-  /* Auto-load XAUUSD when tab is opened */
+  /* Auto-load when tab is clicked */
   var _origSwitch = window.switchTab;
   window.switchTab = function(tab) {
     if (_origSwitch) _origSwitch.apply(this, arguments);
-    if (tab === 'tv') {
-      setTimeout(function(){
-        var ph = document.getElementById('tv-placeholder');
-        /* Always reload to respect current symbol input */
-        window.tvLoad();
-      }, 120);
-    }
+    if (tab === 'tv') setTimeout(window.tvLoad, 150);
   };
 })();
 </script>
-
 
 </body>
 </html>
