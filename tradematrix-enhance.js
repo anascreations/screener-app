@@ -722,9 +722,3 @@ function calcEntryZone() {
         }
       </div>`;
 }
-
-function fmt(v, d) {
-    if (v == null) return '—';
-    d = d ?? (v > 100 ? 2 : v > 1 ? 4 : 6);
-    return Number(v).toFixed(d);
-}
