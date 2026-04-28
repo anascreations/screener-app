@@ -5725,7 +5725,7 @@ window.addEventListener('resize',function(){
 
     <!-- Quick symbol buttons -->
     <div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 18px;border-bottom:1px solid var(--border,#333);">
-      <span style="font-size:11px;color:var(--txt-muted,#888);align-self:center;margin-right:4px;">Quick:</span>
+      <span style="font-size:11px;color:var(--txt-muted,#555);align-self:center;margin-right:4px;white-space:nowrap;">Quick:</span>
       <button class="tv-quick-btn" onclick="tvQuick('OANDA:XAUUSD','D')">XAUUSD</button>
       <button class="tv-quick-btn" onclick="tvQuick('OANDA:EURUSD','60')">EUR/USD</button>
       <button class="tv-quick-btn" onclick="tvQuick('OANDA:USDJPY','60')">USD/JPY</button>
@@ -5759,18 +5759,31 @@ window.addEventListener('resize',function(){
 <style>
 .tv-quick-btn {
   background: var(--bg3, #1e1e2e);
-  color: var(--txt);
-  border: 1px solid var(--border, #333);
+  color: var(--txt, #e0e0e0);
+  border: 1px solid var(--border, #444);
   border-radius: 5px;
   padding: 3px 10px;
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .tv-quick-btn:hover {
   background: var(--accent, #7c3aed);
-  color: #fff;
+  color: #fff !important;
+  border-color: var(--accent, #7c3aed);
+}
+/* Light theme overrides */
+body.tm-light .tv-quick-btn,
+[data-theme="light"] .tv-quick-btn {
+  background: #e8eaf0;
+  color: #1a1a2e !important;
+  border-color: #b0b4c0;
+}
+body.tm-light .tv-quick-btn:hover,
+[data-theme="light"] .tv-quick-btn:hover {
+  background: var(--accent, #7c3aed);
+  color: #fff !important;
   border-color: var(--accent, #7c3aed);
 }
 </style>
