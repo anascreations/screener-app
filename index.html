@@ -2410,6 +2410,7 @@
     <button class="guide-tab-btn"        onclick="switchGuide('g-indicators')">🔬 Indicators</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-smd')">🏆 Smart Money</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-schedule')">🗓 Daily Schedule</button>
+    <button class="guide-tab-btn"        onclick="switchGuide('g-grade')">🏅 Stock Grade</button>
   </div>
 
   <!-- ── MA / EMA Combined Guide ── -->
@@ -3028,6 +3029,132 @@
     </div>
 
   </div><!-- /g-schedule -->
+
+
+  <!-- ── Stock Grade System ── -->
+  <div class="guide-section" id="g-grade">
+    <div class="guide-card">
+      <div class="guide-card-hdr">🏅 Stock Grade System — How Grades Are Determined</div>
+      <div class="guide-card-body">
+
+        <div class="guide-intro" style="border-left-color:#ffd700;">
+          The grade is determined by the <code class="gc">getGrade(gap)</code> function in
+          <code class="gc">tradematrix.js</code>, where <strong>gap = the percentage distance between
+          two moving averages</strong> (how far the faster MA is above the slower MA).
+        </div>
+
+        <!-- GRADE TABLE -->
+        <div style="overflow-x:auto;margin-top:20px;">
+          <table class="grade-tbl">
+            <thead>
+              <tr>
+                <th>Grade</th>
+                <th>Gap (%)</th>
+                <th>Meaning</th>
+                <th style="text-align:center;">Emoji</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="grade-bear">
+                <td><strong>BEAR</strong></td>
+                <td>gap &lt; 0%</td>
+                <td>Faster MA is <em>below</em> slower MA — downtrend</td>
+                <td style="text-align:center;font-size:16px;">🔻</td>
+              </tr>
+              <tr class="grade-flat">
+                <td><strong>FLAT</strong></td>
+                <td>0% – 1%</td>
+                <td>Just crossed, barely above — no conviction</td>
+                <td style="text-align:center;font-size:16px;">➡️</td>
+              </tr>
+              <tr class="grade-spp">
+                <td><strong>S++ 🚀</strong></td>
+                <td>1% – 3%</td>
+                <td>Sweet spot — fresh trend, not yet overextended</td>
+                <td style="text-align:center;font-size:16px;">🚀</td>
+              </tr>
+              <tr class="grade-a">
+                <td><strong>A ✅</strong></td>
+                <td>3% – 5%</td>
+                <td>Good trend, still worth trading but maturing</td>
+                <td style="text-align:center;font-size:16px;">✅</td>
+              </tr>
+              <tr class="grade-b">
+                <td><strong>B ⚠️</strong></td>
+                <td>5% – 8%</td>
+                <td>Trend is extended — reduce position size</td>
+                <td style="text-align:center;font-size:16px;">⚠️</td>
+              </tr>
+              <tr class="grade-c">
+                <td><strong>C 🟡</strong></td>
+                <td>8% – 10%</td>
+                <td>Overextended — high risk of pullback</td>
+                <td style="text-align:center;font-size:16px;">🟡</td>
+              </tr>
+              <tr class="grade-x">
+                <td><strong>X 🔴</strong></td>
+                <td>&gt; 10%</td>
+                <td>Dangerously stretched — avoid new entries</td>
+                <td style="text-align:center;font-size:16px;">🔴</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- WHAT GAP MEASURES -->
+        <div class="grade-info-card" style="margin-top:24px;">
+          <div class="grade-info-title">What the "gap" measures depends on which tab you're on:</div>
+          <div class="grade-info-rows">
+            <div class="grade-info-row">
+              <span class="gir-label">MA tab</span>
+              <span class="gir-arrow">→</span>
+              <span>gap = <code class="gc">(MA20 − MA50) / MA50 × 100%</code> — how far MA20 is above MA50</span>
+            </div>
+            <div class="grade-info-row">
+              <span class="gir-label">EMA tab</span>
+              <span class="gir-arrow">→</span>
+              <span>gap = <code class="gc">(EMA21 − EMA55) / EMA55 × 100%</code> — how far EMA21 is above EMA55</span>
+            </div>
+            <div class="grade-info-row">
+              <span class="gir-label">Gold / Bursa tabs</span>
+              <span class="gir-arrow">→</span>
+              <span>same EMA21 vs EMA55 logic applied to the respective instrument</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WHY S++ IS THE BEST -->
+        <div class="grade-info-card" style="margin-top:16px;">
+          <div class="grade-info-title">Why S++ is the best:</div>
+          <div style="font-size:13px;color:var(--txt);line-height:1.75;padding-top:6px;">
+            S++ (1–3%) means the faster MA <em>just</em> crossed above the slower MA cleanly.
+            The trend is <strong>fresh and unextended</strong> — maximum reward potential with minimum
+            overextension risk. Once the gap widens past 5–10%, the move is already mature and a
+            mean-reversion pullback is increasingly likely.
+          </div>
+        </div>
+
+        <!-- HOW IT AFFECTS TRADE DECISIONS -->
+        <div class="grade-info-card" style="margin-top:16px;">
+          <div class="grade-info-title">How it affects trade decisions:</div>
+          <div style="padding-top:8px;display:flex;flex-direction:column;gap:10px;">
+            <div class="grade-decision-row">
+              <span class="grade-bullet" style="background:#f87171;">●</span>
+              <span>Grade <strong>X</strong> automatically downgrades position size from 100% → 50%
+              and can flip <code class="gc proc">PROCEED</code> → <code class="gc watch">WATCH</code>
+              if the score is below 80</span>
+            </div>
+            <div class="grade-decision-row">
+              <span class="grade-bullet" style="background:#ffd700;">●</span>
+              <span>Only <strong>S++ and A grades</strong> are recommended for full-conviction entries
+              per the tooltip in the app: <em>"Trade S++ and A grades only"</em></span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /guide-card-body -->
+    </div><!-- /guide-card -->
+  </div><!-- /g-grade -->
 
 </div><!-- /panel-guide -->
 
@@ -5768,6 +5895,127 @@ window.addEventListener('resize',function(){
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
+/* ── Grade Table ── */
+.grade-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.grade-tbl th {
+  padding: 10px 14px;
+  text-align: left;
+  background: var(--bg3, #0d0d1a);
+  color: var(--txt-muted, #aaa);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .4px;
+  border-bottom: 2px solid var(--border, #333);
+}
+.grade-tbl td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border, #1e1e2e);
+  color: var(--txt);
+  vertical-align: middle;
+}
+.grade-tbl tbody tr:hover td { background: var(--bg2, #1a1a2e); }
+.grade-bear td { border-left: 4px solid #ef4444; }
+.grade-bear td:first-child { color: #ef4444; }
+.grade-flat td { border-left: 4px solid #94a3b8; }
+.grade-flat td:first-child { color: #94a3b8; }
+.grade-spp  td { border-left: 4px solid #ffd700; background: rgba(255,215,0,.04); }
+.grade-spp  td:first-child { color: #ffd700; }
+.grade-a    td { border-left: 4px solid #4ade80; }
+.grade-a    td:first-child { color: #4ade80; }
+.grade-b    td { border-left: 4px solid #fb923c; }
+.grade-b    td:first-child { color: #fb923c; }
+.grade-c    td { border-left: 4px solid #facc15; }
+.grade-c    td:first-child { color: #facc15; }
+.grade-x    td { border-left: 4px solid #f87171; background: rgba(248,113,113,.04); }
+.grade-x    td:first-child { color: #f87171; }
+
+/* light theme table */
+body.tm-light .grade-tbl td { color: #1a1a2e; }
+body.tm-light .grade-tbl tbody tr:hover td { background: #f0f0f8; }
+
+/* ── Grade Info Cards ── */
+.grade-info-card {
+  background: var(--bg2, #1a1a2e);
+  border: 1px solid var(--border, #333);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+.grade-info-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt);
+  margin-bottom: 4px;
+}
+.grade-info-rows { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; }
+.grade-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--txt);
+  line-height: 1.6;
+}
+.gir-label {
+  background: var(--bg3, #0d0d1a);
+  color: var(--accent2, #38bdf8);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.gir-arrow { color: var(--txt-muted, #888); flex-shrink: 0; margin-top: 2px; }
+.gc {
+  background: var(--bg3, #0d0d1a);
+  color: #f87171;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11.5px;
+  font-family: monospace;
+}
+.gc.proc { color: #4ade80; }
+.gc.watch { color: #facc15; }
+body.tm-light .gc { background: #f0f0f0; }
+body.tm-light .grade-info-card { background: #f5f5fa; }
+body.tm-light .grade-info-title,
+body.tm-light .grade-info-row { color: #1a1a2e; }
+.grade-decision-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--txt);
+  line-height: 1.6;
+}
+body.tm-light .grade-decision-row { color: #1a1a2e; }
+.grade-bullet {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.grade-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--txt);
+  border-bottom: 1px solid var(--border, #222);
+  line-height: 1.5;
+}
+.grade-check { flex-shrink: 0; width: 20px; }
+body.tm-light .grade-row { color: #1a1a2e; }
+
 .tv-quick-btn:hover {
   background: var(--accent, #7c3aed);
   color: #fff !important;
@@ -5781,7 +6029,20 @@ body.tm-light .tv-quick-btn,
   border-color: #b0b4c0;
 }
 body.tm-light .tv-quick-btn:hover,
-[data-theme="light"] .tv-quick-btn:hover {
+[data-theme="light"] .grade-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--txt);
+  border-bottom: 1px solid var(--border, #222);
+  line-height: 1.5;
+}
+.grade-check { flex-shrink: 0; width: 20px; }
+body.tm-light .grade-row { color: #1a1a2e; }
+
+.tv-quick-btn:hover {
   background: var(--accent, #7c3aed);
   color: #fff !important;
   border-color: var(--accent, #7c3aed);
