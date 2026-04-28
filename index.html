@@ -5691,8 +5691,8 @@ window.addEventListener('resize',function(){
     <div class="card-hdr" style="padding:12px 18px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
       <span class="ci">📺</span> TradingView Live Chart
       <span style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <input id="tv-symbol-input" type="text" value="FX:XAUUSD"
-          placeholder="e.g. NASDAQ:AAPL"
+        <input id="tv-symbol-input" type="text" value="OANDA:XAUUSD"
+          placeholder="e.g. OANDA:XAUUSD"
           onkeydown="if(event.key==='Enter')tvLoad()"
           style="background:var(--bg2,#1a1a2e);color:var(--txt);border:1px solid var(--border,#333);
                  border-radius:6px;padding:4px 10px;font-size:12px;font-family:inherit;width:150px;"/>
@@ -5726,19 +5726,19 @@ window.addEventListener('resize',function(){
     <!-- Quick symbol buttons -->
     <div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 18px;border-bottom:1px solid var(--border,#333);">
       <span style="font-size:11px;color:var(--txt-muted,#888);align-self:center;margin-right:4px;">Quick:</span>
-      <button class="tv-quick-btn" onclick="tvQuick('FX:XAUUSD','D')">XAUUSD</button>
-      <button class="tv-quick-btn" onclick="tvQuick('FX:EURUSD','60')">EUR/USD</button>
-      <button class="tv-quick-btn" onclick="tvQuick('FX:USDJPY','60')">USD/JPY</button>
+      <button class="tv-quick-btn" onclick="tvQuick('OANDA:XAUUSD','D')">XAUUSD</button>
+      <button class="tv-quick-btn" onclick="tvQuick('OANDA:EURUSD','60')">EUR/USD</button>
+      <button class="tv-quick-btn" onclick="tvQuick('OANDA:USDJPY','60')">USD/JPY</button>
       <button class="tv-quick-btn" onclick="tvQuick('NASDAQ:AAPL','D')">AAPL</button>
       <button class="tv-quick-btn" onclick="tvQuick('NASDAQ:TSLA','D')">TSLA</button>
       <button class="tv-quick-btn" onclick="tvQuick('NASDAQ:NVDA','D')">NVDA</button>
       <button class="tv-quick-btn" onclick="tvQuick('BINANCE:BTCUSDT','60')">BTC/USDT</button>
       <button class="tv-quick-btn" onclick="tvQuick('BINANCE:ETHUSDT','60')">ETH/USDT</button>
-      <button class="tv-quick-btn" onclick="tvQuick('MYX:5347','D')">TENAGA (MYX)</button>
-      <button class="tv-quick-btn" onclick="tvQuick('MYX:1295','D')">PBBANK (MYX)</button>
-      <button class="tv-quick-btn" onclick="tvQuick('MYX:1023','D')">CIMB (MYX)</button>
-      <button class="tv-quick-btn" onclick="tvQuick('SP:SPX','D')">S&amp;P 500</button>
-      <button class="tv-quick-btn" onclick="tvQuick('NASDAQ:NDX','D')">NASDAQ 100</button>
+      <button class="tv-quick-btn" onclick="tvQuick('KLSE:5347','D')">TENAGA (MYX)</button>
+      <button class="tv-quick-btn" onclick="tvQuick('KLSE:1295','D')">PBBANK (MYX)</button>
+      <button class="tv-quick-btn" onclick="tvQuick('KLSE:1023','D')">CIMB (MYX)</button>
+      <button class="tv-quick-btn" onclick="tvQuick('CBOE:SPX','D')">S&amp;P 500</button>
+      <button class="tv-quick-btn" onclick="tvQuick('NASDAQ:QQQ','D')">NASDAQ 100 (QQQ)</button>
     </div>
 
     <!-- Chart container — TradingView Advanced Widget renders here -->
@@ -5750,7 +5750,7 @@ window.addEventListener('resize',function(){
     <div style="padding:10px 18px;font-size:11px;color:var(--txt-muted,#888);border-top:1px solid var(--border,#333);">
       ℹ️ Powered by <strong>TradingView</strong> Advanced Chart Widget (free).
       Format: <code style="background:var(--bg3,#222);padding:1px 5px;border-radius:3px;">EXCHANGE:SYMBOL</code>
-      &nbsp;e.g. <code style="background:var(--bg3,#222);padding:1px 5px;border-radius:3px;">MYX:5347</code> for Bursa &nbsp;|&nbsp;
+      &nbsp;e.g. <code style="background:var(--bg3,#222);padding:1px 5px;border-radius:3px;">KLSE:5347</code> for Bursa &nbsp;|&nbsp;
       <a href="https://www.tradingview.com" target="_blank" style="color:var(--accent2,#38bdf8);">Open TradingView.com</a> for full features.
     </div>
   </div>
@@ -5782,7 +5782,7 @@ window.addEventListener('resize',function(){
   var _tvWidget = null;
 
   window.tvLoad = function() {
-    var symbol   = (document.getElementById('tv-symbol-input').value || 'FX:XAUUSD').trim().toUpperCase();
+    var symbol   = (document.getElementById('tv-symbol-input').value || 'OANDA:XAUUSD').trim().toUpperCase();
     var interval = document.getElementById('tv-interval-select').value;
     var style    = document.getElementById('tv-style-select').value;
     var isDark   = !document.body.classList.contains('tm-light');
