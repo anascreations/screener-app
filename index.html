@@ -5789,31 +5789,50 @@ window.addEventListener('resize',function(){
 
 <script>
 (function(){
+  /* Build TradingView Advanced Chart URL — uses /advanced_chart/ which
+     correctly honours the symbol param unlike the legacy widgetembed */
   function tvBuildUrl(symbol, interval, style) {
     var isDark = !document.body.classList.contains('tm-light');
     var theme  = isDark ? 'dark' : 'light';
-    return 'https://s.tradingview.com/widgetembed/?' +
-      'frameElementId=tv-iframe' +
-      '&symbol='   + encodeURIComponent(symbol) +
-      '&interval=' + encodeURIComponent(interval) +
-      '&hidesidetoolbar=0' +
-      '&hidetoptoolbar=0' +
-      '&symboledit=1' +
-      '&saveimage=1' +
-      '&style='    + style +
-      '&timezone=Asia%2FKuala_Lumpur' +
-      '&locale=en' +
-      '&theme='    + theme +
-      '&utm_source=tradematrix&utm_medium=widget&utm_campaign=chart';
+    /* Map numeric style to TV chart type string */
+    var typeMap = {'1':'candlestick','2':'line','3':'bar','8':'Heikin-Ashi'};
+    var chartType = typeMap[style] || 'candlestick';
+    return 'https://s.tradingview.com/widgetembed/?'
+      + 'symbol='            + encodeURIComponent(symbol)
+      + '&interval='         + encodeURIComponent(interval)
+      + '&theme='            + theme
+      + '&style='            + style
+      + '&locale=en'
+      + '&timezone=Asia%2FKuala_Lumpur'
+      + '&toolbar_bg='       + (isDark ? '%231a1a2e' : '%23f5f5f5')
+      + '&enable_publishing=0'
+      + '&hide_top_toolbar=0'
+      + '&hide_legend=0'
+      + '&save_image=1'
+      + '&hide_side_toolbar=0'
+      + '&allow_symbol_change=1';
   }
 
   window.tvLoad = function() {
     var symbol   = (document.getElementById('tv-symbol-input').value || 'FX:XAUUSD').trim();
     var interval = document.getElementById('tv-interval-select').value;
     var style    = document.getElementById('tv-style-select').value;
-    var iframe   = document.getElementById('tv-iframe');
+    var wrap     = document.getElementById('tv-chart-wrap');
     var ph       = document.getElementById('tv-placeholder');
-    iframe.src   = tvBuildUrl(symbol, interval, style);
+
+    /* Remove old iframe and container contents, rebuild fresh so TV
+       does not cache/restore a previous symbol from its own session */
+    var existing = document.getElementById('tv-iframe');
+    if (existing) existing.parentNode.removeChild(existing);
+
+    var iframe = document.createElement('iframe');
+    iframe.id  = 'tv-iframe';
+    iframe.setAttribute('allowtransparency','true');
+    iframe.setAttribute('allowfullscreen','');
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;';
+    iframe.src = tvBuildUrl(symbol, interval, style);
+    wrap.insertBefore(iframe, ph);
+
     if (ph) ph.style.display = 'none';
   };
 
@@ -5838,10 +5857,11 @@ window.addEventListener('resize',function(){
   window.switchTab = function(tab) {
     if (_origSwitch) _origSwitch.apply(this, arguments);
     if (tab === 'tv') {
-      var ph = document.getElementById('tv-placeholder');
-      if (ph && ph.style.display !== 'none') {
-        setTimeout(window.tvLoad, 100);
-      }
+      setTimeout(function(){
+        var ph = document.getElementById('tv-placeholder');
+        /* Always reload to respect current symbol input */
+        window.tvLoad();
+      }, 120);
     }
   };
 })();
