@@ -5934,8 +5934,8 @@ window.addEventListener('resize',function(){
 .grade-x    td:first-child { color: #f87171; }
 
 /* light theme table */
-body.tm-light .grade-tbl td { color: #1a1a2e; }
-body.tm-light .grade-tbl tbody tr:hover td { background: #f0f0f8; }
+[data-theme="light"] .grade-tbl td { color: #1a1a2e; }
+[data-theme="light"] .grade-tbl tbody tr:hover td { background: #f0f0f8; }
 
 /* ── Grade Info Cards ── */
 .grade-info-card {
@@ -5982,14 +5982,14 @@ body.tm-light .grade-tbl tbody tr:hover td { background: #f0f0f8; }
 }
 .gc.proc { color: #4ade80; }
 .gc.watch { color: #facc15; }
-body.tm-light .gc { background: #e8eaf0; color: #c0392b; }
-body.tm-light .gc.proc  { color: #15803d; }
-body.tm-light .gc.watch { color: #b45309; }
-body.tm-light .grade-info-card { background: #f0f2f8; border-color: #ccc; }
-body.tm-light .grade-info-title { color: #1a1a2e; }
-body.tm-light .grade-info-row  { color: #1a1a2e; }
-body.tm-light .gir-arrow { color: #555; }
-body.tm-light .gir-label { background: #e2e4ee; color: #0369a1; }
+[data-theme="light"] .gc { background: #e8eaf0; color: #c0392b; }
+[data-theme="light"] .gc.proc  { color: #15803d; }
+[data-theme="light"] .gc.watch { color: #b45309; }
+[data-theme="light"] .grade-info-card { background: #f0f2f8; border-color: #ccc; }
+[data-theme="light"] .grade-info-title { color: #1a1a2e; }
+[data-theme="light"] .grade-info-row  { color: #1a1a2e; }
+[data-theme="light"] .gir-arrow { color: #555; }
+[data-theme="light"] .gir-label { background: #e2e4ee; color: #0369a1; }
 .grade-decision-row {
   display: flex;
   align-items: flex-start;
@@ -5998,9 +5998,9 @@ body.tm-light .gir-label { background: #e2e4ee; color: #0369a1; }
   color: var(--txt);
   line-height: 1.6;
 }
-body.tm-light .grade-decision-row { color: #1a1a2e; }
+[data-theme="light"] .grade-decision-row { color: #1a1a2e; }
 /* guide-intro light fix */
-body.tm-light .guide-intro { color: #1a1a2e; }
+[data-theme="light"] .guide-intro { color: #1a1a2e; }
 .grade-bullet {
   width: 12px;
   height: 12px;
@@ -6020,7 +6020,7 @@ body.tm-light .guide-intro { color: #1a1a2e; }
   line-height: 1.5;
 }
 .grade-check { flex-shrink: 0; width: 20px; }
-body.tm-light .grade-row { color: #1a1a2e; }
+[data-theme="light"] .grade-row { color: #1a1a2e; }
 
 .tv-quick-btn:hover {
   background: var(--accent, #7c3aed);
@@ -6028,13 +6028,13 @@ body.tm-light .grade-row { color: #1a1a2e; }
   border-color: var(--accent, #7c3aed);
 }
 /* Light theme overrides */
-body.tm-light .tv-quick-btn,
+[data-theme="light"] .tv-quick-btn,
 [data-theme="light"] .tv-quick-btn {
   background: #e8eaf0;
   color: #1a1a2e !important;
   border-color: #b0b4c0;
 }
-body.tm-light .tv-quick-btn:hover,
+[data-theme="light"] .tv-quick-btn:hover,
 [data-theme="light"] .grade-row {
   display: flex;
   align-items: flex-start;
@@ -6046,13 +6046,43 @@ body.tm-light .tv-quick-btn:hover,
   line-height: 1.5;
 }
 .grade-check { flex-shrink: 0; width: 20px; }
-body.tm-light .grade-row { color: #1a1a2e; }
+[data-theme="light"] .grade-row { color: #1a1a2e; }
 
 .tv-quick-btn:hover {
   background: var(--accent, #7c3aed);
   color: #fff !important;
   border-color: var(--accent, #7c3aed);
 }
+
+/* Grade section — light theme broad fix */
+[data-theme="light"] .guide-card-body,
+[data-theme="light"] .guide-intro,
+[data-theme="light"] .grade-info-card,
+[data-theme="light"] .grade-info-title,
+[data-theme="light"] .grade-info-row,
+[data-theme="light"] .grade-decision-row,
+[data-theme="light"] .grade-row,
+[data-theme="light"] .guide-card-body span,
+[data-theme="light"] .guide-card-body div {
+  color: #1a1a2e;
+}
+[data-theme="light"] .grade-info-card {
+  background: #f0f2f8;
+  border-color: #c8cbd8;
+}
+[data-theme="light"] .gir-label {
+  background: #dde1f0;
+  color: #0369a1;
+}
+[data-theme="light"] .gc {
+  background: #e8eaf0;
+  color: #c0392b;
+}
+[data-theme="light"] .gc.proc  { color: #15803d; }
+[data-theme="light"] .gc.watch { color: #b45309; }
+[data-theme="light"] .grade-tbl td { color: #1a1a2e; }
+[data-theme="light"] .grade-tbl tbody tr:hover td { background: #eef0f8; }
+
 </style>
 
 <!-- TradingView official widget library -->
