@@ -6151,5 +6151,68 @@ window.addEventListener('resize',function(){
 })();
 </script>
 
+
+<!-- ══════════════════════════════════════
+     SCROLL TO TOP BUTTON
+══════════════════════════════════════ -->
+<button id="tm-scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Scroll to top">
+  ▲
+</button>
+
+<style>
+#tm-scroll-top {
+  position: fixed;
+  bottom: 24px;
+  right: 18px;
+  z-index: 9999;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid var(--accent, #7c3aed);
+  background: var(--bg2, #12122a);
+  color: var(--accent, #7c3aed);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(124,58,237,0.35);
+  opacity: 0;
+  transform: translateY(16px) scale(0.85);
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s;
+  pointer-events: none;
+}
+#tm-scroll-top.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+#tm-scroll-top:hover {
+  background: var(--accent, #7c3aed);
+  color: #fff;
+}
+[data-theme="light"] #tm-scroll-top {
+  background: #fff;
+  color: var(--accent, #7c3aed);
+  border-color: var(--accent, #7c3aed);
+  box-shadow: 0 4px 18px rgba(124,58,237,0.18);
+}
+[data-theme="light"] #tm-scroll-top:hover {
+  background: var(--accent, #7c3aed);
+  color: #fff;
+}
+</style>
+
+<script>
+(function(){
+  var btn = document.getElementById('tm-scroll-top');
+  window.addEventListener('scroll', function(){
+    if (window.scrollY > 280) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }, { passive: true });
+})();
+</script>
+
 </body>
 </html>
