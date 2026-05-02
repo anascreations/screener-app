@@ -422,23 +422,189 @@ function calcForecastRules() {
             : `MA200 not entered. Provide MA200 for macro context — it is the single most important trend filter for long-term direction.`,
     };
 
+    /* ════════════════════════════════════════════
+       DESCRIPTION MAPS — plain-English glossary
+       ════════════════════════════════════════════ */
+
+    /* Direction descriptions */
+    const dirDesc = {
+        'BULLISH': {
+            icon: '🟢',
+            title: 'Strong Uptrend — Most indicators agree price will rise',
+            detail: 'The majority of your indicators (MA stack, momentum oscillators, volume and trend strength) all point upward. This is the highest-probability setup for a long (buy) trade. The market has strong agreement across multiple timeframes that buyers are in control.',
+            action: 'Look for a clean entry near support (MA20 or MA5). Do not chase a spike — wait for a small dip or consolidation before entering.'
+        },
+        'LEANING BULL': {
+            icon: '🟡',
+            title: 'Tilted Bullish — More bull signals than bear, but not all aligned',
+            detail: 'More indicators are bullish than bearish, but some are still neutral or mixed. The market has a bullish bias, but it is not a clean, high-conviction setup. There may be one or two indicators lagging or not yet confirming.',
+            action: 'Enter with reduced position size (50–75%). Confirm with volume or a KDJ crossover before adding. Keep stop tight.'
+        },
+        'NEUTRAL': {
+            icon: '⚪',
+            title: 'Mixed Signals — Bulls and bears are balanced',
+            detail: 'No clear winner between bulls and bears. The market is in a balanced or transitional state. This often happens before a breakout or breakdown. Trading in this zone carries higher risk of whipsaws (false moves in either direction).',
+            action: 'Do not trade yet. Watch for a decisive break above MA5 (bullish) or below MA20 (bearish) with above-average volume to confirm direction first.'
+        },
+        'LEANING BEAR': {
+            icon: '🟠',
+            title: 'Tilted Bearish — More bear signals, downside risk elevated',
+            detail: 'More indicators are pointing down than up. The bullish case is weakening. This does not guarantee a drop, but the statistical edge has shifted toward the bears. Caution is required for long entries.',
+            action: 'Avoid new long (buy) trades. If already in a position, tighten your stop loss. Wait for indicators to turn bullish again before re-entering.'
+        },
+        'BEARISH': {
+            icon: '🔴',
+            title: 'Strong Downtrend — Most indicators signal price will fall',
+            detail: 'The majority of indicators (MA stack, momentum, trend strength) are aligned downward. Buyers are losing control and sellers are dominant. Entering a long trade here goes against the market structure and has a low probability of success.',
+            action: 'Avoid all long entries. If holding a position, consider exiting to protect capital. Wait for a full reversal with MA crossovers and volume confirmation before buying again.'
+        }
+    };
+
+    /* Momentum state descriptions */
+    const momDesc = {
+        'ACCELERATING': {
+            icon: '🚀',
+            title: 'Momentum Accelerating',
+            detail: 'All momentum filters (MA stack, KDJ, MACD and ADX) are aligned and strong. This is the most powerful momentum reading — price has both structure and speed behind it. Moves often extend further than expected in this state.',
+            tip: 'This is the ideal state to ride a trade with a trailing stop rather than taking profit too early.'
+        },
+        'STEADY': {
+            icon: '✅',
+            title: 'Momentum Steady',
+            detail: 'The trend is healthy and consistent. The MA stack is aligned and at least one momentum oscillator (KDJ or MACD) confirms the direction. The move is not overly aggressive — it is sustainable.',
+            tip: 'Good environment for standard entries with normal position size. Manage targets normally.'
+        },
+        'RECOVERING': {
+            icon: '🔄',
+            title: 'Momentum Recovering',
+            detail: 'Price has not yet reclaimed the short-term MA (MA5/EMA8), but momentum oscillators (KDJ or MACD) are turning bullish. This suggests the trend is trying to recover — but has not been confirmed by price structure yet.',
+            tip: 'Wait for price to close back above MA5 before entering. A recovery without price confirmation can fail. Use smaller size if entering early.'
+        },
+        'FADING': {
+            icon: '⚠️',
+            title: 'Momentum Fading',
+            detail: 'The MA stack still looks bullish, but the momentum oscillators (KDJ and MACD) are weakening or turning neutral. This is an early warning sign that the current move may be running out of energy.',
+            tip: 'Do not add new positions. Consider taking partial profit on existing trades. A MACD or KDJ bearish cross would be a strong exit signal.'
+        },
+        'MIXED': {
+            icon: '〰️',
+            title: 'Momentum Mixed',
+            detail: 'Different indicators are giving conflicting signals — some bullish, some bearish. This often occurs during transitions or range-bound markets where there is no clear dominant side.',
+            tip: 'Reduce exposure. A smaller timeframe chart may give clearer signals. Wait for all key indicators to align before committing capital.'
+        }
+    };
+
+    /* Timing message descriptions */
+    const timingDescs = {
+        'ENTER':    {
+            headline: '🎯 What does "ENTER NOW" mean?',
+            body: `Price has pulled back close to the MA20 support zone <strong>and</strong> KDJ momentum is turning bullish — this is the ideal combination. You are buying at a "discount" near support rather than chasing a high price. The risk/reward is most favourable at this point.`,
+            steps: ['Enter near current price or at the next small dip', 'Set your Stop Loss below MA20 (use the SL value below)', 'Target TP1 first, then trail your stop for TP2/TP3']
+        },
+        'PULLBACK': {
+            headline: '⏳ What does "WAIT FOR PULLBACK — price stretched above MA20" mean?',
+            body: `The trend is bullish — good news. But price has moved <strong>too far above MA20</strong> (the 20-period moving average), which acts as a "gravitational anchor". When price gets too stretched, it tends to snap back to MA20 before continuing upward. If you buy now, you are buying at a poor risk/reward — your stop must be wider (bigger loss if wrong) but your reward is smaller (less room to run up).`,
+            steps: [
+                '<strong>Do not buy yet</strong> — entering here risks buying the top of a short-term spike',
+                'Watch for price to pull back toward <strong>MA5 or MA20</strong> (a normal, healthy correction)',
+                'Look for KDJ to reset from overbought (J below 80) during the pullback',
+                'When price is near MA20 again AND KDJ turns bullish → that is your entry',
+                'Ideal entry zone = within 0–3% above MA20'
+            ]
+        },
+        'PROCEED':  {
+            headline: '✅ What does "PROCEED" mean?',
+            body: `The setup is valid — the direction is bullish and price is in a reasonable entry zone. Not the absolute best entry (that would be closer to MA20), but an acceptable one. You can enter with standard position sizing.`,
+            steps: ['Enter at current price or on a small dip', 'Use the Stop Loss level shown below', 'Take partial profit at TP1, let the rest run to TP2 with trailing stop']
+        },
+        'WATCH':    {
+            headline: '👀 What does "WATCH" mean?',
+            body: `The market is in a neutral or transitional state — neither clearly bullish nor bearish. Trading here is like flipping a coin. The smart move is to <strong>do nothing</strong> and wait for the market to show its hand.`,
+            steps: ['Do not trade yet', 'Watch for ADX to rise above 20–25 (trend emerging)', 'Watch for KDJ or MACD to give a clear directional cross', 'A break of MA20 with strong volume will confirm the next direction']
+        },
+        'AVOID':    {
+            headline: '🔴 What does "AVOID LONGS" mean?',
+            body: `Too many indicators are pointing downward. A long (buy) trade here has a low probability of success and goes against the market trend. Protecting your capital is more important than finding a trade.`,
+            steps: ['Close or reduce any long positions you are holding', 'Do not open new buy trades', 'Wait for the trend to reverse: MA5 must cross back above MA20, and KDJ must turn bullish', 'Patience here saves money']
+        }
+    };
+
+    /* Which timing key applies? */
+    let timingKey = 'WATCH';
+    if      (timing.includes('ENTER NOW'))    timingKey = 'ENTER';
+    else if (timing.includes('PULLBACK'))     timingKey = 'PULLBACK';
+    else if (timing.includes('PROCEED'))      timingKey = 'PROCEED';
+    else if (timing.includes('AVOID'))        timingKey = 'AVOID';
+
+    const td   = timingDescs[timingKey];
+    const dd   = dirDesc[dir]   || dirDesc['NEUTRAL'];
+    const md   = momDesc[momentum] || momDesc['MIXED'];
+    const riskPillCls = dirCls==='proceed' ? 'risk-low' : dirCls==='skip' ? 'risk-high' : 'risk-medium';
+
     /* ── Render output ──────────────────────── */
     $('enh-fc-result').style.display = '';
     $('enh-fc-result').innerHTML = `
+
+      <!-- ① TOP DECISION STRIP -->
       <div class="decision-strip ${dirCls}" style="gap:.6rem;">
         <div class="d-badge ${dirCls}" style="font-size:19px;">${dir}</div>
-        <div class="risk-pill ${dirCls==='proceed'?'risk-low':dirCls==='skip'?'risk-high':'risk-medium'}">${momentum}</div>
+        <div class="risk-pill ${riskPillCls}">${momentum}</div>
         <div style="flex:1;font-size:13px;">${timing}</div>
         <div style="font-family:var(--head);font-size:18px;font-weight:700;color:${dirColor};">${conf}%</div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.6rem;">
+      <!-- ② DIRECTION EXPLANATION CARD -->
+      <div class="card" style="border-left:3px solid ${dirColor};margin-top:.5rem;">
+        <div class="card-hdr" style="color:${dirColor};">
+          <span class="ci">${dd.icon}</span> ${dd.title}
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:.5rem;">
+          <div style="font-size:13px;color:var(--text);line-height:1.6;">${dd.detail}</div>
+          <div style="font-size:12px;background:rgba(0,0,0,.15);border-radius:6px;padding:.5rem .75rem;border-left:2px solid ${dirColor};color:var(--dim);">
+            <span style="color:${dirColor};font-weight:600;">What to do → </span>${dd.action}
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ MOMENTUM STATE EXPLANATION -->
+      <div class="card" style="border-left:3px solid var(--accent);margin-top:.35rem;">
+        <div class="card-hdr">
+          <span class="ci">${md.icon}</span> Momentum State: <span style="color:var(--accent);font-weight:700;">${momentum}</span> — ${md.title}
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:.4rem;">
+          <div style="font-size:13px;color:var(--text);line-height:1.6;">${md.detail}</div>
+          <div style="font-size:12px;background:rgba(0,0,0,.15);border-radius:6px;padding:.4rem .7rem;border-left:2px solid var(--accent);color:var(--dim);">
+            <span style="color:var(--accent);font-weight:600;">Tip → </span>${md.tip}
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ TIMING / ACTION EXPLANATION -->
+      <div class="card" style="border-left:3px solid var(--yellow);margin-top:.35rem;">
+        <div class="card-hdr" style="color:var(--yellow);">
+          <span class="ci">📖</span> ${td.headline}
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:.5rem;">
+          <div style="font-size:13px;color:var(--text);line-height:1.65;">${td.body}</div>
+          <div style="font-size:12px;color:var(--dim);">
+            <div style="color:var(--yellow);font-weight:600;margin-bottom:.3rem;font-size:12px;">Step-by-step action:</div>
+            ${td.steps.map((s,i) => `<div style="display:flex;gap:.5rem;padding:.2rem 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+              <span style="color:var(--yellow);font-weight:700;min-width:18px;">${i+1}.</span>
+              <span>${s}</span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- ⑤ SCORE CARDS ROW -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.6rem;margin-top:.35rem;">
         <div class="card">
           <div class="card-hdr"><span class="ci">🐂</span> Bull Score</div>
           <div class="card-body">
             <div style="font-size:26px;font-weight:700;color:var(--green);">${bullPct.toFixed(0)}%</div>
             <div style="height:4px;background:var(--border);border-radius:2px;margin-top:.4rem;overflow:hidden;">
               <div style="height:4px;width:${bullPct}%;background:var(--green);border-radius:2px;"></div></div>
+            <div style="font-size:11px;color:var(--dim);margin-top:.3rem;">% of total points scored as bullish signals. Above 60% = bullish edge.</div>
           </div>
         </div>
         <div class="card">
@@ -447,6 +613,7 @@ function calcForecastRules() {
             <div style="font-size:26px;font-weight:700;color:var(--red);">${bearPct.toFixed(0)}%</div>
             <div style="height:4px;background:var(--border);border-radius:2px;margin-top:.4rem;overflow:hidden;">
               <div style="height:4px;width:${bearPct}%;background:var(--red);border-radius:2px;"></div></div>
+            <div style="font-size:11px;color:var(--dim);margin-top:.3rem;">% of total points scored as bearish signals. Above 40% = caution required.</div>
           </div>
         </div>
         <div class="card">
@@ -454,21 +621,75 @@ function calcForecastRules() {
           <div class="card-body">
             <div style="font-size:26px;font-weight:700;color:${dirColor};">${net>0?'+':''}${net.toFixed(0)}</div>
             <div style="font-size:11px;color:var(--dim);">bull pts − bear pts</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:.3rem;">≥+42 = BULLISH · +18 to +42 = Leaning Bull · ±18 = Neutral · ≤−18 = Leaning Bear · ≤−42 = BEARISH</div>
           </div>
         </div>
         ${atr ? `
         <div class="card">
           <div class="card-hdr"><span class="ci">🎯</span> Projected Zones</div>
-          <div class="card-body" style="font-size:12px;line-height:1.7;">
-            <div>🛑 SL &nbsp;<span style="color:var(--red);font-weight:600;">${fmt(slPrice,dp)}</span></div>
-            <div>✅ TP1 <span style="color:var(--green);font-weight:600;">${fmt(tp1Price,dp)}</span>&nbsp;R:R 1:${rr1}</div>
-            <div>🎯 TP2 <span style="color:var(--green);font-weight:600;">${fmt(tp2Price,dp)}</span>&nbsp;R:R 1:${rr2}</div>
-            <div>🚀 TP3 <span style="color:var(--green);font-weight:600;">${fmt(tp3Price,dp)}</span>&nbsp;R:R 1:${rr3}</div>
+          <div class="card-body" style="font-size:12px;line-height:1.9;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span>🔴</span>
+              <span style="color:var(--dim);min-width:30px;">SL</span>
+              <span style="color:var(--red);font-weight:600;">${fmt(slPrice,dp)}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span>✅</span>
+              <span style="color:var(--dim);min-width:30px;">TP1</span>
+              <span style="color:var(--green);font-weight:600;">${fmt(tp1Price,dp)}</span>
+              <span style="color:var(--dim);">R:R 1:${rr1}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span>🎯</span>
+              <span style="color:var(--dim);min-width:30px;">TP2</span>
+              <span style="color:var(--green);font-weight:600;">${fmt(tp2Price,dp)}</span>
+              <span style="color:var(--dim);">R:R 1:${rr2}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span>🚀</span>
+              <span style="color:var(--dim);min-width:30px;">TP3</span>
+              <span style="color:var(--green);font-weight:600;">${fmt(tp3Price,dp)}</span>
+              <span style="color:var(--dim);">R:R 1:${rr3}</span>
+            </div>
           </div>
         </div>` : ''}
       </div>
 
-      <div class="card">
+      <!-- ⑥ TARGET PRICE EXPLANATION (only when ATR provided) -->
+      ${atr ? `
+      <div class="card" style="border-left:3px solid var(--green);margin-top:.35rem;">
+        <div class="card-hdr"><span class="ci">📐</span> What do SL, TP1, TP2, TP3 mean? — How to use your Projected Zones</div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem;font-size:13px;">
+          <div style="line-height:1.6;color:var(--dim);">These levels are calculated from your <strong style="color:var(--text);">current price + ATR (Average True Range)</strong>. ATR measures how much price typically moves per candle — so the targets adapt to the actual volatility of the stock/pair you are trading.</div>
+          <div style="display:grid;gap:.4rem;">
+            <div style="padding:.5rem .7rem;background:rgba(220,38,38,.08);border-radius:6px;border-left:3px solid var(--red);">
+              <div style="font-weight:700;color:var(--red);">🔴 SL (Stop Loss) = ${fmt(slPrice,dp)}</div>
+              <div style="color:var(--dim);margin-top:.2rem;">This is your <strong style="color:var(--text);">maximum loss point</strong>. If price falls to this level, your trade is wrong — exit immediately to prevent larger losses. It is set 1.5× ATR below your entry price. <em>Never move your SL lower once set.</em></div>
+            </div>
+            <div style="padding:.5rem .7rem;background:rgba(34,197,94,.08);border-radius:6px;border-left:3px solid var(--green);">
+              <div style="font-weight:700;color:var(--green);">✅ TP1 (First Target) = ${fmt(tp1Price,dp)} &nbsp;·&nbsp; R:R 1:${rr1}</div>
+              <div style="color:var(--dim);margin-top:.2rem;">Your <strong style="color:var(--text);">first profit-taking level</strong> — 1.5× ATR above entry. When price reaches TP1, <strong style="color:var(--green);">sell 50% of your position</strong> and move your Stop Loss up to your entry price (break-even). This locks in profit and removes risk from the trade. R:R 1:${rr1} means for every $1 you risk, you earn $${rr1} at this target.</div>
+            </div>
+            <div style="padding:.5rem .7rem;background:rgba(34,197,94,.05);border-radius:6px;border-left:3px solid var(--accent);">
+              <div style="font-weight:700;color:var(--accent);">🎯 TP2 (Second Target) = ${fmt(tp2Price,dp)} &nbsp;·&nbsp; R:R 1:${rr2}</div>
+              <div style="color:var(--dim);margin-top:.2rem;">Your <strong style="color:var(--text);">main profit target</strong> — 2.8× ATR above entry. Sell another 30–40% of your remaining position here. Trail your stop loss below each swing low to protect gains on the way up.</div>
+            </div>
+            <div style="padding:.5rem .7rem;background:rgba(124,58,237,.08);border-radius:6px;border-left:3px solid var(--accent);">
+              <div style="font-weight:700;color:var(--accent);">🚀 TP3 (Runner Target) = ${fmt(tp3Price,dp)} &nbsp;·&nbsp; R:R 1:${rr3}</div>
+              <div style="color:var(--dim);margin-top:.2rem;">The <strong style="color:var(--text);">"moonshot" target</strong> — 4.5× ATR above entry. Only reach for this with the last 10–20% of your position (your "runner"). <em>Only hold the runner if momentum remains ACCELERATING or STEADY. Exit if momentum turns FADING.</em></div>
+            </div>
+          </div>
+          <div style="font-size:11px;background:rgba(0,0,0,.15);border-radius:6px;padding:.5rem .7rem;color:var(--dim);">
+            ⚠️ <strong style="color:var(--yellow);">Important:</strong> These targets assume you enter near the current price. If you wait for a pullback and enter lower, your actual SL and TPs will shift accordingly — re-run the forecast with your actual entry price to get updated levels.
+          </div>
+        </div>
+      </div>` : `
+      <div class="advice-box yellow" style="margin-top:.35rem;">
+        ℹ️ <strong>Tip:</strong> Enter your ATR value in the inputs above to unlock the Projected Zones (SL, TP1, TP2, TP3) with full explanations of how to use each target level.
+      </div>`}
+
+      <!-- ⑦ SIGNAL BREAKDOWN -->
+      <div class="card" style="margin-top:.35rem;">
         <div class="card-hdr"><span class="ci">🔍</span> Signal Breakdown&nbsp;
           <span style="color:var(--dim);font-size:12px;">(${sigs.length} indicator groups · ${totalPts} total pts)</span>
         </div>
@@ -483,19 +704,20 @@ function calcForecastRules() {
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-hdr"><span class="ci">📈</span> Momentum Forecast</div>
+      <!-- ⑧ MOMENTUM FORECAST NARRATIVES -->
+      <div class="card" style="margin-top:.35rem;">
+        <div class="card-hdr"><span class="ci">📈</span> Momentum Forecast — What happens next?</div>
         <div class="card-body">
           <div class="check-row" style="flex-direction:column;align-items:flex-start;gap:.2rem;padding:.5rem 0;">
-            <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);">Short term (1–3 candles)</div>
+            <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);">🕐 Short term (1–3 candles) — Next few hours or bars</div>
             <div style="font-size:13px;color:var(--text);">${narr.short}</div>
           </div>
           <div class="check-row" style="flex-direction:column;align-items:flex-start;gap:.2rem;padding:.5rem 0;">
-            <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);">Medium term (5–15 candles)</div>
+            <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);">📅 Medium term (5–15 candles) — Next few days</div>
             <div style="font-size:13px;color:var(--text);">${narr.medium}</div>
           </div>
           <div class="check-row" style="flex-direction:column;align-items:flex-start;gap:.2rem;padding:.5rem 0;">
-            <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);">Long term (macro bias)</div>
+            <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);">🌐 Long term (macro bias) — Overall market direction</div>
             <div style="font-size:13px;color:var(--text);">${narr.long}</div>
           </div>
         </div>
