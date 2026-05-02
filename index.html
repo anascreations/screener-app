@@ -85,7 +85,6 @@
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="ma"     onclick="switchTab('ma')">∿ MA</button>
   <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA</button>
-       <button class="tab-btn enhance-tab" data-tab="enhance" onclick="switchTab('enhance')">🔮 Smart Tools</button>
   <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAUUSD</button>
   <button class="tab-btn tv-tab" data-tab="tv" onclick="switchTab('tv')">📺 Live Chart</button>
   <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 ETF</button>
@@ -94,7 +93,8 @@
   <button class="tab-btn ipo-tab" data-tab="ipo" onclick="switchTab('ipo')">🏷️ IPO</button>
   <button class="tab-btn sr-tab" data-tab="sr" onclick="switchTab('sr')">📊 S/R Zones</button>
   <button class="tab-btn mtf-tab" data-tab="mtf" onclick="switchTab('mtf')">🔥 MTF Momentum</button>
- <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
+  <button class="tab-btn enhance-tab" data-tab="enhance" onclick="switchTab('enhance')">🔮 Smart Tools</button>
+  <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
   <button class="tab-btn journal-tab" data-tab="journal" onclick="switchTab('journal')">📒 Journal</button>
   <button class="tab-btn capital-tab" data-tab="capital" onclick="switchTab('capital')">💰 Capital</button>
   <button class="tab-btn pnl-tab" data-tab="pnl" onclick="switchTab('pnl')">📈 P&amp;L</button>
@@ -3431,8 +3431,7 @@
         <div class="form-actions">
           <button class="btn btn-primary" onclick="calcForecastRules()">RUN FORECAST ▶</button>
           <button class="btn btn-secondary"
-                  onclick="['enh-fc-price','enh-fc-ma5','enh-fc-ma20','enh-fc-ma50','enh-fc-ma200','enh-fc-k','enh-fc-d','enh-fc-j','enh-fc-rsi','enh-fc-dif','enh-fc-dea','enh-fc-hist','enh-fc-adx','enh-fc-pdi','enh-fc-mdi','enh-fc-adxr','enh-fc-atr','enh-fc-vol','enh-fc-st','enh-fc-bbu','enh-fc-bbl','enh-fc-vwap'].forEach(id=>{const e=$(id);if(e)e.value=''});const ic=$(\'enh-fc-ichi\');if(ic)ic.value=\'\';$('enh-fc-result').style.display='none';">
-            RESET
+                  onclick="['enh-fc-price','enh-fc-ma5','enh-fc-ma20','enh-fc-ma50','enh-fc-ma200','enh-fc-k','enh-fc-d','enh-fc-j','enh-fc-rsi','enh-fc-dif','enh-fc-dea','enh-fc-hist','enh-fc-adx','enh-fc-pdi','enh-fc-mdi','enh-fc-adxr','enh-fc-atr','enh-fc-vol','enh-fc-st','enh-fc-bbu','enh-fc-bbl','enh-fc-vwap'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const ic=document.getElementById('enh-fc-ichi');if(ic)ic.value='';document.getElementById('enh-fc-result').style.display='none';">\n            RESET
           </button>
         </div>
  
