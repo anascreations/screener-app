@@ -1637,7 +1637,8 @@ const f3_pass = e21 > e55;
 const f4_e200 = e200 ? price > e200 : null;
 const fullStack = f1_pass && f2_pass && f3_pass;
 const kdj = scoreKDJ(k, d, j);
-const macd = scoreMACDZone(dif, dea);
+const hist = num('ema-hist');
+const macd = scoreMACDZone(dif, dea, hist);
 const volS = scoreVolume(vol);
 const adxS = scoreADX(adxV);
 const dmiS = scoreDMI(pdiV, mdiV, adxV, adxrV);
@@ -1661,12 +1662,39 @@ eng.add(stS ? stS.pass : null, 4);
 eng.add(rsiS ? rsiS.pass : null, 10);
 const stretchPct = Math.abs(pAboveE8 || 0);
 const tfCfg = getTFConfig('ema');
+
+// ── Confluence bonus: multiple strong signals ──────────────────────────
+let bonus = 0;
+const strongSignals = [
+  kdj?.pass === true && kdj?.zone?.includes('Cross'),
+  macd?.pass === true && (macd?.zone?.includes('Strong') || macd?.zone?.includes('expanding')),
+  adxS?.pass === true && adxS?.strength === 'Very Strong',
+  dmiS?.pass === true && dmiS?.crossZone,
+  volS?.pass === true && vol >= 2.0,
+  f4_e200 === true,
+  ichiS?.pass === true,
+  vwapV && price > vwapV,
+].filter(Boolean).length;
+if (strongSignals >= 5) bonus = 10;
+else if (strongSignals >= 4) bonus = 7;
+else if (strongSignals >= 3) bonus = 4;
+else if (strongSignals >= 2) bonus = 2;
+
+// ── Session bonus ──────────────────────────────────────────────────────
+const sessNowEma = getUSWindowMYT();
+const sessBonusEma = sessNowEma.cls === 'sess-prime' ? 5
+  : sessNowEma.cls === 'sess-power' ? 3
+  : sessNowEma.cls === 'sess-lull'  ? -8
+  : 0;
+
+// ── Over-extension penalty ────────────────────────────────────────────
 let penalty = 0;
 const eHard = tfCfg.f1Warn * 1.6, eMed = tfCfg.f1Warn * 1.2, eSoft = tfCfg.f1Warn;
 if (stretchPct > eHard) penalty = -30;
 else if (stretchPct > eMed) penalty = -20;
 else if (stretchPct > eSoft) penalty = -10;
-const adjScore = Math.min(100, Math.max(0, eng.result() + penalty));
+
+const adjScore = Math.min(100, Math.max(0, eng.result() + penalty + bonus + sessBonusEma));
 const grade = getGrade(e21AboveE55 || 0);
 const momentumOk = (!kdj || kdj.pass !== false)
 && (!macd || macd.pass !== false)
@@ -1685,6 +1713,8 @@ decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
 }
 if (grade.g === 'X' && posSize === '100%') posSize = '50%';
 if (grade.g === 'X' && decision === 'PROCEED' && adjScore < 80) decision = 'WATCH';
+if (sessNowEma.cls === 'sess-lull' && decision === 'PROCEED' && posSize === '100%') posSize = '50%';
+
 setDecisionStrip('ema', decision, riskLevel, grade, `
     <div>Price: <span style="color:var(--text)">${fmt(price)}</span>
       EMA8: <span style="color:var(--text)">${fmt(e8)}</span>
@@ -1692,40 +1722,91 @@ setDecisionStrip('ema', decision, riskLevel, grade, `
       EMA55: <span style="color:var(--text)">${fmt(e55)}</span>
     </div>
     <div>Bull Stack: <span style="color:${fullStack ? 'var(--green)' : 'var(--red)'}">${fullStack ? '✅ Yes' : '✘ No'}</span>
-      &nbsp; Size: <span style="color:${posSize === '100%' ? 'var(--green)' : 'var(--yellow)'}">${posSize}</span>
-      ${adxV ? `&nbsp; ADX: <span style="color:${adxS.c}">${adxV.toFixed(1)}</span>` : ''}
+      &nbsp; Size: <span style="color:${posSize === '100%' || posSize === '75%' ? 'var(--green)' : posSize === '50%' ? 'var(--yellow)' : 'var(--dim)'}">${posSize}</span>
+      &nbsp; Score: <span style="color:var(--accent)">${adjScore.toFixed(0)}/100</span>
+      ${bonus > 0 ? `<span style="color:var(--green);font-size:9px"> +${bonus}pts confluence</span>` : ''}
+      ${sessBonusEma !== 0 ? `<span style="color:${sessBonusEma > 0 ? 'var(--green)' : 'var(--orange)'};font-size:9px"> ${sessBonusEma > 0 ? '+' : ''}${sessBonusEma}pts session</span>` : ''}
+      ${adxV ? `&nbsp; ADX: <span style="color:${adxS.c}">${adxV.toFixed(1)} ${adxS.strength}</span>` : ''}
     </div>`
 );
+
+// ── Trend maturity context card (EMA21 vs EMA55 grade) ─────────────────
+const maturityCardId = 'ema-maturity-card';
+let matCard = $(maturityCardId);
+if (!matCard) {
+    matCard = document.createElement('div');
+    matCard.id = maturityCardId;
+    matCard.className = 'card';
+    const advEl = $('ema-advice');
+    if (advEl) advEl.insertAdjacentElement('afterend', matCard);
+}
+const maturity = e21AboveE55 || 0;
+const matTier = maturity > 10 ? { label: 'Exhausted', col: 'var(--red)',    tip: 'EMA21 is more than 10% above EMA55 — the trend is very mature and overextended. Risk of reversal is high. Only hold with tight trailing stop. Do not add to position.' }
+    : maturity > 8  ? { label: 'Late Stage', col: 'var(--orange)',  tip: 'Trend is in its late stages. Good for holding existing positions with trailing stops, but new entries carry significant reversal risk. Wait for a deeper pullback before buying.' }
+    : maturity > 5  ? { label: 'Maturing',   col: 'var(--yellow)',  tip: 'Trend has been running for a while. Still tradeable but risk/reward is lower than earlier in the trend. Use reduced position size (50%) and keep targets conservative (TP1/TP2 only).' }
+    : maturity > 3  ? { label: 'Healthy',    col: 'var(--accent)',  tip: 'The sweet spot — trend is confirmed and still has room to run. Normal position sizing. This is the best zone for high R:R entries.' }
+    : maturity > 1  ? { label: 'Fresh Trend',col: 'var(--green)',   tip: 'A new trend has just formed. EMA21 recently crossed above EMA55. Early entries here give the best risk/reward — trend still has most of its life ahead. Full position sizing justified.' }
+    : maturity > 0  ? { label: 'Very Early', col: 'var(--green)',   tip: 'Trend is just beginning — EMA21 barely above EMA55. This can be high-conviction early entry OR a false start. Confirm with ADX > 20 and KDJ bullish before sizing up.' }
+    : { label: 'Bearish / Flat', col: 'var(--red)', tip: 'EMA21 is at or below EMA55 — no uptrend present. Buying here goes against the structural trend. Wait for EMA21 to cross above EMA55 before considering long entries.' };
+
+matCard.innerHTML = `
+  <div class="card-hdr"><span class="ci">📊</span> EMA Trend Maturity — <span style="color:${matTier.col};">${matTier.label}</span>
+    <span style="color:var(--dim);font-size:10px;margin-left:.4rem;">EMA21 vs EMA55 gap: ${maturity >= 0 ? '+' : ''}${maturity.toFixed(2)}%</span>
+  </div>
+  <div class="card-body">
+    <div style="font-size:12px;color:var(--dim);line-height:1.6;">${matTier.tip}</div>
+    <div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:9.5px;text-align:center;">
+      ${[['Fresh','1–3%','var(--green)'],['Healthy','3–5%','var(--accent)'],['Maturing','5–8%','var(--yellow)'],['Late','8–10%','var(--orange)'],['Exhausted','>10%','var(--red)']].map(([l,r,c]) =>
+        `<div style="padding:3px 2px;border-radius:3px;background:rgba(0,0,0,.1);color:${c};"><div style="font-weight:600;">${l}</div><div style="color:var(--dim)">${r}</div></div>`
+      ).join('')}
+    </div>
+  </div>`;
+
 const adv = $('ema-advice');
 if (decision === 'PROCEED') {
+const emaStretchOk = stretchPct > tfCfg.f1Ok;
 const lines = [
-stretchPct > tfCfg.f1Ok
-? `⚠️ EMA stack confirmed but price is ${pAboveE8?.toFixed(1)}% above EMA8 — stretched for ${tfCfg.label} (ideal ≤${tfCfg.f1Ideal}%). Wait for pullback to EMA8 (${fmt(e8)}).`
-: `✅ Full EMA bull stack. Price ${pAboveE8?.toFixed(1)}% above EMA8 (ideal ≤${tfCfg.f1Ideal}% on ${tfCfg.label}).`,
+emaStretchOk
+? `⚠️ EMA stack confirmed — but price is ${pAboveE8?.toFixed(1)}% above EMA8 (ideal ≤${tfCfg.f1Ideal}% for ${tfCfg.label}). Stretched entry — reduce to 25–50% now and queue the rest at EMA8 (${fmt(e8)}).`
+: `✅ Full EMA bull stack. Price ${pAboveE8?.toFixed(1)}% above EMA8 (ideal zone ≤${tfCfg.f1Ideal}% on ${tfCfg.label}).`,
 `⏱️ Timeframe: ${tfCfg.label} — Expected hold: ${tfCfg.hold}. ${tfCfg.sessionNote}.`,
-e200 && price > e200 ? `🌐 Macro confirmed: Price above EMA200 — institutional trend alignment.` : '',
-adxS?.pass === true ? `💪 ADX ${adxV?.toFixed(1)} — ${adxS.strength} trend. High-probability entry.` : '',
-dmiS && dmiS.pass === true ? `📊 DMI: ${dmiS.label}` : (dmiS && dmiS.pass === false ? `⚠️ DMI Warning: ${dmiS.label}` : ''),
-ichiS?.pass === true ? `☁️ Price above Ichimoku cloud — trend confirmed.` : '',
-vwapV && price > vwapV ? `📊 Price above VWAP — intraday bulls in control.` : '',
-`📦 Use ${posSize} position. Stop Loss = Price − (ATR × ${tfCfg.atrMult}). Trail after TP1.`,
+e200 && price > e200 ? `🌐 Macro confirmed: Price above EMA200 (${fmt(e200)}) — full institutional trend alignment.` : (e200 ? `⚠️ Macro warning: Price below EMA200 (${fmt(e200)}) — rally may be counter-trend. Reduce size.` : ''),
+adxS?.pass === true ? `💪 ADX ${adxV?.toFixed(1)} (${adxS.strength}) — trend strength confirmed. ${adxS.declining ? '⚠️ ADX is declining — watch for trend slowdown.' : 'Trend has momentum behind it.'}` : '',
+dmiS?.pass === true ? `📊 DMI confirmed: ${dmiS.label}` : (dmiS?.pass === false ? `⚠️ DMI Warning: ${dmiS.label}` : ''),
+ichiS?.pass === true ? `☁️ Price above Ichimoku cloud — confirms strong trend structure.` : (ichiS?.pass === false ? `⚠️ Ichimoku: price inside or below cloud — trend is weak or under resistance.` : ''),
+vwapV && price > vwapV ? `📊 Price above VWAP (${fmt(vwapV)}) — intraday buyers are in control. Bullish intraday bias confirmed.` : (vwapV ? `⚠️ Price below VWAP (${fmt(vwapV)}) — intraday sellers are dominant. Wait for price to reclaim VWAP before entering.` : ''),
+strongSignals >= 4 ? `🔥 High-confluence setup: ${strongSignals} strong signals aligned — consider scaling up to full position.` : strongSignals >= 3 ? `✨ Good confluence: ${strongSignals} strong signals aligned.` : '',
+maturity > 8 ? `⚠️ Trend maturity warning: EMA21 is ${maturity.toFixed(1)}% above EMA55 — this trend is aging. Prioritise TP1 exits and use trailing stops only.` : '',
+`📦 Position size: ${posSize}. Stop Loss = EMA8 − (ATR × ${tfCfg.atrMult}) = ${atr ? fmt(e8 - atr * tfCfg.atrMult) : 'N/A (enter ATR)'}. Never widen SL.`,
+sessNowEma.cls === 'sess-prime' ? `🎯 Prime Window active — optimal entry timing for this session.` : sessNowEma.cls === 'sess-lull' ? `⚠️ Lull period — position size capped at 50%. Low volume increases false breakout risk.` : '',
 ].filter(Boolean).join('\n');
 adv.textContent = lines;
 adv.className = 'advice-box green';
 } else if (decision === 'WATCH') {
-adv.textContent = `⚠️ Partial EMA setup (Score: ${adjScore.toFixed(0)}/100). Wait for Price > EMA8 > EMA21 > EMA55 with all momentum indicators aligned.`;
+const watchReason = stretchPct > tfCfg.f1Warn
+    ? `Price ${pAboveE8?.toFixed(1)}% extended above EMA8 — too stretched for ${tfCfg.label}`
+    : `Score ${adjScore.toFixed(0)}/100 below threshold`;
+adv.textContent = `⚠️ Partial EMA setup (${adjScore.toFixed(0)}/100). ${watchReason}.\n\nIdeal setup requires: Price > EMA8 > EMA21 > EMA55 with KDJ bullish cross, MACD expanding above zero, ADX ≥ 25, and price near EMA8 (≤${tfCfg.f1Ideal}% above). Wait for all conditions to align on a pullback to EMA8/EMA21.`;
 adv.className = 'advice-box yellow';
 } else {
 const missing = [
-!f1_pass && 'Price < EMA8',
-!f2_pass && 'EMA8 < EMA21',
-!f3_pass && 'EMA21 < EMA55',
-kdj?.pass === false && 'KDJ Bearish',
-macd?.pass === false && 'MACD Bearish',
-adxS?.pass === false && `ADX Weak (${adxV?.toFixed(1)})`,
+!f1_pass && `Price (${fmt(price)}) is below EMA8 (${fmt(e8)}) — short-term trend bearish`,
+!f2_pass && `EMA8 (${fmt(e8)}) is below EMA21 (${fmt(e21)}) — medium trend bearish`,
+!f3_pass && `EMA21 (${fmt(e21)}) is below EMA55 (${fmt(e55)}) — macro EMA structure broken`,
+kdj?.pass === false && `KDJ bearish (K${k?.toFixed(0)}<D${d?.toFixed(0)}) — momentum against you`,
+macd?.pass === false && `MACD bearish — downward pressure on price`,
+adxS?.pass === false && `ADX weak (${adxV?.toFixed(1)}) — no trend established`,
 ].filter(Boolean);
-adv.textContent = `🔴 Skip — broken EMA stack. Failed: ${missing.join(', ')}.`;
+adv.textContent = `🔴 Skip — broken EMA stack. Critical filters failed:\n${missing.map((m,i) => `${i+1}. ${m}`).join('\n')}\n\nDo not trade against the EMA stack. Every failed filter adds risk. Wait for all three EMA layers to realign.`;
 adv.className = 'advice-box red';
+}
+
+// Store score on result element for QPP to read
+const emaResultEl = $('ema-result');
+if (emaResultEl) {
+    emaResultEl.setAttribute('data-adjscore', adjScore);
+    emaResultEl.setAttribute('data-e8', e8 || '');
+    emaResultEl.setAttribute('data-stretch', stretchPct || 0);
 }
 updateDial('ema-dial-arc', 'ema-dial-score', adjScore);
 drawPie('ema-pie', 'ema-pie-legend', [
@@ -1830,7 +1911,9 @@ $('ema-day-low').textContent = 'Low ' + fmt(low, 4);
 $('ema-day-high').textContent = 'High ' + fmt(high, 4);
 }
 }
-buildTradePlan('ema-price-block', 'ema-tradeplan-card', price, atr, accountSz, riskPct);
+buildTradePlan('ema-price-block', 'ema-tradeplan-card', price, atr, accountSz, riskPct, 'default', {
+    ma5: e8, ma20: e21, pAboveMA20: pAboveE21, decision, adjScore, tfCfg
+});
 }
 function resetEMA() {
 ['ema-price', 'ema-ema8', 'ema-ema21', 'ema-ema55', 'ema-ema200',
@@ -3881,10 +3964,10 @@ emaCalc = patchCalc(_origEMACalc, 'ema', () => {
 const price = num('ema-price'), atr = num('ema-atr'), e8 = num('ema-ema8');
 const account = num('ema-account');
 if (!price || !atr) return null;
-const dialEl = $('ema-dial-score');
-const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+const resultEl = $('ema-result');
+const score = resultEl ? parseFloat(resultEl.getAttribute('data-adjscore')) || 0 : 0;
 const stretch = e8 ? Math.abs((price - e8) / e8 * 100) : 0;
-return { price, atr, score, account, stretch };
+return { price, atr, score, account, stretch, ma5: e8 };
 }, 'default');
 }
 if (_origGoldCalc) {
