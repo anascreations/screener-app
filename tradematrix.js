@@ -888,24 +888,23 @@ full: Math.max(0, Math.min(100, kelly * 100)),
 half: Math.max(0, Math.min(100, kelly * 50)),
 };
 }
-function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, context = 'default') {
+function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, context = 'default', maCtx = {}) {
 const card = $(cardId);
 const box = $(containerId);
 if (!card || !box || !price || !atr) { if (card) card.style.display = 'none'; return; }
 card.style.display = '';
 
+const { ma5, ma20, pAboveMA20, decision, adjScore, tfCfg } = maCtx;
+
 // ── Dynamic multipliers by context ──────────────────────────────────
-// Gold: wider SL due to higher volatility, bigger TP targets
-// Bursa ETF: tighter SL, quicker TP1 for liquidity
-// Default (US stocks): balanced
 const slMult  = context === 'gold' ? 1.8 : context === 'bursa' ? 1.3 : 1.5;
-const tp1Mult = context === 'gold' ? 1.5 : context === 'bursa' ? 1.2 : 1.5; // R:R 1:1 minimum
-const tp2Mult = context === 'gold' ? 3.0 : context === 'bursa' ? 2.5 : 2.8; // R:R ~1:2
-const tp3Mult = context === 'gold' ? 5.0 : context === 'bursa' ? 4.0 : 4.5; // R:R ~1:3+
+const tp1Mult = context === 'gold' ? 1.5 : context === 'bursa' ? 1.2 : 1.5;
+const tp2Mult = context === 'gold' ? 3.0 : context === 'bursa' ? 2.5 : 2.8;
+const tp3Mult = context === 'gold' ? 5.0 : context === 'bursa' ? 4.0 : 4.5;
 const trailMult = context === 'gold' ? 1.2 : 1.0;
 
 const sl  = price - atr * slMult;
-const be  = price + atr * 0.25; // breakeven zone (slight buffer above entry)
+const be  = price + atr * 0.25;
 const tp1 = price + atr * tp1Mult;
 const tp2 = price + atr * tp2Mult;
 const tp3 = price + atr * tp3Mult;
@@ -916,40 +915,109 @@ const rr2 = (tp2 - price) / risk;
 const rr3 = (tp3 - price) / risk;
 const dp = context === 'gold' ? 2 : 4;
 
-// ── Risk quality assessment ──────────────────────────────────────────
 const riskPctOfPrice = (risk / price) * 100;
 const rrQuality = rr2 >= 2 ? '✅ Excellent' : rr2 >= 1.5 ? '🟢 Good' : rr2 >= 1 ? '🟡 Minimum' : '🔴 Poor';
+
+// ── Entry zone status ──────────────────────────────────────────────
+const stretch = pAboveMA20 != null ? pAboveMA20 : null;
+const f1Warn  = tfCfg?.f1Warn || 8;
+const f1Ideal = tfCfg?.f1Ideal || 3.5;
+let entryBanner = '';
+if (stretch != null && context !== 'gold' && context !== 'bursa') {
+    const isIdeal    = stretch >= 0 && stretch <= f1Ideal;
+    const isOk       = stretch > f1Ideal && stretch <= f1Warn;
+    const isStretched= stretch > f1Warn && stretch <= f1Warn * 1.6;
+    const isExtended = stretch > f1Warn * 1.6;
+    const bcol = isIdeal ? 'var(--green)' : isOk ? 'var(--accent)' : isStretched ? 'var(--yellow)' : 'var(--red)';
+    const bicon= isIdeal ? '🎯' : isOk ? '✅' : isStretched ? '⏳' : '🛑';
+    const btext= isIdeal
+        ? `Ideal entry zone — price is ${stretch.toFixed(1)}% above MA20 (target ≤${f1Ideal}%). Best risk/reward available right now.`
+        : isOk
+        ? `Acceptable entry — price is ${stretch.toFixed(1)}% above MA20. Slightly stretched but still valid. Use standard position size.`
+        : isStretched
+        ? `Price stretched — ${stretch.toFixed(1)}% above MA20 (threshold ≥${f1Warn}%). Entering here increases your risk. Consider waiting for a pullback to MA5 or MA20.`
+        : `Price dangerously extended — ${stretch.toFixed(1)}% above MA20. This is a late entry with poor risk/reward. The Trade Plan levels below are based on current price but a pullback to MA20 is the safer entry trigger.`;
+    entryBanner = `<div style="padding:.5rem .75rem;border-radius:6px;border-left:3px solid ${bcol};background:rgba(0,0,0,.12);margin-bottom:.6rem;font-size:12px;color:var(--text);">
+        <span style="font-size:14px;">${bicon}</span>
+        <strong style="color:${bcol};">Entry Zone Status</strong> — ${btext}
+    </div>`;
+}
+
+// ── Key support levels banner ──────────────────────────────────────
+let supportBanner = '';
+if ((ma5 || ma20) && context !== 'gold' && context !== 'bursa') {
+    const lines = [];
+    if (ma5)  lines.push(`<span>📍 <strong>MA5</strong> <span style="color:var(--accent)">${ma5.toFixed(dp)}</span> — Nearest dynamic support. Watch for price to touch here on a pullback.</span>`);
+    if (ma20) lines.push(`<span>🏛️ <strong>MA20</strong> <span style="color:var(--green)">${ma20.toFixed(dp)}</span> — Key trend floor. A close below MA20 = structure broken, exit trade.</span>`);
+    supportBanner = `<div style="padding:.45rem .7rem;border-radius:6px;background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.12);margin-bottom:.6rem;display:flex;flex-direction:column;gap:.25rem;font-size:12px;color:var(--dim);">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.1rem;">Key Support Levels</div>
+        ${lines.join('')}
+    </div>`;
+}
+
+// ── Pullback entry plan (shown when price is stretched) ────────────
+let pullbackPlan = '';
+if (stretch != null && stretch > f1Warn && ma5 && ma20 && context !== 'gold' && context !== 'bursa') {
+    const pbEntry = ma5 + atr * 0.3;                    // slightly above MA5
+    const pbSL    = ma20 - atr * slMult * 0.8;          // tighter SL off MA20
+    const pbTP1   = pbEntry + (pbEntry - pbSL) * 1.5;
+    const pbTP2   = pbEntry + (pbEntry - pbSL) * 2.8;
+    const pbRisk  = pbEntry - pbSL;
+    pullbackPlan = `
+    <div style="border:1px solid rgba(245,200,66,.35);background:rgba(245,200,66,.04);border-radius:8px;padding:.65rem .75rem;margin-top:.6rem;">
+        <div style="font-size:12px;font-weight:600;color:var(--yellow);margin-bottom:.4rem;">⏳ Pullback Entry Plan — Queue orders when price returns to MA5</div>
+        <div style="font-size:11px;color:var(--dim);margin-bottom:.5rem;">Because price is currently stretched ${stretch.toFixed(1)}% above MA20, this alternative plan gives you a better risk/reward by waiting for a pullback near MA5. The targets below update automatically when price returns to this zone.</div>
+        <div style="display:grid;gap:.25rem;font-size:12px;">
+            <div style="display:flex;justify-content:space-between;padding:.2rem 0;border-bottom:1px solid var(--border);">
+                <span style="color:var(--dim);">⏸ Queue entry near MA5</span>
+                <span style="color:var(--yellow);font-weight:600;">${pbEntry.toFixed(dp)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.2rem 0;border-bottom:1px solid var(--border);">
+                <span style="color:var(--dim);">🛑 Stop Loss (below MA20)</span>
+                <span style="color:var(--red);font-weight:600;">${pbSL.toFixed(dp)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.2rem 0;border-bottom:1px solid var(--border);">
+                <span style="color:var(--dim);">✅ TP1 target</span>
+                <span style="color:var(--green);font-weight:600;">${pbTP1.toFixed(dp)} <span style="color:var(--dim);font-weight:400;">(R:R 1:1.5)</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.2rem 0;">
+                <span style="color:var(--dim);">🎯 TP2 target</span>
+                <span style="color:var(--green);font-weight:600;">${pbTP2.toFixed(dp)} <span style="color:var(--dim);font-weight:400;">(R:R 1:2.8)</span></span>
+            </div>
+        </div>
+        <div style="font-size:11px;color:var(--dim);margin-top:.4rem;">💡 Cancel this queue if price drops below MA20 — that signals structure breakdown, not a pullback.</div>
+    </div>`;
+}
 
 const kellyId = containerId.replace('price-block', 'kelly-block');
 const kellyEl = $(kellyId);
 if (accountSize && riskPct) {
 const riskAmt = accountSize * (riskPct / 100);
-// Enforce max 2% risk rule
 const effectiveRiskPct = Math.min(riskPct, 2);
 const effectiveRiskAmt = accountSize * (effectiveRiskPct / 100);
 const overRisk = riskPct > 2;
 const shares = (effectiveRiskAmt / risk).toFixed(2);
 const positionVal = (price * parseFloat(shares)).toFixed(2);
 const positionPct = ((price * parseFloat(shares)) / accountSize * 100).toFixed(1);
-const kelly = kellySize(58, rr2, 1.0); // 58% win rate assumption with this R:R
+const kelly = kellySize(58, rr2, 1.0);
 const kellySz = kelly ? (kelly.half).toFixed(1) : null;
-const maxDrawdown3 = (effectiveRiskAmt * 3).toFixed(2); // 3 consecutive losses
+const maxDrawdown3 = (effectiveRiskAmt * 3).toFixed(2);
 if (kellyEl) {
 kellyEl.style.display = '';
 kellyEl.innerHTML = `
         <div class="kelly-block">
           <div class="kelly-title">⚖️ Risk Management Calculator</div>
-          ${overRisk ? `<div class="kelly-row" style="color:var(--red);font-size:10px;margin-bottom:.2rem">⚠️ Risk ${riskPct}% exceeds 2% rule — capped at 2% for position sizing</div>` : ''}
+          ${overRisk ? `<div class="kelly-row" style="color:var(--red);font-size:10px;margin-bottom:.2rem">⚠️ Risk ${riskPct}% exceeds the 2% rule — capped at 2% for position sizing. Never risk more than 2% on a single trade.</div>` : ''}
           <div class="kelly-row"><span class="kelly-label">Account Size</span><span class="kelly-val">$${Number(accountSize).toLocaleString()}</span></div>
-          <div class="kelly-row"><span class="kelly-label">Risk per Trade (${effectiveRiskPct}%)</span><span class="kelly-val" style="color:var(--red)">$${effectiveRiskAmt.toFixed(2)}</span></div>
+          <div class="kelly-row"><span class="kelly-label">Risk per Trade (${effectiveRiskPct}%)</span><span class="kelly-val" style="color:var(--red)">$${effectiveRiskAmt.toFixed(2)} <span style="color:var(--dim);font-size:10px;">— max you can lose on this trade</span></span></div>
           <div class="kelly-row"><span class="kelly-label">SL Distance (ATR×${slMult})</span><span class="kelly-val">$${risk.toFixed(dp)} · ${riskPctOfPrice.toFixed(2)}% of price</span></div>
-          <div class="kelly-row"><span class="kelly-label">Suggested Units / Shares</span><span class="kelly-val" style="color:var(--green)">${shares}</span></div>
+          <div class="kelly-row"><span class="kelly-label">Suggested Units / Shares</span><span class="kelly-val" style="color:var(--green)">${shares} <span style="color:var(--dim);font-size:10px;">— buy this many; SL hit = lose exactly $${effectiveRiskAmt.toFixed(2)}</span></span></div>
           <div class="kelly-row"><span class="kelly-label">Position Value</span><span class="kelly-val">$${Number(positionVal).toLocaleString()} (${positionPct}% of account)</span></div>
-          <div class="kelly-row"><span class="kelly-label">R:R Quality</span><span class="kelly-val">${rrQuality} (TP2 = 1:${rr2.toFixed(1)})</span></div>
-          ${kellySz ? `<div class="kelly-row"><span class="kelly-label">Half-Kelly Size</span><span class="kelly-val" style="color:var(--yellow)">${kellySz}% of account</span></div>` : ''}
-          <div class="kelly-row"><span class="kelly-label">3-Loss Drawdown Scenario</span><span class="kelly-val" style="color:var(--orange)">-$${maxDrawdown3} (${(parseFloat(maxDrawdown3)/accountSize*100).toFixed(1)}%)</span></div>
+          <div class="kelly-row"><span class="kelly-label">R:R Quality</span><span class="kelly-val">${rrQuality} (TP2 = 1:${rr2.toFixed(1)}) <span style="color:var(--dim);font-size:10px;">— minimum acceptable is 1:1.5</span></span></div>
+          ${kellySz ? `<div class="kelly-row"><span class="kelly-label">Half-Kelly Size</span><span class="kelly-val" style="color:var(--yellow)">${kellySz}% of account <span style="color:var(--dim);font-size:10px;">— mathematical optimal sizing. Half-Kelly halves risk of ruin vs full Kelly.</span></span></div>` : ''}
+          <div class="kelly-row"><span class="kelly-label">3-Loss Drawdown Scenario</span><span class="kelly-val" style="color:var(--orange)">-$${maxDrawdown3} (${(parseFloat(maxDrawdown3)/accountSize*100).toFixed(1)}%) <span style="color:var(--dim);font-size:10px;">— if you lose 3 trades in a row</span></span></div>
           <div class="kelly-row" style="margin-top:.25rem;padding-top:.25rem;border-top:1px solid var(--border)">
-            <span class="kelly-label" style="color:var(--dim);font-size:9.5px">💡 After 3 losses: reduce size by 50% until 2 wins. Never average down on a losing trade.</span>
+            <span class="kelly-label" style="color:var(--dim);font-size:9.5px">💡 After 3 consecutive losses: reduce size by 50% until you win 2 in a row. This prevents one bad streak from wiping your account. Never average down on a losing trade — only add when the trade is going in your favour.</span>
           </div>
         </div>`;
 }
@@ -957,6 +1025,8 @@ kellyEl.innerHTML = `
 if (kellyEl) kellyEl.style.display = 'none';
 }
 box.innerHTML = `
+    ${entryBanner}
+    ${supportBanner}
     <div class="prow entry">
       <span class="prow-label">📍 Ideal Entry</span>
       <span class="prow-val accent">${price.toFixed(dp)}</span>
@@ -965,33 +1035,34 @@ box.innerHTML = `
     <div class="prow sl">
       <span class="prow-label">🛑 Stop Loss (ATR×${slMult})</span>
       <span class="prow-val red">${sl.toFixed(dp)}</span>
-      <span class="prow-note">Hard stop — set immediately. SL distance: ${risk.toFixed(dp)} (${riskPctOfPrice.toFixed(2)}% of price)</span>
+      <span class="prow-note">Hard stop — set immediately. SL distance: ${risk.toFixed(dp)} (${riskPctOfPrice.toFixed(2)}% of price). If price closes below this level, your trade thesis is wrong — exit.</span>
     </div>
     <div class="prow" style="background:rgba(0,200,240,0.03)">
       <span class="prow-label">🔒 Breakeven Zone</span>
       <span class="prow-val accent">${be.toFixed(dp)}</span>
-      <span class="prow-note">Move SL here if price stalls before TP1 — protect capital first</span>
+      <span class="prow-note">Move SL here if price stalls before TP1. This removes all risk from the trade — worst case becomes a flat exit, not a loss.</span>
     </div>
     <div class="prow tp1">
       <span class="prow-label">✅ TP1 — Exit 35%</span>
       <span class="prow-val green">${tp1.toFixed(dp)}</span>
-      <span class="prow-note">R:R 1:${rr1.toFixed(2)} — at TP1: move SL to entry (breakeven). Lock profit.</span>
+      <span class="prow-note">R:R 1:${rr1.toFixed(2)} — Sell 35% of position here. Immediately move SL up to your entry price. You are now trading for free.</span>
     </div>
     <div class="prow tp2">
       <span class="prow-label">🎯 TP2 — Exit 45%</span>
       <span class="prow-val g2">${tp2.toFixed(dp)}</span>
-      <span class="prow-note">R:R 1:${rr2.toFixed(2)} — at TP2: trail stop ATR×${trailMult} below swing high</span>
+      <span class="prow-note">R:R 1:${rr2.toFixed(2)} — Sell 45% here. Trail stop ATR×${trailMult} below each new swing high. Lock in the bulk of your profit.</span>
     </div>
     <div class="prow tp3">
       <span class="prow-label">🚀 TP3 — Exit 20%</span>
       <span class="prow-val g3">${tp3.toFixed(dp)}</span>
-      <span class="prow-note">R:R 1:${rr3.toFixed(2)} — runner position, trail or hold for continuation</span>
+      <span class="prow-note">R:R 1:${rr3.toFixed(2)} — Keep last 20% as a "runner". Only hold if momentum stays ACCELERATING or STEADY. Exit immediately if momentum turns FADING.</span>
     </div>
     <div class="prow info" style="margin-top:.2rem">
       <span class="prow-label">📐 Trailing Stop</span>
       <span class="prow-val gold">ATR × ${trailMult}</span>
-      <span class="prow-note">After TP1: trail ${trailMult}×ATR below each new higher high. Never widen SL.</span>
-    </div>`;
+      <span class="prow-note">After TP1 hit: trail ${trailMult}×ATR below each new higher swing high. The trailing stop only moves UP — never widen it downward.</span>
+    </div>
+    ${pullbackPlan}`;
 }
 // ─── Chart.js Gauge + Donut — Signal Breakdown ─────────────────────────────
 const _cjsDialMap = {};
@@ -1502,7 +1573,16 @@ if (bbLbl) bbLbl.textContent = `${bbPos.toFixed(1)}% of BB width`;
 } else {
 bbSection.style.display = 'none';
 }
-buildTradePlan('ma-price-block', 'ma-tradeplan-card', price, atr, accountSz, riskPct);
+buildTradePlan('ma-price-block', 'ma-tradeplan-card', price, atr, accountSz, riskPct, 'default', {
+    ma5, ma20, pAboveMA20, decision, adjScore, tfCfg
+});
+// Store score and stretch for QPP to read (fixes QPP always using score=0)
+const maResultEl = $('ma-result');
+if (maResultEl) {
+    maResultEl.setAttribute('data-adjscore', adjScore);
+    maResultEl.setAttribute('data-ma5', ma5 || '');
+    maResultEl.setAttribute('data-stretch', pAboveMA20 || 0);
+}
 }
 function resetMA() {
 ['ma-price', 'ma-ma5', 'ma-ma20', 'ma-ma50', 'ma-ma200',
@@ -3439,6 +3519,9 @@ tp3Mult: 5.0,
 sizeRule: (score, stretch) => score >= 75 && stretch <= 3 ? 1.0 : score >= 55 ? 0.5 : 0.25,
 posLabel: (score, stretch) => score >= 75 && stretch <= 3 ? '100%' : score >= 55 ? '50%' : '25%',
 note: 'Balanced R:R. ATR×1.5 SL. Scale out 40/40/20 at TP1/2/3. Move SL to breakeven at TP1.',
+desc: 'The everyday standard plan. Balanced stop loss and take-profit levels designed to work in most market conditions. When your score is ≥75 and price is in the ideal zone, this gives you full position size with a clean risk/reward of 1:3 or better.',
+bestFor: 'Most traders · Daily & 4H timeframes · Score ≥55 · Any session',
+scoreThreshold: 55,
 riskPct: 1.0,
 winRate: 55,
 },
@@ -3457,6 +3540,9 @@ tp3Mult: 3.0,
 sizeRule: (score) => score >= 75 ? 0.5 : 0.25,
 posLabel: (score) => score >= 75 ? '50%' : '25%',
 note: 'Tight SL (ATR×1.2). Quick TP1 at 1×ATR. Prioritises capital protection. Best for uncertain markets.',
+desc: 'Designed to protect your capital first and profit second. The stop loss is tighter (ATR×1.2), so you get stopped out sooner if wrong, but you also get to take quick profit at TP1 (just 1×ATR away). Position size is capped at 50% max — you will never go all-in with this style.',
+bestFor: 'New traders · Low-confidence setups · Uncertain market conditions · Lull session',
+scoreThreshold: 45,
 riskPct: 0.5,
 winRate: 60,
 },
@@ -3475,6 +3561,9 @@ tp3Mult: 8.0,
 sizeRule: (score) => score >= 72 ? 1.0 : 0.5,
 posLabel: (score) => score >= 72 ? '100%' : '50%',
 note: 'Wide SL (ATR×2.0) to survive volatility. Large TP3 target. Only when score ≥ 72 & strong trend.',
+desc: 'A high-conviction style with a wide stop loss (ATR×2.0) to survive volatile moves that would stop out a standard plan. The trade-off is larger potential loss if wrong, but much bigger reward if right (TP3 = 8×ATR). Only viable with a strong score and a confirmed strong trend (ADX ≥25, PDI>MDI).',
+bestFor: 'Experienced traders · High-score setups (≥72) · Strong ADX trend confirmed · Prime/Power sessions only',
+scoreThreshold: 72,
 riskPct: 1.5,
 winRate: 45,
 },
@@ -3493,6 +3582,9 @@ tp3Mult: 1.5,
 sizeRule: () => 1.0,
 posLabel: () => '100%',
 note: 'Tight SL (ATR×0.8). Quick exits at TP1/TP2. Best during London/NY overlap. Do not hold overnight.',
+desc: 'Fast in, fast out. The stop loss is extremely tight (ATR×0.8) and take-profits are very close (TP1 at just 0.6×ATR). You take small profits quickly and never hold overnight. Full position size is always used because the tight stop means your dollar risk is already small. This style requires active monitoring — you cannot walk away from the screen.',
+bestFor: '5m/15m charts · Prime or Power Hour sessions only · Active screen time required · Never hold overnight',
+scoreThreshold: 0,
 riskPct: 0.5,
 winRate: 58,
 },
@@ -3511,6 +3603,9 @@ tp3Mult: 10.0,
 sizeRule: (score) => score >= 70 ? 0.5 : 0.25,
 posLabel: (score) => score >= 70 ? '50%' : '25%',
 note: 'Wide SL (ATR×2.5) for multi-day holds. TP3 at 10×ATR. Hold through minor pullbacks. Trail after TP1.',
+desc: 'Built for holding trades over several days or weeks. The very wide stop loss (ATR×2.5) prevents you from being shaken out by normal daily volatility. In exchange, TP targets are much bigger — TP3 is 10×ATR away, which can represent very large gains if the trend continues. Position size is reduced (max 50%) to compensate for the wider stop.',
+bestFor: 'Daily/Weekly charts · Score ≥60 · Full MA rainbow confirmed (Price>MA5>MA20>MA50>MA200) · Low-stress approach',
+scoreThreshold: 60,
 riskPct: 1.0,
 winRate: 48,
 },
@@ -3529,6 +3624,9 @@ tp3Mult: 20.0,
 sizeRule: (score) => score >= 75 ? 0.33 : 0.15,
 posLabel: (score) => score >= 75 ? '33%' : '15%',
 note: 'Maximum SL (ATR×3.0). Weeks to months hold. TP3 = 20×ATR. Only in confirmed macro bull trend.',
+desc: 'Long-term position trading — weeks to months. You buy and mostly forget it, using a very wide stop (ATR×3.0) and only checking weekly. Position size is very small (15–33%) because a wide stop means a large potential loss in dollar terms. This style only makes sense when the macro trend (MA200) is strongly bullish and you have high conviction.',
+bestFor: 'Weekly/Monthly charts · Score ≥75 required · Price above MA200 confirmed · Macro bull trend only · Low turnover',
+scoreThreshold: 75,
 riskPct: 0.5,
 winRate: 52,
 },
@@ -3553,7 +3651,7 @@ return `<div class="qpp-ev-bar-wrap">
     </div>
   </div>`;
 }
-function renderQPP(pfx, price, atr, score, accountSize, stretch, context) {
+function renderQPP(pfx, price, atr, score, accountSize, stretch, context, ma5) {
 const container = $(`${pfx}-qpp`);
 if (!container || !price || !atr) { if (container) container.style.display = 'none'; return; }
 container.style.display = '';
@@ -3561,6 +3659,12 @@ const dp = context === 'gold' ? 2 : context === 'bursa' ? 3 : 4;
 const currency = context === 'bursa' ? 'MYR ' : '$';
 const riskAmt = accountSize ? accountSize * 0.01 : 100;
 const maxEv = riskAmt * 3;
+
+// Use actual MA5 for split fill Part 2, fall back to price * 0.972 if not available
+const splitPart2Price = ma5 && ma5 < price ? ma5 : price * 0.972;
+const splitPart2Label = ma5 && ma5 < price ? 'QUEUE AT MA5' : 'QUEUE AT MA5 (est.)';
+const splitAvg = (price + splitPart2Price) / 2;
+
 const cards = QPP_PROFILES.map(p => {
 const sl = price - atr * p.slMult;
 const tp1 = price + atr * p.tp1Mult;
@@ -3580,7 +3684,18 @@ const viable = p.id === 'scalp' ? true
 : p.id === 'aggressive' ? score >= 72
 : p.id === 'swing' ? score >= 60
 : score >= 50;
-return { p, sl, tp1, tp2, tp3, risk, rr1, rr2, rr3, size, ev, avgWinR, acctRisk, units, viable };
+
+// Position size explanation
+const sizeNum = p.sizeRule(score, stretch || 0);
+let sizeTip = '';
+if (sizeNum >= 1.0) sizeTip = 'Full position — score is high and setup is clean.';
+else if (sizeNum >= 0.5) sizeTip = score < (p.scoreThreshold || 55) + 20
+    ? `Reduced to 50% — score ${score.toFixed(0)}/100 is below the ideal threshold for this style. Score ≥${(p.scoreThreshold||55)+20} to unlock full size.`
+    : stretch > 5 ? 'Reduced to 50% — price is stretched from MA20. Better R/R at a pullback.'
+    : 'Half position — moderate confluence. Add only if another signal confirms.';
+else sizeTip = `Minimal position (25%) — score ${score.toFixed(0)}/100 is below threshold for this style. This is a speculative entry. Consider waiting.`;
+
+return { p, sl, tp1, tp2, tp3, risk, rr1, rr2, rr3, size, ev, avgWinR, acctRisk, units, viable, sizeTip };
 });
 const viable = cards.filter(c => c.viable);
 const best = viable.sort((a, b) => b.ev - a.ev)[0];
@@ -3592,7 +3707,9 @@ container.innerHTML = `
           <span>Query Price Planner</span>
           <span class="qpp-subtitle">Choose a trading style below — all levels auto-calculated</span>
         </div>
-        ${best ? `<div class="qpp-best-tag">⭐ Best for current setup: <strong style="color:${best.p.color}">${best.p.label}</strong></div>` : ''}
+        ${best ? `<div class="qpp-best-tag">⭐ Best for current setup: <strong style="color:${best.p.color}">${best.p.label}</strong>
+          <span style="font-size:10px;color:var(--dim);display:block;margin-top:1px;">Highest expected value (EV) among viable profiles at score ${score.toFixed(0)}/100</span>
+        </div>` : ''}
       </div>
       <div class="qpp-tabs" id="${pfx}-qpp-tabs">
         ${QPP_PROFILES.map(p =>
@@ -3611,8 +3728,14 @@ return `
           <div class="qpp-note" style="border-color:${p.border};background:${p.bg}">
             <span class="qpp-badge ${p.badgeCls}">${p.badge}</span>
             <span style="font-size:12.5px;color:var(--text)">${p.note}</span>
-            ${!c.viable ? `<span class="qpp-not-viable">⚠️ Score ${score.toFixed(0)}/100 — below threshold for this style</span>` : ''}
+            ${!c.viable ? `<span class="qpp-not-viable">⚠️ Score ${score.toFixed(0)}/100 — needs ≥${p.scoreThreshold || 50} for this style. Currently not recommended.</span>` : ''}
           </div>
+          ${p.desc ? `<div style="padding:.45rem .7rem;border-radius:6px;background:rgba(0,0,0,.1);margin:.35rem 0;font-size:12px;color:var(--dim);line-height:1.55;">
+            <span style="color:${p.color};font-weight:600;">What is this style? </span>${p.desc}
+          </div>` : ''}
+          ${p.bestFor ? `<div style="padding:.3rem .7rem;border-radius:6px;background:rgba(0,0,0,.08);margin-bottom:.35rem;font-size:11px;color:var(--dim);">
+            <span style="color:${p.color};font-weight:600;">Best for: </span>${p.bestFor}
+          </div>` : ''}
           <div class="qpp-levels">
             <div class="qpp-row qpp-entry">
               <span class="qpp-row-icon">▶</span>
@@ -3624,25 +3747,25 @@ return `
               <span class="qpp-row-icon">🛑</span>
               <span class="qpp-row-label">Stop Loss <span style="color:var(--muted);font-size:9px">ATR×${p.slMult}</span></span>
               <span class="qpp-row-price" style="color:var(--red)">${currency}${c.sl.toFixed(dp)}</span>
-              <span class="qpp-row-note">Risk: ${currency}${c.risk.toFixed(dp)} per unit${c.units ? ` · ${c.units} units max` : ''}</span>
+              <span class="qpp-row-note">Risk: ${currency}${c.risk.toFixed(dp)} per unit${c.units ? ` · ${c.units} units max` : ''} — if price hits this, exit immediately</span>
             </div>
             <div class="qpp-row qpp-tp1">
               <span class="qpp-row-icon">🎯</span>
               <span class="qpp-row-label">TP1 <span style="color:var(--muted);font-size:9px">40% off</span></span>
               <span class="qpp-row-price" style="color:var(--green)">${currency}${c.tp1.toFixed(dp)}</span>
-              <span class="qpp-row-note">R:R 1:${c.rr1.toFixed(2)} · Move SL → breakeven</span>
+              <span class="qpp-row-note">R:R 1:${c.rr1.toFixed(2)} · Sell 40% here, move SL → breakeven. Trade is now risk-free.</span>
             </div>
             <div class="qpp-row qpp-tp2">
               <span class="qpp-row-icon">🎯</span>
               <span class="qpp-row-label">TP2 <span style="color:var(--muted);font-size:9px">40% off</span></span>
               <span class="qpp-row-price" style="color:#55ffaa">${currency}${c.tp2.toFixed(dp)}</span>
-              <span class="qpp-row-note">R:R 1:${c.rr2.toFixed(2)} · Trail ATR×1.0</span>
+              <span class="qpp-row-note">R:R 1:${c.rr2.toFixed(2)} · Sell 40% here. Trail stop ATR×1.0 below swing highs.</span>
             </div>
             <div class="qpp-row qpp-tp3">
               <span class="qpp-row-icon">🚀</span>
               <span class="qpp-row-label">TP3 <span style="color:var(--muted);font-size:9px">20% off</span></span>
               <span class="qpp-row-price" style="color:#88ffcc">${currency}${c.tp3.toFixed(dp)}</span>
-              <span class="qpp-row-note">R:R 1:${c.rr3.toFixed(2)} · Trail or hold</span>
+              <span class="qpp-row-note">R:R 1:${c.rr3.toFixed(2)} · Runner — hold last 20% only if momentum stays ACCELERATING/STEADY</span>
             </div>
           </div>
           <div class="qpp-stats">
@@ -3671,8 +3794,11 @@ return `
               <div class="qpp-stat-val" style="color:var(--green)">${c.units}</div>
             </div>` : ''}
           </div>
+          ${c.sizeTip ? `<div style="padding:.35rem .65rem;border-radius:6px;background:rgba(0,0,0,.1);font-size:11px;color:var(--dim);margin:.3rem 0;">
+            <span style="color:${p.color};font-weight:600;">Why ${c.size} position size? </span>${c.sizeTip}
+          </div>` : ''}
           <div class="qpp-ev-section">
-            <div class="qpp-ev-title">Expected Value per Trade</div>
+            <div class="qpp-ev-title">Expected Value per Trade <span style="font-size:10px;color:var(--dim);font-weight:400;">— positive EV means mathematically profitable over many trades</span></div>
             ${expectancyBar(c.ev, maxEv)}
           </div>
 <div class="qpp-split-fill">
@@ -3682,22 +3808,22 @@ return `
             <div class="qpp-split-part">
               <div class="qpp-split-label">PART 1 — ENTER NOW</div>
               <div class="qpp-split-price" style="color:var(--accent)">${currency}${price.toFixed(dp)}</div>
-              <div class="qpp-split-sub">50% of planned position</div>
+              <div class="qpp-split-sub">50% of planned position · current price</div>
             </div>
             <div class="qpp-split-part">
-              <div class="qpp-split-label">PART 2 — QUEUE AT MA5</div>
-              <div class="qpp-split-price" style="color:var(--green)">${currency}${(price * 0.972).toFixed(dp)}</div>
-              <div class="qpp-split-sub">50% of planned position</div>
+              <div class="qpp-split-label">${splitPart2Label}</div>
+              <div class="qpp-split-price" style="color:var(--green)">${currency}${splitPart2Price.toFixed(dp)}</div>
+              <div class="qpp-split-sub">50% of planned position${ma5 && ma5 < price ? ' · actual MA5 level' : ' · estimated 2.8% below'}</div>
             </div>
             <div class="qpp-split-avg">
               <span class="qpp-split-avg-label">AVG ENTRY</span>
-              <span class="qpp-split-avg-val" style="color:var(--accent)">${currency}${(price * 0.986).toFixed(dp)}</span>
+              <span class="qpp-split-avg-val" style="color:var(--accent)">${currency}${splitAvg.toFixed(dp)}</span>
             </div>
-            <div class="qpp-split-note">You never fully miss the move. Worst case: 50% in at a higher price. Best case: full position at a better average.</div>
-            <div class="qpp-split-cancel">Cancel if price runs more than 3% above current price without touching MA5</div>
+            <div class="qpp-split-note">You never fully miss the move. Worst case: 50% in at a higher price. Best case: full position at a better average. Part 2 is queued at MA5 — the nearest strong support where price often pulls back before continuing.</div>
+            <div class="qpp-split-cancel">Cancel Part 2 if: price runs more than 3% above current price without touching MA5 · OR if a bearish signal appears on your chart</div>
           </div>
           <div class="qpp-compare">
-            <div class="qpp-compare-title">📊 Profile Comparison</div>
+            <div class="qpp-compare-title">📊 Profile Comparison — All Styles at a Glance</div>
             <div class="qpp-compare-grid">
               ${cards.map(cc => `
                 <div class="qpp-compare-row${cc.p.id === p.id ? ' qpp-compare-active' : ''}">
@@ -3733,19 +3859,21 @@ return function() {
 fn.apply(this, arguments);
 requestAnimationFrame(() => {
 const res = getPriceAtrScore();
-if (res) renderQPP(pfx, res.price, res.atr, res.score, res.account, res.stretch, context);
+if (res) renderQPP(pfx, res.price, res.atr, res.score, res.account, res.stretch, context, res.ma5);
 });
 };
 }
 if (_origMACalc) {
 maCalc = patchCalc(_origMACalc, 'ma', () => {
 const price = num('ma-price'), atr = num('ma-atr'), ma20 = num('ma-ma20');
+const ma5 = num('ma-ma5');
 const account = num('ma-account');
 if (!price || !atr) return null;
-const dialEl = $('ma-dial-score');
-const score = dialEl ? parseFloat(dialEl.textContent) || 0 : 0;
+// Read score from data attribute set by maCalc (fixes QPP always using score=0)
+const resultEl = $('ma-result');
+const score = resultEl ? parseFloat(resultEl.getAttribute('data-adjscore')) || 0 : 0;
 const stretch = ma20 ? Math.abs((price - ma20) / ma20 * 100) : 0;
-return { price, atr, score, account, stretch };
+return { price, atr, score, account, stretch, ma5 };
 }, 'default');
 }
 if (_origEMACalc) {
