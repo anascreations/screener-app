@@ -85,7 +85,6 @@
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="ma"     onclick="switchTab('ma')">∿ MA</button>
   <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA</button>
-<button class="tab-btn enhance-tab" data-tab="enhance" onclick="switchTab('enhance')">🔮 Smart Tools</button>
   <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAUUSD</button>
   <button class="tab-btn tv-tab" data-tab="tv" onclick="switchTab('tv')">📺 Live Chart</button>
   <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 ETF</button>
@@ -94,7 +93,8 @@
   <button class="tab-btn ipo-tab" data-tab="ipo" onclick="switchTab('ipo')">🏷️ IPO</button>
   <button class="tab-btn sr-tab" data-tab="sr" onclick="switchTab('sr')">📊 S/R Zones</button>
   <button class="tab-btn mtf-tab" data-tab="mtf" onclick="switchTab('mtf')">🔥 MTF Momentum</button>
-    <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
+  <button class="tab-btn enhance-tab" data-tab="enhance" onclick="switchTab('enhance')">🔮 Smart Tools</button>
+  <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
   <button class="tab-btn journal-tab" data-tab="journal" onclick="switchTab('journal')">📒 Journal</button>
   <button class="tab-btn capital-tab" data-tab="capital" onclick="switchTab('capital')">💰 Capital</button>
   <button class="tab-btn pnl-tab" data-tab="pnl" onclick="switchTab('pnl')">📈 P&amp;L</button>
@@ -3209,6 +3209,15 @@
                    margin-bottom:-1px;transition:all .2s;">
       🎯 ENTRY OPTIMIZER
     </button>
+    <button class="enh-tab-btn" data-et="cp"
+            onclick="switchEnhTab('cp')"
+            style="flex-shrink:0;padding:.55rem 1.1rem;cursor:pointer;color:var(--dim);
+                   font-family:var(--mono);font-size:13px;font-weight:600;
+                   letter-spacing:.1em;text-transform:uppercase;border:none;
+                   background:transparent;border-bottom:2px solid transparent;
+                   margin-bottom:-1px;transition:all .2s;">
+      🕯️ CANDLE PATTERNS
+    </button>
   </div>
  
   <!-- ─────────────────────────────────────────────────────────────
@@ -3251,6 +3260,18 @@
             <label>Period <span class="opt-tag">info only · 10</span></label>
             <input type="number" id="enh-st-period" value="10" step="1" min="1"
                    placeholder="10" disabled style="opacity:.5;cursor:not-allowed;"/>
+          </div>
+          <div class="fld">
+            <label>Prev Candle ST <span class="opt-tag">OPT · flip detect</span></label>
+            <input type="number" id="enh-st-prev" step="0.0001" placeholder="prior bar ST value"/>
+          </div>
+          <div class="fld">
+            <label>Prev Candle Bull? <span class="opt-tag">OPT</span></label>
+            <select id="enh-st-prev-dir">
+              <option value="">— Not Set —</option>
+              <option value="bull">Previous bar was Bullish ST</option>
+              <option value="bear">Previous bar was Bearish ST</option>
+            </select>
           </div>
         </div>
  
@@ -3389,11 +3410,28 @@
           <div class="fld"><label>Supertrend <span class="opt-tag">OPT</span></label>
             <input type="number" id="enh-fc-st"  step="0.0001" placeholder="from ST Calc"/></div>
         </div>
+
+        <div class="sec-label">Bollinger Bands &amp; Price Context <span class="opt-tag">OPT</span></div>
+        <div class="fg" style="margin-bottom:.75rem;">
+          <div class="fld"><label>BB Upper <span class="opt-tag">OPT</span></label>
+            <input type="number" id="enh-fc-bbu" step="0.0001" placeholder="e.g. 1.55"/></div>
+          <div class="fld"><label>BB Lower <span class="opt-tag">OPT</span></label>
+            <input type="number" id="enh-fc-bbl" step="0.0001" placeholder="e.g. 1.22"/></div>
+          <div class="fld"><label>VWAP <span class="opt-tag">OPT · intraday</span></label>
+            <input type="number" id="enh-fc-vwap" step="0.0001" placeholder="e.g. 1.40"/></div>
+          <div class="fld"><label>Ichimoku Cloud <span class="opt-tag">OPT</span></label>
+            <select id="enh-fc-ichi">
+              <option value="">— Not Set —</option>
+              <option value="above">Price Above Cloud</option>
+              <option value="inside">Price Inside Cloud</option>
+              <option value="below">Price Below Cloud</option>
+            </select></div>
+        </div>
  
         <div class="form-actions">
           <button class="btn btn-primary" onclick="calcForecastRules()">RUN FORECAST ▶</button>
           <button class="btn btn-secondary"
-                  onclick="['enh-fc-price','enh-fc-ma5','enh-fc-ma20','enh-fc-ma50','enh-fc-ma200','enh-fc-k','enh-fc-d','enh-fc-j','enh-fc-rsi','enh-fc-dif','enh-fc-dea','enh-fc-hist','enh-fc-adx','enh-fc-pdi','enh-fc-mdi','enh-fc-adxr','enh-fc-atr','enh-fc-vol','enh-fc-st'].forEach(id=>{const e=$(id);if(e)e.value=''});$('enh-fc-result').style.display='none';">
+                  onclick="['enh-fc-price','enh-fc-ma5','enh-fc-ma20','enh-fc-ma50','enh-fc-ma200','enh-fc-k','enh-fc-d','enh-fc-j','enh-fc-rsi','enh-fc-dif','enh-fc-dea','enh-fc-hist','enh-fc-adx','enh-fc-pdi','enh-fc-mdi','enh-fc-adxr','enh-fc-atr','enh-fc-vol','enh-fc-st','enh-fc-bbu','enh-fc-bbl','enh-fc-vwap'].forEach(id=>{const e=$(id);if(e)e.value=''});const ic=$(\'enh-fc-ichi\');if(ic)ic.value=\'\';$('enh-fc-result').style.display='none';">
             RESET
           </button>
         </div>
@@ -3469,9 +3507,98 @@
     </div>
  
     <div id="enh-en-result" style="display:none;"></div>
- 
+
   </div><!-- /enh-pnl-en -->
- 
+
+
+  <!-- ─────────────────────────────────────────────────────────────
+       SUB-PANEL: CANDLE PATTERN SCANNER
+  ──────────────────────────────────────────────────────────────── -->
+  <div class="enh-sub-panel" id="enh-pnl-cp"
+       style="display:none;flex-direction:column;gap:.9rem;">
+
+    <div class="card">
+      <div class="card-hdr"><span class="ci">🕯️</span> CANDLE PATTERN SCANNER
+        <span class="badge-new" style="margin-left:.5rem;">PROFESSIONAL</span>
+      </div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--dim);margin-bottom:.75rem;">
+          Identifies high-probability candlestick reversal and continuation patterns.
+          Enter 1–3 candles (current + prior bars) + trend context for the most accurate read.
+          Each pattern is rated by reliability and comes with a full trade action plan.
+        </div>
+
+        <div class="sec-label">Current Candle (most recent bar) <span class="req-tag">REQ</span></div>
+        <div class="fg" style="margin-bottom:.75rem;">
+          <div class="fld"><label>Open <span class="req-tag">REQ</span></label>
+            <input type="number" id="enh-cp-o1" step="0.0001" placeholder="e.g. 1.38"/></div>
+          <div class="fld"><label>High <span class="req-tag">REQ</span></label>
+            <input type="number" id="enh-cp-h1" step="0.0001" placeholder="e.g. 1.45"/></div>
+          <div class="fld"><label>Low <span class="req-tag">REQ</span></label>
+            <input type="number" id="enh-cp-l1" step="0.0001" placeholder="e.g. 1.35"/></div>
+          <div class="fld"><label>Close <span class="req-tag">REQ</span></label>
+            <input type="number" id="enh-cp-c1" step="0.0001" placeholder="e.g. 1.42"/></div>
+        </div>
+
+        <div class="sec-label">Previous Candle (−1 bar) <span class="opt-tag">OPT · unlocks 2-bar patterns</span></div>
+        <div class="fg" style="margin-bottom:.75rem;">
+          <div class="fld"><label>Open</label>
+            <input type="number" id="enh-cp-o2" step="0.0001" placeholder="e.g. 1.42"/></div>
+          <div class="fld"><label>High</label>
+            <input type="number" id="enh-cp-h2" step="0.0001" placeholder="e.g. 1.46"/></div>
+          <div class="fld"><label>Low</label>
+            <input type="number" id="enh-cp-l2" step="0.0001" placeholder="e.g. 1.36"/></div>
+          <div class="fld"><label>Close</label>
+            <input type="number" id="enh-cp-c2" step="0.0001" placeholder="e.g. 1.39"/></div>
+        </div>
+
+        <div class="sec-label">Candle −2 bar <span class="opt-tag">OPT · unlocks 3-bar patterns</span></div>
+        <div class="fg" style="margin-bottom:.75rem;">
+          <div class="fld"><label>Open</label>
+            <input type="number" id="enh-cp-o3" step="0.0001" placeholder="e.g. 1.36"/></div>
+          <div class="fld"><label>High</label>
+            <input type="number" id="enh-cp-h3" step="0.0001" placeholder="e.g. 1.44"/></div>
+          <div class="fld"><label>Low</label>
+            <input type="number" id="enh-cp-l3" step="0.0001" placeholder="e.g. 1.33"/></div>
+          <div class="fld"><label>Close</label>
+            <input type="number" id="enh-cp-c3" step="0.0001" placeholder="e.g. 1.38"/></div>
+        </div>
+
+        <div class="sec-label">Trend Context <span class="opt-tag">OPT · improves pattern accuracy</span></div>
+        <div class="fg" style="margin-bottom:.75rem;">
+          <div class="fld"><label>ATR14 <span class="opt-tag">OPT</span></label>
+            <input type="number" id="enh-cp-atr" step="0.0001" placeholder="e.g. 0.045"/></div>
+          <div class="fld"><label>Prior Trend</label>
+            <select id="enh-cp-trend">
+              <option value="up">Uptrend (Price above MA5 &gt; MA20)</option>
+              <option value="down">Downtrend (Price below MA5 &amp; MA20)</option>
+              <option value="sideways">Sideways / Ranging</option>
+            </select></div>
+          <div class="fld"><label>Volume Ratio <span class="opt-tag">OPT</span></label>
+            <input type="number" id="enh-cp-vol" step="0.01" placeholder="e.g. 1.5"/></div>
+          <div class="fld"><label>Near Key S/R?</label>
+            <select id="enh-cp-sr">
+              <option value="">Not Set</option>
+              <option value="support">Near Support Level</option>
+              <option value="resistance">Near Resistance Level</option>
+              <option value="neither">Away from S/R</option>
+            </select></div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="calcCandlePatterns()">SCAN PATTERNS ▶</button>
+          <button class="btn btn-secondary"
+                  onclick="['enh-cp-o1','enh-cp-h1','enh-cp-l1','enh-cp-c1','enh-cp-o2','enh-cp-h2','enh-cp-l2','enh-cp-c2','enh-cp-o3','enh-cp-h3','enh-cp-l3','enh-cp-c3','enh-cp-atr','enh-cp-vol'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});document.getElementById('enh-cp-result').style.display='none';">
+            RESET
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="enh-cp-result" style="display:none;"></div>
+
+  </div><!-- /enh-pnl-cp -->
+
 </div><!-- /panel-enhance -->
  
  
