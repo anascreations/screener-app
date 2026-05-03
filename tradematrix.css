@@ -5510,3 +5510,58 @@ html, body { overflow-x: hidden; max-width: 100vw; }
   .cjs-dial-outer { width: 150px; height: 92px; }
   .cjs-pie-canvas { width: 120px !important; height: 120px !important; }
 }
+
+/* ═══════════════════════════════════════════════════
+   MOBILE TEXT WRAP FIX — Signal Breakdown + MA Filter
+   Targets: .check-row/.check-val (Smart Tools Forecast)
+            .sm-check-row (MA/EMA filter audit rows)
+   Problem: white-space:nowrap + flex caused text to
+            overflow and get clipped on narrow screens.
+   Fix: at ≤600px, stack label above value and allow
+        full wrapping so no text is ever hidden.
+═══════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+  /* Signal Breakdown rows (Smart Tools → Forecast) */
+  .check-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: .3rem .55rem;
+  }
+  .check-label {
+    /* let label grow but still break if very long */
+    word-break: break-word;
+    min-width: 0;
+  }
+  .check-val {
+    white-space: normal;      /* override the desktop nowrap */
+    word-break: break-word;
+    text-align: left;
+    margin-left: 0;           /* no longer pushed to far right */
+    width: 100%;              /* take own full line below label */
+    padding-left: 1.6rem;     /* indent under the ✔/✘ icon */
+    font-size: 11px;
+    max-width: 100%;
+  }
+
+  /* MA / EMA 7-Filter Audit rows */
+  .sm-check-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  /* the note/value text inside sm-check-row spans */
+  .sm-check-row span,
+  .sm-check-row .sm-check-note {
+    white-space: normal;
+    word-break: break-word;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  /* prow-note (Trade Plan detail text) */
+  .prow-note {
+    white-space: normal;
+    word-break: break-word;
+    min-width: 0;
+  }
+}
