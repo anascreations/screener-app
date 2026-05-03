@@ -85,15 +85,16 @@
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="ma"     onclick="switchTab('ma')">∿ MA</button>
   <button class="tab-btn"        data-tab="ema"    onclick="switchTab('ema')">≋ EMA</button>
-     <button class="tab-btn enhance-tab" data-tab="enhance" onclick="switchTab('enhance')">🔮 Smart Tools</button>
+       <button class="tab-btn enhance-tab" data-tab="enhance" onclick="switchTab('enhance')">🔮 Smart Tools</button>
   <button class="tab-btn gold-tab" data-tab="gold" onclick="switchTab('gold')">◈ XAUUSD</button>
   <button class="tab-btn tv-tab" data-tab="tv" onclick="switchTab('tv')">📺 Live Chart</button>
   <button class="tab-btn bursa-tab" data-tab="bursa" onclick="switchTab('bursa')">🇲🇾 ETF</button>
-      <button class="tab-btn scalp-tab" data-tab="scalp" onclick="switchTab('scalp')">📈 Scalping</button>
+      <button class="tab-btn scalp-tab" data-tab="scalp" onclick="switchTab('scalp')">📈 Scalp Guide</button>
   <button class="tab-btn swing-tab" data-tab="swing" onclick="switchTab('swing')">🔄 Swing Reversal</button>
   <button class="tab-btn ipo-tab" data-tab="ipo" onclick="switchTab('ipo')">🏷️ IPO</button>
   <button class="tab-btn sr-tab" data-tab="sr" onclick="switchTab('sr')">📊 S/R Zones</button>
   <button class="tab-btn mtf-tab" data-tab="mtf" onclick="switchTab('mtf')">🔥 MTF Momentum</button>
+  <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
   <button class="tab-btn journal-tab" data-tab="journal" onclick="switchTab('journal')">📒 Journal</button>
   <button class="tab-btn capital-tab" data-tab="capital" onclick="switchTab('capital')">💰 Capital</button>
   <button class="tab-btn pnl-tab" data-tab="pnl" onclick="switchTab('pnl')">📈 P&amp;L</button>
@@ -102,8 +103,6 @@
   <button class="tab-btn gates-tab" data-tab="gates" onclick="switchTab('gates')">✅ Gates</button>
   <button class="tab-btn income-tab" data-tab="income" onclick="switchTab('income')">💼 Income</button>
   <button class="tab-btn moomoo-tab" data-tab="moomoo" onclick="switchTab('moomoo')">📱 Quick Fix</button>
-     <button class="tab-btn guide-tab" data-tab="guide" onclick="switchTab('guide')">📖 Trading Guide</button>
-     
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -1753,8 +1752,8 @@
   <div class="ipo-hero">
     <div class="ipo-hero-icon">🏷️</div>
     <div>
-      <div class="ipo-hero-title">Bursa Malaysia IPO Scanner</div>
-      <div class="ipo-hero-sub">Pre-IPO Valuation · Listing Day Pump &amp; Dump Detection · Subscribe or Avoid · Balloting Probability</div>
+      <div class="ipo-hero-title">Bursa IPO Scanner</div>
+      <div class="ipo-hero-sub">Pre-IPO Valuation · Listing Day Pump &amp; Dump Detection · Subscribe or Avoid</div>
     </div>
   </div>
 
@@ -1762,7 +1761,6 @@
   <div class="guide-tabs">
     <button class="guide-tab-btn active" onclick="ipoSwitch('ipo-pre')">📋 Pre-IPO Screening</button>
     <button class="guide-tab-btn"        onclick="ipoSwitch('ipo-listing')">📈 Listing Day Tracker</button>
-    <button class="guide-tab-btn"        onclick="ipoSwitch('ipo-howworks')">📚 How IPO Works</button>
   </div>
 
   <!-- ── PRE-IPO SCREENING ── -->
@@ -1830,18 +1828,7 @@
           <div class="fld"><label>Revenue Growth % YoY</label><input type="number" id="ipo-rev-growth" step="0.1" placeholder="18.0" oninput="ipoCalc()"/></div>
           <div class="fld"><label>Net Profit Margin %</label><input type="number" id="ipo-npm" step="0.1" placeholder="12.0" oninput="ipoCalc()"/></div>
           <div class="fld"><label>Debt-to-Equity</label><input type="number" id="ipo-de" step="0.01" placeholder="0.40" oninput="ipoCalc()"/></div>
-          <div class="fld"><label>ROE % <span class="opt-tag">opt</span></label><input type="number" id="ipo-roe" step="0.1" placeholder="15.0" oninput="ipoCalc()"/></div>
           <div class="fld"><label>Dividend Yield % <span class="opt-tag">opt</span></label><input type="number" id="ipo-div" step="0.1" placeholder="2.5" oninput="ipoCalc()"/></div>
-          <div class="fld"><label>Use of Proceeds <span class="opt-tag">opt</span></label>
-            <select id="ipo-proceeds" onchange="ipoCalc()">
-              <option value="">— Not Set —</option>
-              <option value="expansion">Business Expansion / Capex</option>
-              <option value="rd">R&amp;D / Technology</option>
-              <option value="working">Working Capital</option>
-              <option value="debt">Debt Repayment</option>
-              <option value="founders">Founders Selling Out</option>
-            </select>
-          </div>
         </div>
 
         <div class="sec-label">Offer Structure</div>
@@ -1849,15 +1836,6 @@
           <div class="fld"><label>Free Float %</label><input type="number" id="ipo-float" step="0.1" placeholder="25.0" oninput="ipoCalc()"/></div>
           <div class="fld"><label>Cornerstone % <span class="opt-tag">opt</span></label><input type="number" id="ipo-corner" step="0.1" placeholder="30.0" oninput="ipoCalc()"/></div>
           <div class="fld"><label>Oversubscription × <span class="opt-tag">opt</span></label><input type="number" id="ipo-oversub" step="0.1" placeholder="25.0" oninput="ipoCalc()"/></div>
-          <div class="fld"><label>Lock-up Period <span class="opt-tag">opt</span></label>
-            <select id="ipo-lockup" onchange="ipoCalc()">
-              <option value="">— Not Set —</option>
-              <option value="6">6 months</option>
-              <option value="12">12 months</option>
-              <option value="24">24 months</option>
-              <option value="none">No lock-up stated</option>
-            </select>
-          </div>
           <div class="fld"><label>Shariah Compliant</label>
             <select id="ipo-shariah" onchange="ipoCalc()">
               <option value="">— Unknown —</option>
@@ -1873,28 +1851,10 @@
               <option value="consumer">Consumer</option>
               <option value="industrial">Industrial</option>
               <option value="property">Property</option>
-              <option value="finance">Finance / Banking</option>
-              <option value="energy">Energy / Oil &amp; Gas</option>
+              <option value="finance">Finance</option>
+              <option value="energy">Energy/Oil</option>
               <option value="plantation">Plantation</option>
-              <option value="reit">REIT</option>
-              <option value="construction">Construction</option>
             </select>
-          </div>
-        </div>
-
-        <!-- Balloting Probability Calculator -->
-        <div class="sec-label">🎲 Balloting Probability Calculator <span class="opt-tag">opt</span></div>
-        <div style="padding:.6rem .75rem;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.06);margin-bottom:.9rem;">
-          <div style="font-size:11px;color:var(--dim);margin-bottom:.6rem;line-height:1.5;">Estimate your chance of receiving IPO shares based on oversubscription and lot size. In Bursa IPOs, balloting is random — this gives you a statistical probability only.</div>
-          <div class="fg" style="margin-bottom:.6rem;">
-            <div class="fld"><label>Lots Applied</label><input type="number" id="ipo-ball-lots" step="1" placeholder="1" min="1" oninput="ipoBalloCalc()"/></div>
-            <div class="fld"><label>Public Tranche (lots)</label><input type="number" id="ipo-ball-total" step="1000" placeholder="5000000" oninput="ipoBalloCalc()"/></div>
-          </div>
-          <div id="ipo-ballo-result" style="display:none;padding:.5rem .65rem;border-radius:6px;background:rgba(0,0,0,.1);font-family:var(--mono);font-size:12px;display:flex;flex-direction:column;gap:.25rem;">
-            <div style="display:flex;justify-content:space-between;"><span style="color:var(--dim);">Applications received (est.)</span><span id="ipo-ballo-apps" style="color:var(--text);"></span></div>
-            <div style="display:flex;justify-content:space-between;"><span style="color:var(--dim);">Your chance of 1 lot</span><span id="ipo-ballo-pct" style="font-weight:700;"></span></div>
-            <div style="display:flex;justify-content:space-between;"><span style="color:var(--dim);">Approx. shares if balloted</span><span id="ipo-ballo-shares" style="color:var(--accent);"></span></div>
-            <div id="ipo-ballo-note" style="font-size:10px;color:var(--dim);margin-top:.2rem;line-height:1.5;"></div>
           </div>
         </div>
 
@@ -2052,220 +2012,6 @@
       </div>
     </div>
   </div><!-- /ipo-listing -->
-
-  <!-- ══════════════════════════════════════════
-       HOW IPO WORKS — BURSA MALAYSIA EDUCATION
-  ═════════════════════════════════════════════ -->
-  <div class="guide-section" id="ipo-howworks">
-
-    <div class="card" style="border-left:3px solid #f5a623;margin-bottom:.75rem;">
-      <div class="card-hdr" style="color:#f5a623;"><span class="ci">🇲🇾</span> Is This Only for Bursa Malaysia?</div>
-      <div class="card-body" style="font-size:13px;color:var(--text);line-height:1.7;">
-        <p style="margin-bottom:.5rem;">This IPO Scanner is <strong style="color:#f5a623;">designed specifically for Bursa Malaysia</strong> — the Malaysian stock exchange. The rules, processes, terminology (balloting, pink form, cornerstone investors, SC approval) and all thresholds used in the scoring model are based on how IPOs work in Malaysia.</p>
-        <p style="margin-bottom:.5rem;">The general concepts of PE valuation, free float, oversubscription, and listing day trading apply to most stock exchanges worldwide — but the specific criteria, lot sizes (100 shares per lot in Malaysia), currency (MYR), and regulatory framework are Bursa-specific.</p>
-        <p>Other major exchanges with similar but different IPO processes: NYSE/NASDAQ (USA), HKEX (Hong Kong), SGX (Singapore), SET (Thailand), IDX (Indonesia). If trading those, adjust the PE thresholds and lot sizes accordingly.</p>
-      </div>
-    </div>
-
-    <!-- Timeline -->
-    <div class="card" style="margin-bottom:.75rem;">
-      <div class="card-hdr"><span class="ci">🗓️</span> The Full Bursa IPO Journey — From Filing to Listing</div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:.5rem;">
-        <div style="font-size:12px;color:var(--dim);margin-bottom:.25rem;">A typical Bursa IPO takes <strong style="color:var(--text);">6–18 months from start to listing day</strong>. Here is every stage:</div>
-
-        <!-- Stage items -->
-        <div style="display:flex;flex-direction:column;gap:.4rem;">
-          <!-- 1 -->
-          <div style="display:flex;gap:.75rem;padding:.6rem .75rem;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.05);">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#f5a623;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:11px;font-weight:700;color:#000;">1</div>
-            <div>
-              <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#f5a623;letter-spacing:.06em;margin-bottom:.2rem;">COMPANY DECISION + APPOINTMENT OF ADVISERS</div>
-              <div style="font-size:12px;color:var(--text);line-height:1.6;">The company's board decides to go public (list on Bursa) to raise capital. They appoint a <strong>Principal Adviser</strong> (investment bank), an <strong>Underwriter</strong> (guarantees shares are sold), an <strong>Auditor</strong>, and a <strong>Legal Counsel</strong>. These professionals guide the entire IPO process and ensure compliance with SC (Securities Commission Malaysia) rules.</div>
-            </div>
-          </div>
-          <!-- 2 -->
-          <div style="display:flex;gap:.75rem;padding:.6rem .75rem;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.05);">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#f5a623;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:11px;font-weight:700;color:#000;">2</div>
-            <div>
-              <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#f5a623;letter-spacing:.06em;margin-bottom:.2rem;">DUE DILIGENCE + PROSPECTUS PREPARATION</div>
-              <div style="font-size:12px;color:var(--text);line-height:1.6;">Lawyers and bankers conduct thorough due diligence — auditing 3–5 years of financial statements, reviewing business operations, assessing risks, checking legal compliance, and interviewing management. This is where they discover any hidden problems. The findings form the basis of the <strong>Prospectus</strong> — the document that discloses all material information to potential investors. <em>The prospectus is your most important research document as an investor.</em></div>
-            </div>
-          </div>
-          <!-- 3 -->
-          <div style="display:flex;gap:.75rem;padding:.6rem .75rem;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.05);">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#f5a623;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:11px;font-weight:700;color:#000;">3</div>
-            <div>
-              <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#f5a623;letter-spacing:.06em;margin-bottom:.2rem;">SC (SECURITIES COMMISSION) APPROVAL</div>
-              <div style="font-size:12px;color:var(--text);line-height:1.6;">The company submits its IPO application to the <strong>Securities Commission Malaysia (SC)</strong>. The SC reviews the prospectus, financial statements, and business plan to ensure the IPO meets all regulatory requirements under the Capital Markets and Services Act (CMSA) and Bursa Listing Requirements. This process typically takes <strong>2–4 months</strong>. The SC may request additional information or revisions. Once approved, the company receives a "no objection" letter allowing it to proceed.</div>
-            </div>
-          </div>
-          <!-- 4 -->
-          <div style="display:flex;gap:.75rem;padding:.6rem .75rem;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.05);">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#f5a623;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:11px;font-weight:700;color:#000;">4</div>
-            <div>
-              <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#f5a623;letter-spacing:.06em;margin-bottom:.2rem;">IPO PRICE DETERMINATION + SHARE ALLOCATION STRUCTURE</div>
-              <div style="font-size:12px;color:var(--text);line-height:1.6;">The IPO offer price is set through a <strong>book-building process</strong> (institutional investors indicate how much they would pay) or a <strong>fixed price mechanism</strong> (most common in Malaysia for retail IPOs). The company decides how to split the shares:
-                <br/>• <strong>Bumiputera tranche</strong> — reserved for Bumiputera (Malaysian Malay) investors as required by government policy. Often 30–50% of public shares.
-                <br/>• <strong>Public tranche</strong> — open to all Malaysian retail investors via balloting.
-                <br/>• <strong>Institutional tranche</strong> — allocated directly to fund managers, EPF, insurance companies.
-                <br/>• <strong>Cornerstone investors</strong> — major institutions that commit to buying a large block at IPO price and agree to a lock-up period (typically 6–12 months). Cornerstone participation signals institutional confidence.
-              </div>
-            </div>
-          </div>
-          <!-- 5 -->
-          <div style="display:flex;gap:.75rem;padding:.6rem .75rem;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.05);">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#f5a623;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:11px;font-weight:700;color:#000;">5</div>
-            <div>
-              <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#f5a623;letter-spacing:.06em;margin-bottom:.2rem;">PROSPECTUS LAUNCH + PUBLIC APPLICATION PERIOD</div>
-              <div style="font-size:12px;color:var(--text);line-height:1.6;">The prospectus is released publicly. Retail investors can apply for IPO shares through:
-                <br/>• <strong>Online via broker / bank platforms</strong> (e.g. Maybank2u, CIMB Clicks, CDS online) — most common method today
-                <br/>• <strong>Physical "Pink Form"</strong> — paper application form attached to the printed prospectus, submitted at banks
-                <br/>• <strong>ATM application</strong> — available at some banks
-                <br/>The application period is typically <strong>open for 7–14 days</strong>. You apply for lots (1 lot = 100 shares in Malaysia). Payment is debited from your account on application. If you do not receive shares, the full amount is refunded automatically.</div>
-            </div>
-          </div>
-          <!-- 6 -->
-          <div style="display:flex;gap:.75rem;padding:.6rem .75rem;border:1px solid rgba(245,166,35,.4);border-radius:6px;background:rgba(245,166,35,.05);">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#f5a623;display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:11px;font-weight:700;color:#000;">6</div>
-            <div>
-              <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#f5a623;letter-spacing:.06em;margin-bottom:.2rem;">BALLOTING — WHO GETS THE SHARES?</div>
-              <div style="font-size:12px;color:var(--text);line-height:1.6;">This is the <strong>most important stage for retail investors</strong>. When a IPO is oversubscribed (more applicants than shares available), a <strong>computerised ballot</strong> is conducted by Bursa to randomly determine who receives shares. Key facts:
-                <br/><br/>• <strong>More lots applied ≠ higher chance</strong> for the first ballot. In many Bursa IPOs, the first ballot gives everyone who applies an equal chance of receiving the minimum 1 lot.
-                <br/>• If shares remain after the first ballot, a second ballot distributes additional lots to winners from round 1.
-                <br/>• <strong>Multiple applications from the same CDS account are NOT allowed</strong> — disqualification risk.
-                <br/>• Your chances depend entirely on how oversubscribed the tranche is. At 100× oversubscription with 5 million lots available: ~5,000 applicants per lot = ~2% chance per application.
-                <br/>• <strong>Balloting results are announced 2–3 business days after application closes.</strong> Check via Bursa website, your broker, or Computershare (share registrar).
-              </div>
-            </div>
-          </div>
-          <!-- 7 -->
-          <div style="display:flex;gap:.75rem;padding:.6rem .75rem;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.05);">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:11px;font-weight:700;color:#000;">7</div>
-            <div>
-              <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--green);letter-spacing:.06em;margin-bottom:.2rem;">LISTING DAY — TRADING BEGINS</div>
-              <div style="font-size:12px;color:var(--text);line-height:1.6;">Typically <strong>3–5 business days after balloting results</strong>. On listing day, the stock starts trading on Bursa at the first opening auction. The opening price is determined by the order book — if demand is high, price opens well above the IPO price (a "gap up"). If demand is low, it may open below (a "broken IPO"). Use the <strong>Listing Day Tracker</strong> tab to monitor real-time signals.</div>
-            </div>
-          </div>
-          <!-- 8 -->
-          <div style="display:flex;gap:.75rem;padding:.6rem .75rem;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.05);">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:11px;font-weight:700;color:#000;">8</div>
-            <div>
-              <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.06em;margin-bottom:.2rem;">POST-LISTING — HOLD OR SELL?</div>
-              <div style="font-size:12px;color:var(--text);line-height:1.6;">After listing, shareholders face the key decision: sell for quick profit, hold for long-term gains, or exit if signals are bad.
-                <br/><br/>• <strong>Stag (flip on listing day):</strong> Sell at open or within the first hour. Best when IPO is oversubscribed 50×+, gap is 15–30%, and you have no conviction in the business long-term.
-                <br/>• <strong>Hold 3–6 months:</strong> Best when IPO has strong fundamentals, cornerstone lock-up ensures price support, and the business is growing consistently.
-                <br/>• <strong>Cut loss immediately:</strong> If price falls below IPO offer price at any point — this is a "broken IPO". Do not average down. Exit and wait for secondary market entry at a better price later.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Red Flags -->
-    <div class="card" style="border-left:3px solid var(--red);margin-bottom:.75rem;">
-      <div class="card-hdr" style="color:var(--red);"><span class="ci">🚩</span> Red Flags — When to Avoid an IPO Completely</div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:.35rem;font-size:12px;">
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(240,58,74,.06);"><strong style="color:var(--red);">Founders selling out ≥40% of proceeds</strong> — if the IPO purpose is mainly to let founders cash out (secondary offering), insiders are leaving. The company is not raising fresh capital for growth. Avoid.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(240,58,74,.06);"><strong style="color:var(--red);">PE ratio more than 2× industry average</strong> — you are paying a massive premium for the "IPO brand". The secondary market will reprice this down over 3–12 months. Historical data on Bursa shows overpriced IPOs average –15% in the first year after listing hype fades.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(240,58,74,.06);"><strong style="color:var(--red);">No lock-up period for major shareholders</strong> — means promoters and founders can sell all their shares on Day 1. Extreme dump risk on listing day.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(240,58,74,.06);"><strong style="color:var(--red);">Revenue declining in most recent year</strong> — a company listing during declining revenue is trying to exit at the peak before things get worse. The timing is suspicious.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(240,58,74,.06);"><strong style="color:var(--red);">Free float below 15%</strong> — very thin trading liquidity. Price is easily manipulated by a few large sellers. The secondary market price can drop sharply with no buyers available.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(240,58,74,.06);"><strong style="color:var(--red);">Related party transactions that dominate revenue</strong> — check the prospectus for revenue concentration. If 60%+ of revenue comes from companies owned by the same directors/promoters, future revenue is not independent and can be withdrawn at any time.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(240,58,74,.06);"><strong style="color:var(--red);">D/E ratio above 1.5 with no clear path to reduce it</strong> — use of proceeds going straight to debt repayment without growth investment means the company listed to fix its balance sheet, not to grow.</div>
-      </div>
-    </div>
-
-    <!-- Green Flags -->
-    <div class="card" style="border-left:3px solid var(--green);margin-bottom:.75rem;">
-      <div class="card-hdr" style="color:var(--green);"><span class="ci">✅</span> Green Flags — Signs of a Quality IPO</div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:.35rem;font-size:12px;">
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(0,232,122,.05);"><strong style="color:var(--green);">Cornerstone investors &gt;20% with 12+ month lock-up</strong> — major funds (EPF, Amanah Saham, Khazanah) are committing at IPO price. They have done full due diligence. This is the single strongest institutional confidence signal.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(0,232,122,.05);"><strong style="color:var(--green);">Proceeds 100% for growth / expansion / R&D</strong> — no founder cash-out. All money raised goes into making the business bigger and better. This aligns management incentives with shareholders.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(0,232,122,.05);"><strong style="color:var(--green);">Consistent 3-year revenue AND profit growth</strong> — not just one good year. A company that has been compounding earnings for multiple years before listing has demonstrated it can actually execute.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(0,232,122,.05);"><strong style="color:var(--green);">PE at 10–30% discount to industry peers</strong> — the company is offering a fair deal. You are buying a growing business at a price below what similar listed companies trade at. This creates immediate re-rating potential.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(0,232,122,.05);"><strong style="color:var(--green);">Shariah-compliant classification</strong> — opens the IPO to Islamic investment funds, Amanah Saham, and a larger pool of local institutional buyers. More demand = better listing day support.</div>
-        <div style="padding:.4rem .65rem;border-radius:5px;background:rgba(0,232,122,.05);"><strong style="color:var(--green);">50×+ oversubscription with &gt;100,000 applicants</strong> — extreme public demand. High probability of strong listing day gap and post-listing momentum for at least the first few weeks.</div>
-      </div>
-    </div>
-
-    <!-- Sector PE Table -->
-    <div class="card" style="margin-bottom:.75rem;">
-      <div class="card-hdr"><span class="ci">📊</span> Typical PE Ranges by Sector — Bursa Malaysia Reference</div>
-      <div class="card-body">
-        <div class="ref-grid" style="margin:0;">
-          <div class="ref-panel">
-            <div class="ref-panel-hdr">Technology</div>
-            <div class="ref-panel-body">
-              <div class="ref-row"><span class="ref-range" style="color:var(--green)">20–35×</span><span>Software / SaaS</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--accent)">15–25×</span><span>IT Services / Hardware</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--dim)">10–18×</span><span>Semiconductor / EMS</span></div>
-            </div>
-          </div>
-          <div class="ref-panel">
-            <div class="ref-panel-hdr">Healthcare</div>
-            <div class="ref-panel-body">
-              <div class="ref-row"><span class="ref-range" style="color:var(--green)">25–40×</span><span>Private Hospitals</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--accent)">18–28×</span><span>Pharmaceuticals</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--dim)">12–20×</span><span>Medical Devices</span></div>
-            </div>
-          </div>
-          <div class="ref-panel">
-            <div class="ref-panel-hdr">Consumer</div>
-            <div class="ref-panel-body">
-              <div class="ref-row"><span class="ref-range" style="color:var(--green)">18–28×</span><span>F&amp;B Chains / Brands</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--accent)">12–20×</span><span>Retail / Distribution</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--dim)">8–15×</span><span>FMCG / Staples</span></div>
-            </div>
-          </div>
-          <div class="ref-panel">
-            <div class="ref-panel-hdr">Property / REIT</div>
-            <div class="ref-panel-body">
-              <div class="ref-row"><span class="ref-range" style="color:var(--accent)">12–18×</span><span>Property Developers</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--dim)">—</span><span>REIT (use yield not PE)</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--yellow)">5–10×</span><span>Construction</span></div>
-            </div>
-          </div>
-          <div class="ref-panel">
-            <div class="ref-panel-hdr">Finance</div>
-            <div class="ref-panel-body">
-              <div class="ref-row"><span class="ref-range" style="color:var(--accent)">10–16×</span><span>Banks / Insurance</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--dim)">8–14×</span><span>Non-bank Finance</span></div>
-            </div>
-          </div>
-          <div class="ref-panel">
-            <div class="ref-panel-hdr">Plantation / Energy</div>
-            <div class="ref-panel-body">
-              <div class="ref-row"><span class="ref-range" style="color:var(--dim)">10–16×</span><span>Palm Oil Plantation</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--dim)">8–14×</span><span>Oil &amp; Gas Services</span></div>
-              <div class="ref-row"><span class="ref-range" style="color:var(--accent)">15–25×</span><span>Renewable Energy</span></div>
-            </div>
-          </div>
-        </div>
-        <div style="font-size:10px;color:var(--dim);margin-top:.6rem;line-height:1.5;">⚠️ These are indicative ranges only. Actual sector PE varies with market conditions, interest rate environment, and company quality. Always compare the IPO PE against the <em>current</em> PE of listed peers in the same sub-sector.</div>
-      </div>
-    </div>
-
-    <!-- Glossary -->
-    <div class="card">
-      <div class="card-hdr"><span class="ci">📖</span> IPO Glossary — Key Terms Explained</div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:.35rem;font-size:12px;line-height:1.6;">
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Balloting</strong> — The random computerised process that determines which retail investors receive IPO shares when the offer is oversubscribed. Conducted by Bursa Depository or the share registrar (e.g. Tricor, Computershare).</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Cornerstone Investor</strong> — A major institutional investor (e.g. EPF, fund manager) that commits to buying a specific block of IPO shares at the offer price, subject to a lock-up period. Presence of cornerstone investors significantly reduces listing day dump risk.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">CDS Account</strong> — Central Depository System account. You must have a CDS account with a Bursa-authorised broker to apply for or receive IPO shares. Opening one takes 1–3 business days.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Free Float</strong> — The percentage of total shares available for public trading. Excludes shares held by founders, cornerstone investors (during lock-up), and government entities. Low free float = less liquidity = more volatile price.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Lock-up Period</strong> — A contractual restriction preventing major shareholders (founders, cornerstone investors) from selling their shares for a specified period after listing (typically 6–24 months). When lock-ups expire, watch for selling pressure.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">NTA (Net Tangible Assets) per Share</strong> — The book value of tangible assets divided by total shares. If the IPO price is significantly above NTA, you are paying a premium for future earnings growth. Premium >50% requires very high earnings growth to justify.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Oversubscription Rate</strong> — If 10 million lots were applied for but only 1 million are available, the IPO is 10× oversubscribed. High oversubscription (50×+) is a strong signal of public demand and typically leads to a strong listing day open. This rate is announced after the application period closes.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Pink Form (Physical Application)</strong> — The paper form found in the printed IPO prospectus, used for physical IPO applications submitted at banks. Increasingly rare as online applications dominate, but still valid.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">SC (Securities Commission Malaysia)</strong> — The primary regulator for capital markets in Malaysia. Approves IPO prospectuses, sets listing requirements, and enforces investor protection rules. All Bursa-listed IPOs must receive SC approval before proceeding.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Stagging / Flipping</strong> — The strategy of applying for IPO shares with the sole intention of selling them on listing day for a quick profit (the gap from IPO price to open price). Most effective for heavily oversubscribed IPOs with strong sector tailwinds.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Underwriter</strong> — The investment bank or broker that guarantees the IPO will raise its target capital. If insufficient public applications are received, the underwriter commits to buying the unsold shares themselves. Strong underwriters signal deal credibility.</div>
-        <div style="padding:.35rem .6rem;border-radius:5px;border:1px solid var(--border);"><strong style="color:var(--accent);">Bumiputera Tranche</strong> — A portion of IPO shares reserved exclusively for Bumiputera investors as part of Malaysia's affirmative action policy under the national equity framework. Typically 30–50% of the public offering. Non-Bumiputera investors apply under the separate public (non-Bumi) tranche.</div>
-      </div>
-    </div>
-
-  </div><!-- /ipo-howworks -->
 
 </div><!-- /panel-ipo -->
 
@@ -5039,8 +4785,10 @@
   <a href="#sg-tf5m">TF5M FILTER</a>
   <a href="#sg-tf1m">TF1M ENTRY</a>
   <a href="#sg-scenarios">SCENARIOS</a>
+  <a href="#sg-gap">GAP OPEN</a>
   <a href="#sg-management">TRADE MGMT</a>
   <a href="#sg-checklist">CHECKLIST</a>
+  <a href="#sg-tools">QUICK TOOLS</a>
   <a href="#sg-mistakes">MISTAKES</a>
   <div class="sg-clock-wrap">
     <div class="sg-live-dot"></div>
@@ -5082,11 +4830,11 @@
     <div class="card">
       <div class="card-hdr" style="color:var(--yellow)">⏰ BEST TRADING HOURS (ET)</div>
       <div class="sg-sess">
-        <div class="sg-slot hot">9:30 – 10:30 AM &nbsp;★★★ PRIME SESSION</div>
-        <div class="sg-slot cold">10:30 – 11:30 AM &nbsp;☆ SLOW — USE CAUTION</div>
-        <div class="sg-slot cold">11:30 AM – 2:00 PM &nbsp;✕ AVOID — LUNCH CHOP</div>
-        <div class="sg-slot cold">2:00 – 3:00 PM &nbsp;☆ MODERATE</div>
-        <div class="sg-slot warm">3:00 – 4:00 PM &nbsp;★★ CLOSING MOMENTUM</div>
+        <div class="sg-slot hot">9:30 – 10:30 AM ET &nbsp;★★★ PRIME &nbsp;<span style="opacity:.6;font-size:9px;">9:30 PM – 10:30 PM MYT</span></div>
+        <div class="sg-slot cold">10:30 – 11:30 AM ET &nbsp;☆ SLOW &nbsp;<span style="opacity:.6;font-size:9px;">10:30 PM – 11:30 PM MYT</span></div>
+        <div class="sg-slot cold">11:30 AM – 2:00 PM ET &nbsp;✕ LUNCH CHOP &nbsp;<span style="opacity:.6;font-size:9px;">11:30 PM – 2:00 AM MYT</span></div>
+        <div class="sg-slot cold">2:00 – 3:00 PM ET &nbsp;☆ MODERATE &nbsp;<span style="opacity:.6;font-size:9px;">2:00 – 3:00 AM MYT</span></div>
+        <div class="sg-slot warm">3:00 – 4:00 PM ET &nbsp;★★ CLOSING &nbsp;<span style="opacity:.6;font-size:9px;">3:00 – 4:00 AM MYT</span></div>
       </div>
       <div style="color:var(--dim);font-size:11px;font-family:var(--mono);margin-top:6px;">Malaysia local time: 9:30 PM – 4:00 AM</div>
     </div>
@@ -5264,7 +5012,7 @@
       <div class="sg-rules">
         <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">TD count is 7, 8, or 9</span> — exhaustion imminent</div></div>
         <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">ADX is falling</span> even if still above 28</div></div>
-        <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">Price more than 0.5% above VWAP</span> — too late to chase</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">Price more than 0.4% above VWAP</span> — too late to chase (same threshold as filter rule above)</div></div>
         <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">Long upper wick on candle</span> — seller rejection above</div></div>
         <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">Volume declining</span> on consecutive green candles</div></div>
         <div class="sg-rr"><div class="sg-rr-icon">✗</div><div class="sg-rr-desc"><span class="c-no">TF5M is bearish</span> or price below 5M VWAP</div></div>
@@ -5563,36 +5311,241 @@
     <span class="sg-badge" style="color:var(--green);border-color:var(--green)">INTERACTIVE</span>
   </div>
 
-  <div class="sg-alert sg-alert-green">Tick each condition BEFORE hitting buy. All <strong>REQUIRED</strong> items must be checked. Optional items boost confidence.</div>
-
-  <div class="sg-prog-wrap">
-    <span style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px">PROGRESS</span>
-    <div class="sg-prog-track"><div class="sg-prog-fill" id="sg-prog-fill" style="width:0%;background:var(--green)"></div></div>
-    <span id="sg-prog-text" style="font-family:var(--mono);font-size:10px;color:var(--dim)">0/12</span>
+  <!-- Live session status banner -->
+  <div id="sg-sess-banner" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:6px;border-left:4px solid var(--dim);background:rgba(0,0,0,.08);margin-bottom:14px;font-family:var(--mono);font-size:11px;letter-spacing:.05em;">
+    <div class="sg-live-dot" id="sg-sess-dot" style="flex-shrink:0;width:8px;height:8px;border-radius:50%;background:var(--dim)"></div>
+    <div>
+      <span id="sg-sess-label" style="font-weight:700;color:var(--dim)">LOADING…</span>
+      <span id="sg-sess-myt" style="color:var(--dim);margin-left:8px;font-size:10px;"></span>
+    </div>
+    <div id="sg-sess-advice" style="margin-left:auto;font-size:10px;color:var(--dim);text-align:right;max-width:50%;line-height:1.4;"></div>
   </div>
 
-  <div style="margin:16px 0 8px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px">▶ TF5M CONDITIONS — REQUIRED</div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c1"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: Price is above VWAP on the 5-minute chart</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c2"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: EMA8 is above EMA21, both slopes pointing up</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c3"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: ADX above 20 or clear trend is visible</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
+  <div class="sg-alert sg-alert-green" style="margin-bottom:14px;">Tick each condition BEFORE hitting buy. All <strong>REQUIRED</strong> items must be checked. Optional items boost confidence score.</div>
 
-  <div style="margin:18px 0 8px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px">▶ TF1M CONDITIONS — REQUIRED</div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c4"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: Price &gt; EMA8 &gt; EMA21 &gt; VWAP — full bullish stack</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c5"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: ADX above 28 and slope is rising</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c6"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: TD count is NOT 7, 8, or 9 (exhaustion zone)</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c7"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Entry candle volume is above average</div><span class="sg-ci-tag">VOL · REQUIRED</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c8"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Candle CLOSES above EMA8 — not just a wick touch</div><span class="sg-ci-tag">CANDLE · REQUIRED</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c9"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Trade time: 9:30–10:30 AM ET or 3:00–4:00 PM ET</div><span class="sg-ci-tag">TIME · REQUIRED</span></div>
+  <!-- Dual progress bars -->
+  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:rgba(0,0,0,.06);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--dim);min-width:70px;">REQUIRED</span>
+      <div style="flex:1;height:7px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div id="sg-prog-req" style="height:7px;width:0%;background:var(--red);border-radius:3px;transition:width .3s;"></div>
+      </div>
+      <span id="sg-prog-req-txt" style="font-family:var(--mono);font-size:11px;color:var(--dim);min-width:30px;text-align:right;">0/9</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--dim);min-width:70px;">OPTIONAL</span>
+      <div style="flex:1;height:7px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div id="sg-prog-opt" style="height:7px;width:0%;background:var(--yellow);border-radius:3px;transition:width .3s;"></div>
+      </div>
+      <span id="sg-prog-opt-txt" style="font-family:var(--mono);font-size:11px;color:var(--dim);min-width:30px;text-align:right;">0/3</span>
+    </div>
+  </div>
+
+  <div style="margin:0 0 8px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px">▶ TF5M CONDITIONS — REQUIRED</div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c1" data-label="TF5M: Price above VWAP"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: Price is above VWAP on the 5-minute chart</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c2" data-label="TF5M: EMA8 > EMA21 bullish"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: EMA8 is above EMA21, both slopes pointing up</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c3" data-label="TF5M: ADX > 20"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF5M: ADX above 20 or clear trend is visible</div><span class="sg-ci-tag">5M · REQUIRED</span></div>
+
+  <div style="margin:16px 0 8px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:2px">▶ TF1M CONDITIONS — REQUIRED</div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c4" data-label="TF1M: Full bullish stack"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: Price &gt; EMA8 &gt; EMA21 &gt; VWAP — full bullish stack</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c5" data-label="TF1M: ADX > 28 rising"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: ADX above 28 and slope is rising</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c6" data-label="TF1M: TD count not 7-9"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TF1M: TD count is NOT 7, 8, or 9 (exhaustion zone)</div><span class="sg-ci-tag">1M · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c7" data-label="Volume above average"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Entry candle volume is above average</div><span class="sg-ci-tag">VOL · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c8" data-label="Candle body closes above EMA8"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Candle CLOSES above EMA8 — not just a wick touch</div><span class="sg-ci-tag">CANDLE · REQUIRED</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'req')" data-id="sg-c9" data-label="Prime/closing session active"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Trade time: 9:30–10:30 AM ET or 3:00–4:00 PM ET</div><span class="sg-ci-tag">TIME · REQUIRED</span></div>
 
   <div style="margin:18px 0 8px;font-family:var(--mono);font-size:10px;color:var(--yellow);letter-spacing:2px">▶ QUALITY BOOSTERS — OPTIONAL</div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c10"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TD count is 1–4 (fresh momentum, early in the cycle)</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c11"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Candle body exceeds 60% of total candle range</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
-  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c12"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Price within 0.4% of VWAP (not over-extended)</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c10" data-label="TD count 1–4 (early cycle)"><div class="sg-ci-box">✓</div><div class="sg-ci-text">TD count is 1–4 (fresh momentum, early in the cycle)</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c11" data-label="Candle body > 60% of range"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Candle body exceeds 60% of total candle range</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
+  <div class="sg-ci" onclick="sgToggleCheck(this,'opt')" data-id="sg-c12" data-label="Price within 0.4% of VWAP"><div class="sg-ci-box">✓</div><div class="sg-ci-text">Price within 0.4% of VWAP (not over-extended)</div><span class="sg-ci-tag" style="color:var(--yellow);border-color:var(--yellow)">OPTIONAL</span></div>
 
   <div id="sg-checklist-result" class="sg-cl-result"></div>
-  <div style="display:flex;gap:12px;margin-top:14px">
+  <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;">
     <button class="sg-btn sg-btn-go" onclick="sgEvaluateChecklist()">▶ EVALUATE TRADE</button>
     <button class="sg-btn sg-btn-red" onclick="sgResetChecklist()">↺ RESET</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ 07b QUICK TOOLS -->
+<div class="sg-sec" id="sg-tools">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">07B</span>
+    <span class="sg-sec-title">QUICK TOOLS</span>
+    <span class="sg-badge" style="color:var(--accent);border-color:var(--accent)">LIVE CALC</span>
+  </div>
+
+  <div class="sg-g2" style="margin-bottom:16px;">
+
+    <!-- Quick Scalp Calculator -->
+    <div class="card">
+      <div class="card-hdr" style="color:var(--green)">⚡ QUICK SCALP CALCULATOR</div>
+      <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">ENTRY PRICE</div>
+            <input id="sgc-entry" type="number" step="0.01" placeholder="6.50"
+              style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:6px 8px;color:var(--text);font-family:var(--mono);font-size:13px;"
+              oninput="sgCalc()"/>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">STOP LOSS</div>
+            <input id="sgc-stop" type="number" step="0.01" placeholder="6.40"
+              style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:6px 8px;color:var(--text);font-family:var(--mono);font-size:13px;"
+              oninput="sgCalc()"/>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">ACCOUNT ($)</div>
+            <input id="sgc-acct" type="number" step="100" placeholder="10000"
+              style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:6px 8px;color:var(--text);font-family:var(--mono);font-size:13px;"
+              oninput="sgCalc()"/>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">RISK % (max 1%)</div>
+            <input id="sgc-risk" type="number" step="0.1" placeholder="1" value="1"
+              style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:6px 8px;color:var(--text);font-family:var(--mono);font-size:13px;"
+              oninput="sgCalc()"/>
+          </div>
+        </div>
+        <div id="sgc-result" style="display:none;margin-top:4px;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+          <div style="background:rgba(0,0,0,.1);padding:6px 10px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);">TRADE PLAN</div>
+          <div style="padding:8px 10px;display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:12px;">
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--dim);">Risk $</span><span id="sgc-riskamt" style="color:var(--red);font-weight:600;"></span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--dim);">Shares</span><span id="sgc-shares" style="color:var(--green);font-weight:600;"></span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--dim);">TP1 (2R)</span><span id="sgc-tp1" style="color:var(--green);font-weight:600;"></span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--dim);">TP2 (3R)</span><span id="sgc-tp2" style="color:var(--accent);font-weight:600;"></span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--dim);">Pos. value</span><span id="sgc-posval" style="color:var(--dim);"></span></div>
+            <div id="sgc-warn" style="color:var(--red);font-size:10px;margin-top:2px;display:none;"></div>
+          </div>
+          <!-- Mini RR bar -->
+          <div style="display:flex;height:18px;margin:0 10px 10px;border:1px solid var(--border);border-radius:3px;overflow:hidden;">
+            <div id="sgc-bar-sl" style="background:rgba(240,58,74,.25);border-right:2px dashed var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--red);">SL</div>
+            <div style="width:3px;background:var(--yellow);flex-shrink:0;"></div>
+            <div id="sgc-bar-t1" style="background:rgba(0,232,122,.15);border-right:2px dashed var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--green);">2R</div>
+            <div id="sgc-bar-t2" style="background:rgba(0,200,240,.12);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--accent);">3R</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VWAP Distance Calculator -->
+    <div class="card">
+      <div class="card-hdr" style="color:var(--yellow)">📏 VWAP DISTANCE CHECK</div>
+      <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">CURRENT PRICE</div>
+            <input id="sgv-price" type="number" step="0.0001" placeholder="6.52"
+              style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:6px 8px;color:var(--text);font-family:var(--mono);font-size:13px;"
+              oninput="sgVwapCalc()"/>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">VWAP VALUE</div>
+            <input id="sgv-vwap" type="number" step="0.0001" placeholder="6.49"
+              style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:6px 8px;color:var(--text);font-family:var(--mono);font-size:13px;"
+              oninput="sgVwapCalc()"/>
+          </div>
+        </div>
+        <div id="sgv-result" style="display:none;border:1px solid var(--border);border-radius:6px;padding:10px;font-family:var(--mono);font-size:12px;display:flex;flex-direction:column;gap:5px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--dim);">Distance</span>
+            <span id="sgv-pct" style="font-size:16px;font-weight:700;"></span>
+          </div>
+          <div style="height:10px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div id="sgv-bar" style="height:10px;background:var(--green);border-radius:3px;transition:width .3s;"></div>
+          </div>
+          <div id="sgv-verdict" style="font-size:11px;margin-top:2px;line-height:1.5;"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.6;margin-top:2px;">
+          ≤0.2% = <span style="color:var(--green);">ideal entry zone</span><br/>
+          0.2–0.4% = <span style="color:var(--yellow);">caution, tighter target</span><br/>
+          &gt;0.4% = <span style="color:var(--red);">too extended — skip entry</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session P&L Tracker -->
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-hdr" style="color:var(--accent)">📊 SESSION P&amp;L TRACKER
+      <button onclick="sgPLReset()" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--dim);cursor:pointer;letter-spacing:.06em;">RESET SESSION</button>
+    </div>
+    <div style="padding:12px;">
+      <!-- Entry row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:8px;align-items:end;">
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">ENTRY $</div>
+          <input id="sgpl-entry" type="number" step="0.01" placeholder="6.50"
+            style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:5px 7px;color:var(--text);font-family:var(--mono);font-size:12px;"/>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">EXIT $</div>
+          <input id="sgpl-exit" type="number" step="0.01" placeholder="6.70"
+            style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:5px 7px;color:var(--text);font-family:var(--mono);font-size:12px;"/>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);margin-bottom:3px;">SHARES</div>
+          <input id="sgpl-shares" type="number" step="1" placeholder="100"
+            style="width:100%;background:var(--card2,var(--card));border:1px solid var(--border);border-radius:4px;padding:5px 7px;color:var(--text);font-family:var(--mono);font-size:12px;"/>
+        </div>
+        <button onclick="sgPLAdd()" class="sg-btn sg-btn-go" style="padding:5px 12px;font-size:10px;margin-top:0;white-space:nowrap;">+ LOG</button>
+      </div>
+      <!-- Stats strip -->
+      <div id="sgpl-stats" style="display:none;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+        <div class="sg-kpi"><div class="sg-kpi-lbl">TRADES</div><div id="sgpl-n" class="sg-kpi-val" style="font-size:18px;color:var(--text);">0</div></div>
+        <div class="sg-kpi"><div class="sg-kpi-lbl">WIN RATE</div><div id="sgpl-wr" class="sg-kpi-val" style="font-size:18px;">0%</div></div>
+        <div class="sg-kpi"><div class="sg-kpi-lbl">SESSION P&amp;L</div><div id="sgpl-pnl" class="sg-kpi-val" style="font-size:18px;">$0</div></div>
+        <div class="sg-kpi"><div class="sg-kpi-lbl">AVG R</div><div id="sgpl-avgr" class="sg-kpi-val" style="font-size:18px;color:var(--accent);">—</div></div>
+      </div>
+      <!-- Trade log -->
+      <div id="sgpl-log" style="display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;"></div>
+      <div id="sgpl-empty" style="font-family:var(--mono);font-size:11px;color:var(--dim);text-align:center;padding:16px 0;">No trades logged yet this session</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ SCENARIO 09 GAP -->
+<div class="sg-sec" id="sg-gap">
+  <div class="sg-sec-hdr">
+    <span class="sg-sec-num">05B</span>
+    <span class="sg-sec-title">GAP-UP OPEN — TRADE OR FADE?</span>
+    <span class="sg-badge" style="color:var(--yellow);border-color:var(--yellow)">SCENARIO 09</span>
+  </div>
+  <div class="sg-alert sg-alert-amber" style="margin-bottom:14px;">
+    <strong>⚠️ HIGH RISK SITUATION:</strong> Gap-up opens are among the most dangerous for scalpers. Price opens above the prior day's high — either it continues (gap-and-go) or reverses hard (fade). Wrong call = instant stop hit.
+  </div>
+  <div class="sg-g2">
+    <div class="sg-scenario" style="margin-bottom:0;">
+      <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num" style="font-size:14px;">↑</span><span class="sg-sc-title c-go">GAP-AND-GO — TRADE WITH IT</span></div><span class="sg-verdict sg-v-go">✓ ENTRY</span></div>
+      <div class="sg-sc-body">
+        <p class="sg-sc-desc">Buy the momentum if ALL of these apply. Miss one and wait.</p>
+        <ul class="sg-conds">
+          <li class="met">Gap size &lt; 2% — smaller gaps have cleaner follow-through</li>
+          <li class="met">Pre-market volume 2× or more vs. prior 3-day avg</li>
+          <li class="met">Clear news catalyst driving the gap (earnings, upgrade, deal)</li>
+          <li class="met">Price holds above prior day's high for 2+ minutes at open</li>
+          <li class="met">TF5M EMA8 pointing sharply up from open</li>
+          <li class="warn">Wait for ORB (first 5 min) to close — do not enter at the bell</li>
+        </ul>
+        <div class="sg-action sg-a-go">✓ ENTRY: After ORB close, on pullback to EMA8 or VWAP<br>✓ STOP: Below the gap open price or ORB low<br>✓ TARGET: Prior resistance levels — not a fixed R multiple</div>
+      </div>
+    </div>
+    <div class="sg-scenario" style="margin-bottom:0;">
+      <div class="sg-sc-hdr"><div style="display:flex;align-items:center"><span class="sg-sc-num" style="font-size:14px;">↓</span><span class="sg-sc-title c-no">GAP FADE — SKIP OR SHORT</span></div><span class="sg-verdict sg-v-no">✕ SKIP LONG</span></div>
+      <div class="sg-sc-body">
+        <p class="sg-sc-desc">Fade signals — do not buy long. Institutions are selling into the gap.</p>
+        <ul class="sg-conds">
+          <li class="fail">Gap size &gt; 4% — over-extended, mean reversion risk is very high</li>
+          <li class="fail">No news catalyst — gap is thin-air speculation</li>
+          <li class="fail">Pre-market volume low despite the gap</li>
+          <li class="warn">Opening candle has a long upper wick — sellers rejecting the high</li>
+          <li class="fail">Price immediately falls back into prior day's range within 3 min</li>
+        </ul>
+        <div class="sg-action sg-a-no">✕ DO NOT BUY LONG — gap is failing<br>→ Wait for price to fill back to prior close level<br>→ Short setup: enter when prior day's high is broken to the downside<br>→ Best play: walk away, wait for a clean setup elsewhere</div>
+      </div>
+    </div>
+  </div>
+  <div class="sg-alert sg-alert-blue" style="margin-top:14px;">
+    <strong>💡 GOLDEN GAP RULE:</strong> If you are unsure which scenario applies — it is always the fade. Chasing a gap-and-go that fails is one of the most common causes of large single-day losses. When in doubt, sit out.
   </div>
 </div>
 
@@ -5608,11 +5561,11 @@
     <div class="card">
       <div class="card-hdr" style="color:var(--red)">💀 FATAL MISTAKES</div>
       <div class="sg-rules">
-        <div class="sg-rr"><div class="sg-rr-icon">1</div><div class="sg-rr-desc"><span class="c-no">Trading without checking TF5M first</span> — entering a downtrend without realising it</div></div>
-        <div class="sg-rr"><div class="sg-rr-icon">2</div><div class="sg-rr-desc"><span class="c-no">No stop loss</span> — one trade can wipe out 10 winners</div></div>
-        <div class="sg-rr"><div class="sg-rr-icon">3</div><div class="sg-rr-desc"><span class="c-no">Chasing breakouts after TD 9</span> — buying right before a reversal</div></div>
-        <div class="sg-rr"><div class="sg-rr-icon">4</div><div class="sg-rr-desc"><span class="c-no">Trading during lunch (11:30 AM–2:00 PM ET)</span> — low volume, fake moves everywhere</div></div>
-        <div class="sg-rr"><div class="sg-rr-icon">5</div><div class="sg-rr-desc"><span class="c-no">Averaging down without a plan</span> — adding size to a losing position</div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">1</div><div class="sg-rr-desc"><span class="c-no">Trading without checking TF5M first</span> — entering a downtrend without realising it<br><span style="font-size:11px;color:var(--dim);">Recovery: close the trade immediately at market. Do not wait for it to recover. Check TF5M now.</span></div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">2</div><div class="sg-rr-desc"><span class="c-no">No stop loss</span> — one trade can wipe out 10 winners<br><span style="font-size:11px;color:var(--dim);">Recovery: set a mental stop at –1% below entry right now. If price is already past it, exit immediately at market.</span></div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">3</div><div class="sg-rr-desc"><span class="c-no">Chasing breakouts after TD 9</span> — buying right before a reversal<br><span style="font-size:11px;color:var(--dim);">Recovery: take profit on half immediately. Move stop to breakeven on the rest. Do not add.</span></div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">4</div><div class="sg-rr-desc"><span class="c-no">Trading during lunch (11:30 AM–2:00 PM ET)</span> — low volume, fake moves everywhere<br><span style="font-size:11px;color:var(--dim);">Recovery: close any open lunch trades at market and step away from the screen until 3:00 PM ET.</span></div></div>
+        <div class="sg-rr"><div class="sg-rr-icon">5</div><div class="sg-rr-desc"><span class="c-no">Averaging down without a plan</span> — adding size to a losing position<br><span style="font-size:11px;color:var(--dim);">Recovery: stop adding immediately. Exit the entire position at market. A losing trade doubled in size becomes a catastrophic trade.</span></div></div>
       </div>
     </div>
     <div class="card">
@@ -5639,10 +5592,13 @@
 
 <script>
 (function() {
-  // ET clock
+  /* ── ET clock ─────────────────────── */
+  function sgGetET() {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  }
   function sgUpdateClock() {
     try {
-      var et = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      var et = sgGetET();
       var h = String(et.getHours()).padStart(2,'0');
       var m = String(et.getMinutes()).padStart(2,'0');
       var s = String(et.getSeconds()).padStart(2,'0');
@@ -5653,7 +5609,50 @@
   setInterval(sgUpdateClock, 1000);
   sgUpdateClock();
 
-  // Scroll-spy nav (uses offsetTop within document, works in scrollable panel)
+  /* ── Session detection + banner ──── */
+  function sgGetSession(et) {
+    var h = et.getHours(), m = et.getMinutes();
+    var mins = h * 60 + m;
+    var day = et.getDay(); // 0=Sun,6=Sat
+    if (day === 0 || day === 6) return { id:'closed', label:'MARKET CLOSED', col:'var(--dim)', advice:'Weekend — no trading. Use this time to review your journal and plan for Monday.', dot:'var(--dim)' };
+    if (mins < 9*60+30)         return { id:'premarket', label:'PRE-MARKET', col:'var(--yellow)', advice:'Pre-market active. Mark key levels, check news catalysts, calculate gap size vs prior close.', dot:'var(--yellow)' };
+    if (mins < 10*60+30)        return { id:'prime', label:'★★★ PRIME SESSION', col:'var(--green)', advice:'Best scalp window. Full position size permitted. Execute setups that meet ALL checklist items.', dot:'var(--green)' };
+    if (mins < 11*60+30)        return { id:'slow', label:'☆ SLOW — CAUTION', col:'var(--yellow)', advice:'Volume fading. Reduce position size 50%. Only the cleanest A+ setups.', dot:'var(--yellow)' };
+    if (mins < 14*60+0)         return { id:'lunch', label:'✕ LUNCH CHOP', col:'var(--red)', advice:'Avoid intraday scalps. Market makers widen spreads. High false-breakout rate.', dot:'var(--red)' };
+    if (mins < 15*60+0)         return { id:'mod', label:'☆ MODERATE', col:'var(--yellow)', advice:'Volume beginning to return. Wait for clear momentum signals before entering.', dot:'var(--yellow)' };
+    if (mins < 16*60+0)         return { id:'closing', label:'★★ CLOSING MOMENTUM', col:'var(--accent)', advice:'Second-best window. Strong directional moves. Use ORB high of the day as reference.', dot:'var(--accent)' };
+    return { id:'after', label:'AFTER HOURS', col:'var(--dim)', advice:'Market closed. Log today\'s trades and review performance.', dot:'var(--dim)' };
+  }
+
+  function mytLabel(et) {
+    var myt = new Date(et.getTime() + (8*60 - et.getTimezoneOffset() - 300) * 60000);
+    /* simpler: just offset from ET. MYT = ET + 12h (EDT) or ET + 13h (EST) */
+    var etOff = et.getTimezoneOffset(); /* unused but shows intent */
+    /* compute MYT from current device time directly */
+    var mytNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kuala_Lumpur' }));
+    return String(mytNow.getHours()).padStart(2,'0') + ':' + String(mytNow.getMinutes()).padStart(2,'0') + ' MYT';
+  }
+
+  function sgUpdateBanner() {
+    var et = sgGetET();
+    var sess = sgGetSession(et);
+    var banner = document.getElementById('sg-sess-banner');
+    var dot = document.getElementById('sg-sess-dot');
+    var lbl = document.getElementById('sg-sess-label');
+    var mytEl = document.getElementById('sg-sess-myt');
+    var adv = document.getElementById('sg-sess-advice');
+    if (!banner) return;
+    banner.style.borderLeftColor = sess.col;
+    banner.style.background = sess.id === 'prime' ? 'rgba(0,232,122,.07)' : sess.id === 'lunch' ? 'rgba(240,58,74,.07)' : 'rgba(0,0,0,.07)';
+    if (dot) dot.style.background = sess.dot;
+    if (lbl) { lbl.textContent = sess.label; lbl.style.color = sess.col; }
+    if (mytEl) mytEl.textContent = mytLabel(et);
+    if (adv) adv.textContent = sess.advice;
+  }
+  setInterval(sgUpdateBanner, 5000);
+  sgUpdateBanner();
+
+  /* ── Nav scroll-spy ──────────────── */
   document.querySelectorAll('#panel-scalp .sg-nav a').forEach(function(a) {
     a.addEventListener('click', function(e) {
       e.preventDefault();
@@ -5662,7 +5661,6 @@
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
-
   function sgUpdateNav() {
     var secs = document.querySelectorAll('#panel-scalp .sg-sec');
     var tabs = document.querySelectorAll('#panel-scalp .sg-nav a');
@@ -5677,7 +5675,7 @@
   }
   window.addEventListener('scroll', sgUpdateNav, { passive: true });
 
-  // Checklist
+  /* ── Checklist ───────────────────── */
   var checkedReq = new Set();
   var checkedOpt = new Set();
 
@@ -5687,39 +5685,40 @@
     var on = el.classList.toggle('checked');
     if (type === 'req') { on ? checkedReq.add(id) : checkedReq.delete(id); }
     else                { on ? checkedOpt.add(id) : checkedOpt.delete(id); }
-    var total = checkedReq.size + checkedOpt.size;
-    var fill  = document.getElementById('sg-prog-fill');
-    var txt   = document.getElementById('sg-prog-text');
-    if (fill) {
-      fill.style.width = Math.round(total / 12 * 100) + '%';
-      fill.style.background = checkedReq.size === 9 ? 'var(--green)' : checkedReq.size >= 6 ? 'var(--yellow)' : 'var(--red)';
-    }
-    if (txt) txt.textContent = total + '/12';
+    /* dual progress bars */
+    var rq = document.getElementById('sg-prog-req');
+    var rqt = document.getElementById('sg-prog-req-txt');
+    var op = document.getElementById('sg-prog-opt');
+    var opt2 = document.getElementById('sg-prog-opt-txt');
+    if (rq) { rq.style.width = Math.round(checkedReq.size/9*100)+'%'; rq.style.background = checkedReq.size===9?'var(--green)':checkedReq.size>=6?'var(--yellow)':'var(--red)'; }
+    if (rqt) rqt.textContent = checkedReq.size+'/9';
+    if (op) { op.style.width = Math.round(checkedOpt.size/3*100)+'%'; }
+    if (opt2) opt2.textContent = checkedOpt.size+'/3';
   };
 
   window.sgEvaluateChecklist = function() {
     var res = document.getElementById('sg-checklist-result');
     if (!res) return;
     res.style.display = 'block';
-    if (checkedReq.size === 9 && checkedOpt.size === 3) {
-      res.style.cssText = 'display:block;border:1px solid var(--green);background:rgba(0,232,122,.1);color:var(--green)';
-      res.innerHTML = '✅ &nbsp; ALL 12/12 CHECKED — PERFECT SETUP! ENTER WITH FULL SIZE';
-    } else if (checkedReq.size === 9) {
-      res.style.cssText = 'display:block;border:1px solid var(--green);background:rgba(0,232,122,.07);color:var(--green)';
-      res.innerHTML = '✅ &nbsp; ALL REQUIRED CONDITIONS MET (' + checkedOpt.size + '/3 optional) — OK TO ENTER';
+    if (checkedReq.size === 9) {
+      var qual = checkedOpt.size === 3 ? 'PERFECT SETUP — FULL SIZE' : checkedOpt.size === 2 ? 'STRONG SETUP — FULL SIZE' : checkedOpt.size === 1 ? 'GOOD SETUP — STANDARD SIZE' : 'MINIMUM VALID — REDUCE TO 50%';
+      res.style.cssText = 'display:block;border:1px solid var(--green);background:rgba(0,232,122,.07);color:var(--green);padding:13px;text-align:center;font-family:var(--mono);letter-spacing:1px;font-size:11px;border-radius:var(--r);margin-top:12px;';
+      res.innerHTML = '✅ ALL 9 REQUIRED MET ('+checkedOpt.size+'/3 optional) — '+qual;
     } else {
-      var missing = 9 - checkedReq.size;
-      res.style.cssText = 'display:block;border:1px solid var(--red);background:rgba(240,58,74,.07);color:var(--red)';
-      res.innerHTML = '⛔ &nbsp; ' + missing + ' REQUIRED CONDITION(S) NOT MET — DO NOT ENTER';
+      /* collect names of unchecked required items */
+      var missing = [];
+      document.querySelectorAll('#panel-scalp .sg-ci[data-id]').forEach(function(el) {
+        if (!el.classList.contains('checked') && el.getAttribute('onclick') && el.getAttribute('onclick').includes("'req'")) {
+          missing.push(el.getAttribute('data-label') || el.querySelector('.sg-ci-text').textContent.trim().substring(0,40));
+        }
+      });
+      var missingCount = 9 - checkedReq.size;
+      res.style.cssText = 'display:block;border:1px solid var(--red);background:rgba(240,58,74,.07);color:var(--red);padding:13px;font-family:var(--mono);letter-spacing:.5px;font-size:11px;border-radius:var(--r);margin-top:12px;line-height:1.7;';
+      res.innerHTML = '⛔ '+missingCount+' REQUIRED CONDITION'+(missingCount>1?'S':'')+' NOT MET — DO NOT ENTER<br>'
+        + '<div style="margin-top:6px;font-size:10px;color:var(--orange);">'
+        + missing.map(function(m){ return '✗ '+m; }).join('<br/>')
+        + '</div>';
     }
-    // re-apply shared styles
-    res.style.padding = '13px';
-    res.style.textAlign = 'center';
-    res.style.fontFamily = 'var(--mono)';
-    res.style.letterSpacing = '1px';
-    res.style.fontSize = '12px';
-    res.style.borderRadius = 'var(--r)';
-    res.style.marginTop = '12px';
   };
 
   window.sgResetChecklist = function() {
@@ -5727,13 +5726,138 @@
     document.querySelectorAll('#panel-scalp .sg-ci').forEach(function(el) {
       el.classList.remove('checked','blocked');
     });
-    var fill = document.getElementById('sg-prog-fill');
-    var txt  = document.getElementById('sg-prog-text');
-    var res  = document.getElementById('sg-checklist-result');
-    if (fill) { fill.style.width = '0%'; fill.style.background = 'var(--green)'; }
-    if (txt)  txt.textContent = '0/12';
-    if (res)  res.style.display = 'none';
+    var rq = document.getElementById('sg-prog-req'), rqt = document.getElementById('sg-prog-req-txt');
+    var op = document.getElementById('sg-prog-opt'), opt2 = document.getElementById('sg-prog-opt-txt');
+    if (rq) { rq.style.width='0%'; rq.style.background='var(--red)'; }
+    if (rqt) rqt.textContent='0/9';
+    if (op) op.style.width='0%';
+    if (opt2) opt2.textContent='0/3';
+    var res = document.getElementById('sg-checklist-result');
+    if (res) res.style.display='none';
   };
+
+  /* ── Quick Scalp Calculator ─────── */
+  window.sgCalc = function() {
+    var entry = parseFloat(document.getElementById('sgc-entry').value);
+    var stop  = parseFloat(document.getElementById('sgc-stop').value);
+    var acct  = parseFloat(document.getElementById('sgc-acct').value);
+    var riskp = parseFloat(document.getElementById('sgc-risk').value) || 1;
+    var res = document.getElementById('sgc-result');
+    if (!entry || !stop || entry <= stop) { if(res) res.style.display='none'; return; }
+    var riskD    = entry - stop;
+    var riskPct  = Math.min(riskp, 1);
+    var riskAmt  = acct ? acct * riskPct / 100 : null;
+    var shares   = riskAmt ? Math.floor(riskAmt / riskD) : null;
+    var tp1      = (entry + riskD * 2).toFixed(2);
+    var tp2      = (entry + riskD * 3).toFixed(2);
+    var posVal   = shares ? (shares * entry).toFixed(0) : null;
+    if (res) {
+      res.style.display = 'block';
+      document.getElementById('sgc-riskamt').textContent  = riskAmt ? '$'+riskAmt.toFixed(2) : '—';
+      document.getElementById('sgc-shares').textContent   = shares ? shares+' shares' : '—';
+      document.getElementById('sgc-tp1').textContent      = '$'+tp1+' (+$'+(riskD*2).toFixed(2)+')';
+      document.getElementById('sgc-tp2').textContent      = '$'+tp2+' (+$'+(riskD*3).toFixed(2)+')';
+      document.getElementById('sgc-posval').textContent   = posVal ? '$'+Number(posVal).toLocaleString() : '—';
+      var warn = document.getElementById('sgc-warn');
+      if (warn) { warn.style.display = riskp > 1 ? 'block' : 'none'; warn.textContent = '⚠ Risk >1% — capped to 1% for position sizing'; }
+      /* RR bar proportions */
+      var total = riskD * 5;
+      document.getElementById('sgc-bar-sl').style.width  = (riskD/total*100)+'%';
+      document.getElementById('sgc-bar-t1').style.width  = (riskD*2/total*100)+'%';
+      document.getElementById('sgc-bar-t2').style.width  = (riskD*2/total*100)+'%';
+    }
+  };
+
+  /* ── VWAP Distance Calculator ───── */
+  window.sgVwapCalc = function() {
+    var price = parseFloat(document.getElementById('sgv-price').value);
+    var vwap  = parseFloat(document.getElementById('sgv-vwap').value);
+    var res   = document.getElementById('sgv-result');
+    if (!price || !vwap) { if(res) res.style.display='none'; return; }
+    var pct   = ((price - vwap) / vwap * 100);
+    var absPct= Math.abs(pct);
+    var col   = absPct <= 0.2 ? 'var(--green)' : absPct <= 0.4 ? 'var(--yellow)' : 'var(--red)';
+    var verdict, barPct;
+    if (pct < 0) {
+      verdict = '🔴 Price BELOW VWAP — do not go long. Wait for price to reclaim VWAP before any buy entry.';
+      col = 'var(--red)'; barPct = 0;
+    } else if (absPct <= 0.2) {
+      verdict = '✅ IDEAL zone — price is within 0.2% above VWAP. Best risk/reward for entry. Proceed if checklist is complete.';
+      barPct = absPct / 0.4 * 60;
+    } else if (absPct <= 0.4) {
+      verdict = '⚠️ CAUTION — price is '+absPct.toFixed(2)+'% above VWAP. Entry is borderline. Use a tighter TP1 target (1.5R). Do not add to a position at this level.';
+      barPct = 60 + (absPct-0.2)/0.2*30;
+    } else {
+      verdict = '🛑 TOO EXTENDED — '+absPct.toFixed(2)+'% above VWAP exceeds the 0.4% limit. Skip this entry. Wait for pullback to VWAP before re-evaluating.';
+      barPct = 100;
+    }
+    if (res) {
+      res.style.display = 'flex';
+      document.getElementById('sgv-pct').textContent = (pct >= 0 ? '+' : '') + pct.toFixed(3) + '%';
+      document.getElementById('sgv-pct').style.color = col;
+      document.getElementById('sgv-bar').style.width = Math.min(barPct, 100) + '%';
+      document.getElementById('sgv-bar').style.background = col;
+      document.getElementById('sgv-verdict').textContent = verdict;
+      document.getElementById('sgv-verdict').style.color = col;
+    }
+  };
+
+  /* ── Session P&L Tracker ────────── */
+  var sgTrades = [];
+  window.sgPLAdd = function() {
+    var entry  = parseFloat(document.getElementById('sgpl-entry').value);
+    var exit   = parseFloat(document.getElementById('sgpl-exit').value);
+    var shares = parseFloat(document.getElementById('sgpl-shares').value);
+    if (!entry || !exit || !shares) { alert('Enter Entry, Exit and Shares to log trade.'); return; }
+    var pnl    = (exit - entry) * shares;
+    var pct    = ((exit - entry) / entry * 100);
+    sgTrades.push({ entry, exit, shares, pnl, pct, time: new Date() });
+    document.getElementById('sgpl-entry').value  = '';
+    document.getElementById('sgpl-exit').value   = '';
+    document.getElementById('sgpl-shares').value = '';
+    sgPLRender();
+  };
+  window.sgPLReset = function() {
+    sgTrades = [];
+    sgPLRender();
+  };
+  function sgPLRender() {
+    var n    = sgTrades.length;
+    var wins = sgTrades.filter(function(t){ return t.pnl > 0; }).length;
+    var totalPnl = sgTrades.reduce(function(s,t){ return s+t.pnl; }, 0);
+    var avgPct   = n ? sgTrades.reduce(function(s,t){ return s+t.pct; },0)/n : 0;
+    var empty = document.getElementById('sgpl-empty');
+    var stats = document.getElementById('sgpl-stats');
+    var log   = document.getElementById('sgpl-log');
+    if (empty) empty.style.display = n ? 'none' : 'block';
+    if (stats) stats.style.display = n ? 'grid' : 'none';
+    if (n) {
+      document.getElementById('sgpl-n').textContent   = n;
+      var wr = document.getElementById('sgpl-wr');
+      var wrPct = Math.round(wins/n*100);
+      wr.textContent = wrPct+'%';
+      wr.style.color = wrPct >= 60 ? 'var(--green)' : wrPct >= 45 ? 'var(--yellow)' : 'var(--red)';
+      var pnlEl = document.getElementById('sgpl-pnl');
+      pnlEl.textContent = (totalPnl >= 0 ? '+$' : '-$') + Math.abs(totalPnl).toFixed(2);
+      pnlEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+      document.getElementById('sgpl-avgr').textContent = (avgPct >= 0 ? '+' : '') + avgPct.toFixed(2) + '%';
+    }
+    if (log) {
+      log.innerHTML = sgTrades.slice().reverse().map(function(t, i) {
+        var real = sgTrades.length - 1 - i;
+        var win = t.pnl > 0;
+        var hhmm = String(t.time.getHours()).padStart(2,'0')+':'+String(t.time.getMinutes()).padStart(2,'0');
+        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid var(--border);border-left:3px solid '+(win?'var(--green)':'var(--red)')+';border-radius:4px;font-family:var(--mono);font-size:11px;">'
+          +'<span style="color:var(--dim);font-size:10px;">'+hhmm+'</span>'
+          +'<span style="color:var(--dim);">#'+(real+1)+'</span>'
+          +'<span style="flex:1;">$'+t.entry.toFixed(2)+' → $'+t.exit.toFixed(2)+' × '+t.shares+'sh</span>'
+          +'<span style="font-weight:700;color:'+(win?'var(--green)':'var(--red)')+';">'+(t.pnl>=0?'+':'')+'$'+t.pnl.toFixed(2)+'</span>'
+          +'</div>';
+      }).join('');
+    }
+  }
+  sgPLRender();
+
 })();
 </script>
 
