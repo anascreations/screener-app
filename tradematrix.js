@@ -1773,6 +1773,10 @@ $('gold-result').style.display = 'none';
 return;
 }
 $('gold-result').style.display = '';
+const e8   = num('gold-e8');
+const sar  = num('gold-sar');
+const tdN  = num('gold-td');
+const haVal = (typeof sel === 'function' ? sel('gold-ha') : null) || (document.getElementById('gold-ha') ? document.getElementById('gold-ha').value : '');
 const rsi = num('gold-rsi');
 const adxV = num('gold-adx');
 const pdiV = num('gold-pdi');
@@ -1783,29 +1787,55 @@ const d = num('gold-d');
 const j = num('gold-j');
 const dif = num('gold-dif');
 const dea = num('gold-dea');
+const hist = num('gold-hist');
 const vol = num('gold-vol');
 const atr = num('gold-atr');
-const dxyDir = sel('gold-dxy-dir');
+const dxyDir = (typeof sel === 'function' ? sel('gold-dxy-dir') : null) || (document.getElementById('gold-dxy-dir') ? document.getElementById('gold-dxy-dir').value : '');
 const fibH = num('gold-fibh');
 const fibL = num('gold-fibl');
-const fibDir = sel('gold-fib-dir');
+const fibDir = (typeof sel === 'function' ? sel('gold-fib-dir') : null) || (document.getElementById('gold-fib-dir') ? document.getElementById('gold-fib-dir').value : 'retrace');
 const riskPct = num('gold-risk-pct');
 const accountSz = num('gold-account');
+const pAboveE8  = e8  ? pct(price, e8)  : null;
 const pAboveE21 = pct(price, e21);
 const pAboveE55 = pct(price, e55);
 const pAboveE200 = pct(price, e200);
 const e21AboveE55 = pct(e21, e55);
 const e55AboveE200 = pct(e55, e200);
+const e8AboveE21 = e8 ? pct(e8, e21) : null;
+// Core EMA filters
 const f1_proximity = price > e21;
 const f1_stretch = Math.abs(pAboveE21 || 0);
 const f2_pass = e21 > e55;
 const f3_pass = e55 > e200;
 const macroPass = price > e200;
+// EMA8 short-term filter (bonus signal)
+const e8Pass = e8 ? (price > e8 && e8 > e21 ? true : price > e8 ? 'warn' : false) : null;
+// SAR filter — price above SAR = bullish trend, below = bearish
+const sarPass = sar ? (price > sar ? true : false) : null;
+const sarLabel = sar ? (price > sar ? `Price $${price.toFixed(2)} above SAR $${sar.toFixed(2)} — bullish trend ✅` : `Price $${price.toFixed(2)} BELOW SAR $${sar.toFixed(2)} — bearish reversal 🔴`) : '—';
+// TD Sequential exhaustion filter
+let tdPass = null, tdLabel = '—', tdWarn = false;
+if (tdN != null) {
+  if (tdN >= 9 && tdN <= 13) { tdPass = false; tdWarn = true; tdLabel = `TD ${tdN} — EXHAUSTION zone. High reversal risk. Do not enter new longs.`; }
+  else if (tdN >= 7) { tdPass = 'warn'; tdLabel = `TD ${tdN} — approaching exhaustion (7-8). Take partial profit if in trade.`; }
+  else if (tdN >= 1 && tdN <= 4) { tdPass = true; tdLabel = `TD ${tdN} — early cycle. Best momentum window for entries.`; }
+  else { tdPass = true; tdLabel = `TD ${tdN} — mid cycle. Normal position sizing.`; }
+}
+// Heikin Ashi filter
+let haPass = null, haLabel = '—';
+if (haVal) {
+  if (haVal === 'bull') { haPass = true; haLabel = '🟢 HA Bullish — no lower wick, strong momentum'; }
+  else if (haVal === 'bull_wick') { haPass = true; haLabel = '🟡 HA Bullish with lower wick — momentum but some pullback'; }
+  else if (haVal === 'doji') { haPass = 'warn'; haLabel = '⚪ HA Doji — indecision. Wait for confirmation candle.'; }
+  else if (haVal === 'bear_wick') { haPass = false; haLabel = '🟠 HA Bearish with upper wick — sellers emerging'; }
+  else if (haVal === 'bear') { haPass = false; haLabel = '🔴 HA Bearish — strong downward momentum, avoid longs'; }
+}
 const kdj = scoreKDJ(k, d, j);
 const rsiS = scoreRSI(rsi, 'gold');
 const adxS = scoreADX(adxV);
 const dmiS = scoreDMI(pdiV, mdiV, adxV, adxrV);
-const macd = scoreMACDZone(dif, dea);
+const macd = scoreMACDZone(dif, dea, hist);
 const volS = scoreVolume(vol);
 let dxyPass = null, dxyLabel = '—';
 if (dxyDir) {
@@ -1816,21 +1846,30 @@ if (dxyDir === 'rising') { dxyPass = false; dxyLabel = '📈 Rising (Bearish Gol
 const sess = getSession();
 const sessPass = sess.score >= 70 ? true : sess.score >= 40 ? 'warn' : false;
 const eng = scoreEngine();
+// Core EMA stack (45 pts)
 eng.add(f1_proximity, 15);
 eng.add(f2_pass, 15);
 eng.add(f3_pass, 15);
+// Momentum (46 pts)
 eng.add(kdj ? kdj.pass : null, 12);
-eng.add(rsiS ? rsiS.pass : null, 12);
-eng.add(adxS ? adxS.pass : null, 12);
-eng.add(macd ? macd.pass : null, 10);
-eng.add(volS ? volS.pass : null, 6);
-eng.add(dxyPass, 5);
+eng.add(rsiS ? rsiS.pass : null, 10);
+eng.add(adxS ? adxS.pass : null, 10);
+eng.add(dmiS ? dmiS.pass : null, 8);   // ← BUG FIX: was never added!
+eng.add(macd ? macd.pass : null, 8);   // hist now passed in
+// Supporting (19 pts)
+eng.add(e8Pass, 5);                    // EMA8 short momentum
+eng.add(sarPass, 5);                   // SAR direction
+eng.add(haPass, 4);                    // Heikin Ashi
+eng.add(volS ? volS.pass : null, 3);
+// Context
+eng.add(dxyPass, 4);
 eng.add(sessPass, 3);
 let penalty = 0;
 if (f1_stretch > 6) penalty = -18;
 else if (f1_stretch > 4) penalty = -10;
 else if (f1_stretch > 2) penalty = -4;
 if (!macroPass) penalty -= 10;
+if (tdWarn) penalty -= 12;             // TD exhaustion warning
 const adjScore = Math.max(0, Math.min(100, eng.result() + penalty));
 const grade = getGrade(e21AboveE55 || 0);
 const macroTrendOk = f3_pass && macroPass;
@@ -1854,46 +1893,67 @@ updateGoldSessionBanner();
 const chipText = `${sess.emoji} ${sess.full}`;
 setDecisionStrip('gold', decision, riskLevel, grade, `
     <div>XAUUSD: <span style="color:var(--gold);font-weight:700">$${price.toFixed(2)}</span>
+      ${e8 ? `&nbsp; EMA8: <span style="color:${e8Pass===true?'var(--green)':'var(--red)'}">${e8.toFixed(2)}</span>` : ''}
       &nbsp; EMA21: <span style="color:var(--text)">${e21.toFixed(2)}</span>
       EMA55: <span style="color:var(--text)">${e55.toFixed(2)}</span>
       EMA200: <span style="color:var(--text)">${e200.toFixed(2)}</span>
     </div>
     <div>Macro: <span style="color:${macroPass ? 'var(--green)' : 'var(--red)'}">${macroPass ? '✅ Above EMA200' : '✘ Below EMA200'}</span>
-      &nbsp; Size: <span style="color:${posSize === '100%' ? 'var(--green)' : 'var(--yellow)'}">${posSize}</span>
+      &nbsp; Size: <span style="color:${posSize === '100%' ? 'var(--green)' : posSize==='0%'?'var(--red)':'var(--yellow)'}">${posSize}</span>
       &nbsp; Score: <span style="color:var(--gold)">${adjScore.toFixed(0)}/100</span>
+      ${sar ? `&nbsp; SAR: <span style="color:${sarPass===true?'var(--green)':'var(--red)'}">$${sar.toFixed(2)} ${sarPass===true?'✅':'🔴'}</span>` : ''}
+      ${tdN ? `&nbsp; TD: <span style="color:${tdPass===true?'var(--green)':tdPass===false?'var(--red)':'var(--yellow)'}">${tdN}</span>` : ''}
     </div>`, chipText
 );
 const adv = $('gold-advice');
 if (decision === 'PROCEED') {
 const lines = [
 f1_stretch > 3
-? `⚠️ Gold price is ${f1_stretch.toFixed(1)}% above EMA21 — consider waiting for a pullback to EMA21 ($${e21.toFixed(2)}) before entering.`
+? `⚠️ Gold price is ${f1_stretch.toFixed(1)}% above EMA21 ($${e21.toFixed(2)}) — stretched. Consider queuing entry at EMA21 pullback.`
 : `✅ Gold momentum confirmed. Price ${pAboveE21?.toFixed(1)}% above EMA21 — within acceptable range.`,
-`📐 Full EMA Stack: EMA21>EMA55>EMA200 ${f2_pass && f3_pass ? '✅ Aligned' : '🔴 Misaligned'}`,
-rsiS?.pass === true ? `📊 RSI ${rsi?.toFixed(1)} — in the gold momentum sweet spot (50-70).` : '',
-adxS?.pass === true ? `💪 ADX ${adxV?.toFixed(1)} — ${adxS.strength} trend. High-probability gold setup.` : '',
-dxyDir === 'falling' ? `💵 DXY falling — dollar weakness supports gold bulls. Adds conviction.` : '',
-sess.score >= 70 ? `⏰ Trading during ${sess.full} — optimal liquidity for gold.` : `⚠️ ${sess.full} — lower liquidity. Consider wider spreads.`,
-`📦 Position: ${posSize}. Gold SL = Entry − (ATR × 1.8). Gold moves in wider ranges; don't use tight stops.`,
+e8 && e8Pass === true ? `📈 EMA8 ($${e8.toFixed(2)}) stack confirmed: Price > EMA8 > EMA21 — short-term momentum aligned.` :
+e8 && e8Pass === false ? `⚠️ Price below EMA8 ($${e8.toFixed(2)}) — short-term momentum stalling. Watch for reclaim.` : '',
+sar ? (sarPass === true ? `✅ SAR ($${sar.toFixed(2)}) below price — Parabolic SAR bullish, trend intact.` : `🔴 SAR ($${sar.toFixed(2)}) above price — SAR turned bearish, caution.`) : '',
+haVal ? `🕯️ Heikin Ashi: ${haLabel}` : '',
+tdN ? (tdPass === false ? `⚠️ TD ${tdN} — ${tdLabel}` : `TD ${tdN}: ${tdLabel}`) : '',
+`📐 EMA Stack: EMA21>EMA55>EMA200 ${f2_pass && f3_pass ? '✅ Aligned' : '🔴 Misaligned'}`,
+rsiS?.pass === true ? `📊 RSI ${rsi?.toFixed(1)} — gold momentum sweet spot (50-70).` :
+  rsiS?.pass === false ? `⚠️ RSI ${rsi?.toFixed(1)} — outside 50-70 zone. Lower conviction.` : '',
+adxS?.pass === true ? `💪 ADX ${adxV?.toFixed(1)} (${adxS.strength}) — trend strength confirmed.` +
+  (adxS.declining ? ' ⚠️ ADX declining — watch for momentum loss.' : '') : '',
+dmiS?.pass === true ? `📊 DMI: PDI ${pdiV?.toFixed(1)} > MDI ${mdiV?.toFixed(1)} — buyers in control.` :
+  dmiS?.pass === false ? `⚠️ DMI: MDI ${mdiV?.toFixed(1)} > PDI ${pdiV?.toFixed(1)} — sellers dominant.` : '',
+macd?.pass === true ? `📈 MACD ${macd.zone}${hist != null ? ` | Histogram: ${hist > 0 ? 'expanding ✅' : 'contracting ⚠️'}` : ''}` : '',
+dxyDir === 'falling' ? `💵 DXY falling — dollar weakness supports gold bulls. Strong conviction add.` : '',
+sess.score >= 70 ? `⏰ ${sess.full} — optimal gold liquidity window.` : `⚠️ ${sess.full} — lower liquidity. Widen spread buffer.`,
+`📦 Position: ${posSize}. SL = Entry − (ATR ${atr ? `$${atr.toFixed(0)}` : ''} × 1.8). Gold requires wider stops than equities.`,
 ].filter(Boolean).join('\n');
 adv.textContent = lines;
 adv.className = 'advice-box gold';
 } else if (decision === 'WATCH') {
-adv.textContent = `⚠️ Partial gold setup (Score: ${adjScore.toFixed(0)}/100). Wait for all 7 filters to align. Key requirements: EMA21>EMA55>EMA200, RSI 50-70, ADX>28, KDJ+MACD bullish. Patience is a trade.`;
+adv.textContent = `⚠️ Partial gold setup — Score ${adjScore.toFixed(0)}/100. ` +
+  (tdWarn ? `TD ${tdN} exhaustion alert — do not enter regardless of other signals. ` : '') +
+  `Wait for: EMA21>EMA55>EMA200 aligned, RSI 50-70, ADX>28, KDJ+MACD bullish` +
+  (sar ? `, Price above SAR ($${sar.toFixed(2)})` : '') +
+  `. Patience is the edge.`;
 adv.className = 'advice-box yellow';
 } else {
 const missing = [
-!macroPass && `Price below EMA200 ($${e200.toFixed(2)}) — no long`,
+tdWarn && `TD ${tdN} exhaustion — timing reversal zone`,
+!macroPass && `Price below EMA200 ($${e200.toFixed(2)}) — macro bearish`,
 !f1_proximity && `Price below EMA21 ($${e21.toFixed(2)})`,
-!f2_pass && `EMA21 < EMA55 (short trend bearish)`,
+!f2_pass && `EMA21 < EMA55 (medium trend bearish)`,
 !f3_pass && `EMA55 < EMA200 (macro trend bearish)`,
-kdj?.pass === false && `KDJ Bearish`,
-macd?.pass === false && `MACD Bearish`,
-rsiS?.pass === false && `RSI ${rsi?.toFixed(1)} — outside momentum zone`,
+sarPass === false && sar && `Price below SAR $${sar.toFixed(2)} — trend reversed`,
+haPass === false && haVal && `Heikin Ashi bearish (${haVal})`,
+kdj?.pass === false && `KDJ bearish K${k?.toFixed(0)}<D${d?.toFixed(0)}`,
+dmiS?.pass === false && `DMI bearish MDI>${pdiV?.toFixed(0)}`,
+macd?.pass === false && `MACD bearish DIF${dif?.toFixed(1)}`,
+rsiS?.pass === false && `RSI ${rsi?.toFixed(1)} outside 50-70`,
 adxS?.pass === false && `ADX ${adxV?.toFixed(1)} — no trend`,
-dxyPass === false && `DXY Rising — headwind for gold`,
+dxyPass === false && `DXY rising — dollar headwind for gold`,
 ].filter(Boolean);
-adv.textContent = `🔴 Skip gold trade. Critical failures: ${missing.join(' | ')}`;
+adv.textContent = `🔴 Skip gold. ${missing.join(' | ')}. Wait for full alignment before entering.`;
 adv.className = 'advice-box red';
 }
 updateDial('gold-dial-arc', 'gold-dial-score', adjScore, true);
@@ -1914,18 +1974,30 @@ buildCheck('F1 — Price > EMA21 (Momentum)', f1_proximity, `${f1_stretch.toFixe
 buildCheck('F2 — EMA21 > EMA55 (Short Trend)', f2_pass, fmt2(e21AboveE55)),
 buildCheck('F3 — EMA55 > EMA200 (Macro Trend)', f3_pass, fmt2(e55AboveE200)),
 buildCheck('F4 — Price > EMA200 (Institutional)', macroPass, `$${e200.toFixed(2)} ${macroPass ? '✅' : '🔴 Critical fail'}`),
+e8 ? buildCheck(`EMA8 Short Momentum ($${e8.toFixed(2)})`, e8Pass === true ? true : e8Pass === false ? false : null,
+  `Price>EMA8>EMA21? ${price>e8&&e8>e21?'✅ Full stack':'⚠️ Partial'} | EMA8 ${e8AboveE21>=0?'+':''}${e8AboveE21?.toFixed(2)}% vs EMA21`)
+: buildCheck('EMA8 Short Momentum', null, 'Not provided — enter EMA8 for short-term filter'),
+sar ? buildCheck(`SAR $${sar.toFixed(2)} — ${sarPass===true?'Bullish':'Bearish'}`, sarPass === true ? true : false, sarLabel)
+: buildCheck('Parabolic SAR', null, 'Not provided — enter SAR value'),
 kdj
-? buildCheck(`F5 — KDJ ${kdj.zone}`, kdj.pass === true ? true : kdj.pass === false ? false : null, `K:${k?.toFixed(1)} D:${d?.toFixed(1)} J:${j?.toFixed(1)}`)
-: buildCheck('F5 — KDJ', null, 'Not provided'),
+? buildCheck(`KDJ ${kdj.zone}`, kdj.pass === true ? true : kdj.pass === false ? false : null, `K:${k?.toFixed(1)} D:${d?.toFixed(1)} J:${j?.toFixed(1)}`)
+: buildCheck('KDJ Momentum', null, 'Not provided'),
 rsiS
-? buildCheck(`F6 — RSI ${rsiS.zone}`, rsiS.pass === true ? true : rsiS.pass === false ? false : null, `RSI: ${rsi?.toFixed(1)} (target 50-70)`)
-: buildCheck('F6 — RSI14 Momentum', null, 'Not provided'),
+? buildCheck(`RSI ${rsiS.zone}`, rsiS.pass === true ? true : rsiS.pass === false ? false : null, `RSI: ${rsi?.toFixed(1)} (gold zone 50-70)`)
+: buildCheck('RSI14 Momentum', null, 'Not provided'),
 adxS
-? buildCheck(`F7 — ADX ${adxS.zone}`, adxS.pass === true ? true : adxS.pass === false ? false : null, `ADX: ${adxV?.toFixed(1)} (min 28)`)
-: buildCheck('F7 — ADX Trend Strength', null, 'Not provided'),
+? buildCheck(`ADX ${adxS.zone} ${adxS.declining?'⚠️ Declining':''}`, adxS.pass === true ? true : adxS.pass === false ? false : null, `ADX: ${adxV?.toFixed(1)} (min 28) ADXR: ${adxrV?.toFixed(1)||'—'}`)
+: buildCheck('ADX Trend Strength', null, 'Not provided'),
+dmiS
+? buildCheck(`DMI — ${dmiS.label}`, dmiS.pass === true ? true : dmiS.pass === false ? false : null, `PDI:${pdiV?.toFixed(1)} MDI:${mdiV?.toFixed(1)} ${pdiV>mdiV?'Bulls dominant':'Bears dominant'}`)
+: buildCheck('DMI Direction', null, 'Not provided — enter PDI/MDI'),
 macd
-? buildCheck(`MACD — ${macd.zone}`, macd.pass === true ? true : macd.pass === false ? false : null, `DIF:${dif?.toFixed(2)} DEA:${dea?.toFixed(2)}`)
+? buildCheck(`MACD ${macd.zone}`, macd.pass === true ? true : macd.pass === false ? false : null, `DIF:${dif?.toFixed(2)} DEA:${dea?.toFixed(2)} Hist:${hist!=null?hist.toFixed(2):'—'}`)
 : buildCheck('MACD Signal', null, 'Not provided'),
+haVal ? buildCheck(`Heikin Ashi`, haPass === true ? true : haPass === false ? false : null, haLabel)
+: buildCheck('Heikin Ashi Candle', null, 'Not provided — select HA candle type'),
+tdN != null ? buildCheck(`TD Sequential — Count ${tdN}`, tdPass === true ? true : tdPass === false ? false : null, tdLabel)
+: buildCheck('TD Sequential Count', null, 'Not provided — enter TD count'),
 dxyDir
 ? buildCheck(`DXY Correlation`, dxyPass === true ? true : dxyPass === false ? false : null, dxyLabel)
 : buildCheck('DXY Correlation', null, 'Not provided'),
@@ -1933,14 +2005,20 @@ buildCheck(`Session — ${sess.full}`, sessPass === true ? true : sessPass === '
 ].join('');
 updateMeter('gold-signal-meter', passArr.length, 7);
 $('gold-alignment-grid').innerHTML = [
+e8 ? ['Price vs EMA8', pAboveE8, pAboveE8 >= 0 && pAboveE8 <= 1.5 ? 'green' : pAboveE8 > 3 ? 'red' : 'yellow'] : null,
 ['Price vs EMA21', pAboveE21, pAboveE21 >= 0 && pAboveE21 <= 2 ? 'green' : pAboveE21 > 5 ? 'red' : pAboveE21 > 3 ? 'yellow' : 'accent'],
 ['Price vs EMA55', pAboveE55, pAboveE55 >= 0 ? 'accent' : 'red'],
 ['Price vs EMA200', pAboveE200, pAboveE200 >= 0 ? 'green' : 'red'],
+e8 ? ['EMA8 vs EMA21', e8AboveE21, e8AboveE21 > 0 ? 'green' : 'red'] : null,
 ['EMA21 vs EMA55', e21AboveE55, e21AboveE55 > 0 ? 'green' : 'red'],
 ['EMA55 vs EMA200', e55AboveE200, e55AboveE200 > 0 ? 'green' : 'red'],
-['Macro Aligned', null, macroPass && f2_pass && f3_pass ? 'green' : 'red', macroPass && f2_pass && f3_pass ? '✅ Full Bull' : '🔴 Misaligned'],
+['EMA Stack', null, macroPass && f2_pass && f3_pass ? 'green' : 'red', macroPass && f2_pass && f3_pass ? (e8&&price>e8&&e8>e21?'✅ Full 4-EMA Bull':'✅ 3-EMA Bull') : '🔴 Misaligned'],
+sar != null ? ['SAR Signal', null, sarPass===true?'green':'red', sarPass===true?`✅ Bullish $${sar.toFixed(2)}`:`🔴 Bearish $${sar.toFixed(2)}`] : null,
 rsi != null ? ['RSI14', null, rsiS.c.includes('green') ? 'green' : rsiS.c.includes('yellow') ? 'yellow' : 'red', `${rsi.toFixed(1)} ${rsiS.zone}`] : null,
 adxV != null ? ['ADX14', null, adxS.c.includes('green') ? 'green' : adxS.c.includes('yellow') ? 'yellow' : 'red', `${adxV.toFixed(1)} ${adxS.strength}`] : null,
+pdiV != null && mdiV != null ? ['DMI', null, pdiV>mdiV?'green':'red', `PDI ${pdiV.toFixed(1)} vs MDI ${mdiV.toFixed(1)}`] : null,
+tdN != null ? ['TD Count', null, tdPass===true?'green':tdPass===false?'red':'yellow', `Count ${tdN} — ${tdN>=9?'Exhaustion':'Momentum'}`] : null,
+haVal ? ['Heikin Ashi', null, haPass===true?'green':haPass===false?'red':'yellow', haLabel] : null,
 ].filter(Boolean).map(([l, v, c, ov]) => {
 const display = ov || (v != null ? (v >= 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
 return `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${display}</div></div>`;
@@ -2114,17 +2192,17 @@ sessGrid.innerHTML = sessData.map(s =>
 buildTradePlan('gold-price-block', 'gold-tradeplan-card', price, atr, accountSz, riskPct, 'gold');
 }
 function resetGold() {
-['gold-price', 'gold-e21', 'gold-e55', 'gold-e200',
-'gold-rsi', 'gold-adx', 'gold-k', 'gold-d', 'gold-j',
-'gold-dif', 'gold-dea', 'gold-hist',
-'gold-dxy', 'gold-vol', 'gold-atr',
-'gold-fibh', 'gold-fibl',
-'gold-risk-pct', 'gold-account', 'gold-lotsize',
+['gold-price','gold-e8','gold-e21','gold-e55','gold-e200',
+'gold-sar','gold-td',
+'gold-rsi','gold-adx','gold-pdi','gold-mdi','gold-adxr',
+'gold-k','gold-d','gold-j',
+'gold-dif','gold-dea','gold-hist',
+'gold-dxy','gold-vol','gold-atr','gold-risk-pct','gold-account','gold-lotsize',
+'gold-fibh','gold-fibl','gold-fibh2','gold-fibl2','gold-prev-close',
 ].forEach(id => { const el = $(id); if (el) el.value = ''; });
-const dxyDirEl = $('gold-dxy-dir');
-const fibDirEl = $('gold-fib-dir');
-if (dxyDirEl) dxyDirEl.value = '';
-if (fibDirEl) fibDirEl.value = 'retrace';
+['gold-dxy-dir','gold-fib-dir','gold-ha'].forEach(id => {
+  const el = $(id); if (el && el.options) el.value = el.options[0].value;
+});
 $('gold-result').style.display = 'none';
 }
 updateGoldSessionBanner();
