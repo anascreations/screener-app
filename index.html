@@ -2563,6 +2563,7 @@
     <button class="guide-tab-btn"        onclick="switchGuide('g-smd')">🏆 Smart Money</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-schedule')">🗓 Daily Schedule</button>
     <button class="guide-tab-btn"        onclick="switchGuide('g-grade')">🏅 Stock Grade</button>
+       <button class="guide-tab-btn"        onclick="switchGuide('g-smarttools')">🔮 Smart Tools</button>
   </div>
 
   <!-- ── MA / EMA Combined Guide ── -->
@@ -3307,6 +3308,46 @@
       </div><!-- /guide-card-body -->
     </div><!-- /guide-card -->
   </div><!-- /g-grade -->
+
+     <!-- ── Smart Tools Guide ── -->
+  <div class="guide-section" id="g-smarttools">
+    <div class="guide-card">
+      <div class="guide-card-hdr">🔮 Smart Tools — How to Use Every Sub-Tool</div>
+      <div class="guide-card-body">
+
+        <div class="guide-sub-hdr">📟 Supertrend Calculator</div>
+        <p>Enter the current candle High, Low, Close and your ATR. The tool outputs the active Supertrend value (lower band = bullish, upper band = bearish) and the direction. Use the output value as the <strong>Supertrend</strong> input in the MA and EMA tabs. Also enter the previous bar's ST value and direction to trigger Flip Detection — a bar that changes direction is the highest-reliability ST signal.</p>
+
+        <div class="guide-sub-hdr">🔮 Trend Forecast (Rule-Based)</div>
+        <p>Enter all indicator values from your chart. The engine scores up to 14 indicator groups and returns: <strong>Direction</strong> (Bullish → Bearish), <strong>Momentum State</strong> (Accelerating → Fading), <strong>Timing Signal</strong> (Enter / Wait / Avoid), and a <strong>Confidence %</strong>. Minimum required fields: Price, MA5, MA20, KDJ K/D/J, MACD DIF/DEA. Optional fields (BB, VWAP, Ichimoku, ADX, Volume) each add scoring weight.</p>
+        <p><strong>Confidence % guide:</strong> 75–100 = strong setup, full size. 55–74 = acceptable, 50–75% size. Below 55 = skip or minimal size. Below 40 = do not trade.</p>
+        <p><strong>WAIT FOR PULLBACK</strong> means price is stretched more than the timeframe threshold above MA20. The risk/reward is poor at current price — queue entry at MA20 or MA5 instead.</p>
+
+        <div class="guide-sub-hdr">🎯 Entry Optimizer</div>
+        <p>Enter Price, MA20, MA5, ATR, KDJ and account size. The tool outputs a <strong>Protected Zone</strong> (MA20 to MA20+2×ATR — the safest buy area), <strong>Ideal Entry</strong> price, <strong>Stop Loss</strong>, and <strong>TP1/2/3</strong> targets. It also checks 5 entry conditions and gives a HIGH / MEDIUM / LOW probability verdict. Use this after Trend Forecast confirms PROCEED or ENTER NOW.</p>
+
+        <div class="guide-sub-hdr">🕯️ Candle Pattern Scanner</div>
+        <p>Enter OHLC for up to 3 bars (current + 2 prior). The scanner identifies 18 professional patterns across single-bar (Hammer, Shooting Star, Doji, Marubozu), two-bar (Engulfing, Tweezer, Inside Bar, Harami) and three-bar (Morning/Evening Star, Three Soldiers/Crows) setups. Each pattern shows its trade action, entry price, stop loss, and reliability rating (★★★ = high, ★★☆ = moderate, ★☆☆ = weak). Always combine with the Trend Forecast direction — a bullish pattern in a BEARISH forecast has low probability.</p>
+
+        <div class="guide-sub-hdr">⭐ Reliability ratings explained</div>
+        <ul>
+          <li><strong>★★★ High</strong> — 60–70%+ historical win rate in correct context. Enter with normal size on next candle confirmation.</li>
+          <li><strong>★★☆ Moderate</strong> — Requires at least one additional confirmation (volume above average, at S/R zone, KDJ oversold/overbought). Use 50% size.</li>
+          <li><strong>★☆☆ Weak / Early</strong> — Do not trade on pattern alone. Wait for the next candle to confirm direction first.</li>
+        </ul>
+
+        <div class="guide-sub-hdr">📐 Workflow — how to use Smart Tools together</div>
+        <ol>
+          <li>Run <strong>MA or EMA Calc</strong> first — then tap "→ Smart Tools Forecast" to auto-fill all values</li>
+          <li>Run <strong>Trend Forecast</strong> — if PROCEED or ENTER NOW, continue to step 3. If WATCH or AVOID, stop here.</li>
+          <li>Run <strong>Entry Optimizer</strong> — confirm price is inside the Protected Zone. Note the Ideal Entry and Stop Loss.</li>
+          <li>Run <strong>Candle Scanner</strong> — enter the last 2–3 candles. Look for a bullish pattern (Hammer, Engulfing, Morning Star) to confirm entry timing.</li>
+          <li>Enter the trade with the position size recommended by the Forecast confidence score.</li>
+        </ol>
+
+      </div>
+    </div>
+  </div><!-- /g-smarttools -->
 
 </div><!-- /panel-guide -->
 
