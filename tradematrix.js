@@ -1009,7 +1009,7 @@ if (context === 'gold' && maCtx && maCtx.ma20) {
 }
 
 box.innerHTML = `
-    \${goldProtectedZoneHtml}
+    ${goldProtectedZoneHtml}
     <div class="prow entry">
       <span class="prow-label">📍 Ideal Entry</span>
       <span class="prow-val accent">\${price.toFixed(dp)}</span>
