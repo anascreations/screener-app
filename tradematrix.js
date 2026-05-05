@@ -956,10 +956,63 @@ kellyEl.innerHTML = `
 } else {
 if (kellyEl) kellyEl.style.display = 'none';
 }
+// ── Gold Protected Zone block ─────────────────────────────────────
+let goldProtectedZoneHtml = '';
+if (context === 'gold' && maCtx && maCtx.ma20) {
+  const gZoneLow  = maCtx.ma20;
+  const gZoneHigh = +(maCtx.ma20 + atr * 2).toFixed(2);
+  const gIdeal    = maCtx.ma5
+      ? +Math.min(maCtx.ma5, maCtx.ma20 + atr * 0.8).toFixed(2)
+      : +(maCtx.ma20 + atr * 0.5).toFixed(2);
+  const gInZone   = price >= gZoneLow && price <= gZoneHigh;
+  const gZoneCol  = gInZone ? 'var(--green)' : price < gZoneLow ? 'var(--red)' : 'var(--yellow)';
+  const gBandPct  = Math.min(97, Math.max(3, (price - gZoneLow) / Math.max(gZoneHigh - gZoneLow, 1) * 100));
+  const gZoneStat = gInZone
+    ? '✅ Price is INSIDE the Protected Zone — this is the safest buy area for gold. Support (EMA21) is close below and room to run above.'
+    : price < gZoneLow
+    ? '🔴 Price BELOW EMA21 — key support broken. Avoid new long entries. Wait for price to reclaim EMA21 before considering a buy.'
+    : `⚠️ Price is ABOVE the Protected Zone — ${((price - gZoneHigh)/price*100).toFixed(1)}% extended past EMA21+2×ATR. Chasing here means wide stop and poor R:R. Wait for a pullback to the zone.`;
+  goldProtectedZoneHtml = `
+    <div style="border:1.5px solid ${gZoneCol};border-radius:8px;padding:.7rem .8rem;margin-bottom:.65rem;background:rgba(0,0,0,.07);">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;">
+        <span style="font-size:16px;">🛡️</span>
+        <span style="font-family:var(--head);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${gZoneCol};">GOLD PROTECTED ZONE</span>
+        ${gInZone ? '<span style="font-size:10px;padding:1px 8px;border-radius:10px;background:rgba(0,232,122,.15);color:var(--green);font-weight:600;border:1px solid var(--green);">◀ YOU ARE HERE</span>' : ''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-family:var(--mono);margin-bottom:.5rem;">
+        <div style="padding:.4rem .55rem;background:rgba(0,0,0,.1);border-radius:5px;">
+          <div style="font-size:9px;color:var(--dim);letter-spacing:.08em;margin-bottom:2px;">ZONE FLOOR — EMA21</div>
+          <div style="color:var(--accent);font-weight:700;font-size:14px;">$\${gZoneLow.toFixed(2)}</div>
+        </div>
+        <div style="padding:.4rem .55rem;background:rgba(0,0,0,.1);border-radius:5px;">
+          <div style="font-size:9px;color:var(--dim);letter-spacing:.08em;margin-bottom:2px;">ZONE CEILING — EMA21 + 2×ATR</div>
+          <div style="color:var(--accent);font-weight:700;font-size:14px;">$\${gZoneHigh.toFixed(2)}</div>
+        </div>
+        <div style="padding:.4rem .55rem;background:rgba(245,200,66,.08);border-radius:5px;border:1px solid rgba(245,200,66,.25);">
+          <div style="font-size:9px;color:var(--dim);letter-spacing:.08em;margin-bottom:2px;">IDEAL ENTRY (EMA8 / 0.8×ATR)</div>
+          <div style="color:var(--yellow);font-weight:700;font-size:18px;">$\${gIdeal.toFixed(2)}</div>
+        </div>
+        <div style="padding:.4rem .55rem;background:rgba(0,0,0,.08);border-radius:5px;border:1px solid ${gZoneCol}33;">
+          <div style="font-size:9px;color:var(--dim);letter-spacing:.08em;margin-bottom:2px;">CURRENT PRICE</div>
+          <div style="color:${gZoneCol};font-weight:700;font-size:18px;">$\${price.toFixed(2)}</div>
+        </div>
+      </div>
+      <div style="position:relative;height:10px;background:var(--border);border-radius:5px;overflow:visible;margin:.3rem 0;">
+        <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,232,122,.2) 0%,rgba(0,200,240,.2) 50%,rgba(245,200,66,.2) 100%);border-radius:5px;"></div>
+        <div style="position:absolute;top:-3px;bottom:-3px;width:4px;background:${gZoneCol};border-radius:2px;box-shadow:0 0 6px ${gZoneCol};left:\${gBandPct}%;transform:translateX(-50%);"></div>
+      </div>
+      <div style="font-size:12px;line-height:1.6;color:${gInZone ? 'var(--green)' : price < gZoneLow ? 'var(--red)' : 'var(--yellow)'};margin-top:.35rem;">\${gZoneStat}</div>
+      <div style="font-size:11px;color:var(--dim);margin-top:.3rem;line-height:1.55;padding:.35rem .5rem;background:rgba(0,0,0,.08);border-radius:5px;">
+        💡 <strong style="color:var(--text);">Why "Protected"?</strong> EMA21 acts as gold's gravitational support floor. When price is in this zone (between EMA21 and EMA21+2×ATR), a bounce is statistically likely because institutional buyers typically defend EMA21. Your stop loss sits just below EMA21, keeping risk tight while the reward has full room to develop.
+      </div>
+    </div>`;
+}
+
 box.innerHTML = `
+    \${goldProtectedZoneHtml}
     <div class="prow entry">
       <span class="prow-label">📍 Ideal Entry</span>
-      <span class="prow-val accent">${price.toFixed(dp)}</span>
+      <span class="prow-val accent">\${price.toFixed(dp)}</span>
       <span class="prow-note">Enter on confirmed close above — not on anticipation</span>
     </div>
     <div class="prow sl">
