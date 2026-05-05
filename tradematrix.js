@@ -1790,6 +1790,10 @@ const dea = num('gold-dea');
 const hist = num('gold-hist');
 const vol = num('gold-vol');
 const atr = num('gold-atr');
+const bbu  = num('gold-bbu');
+const bbm  = num('gold-bbm');
+const bbl  = num('gold-bbl');
+const vwap = num('gold-vwap');
 const dxyDir = (typeof sel === 'function' ? sel('gold-dxy-dir') : null) || (document.getElementById('gold-dxy-dir') ? document.getElementById('gold-dxy-dir').value : '');
 const fibH = num('gold-fibh');
 const fibL = num('gold-fibl');
@@ -1864,12 +1868,35 @@ eng.add(volS ? volS.pass : null, 3);
 // Context
 eng.add(dxyPass, 4);
 eng.add(sessPass, 3);
+// BB Position scoring (8 pts)
+let bbPass = null, bbPos = null, bbLabel = '—', bbZone = '—';
+if (bbu != null && bbl != null && bbu > bbl) {
+  const bbRange = bbu - bbl;
+  bbPos = ((price - bbl) / bbRange) * 100;
+  if (bbPos < 0) { bbPass = false; bbLabel = `🔴 Price below BB Lower ($${bbl.toFixed(2)}) — extreme bearish extension`; bbZone = 'Below Band'; }
+  else if (bbPos <= 20) { bbPass = true; bbLabel = `✅ Near BB Lower ($${bbl.toFixed(2)}) — oversold bounce zone`; bbZone = 'Lower Zone'; }
+  else if (bbPos <= 50) { bbPass = null; bbLabel = `Price in BB lower half (${bbPos.toFixed(0)}%) — bearish bias`; bbZone = 'Lower Half'; }
+  else if (bbPos <= 80) { bbPass = true; bbLabel = `✅ BB upper half (${bbPos.toFixed(0)}%) — bullish momentum zone`; bbZone = 'Upper Half'; }
+  else if (bbPos <= 100) { bbPass = null; bbLabel = `Near BB Upper ($${bbu.toFixed(2)}) — overbought caution`; bbZone = 'Upper Zone'; }
+  else { bbPass = false; bbLabel = `Price above BB Upper — extreme overbought`; bbZone = 'Above Band'; }
+  eng.add(bbPass, 8);
+}
+// VWAP scoring (6 pts)
+let vwapPass = null, vwapLabel = '—', vwapDist = null;
+if (vwap != null) {
+  vwapDist = ((price - vwap) / vwap * 100);
+  vwapPass = price > vwap ? true : false;
+  vwapLabel = price > vwap
+    ? `✅ Price $${price.toFixed(2)} above VWAP $${vwap.toFixed(2)} (+${vwapDist.toFixed(2)}%) — intraday bullish`
+    : `🔴 Price $${price.toFixed(2)} below VWAP $${vwap.toFixed(2)} (${vwapDist.toFixed(2)}%) — intraday bearish`;
+  eng.add(vwapPass, 6);
+}
 let penalty = 0;
 if (f1_stretch > 6) penalty = -18;
 else if (f1_stretch > 4) penalty = -10;
 else if (f1_stretch > 2) penalty = -4;
 if (!macroPass) penalty -= 10;
-if (tdWarn) penalty -= 12;             // TD exhaustion warning
+if (tdWarn) penalty -= 12;
 const adjScore = Math.max(0, Math.min(100, eng.result() + penalty));
 const grade = getGrade(e21AboveE55 || 0);
 const macroTrendOk = f3_pass && macroPass;
@@ -2189,11 +2216,255 @@ sessGrid.innerHTML = sessData.map(s =>
       <div style="font-size:9px;color:var(--muted);margin-top:.1rem">${s.note}</div>
     </div>`
 ).join('');
+// ════════════════════════════════════════════════════
+// GOLD FORECAST SECTION — Smart Tools style output
+// ════════════════════════════════════════════════════
+(function renderGoldForecast() {
+  const el = $('gold-forecast-card');
+  if (!el) return;
+  el.style.display = '';
+
+  // ── Direction ──────────────────────────────────────
+  const net = (adjScore - 50) * 2;
+  let goldDir, dirCol, dirCls;
+  if      (adjScore >= 78) { goldDir = 'BULLISH';      dirCol = 'var(--green)';  dirCls = 'proceed'; }
+  else if (adjScore >= 62) { goldDir = 'LEANING BULL'; dirCol = 'var(--accent)'; dirCls = 'proceed'; }
+  else if (adjScore >= 42) { goldDir = 'NEUTRAL';       dirCol = 'var(--yellow)'; dirCls = 'watch';   }
+  else if (adjScore >= 28) { goldDir = 'LEANING BEAR'; dirCol = 'var(--orange)'; dirCls = 'watch';   }
+  else                      { goldDir = 'BEARISH';      dirCol = 'var(--red)';    dirCls = 'skip';    }
+
+  // ── Gold-specific direction descriptions ──────────
+  const gdirDesc = {
+    'BULLISH': {
+      icon: '🟡',
+      title: 'Strong Bullish — All gold filters aligned upward',
+      detail: 'EMA stack bullish, momentum oscillators (KDJ, RSI, MACD) all positive, DMI confirms buyers dominant. Gold is in a high-probability long setup. Dollar weakness or geopolitical risk adds tailwind.',
+      action: 'Enter near EMA21 or MA5 support. Stop loss 1.8×ATR below EMA21. Do not chase spikes — gold mean-reverts fast after over-extension.'
+    },
+    'LEANING BULL': {
+      icon: '🟡',
+      title: 'Tilted Bullish — More bull signals than bear',
+      detail: 'Majority of EMA and momentum filters are bullish but not fully aligned. One or two indicators are neutral or lagging. The bias is upward but conviction is not maximum.',
+      action: 'Enter with 50–75% position size. Wait for KDJ cross above 50 or price to reclaim EMA8 before adding. Tighter stop at 1.5×ATR.'
+    },
+    'NEUTRAL': {
+      icon: '⚪',
+      title: 'Mixed — Gold is in consolidation or transition',
+      detail: 'No clear directional edge. Gold may be coiling before a breakout or building a base after a decline. ADX below 25 suggests no trending momentum. Risk of choppy, unrewarding price action.',
+      action: 'Do not trade. Watch for EMA21 reclaim with volume, or a bearish break below BB Lower. Either trigger confirms the next direction.'
+    },
+    'LEANING BEAR': {
+      icon: '🟠',
+      title: 'Tilted Bearish — Downside risk elevated for gold',
+      detail: 'More bearish filters than bullish. EMA stack partially broken, momentum indicators weakening. MDI beginning to dominate PDI. The statistical edge has shifted against longs.',
+      action: 'Avoid new long entries. If holding gold, tighten stop to EMA21. Exit on any close below BB Lower band or MA20.'
+    },
+    'BEARISH': {
+      icon: '🔴',
+      title: 'Strong Bearish — Gold in confirmed downtrend',
+      detail: 'Price below EMA8, EMA21, and EMA55. MDI dominates PDI. RSI, KDJ, and MACD all bearish. SAR above price confirms trend reversal. This is the highest-risk environment for long trades — you are fighting every technical indicator.',
+      action: 'Do not buy gold. Protect any existing positions with tight stops. Wait for RSI to reach oversold (<30), KDJ to cross bullish from below 20, and price to reclaim EMA8 before considering re-entry.'
+    }
+  };
+
+  // ── Momentum state ────────────────────────────────
+  const adxStrong = adxV != null && adxV >= 28;
+  const dmiAligned = dmiS?.pass === true;
+  const kdjBull = kdj?.pass === true;
+  const macdBull = macd?.pass === true;
+  const allMomBull = kdjBull && macdBull;
+  const rsiBull = rsiS?.pass === true;
+  let goldMom;
+  if (adxStrong && dmiAligned && allMomBull && rsiBull) goldMom = 'ACCELERATING';
+  else if (adxStrong && dmiAligned && (kdjBull || macdBull)) goldMom = 'STEADY';
+  else if (!f1_proximity && (kdjBull || rsiBull)) goldMom = 'RECOVERING';
+  else if (f1_proximity && !kdjBull && !macdBull) goldMom = 'FADING';
+  else goldMom = 'MIXED';
+
+  const gmomDesc = {
+    'ACCELERATING': { icon: '🚀', tip: 'ADX strong + DMI aligned + KDJ/MACD bullish. Ideal for trailing stops. Gold can run 3–5% in this state without pullback.' },
+    'STEADY':       { icon: '✅', tip: 'Trend healthy with good structure. Normal entry with ATR×1.8 stop. Gold often extends 2–3% before first pullback.' },
+    'RECOVERING':   { icon: '🔄', tip: 'Oscillators turning bullish but price below EMA21. Wait for price to close above EMA21 before entering. A false recovery fails here ~40% of the time.' },
+    'FADING':       { icon: '⚠️', tip: 'EMA stack still intact but KDJ and MACD weakening. Take partial profit. Do not add. Watch for MACD bearish cross as exit signal.' },
+    'MIXED':        { icon: '〰️', tip: 'Conflicting signals. Gold in consolidation or transition zone. Reduce exposure. Wait for ADX > 28 to confirm a new directional move.' }
+  };
+
+  // ── Timing / entry signal ─────────────────────────
+  let goldTiming, timingKey;
+  const stacked = f1_proximity && f2_pass && f3_pass;
+  if (!stacked || adjScore < 35 || tdWarn) {
+    goldTiming = tdWarn ? `🛑 TD ${tdN} EXHAUSTION — Do not enter. Reversal zone.` : '🔴 AVOID LONGS — EMA structure broken or score too low';
+    timingKey = 'AVOID';
+  } else if (f1_stretch > 5) {
+    goldTiming = `⏳ WAIT FOR PULLBACK — Price ${f1_stretch.toFixed(1)}% stretched above EMA21. Queue near EMA21 ($${e21.toFixed(2)}) or BB Mid ($${bbm ? bbm.toFixed(2) : 'N/A'})`;
+    timingKey = 'PULLBACK';
+  } else if (adjScore >= 65 && kdjBull) {
+    goldTiming = '🎯 ENTER NOW — EMA stack aligned + KDJ bullish + acceptable stretch';
+    timingKey = 'ENTER';
+  } else if (adjScore >= 50) {
+    goldTiming = '✅ PROCEED — Setup valid. Standard position size.';
+    timingKey = 'PROCEED';
+  } else {
+    goldTiming = '👀 WATCH — Partial setup. Wait for more indicators to confirm.';
+    timingKey = 'WATCH';
+  }
+
+  // ── Timing descriptions ───────────────────────────
+  const timingDescs = {
+    'ENTER':    {
+      headline: '🎯 ENTER NOW — What this means for Gold',
+      body: 'EMA21 is your nearest dynamic support, KDJ has crossed bullish from the support zone, and price stretch is acceptable (within 3% of EMA21). This is the optimal entry window for gold — you are buying near support rather than chasing a spike. Gold ATR is high (~$90+) so risk is real — set your stop immediately.',
+      steps: ['Enter at current price or wait for a 0.3–0.5% dip intraday', `Stop Loss: EMA21 ($${e21.toFixed(2)}) − 1.8×ATR = $${atr ? (e21 - atr * 1.8).toFixed(2) : '(enter ATR)'}`, 'Take 35% profit at TP1, move SL to entry price (breakeven)', 'Hold remaining with trailing stop below each new swing high']
+    },
+    'PULLBACK': {
+      headline: '⏳ WAIT FOR PULLBACK — Price stretched above EMA21',
+      body: `Gold price has moved ${f1_stretch.toFixed(1)}% above EMA21 ($${e21.toFixed(2)}). Gold is a mean-reverting instrument — after 4%+ stretches it typically snaps back to EMA21 or BB Mid before continuing. Entering now means your stop must be wide and your reward is compressed. The risk/reward is poor. The correct strategy is to <strong>wait for price to pull back to EMA21 or BB Mid</strong> — that is your entry trigger.`,
+      steps: [
+        `Do not buy yet — wait for price to return toward EMA21 ($${e21.toFixed(2)}) or BB Mid ($${bbm ? bbm.toFixed(2) : 'N/A'})`,
+        'Watch KDJ: when K drops below 50 during the pullback, then crosses back above D → that is the entry trigger',
+        `Ideal entry zone: EMA21 ($${e21.toFixed(2)}) ± 0.5% = $${(e21 * 0.995).toFixed(2)} – $${(e21 * 1.005).toFixed(2)}`,
+        'If price drops below EMA55 during the pullback — the setup is invalidated. Do not enter.'
+      ]
+    },
+    'PROCEED':  {
+      headline: '✅ PROCEED — Acceptable Gold Setup',
+      body: 'The setup meets minimum conditions. Price and EMA structure are bullish, some momentum confirmation present. Not the ideal entry (that would be closer to EMA21 on a pullback) but an acceptable one.',
+      steps: ['Enter at current price with 50–75% of planned position', `Stop: EMA21 ($${e21.toFixed(2)}) − 1.8×ATR`, 'Add the remaining 25–50% if price dips to EMA21 without breaking it', 'TP1 at 1×ATR above entry, trail the rest']
+    },
+    'WATCH':    {
+      headline: '👀 WATCH — Wait for Gold Setup to Complete',
+      body: 'Not enough indicators are aligned for a high-confidence gold entry. Gold is a volatile instrument — taking a low-confidence trade with ATR ~$90 per day means you can easily lose $90–180 per ounce on a false signal. The cost of waiting is zero. The cost of a bad gold trade is real.',
+      steps: ['Do not trade', 'Watch for: KDJ cross above 50, MACD histogram turning less negative, price above VWAP', 'ADX must rise above 25 to confirm a new directional move is developing', 'Only enter when at least 4 of 5 core conditions are confirmed']
+    },
+    'AVOID':    {
+      headline: '🔴 AVOID LONGS — Gold Structure Broken',
+      body: tdWarn ? `TD Sequential count of ${tdN} is in the exhaustion zone (9–13). This is a timing reversal signal — the current move is statistically overextended. Even if the daily trend is bullish, entering now risks catching the reversal. Gold often drops 2–5% after a TD 9 exhaustion signal.` : 'Too many structural filters have failed. Price is below EMA21 (or EMA55, or EMA200). MDI is dominating PDI. Going long here means fighting every indicator simultaneously.',
+      steps: ['Exit or reduce any long positions immediately', 'Do not open new long (buy) trades', 'Wait for: full EMA stack realignment + KDJ cross above 50 + MACD histogram turning positive', 'Minimum wait: 3–5 daily candles after conditions reset before re-evaluating']
+    }
+  };
+  const td = timingDescs[timingKey] || timingDescs['WATCH'];
+  const dd = gdirDesc[goldDir] || gdirDesc['NEUTRAL'];
+  const md = gmomDesc[goldMom] || gmomDesc['MIXED'];
+
+  // ── Short/medium/long narratives ─────────────────
+  const shortNarr = adjScore >= 65
+    ? `Price above EMA21 with ${goldMom === 'ACCELERATING' ? 'accelerating' : 'steady'} momentum. Expect continued upside toward EMA55 ($${e55.toFixed(2)})${e8 ? ` and EMA8 ($${e8.toFixed(2)})` : ''}. ${rsi != null && rsi > 60 ? 'RSI still has room before overbought.' : ''}`
+    : adjScore >= 42
+    ? `Gold in transition — mixed signals. Short-term bias ${f1_proximity ? 'slightly bullish (above EMA21)' : 'bearish (below EMA21)'}. Likely to consolidate between $${(price - (atr||100)).toFixed(0)} and $${(price + (atr||100)).toFixed(0)} before next directional move.`
+    : `Price below EMA21 ($${e21.toFixed(2)})${e8 ? ` and EMA8 ($${e8.toFixed(2)})` : ''}. Short-term momentum is bearish. Expect testing of lower supports: BB Lower ${bbl ? `$${bbl.toFixed(2)}` : '—'}, then EMA55 ($${e55.toFixed(2)}).`;
+
+  const medNarr = f2_pass && f3_pass
+    ? `EMA21 > EMA55 > EMA200 — medium-term trend structure bullish. Any pullback to EMA21 is a buying opportunity as long as EMA21 holds. ${adxV != null ? `ADX ${adxV.toFixed(1)} — trend ${adxV >= 28 ? 'confirmed strong' : 'weak, watch for false signals'}.` : ''} ${dmiS?.pass === true ? `PDI ${pdiV?.toFixed(1)} dominant — buyers structurally in control.` : `MDI ${mdiV?.toFixed(1)} dominant — sellers have medium-term edge.`}`
+    : !f2_pass && f3_pass
+    ? `EMA21 has crossed below EMA55 — medium-term structure weakening. Still above EMA200 (macro bull). Wait for EMA21 to reclaim EMA55 ($${e55.toFixed(2)}) for medium-term bull signal to restore.`
+    : `EMA55 below EMA200 — macro downtrend. Gold is in a structural correction. Medium-term target is EMA200 ($${e200.toFixed(2)}) as key support. Bounce possible but any rally is counter-trend.`;
+
+  const longNarr = macroPass
+    ? `Price above EMA200 ($${e200.toFixed(2)}) — institutional macro trend remains bullish. Long-term gold investors are not threatened. Use dips to EMA200 as long-term accumulation levels if macro thesis is intact.`
+    : `Price below EMA200 ($${e200.toFixed(2)}) — macro institutional trend has broken down. This is a significant structural warning. Long-term holders should reassess positions. Only a weekly close back above EMA200 restores the long-term bullish case.`;
+
+  // ── BB analysis ───────────────────────────────────
+  let bbAnalysis = '';
+  if (bbu != null && bbl != null && bbPos != null) {
+    const bbRange = bbu - bbl;
+    const bbWidth = (bbRange / (bbm || (bbu+bbl)/2) * 100);
+    const widthNote = bbWidth > 12 ? '🔥 Wide bands — high volatility expansion in progress. Large moves expected.' : bbWidth > 7 ? 'Normal bandwidth — typical gold volatility.' : '🔒 Narrow bands — squeeze forming. Watch for breakout direction.';
+    bbAnalysis = `
+    <div class="card" style="border-left:3px solid #FFD700;margin-top:.35rem;">
+      <div class="card-hdr" style="color:#FFD700;"><span class="ci">📊</span> Bollinger Bands — Price Position ${bbPos.toFixed(0)}%</div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.4rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;text-align:center;font-size:12px;">
+          <div style="padding:.4rem;border-radius:5px;background:rgba(240,58,74,.08);"><div style="color:var(--dim);font-size:10px;">BB UPPER</div><div style="color:var(--red);font-weight:600;">$${bbu.toFixed(2)}</div></div>
+          ${bbm ? `<div style="padding:.4rem;border-radius:5px;background:rgba(0,0,0,.08);"><div style="color:var(--dim);font-size:10px;">BB MID/MA20</div><div style="color:var(--text);font-weight:600;">$${bbm.toFixed(2)}</div></div>` : '<div></div>'}
+          <div style="padding:.4rem;border-radius:5px;background:rgba(0,232,122,.08);"><div style="color:var(--dim);font-size:10px;">BB LOWER</div><div style="color:var(--green);font-weight:600;">$${bbl.toFixed(2)}</div></div>
+        </div>
+        <div style="position:relative;height:12px;background:var(--border);border-radius:6px;overflow:hidden;margin:.2rem 0;">
+          <div style="position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(0,232,122,.2),rgba(245,200,66,.2),rgba(240,58,74,.2));"></div>
+          <div style="position:absolute;top:0;bottom:0;width:3px;background:#FFD700;border-radius:2px;left:${Math.min(Math.max(bbPos,1),98)}%;transform:translateX(-50%);"></div>
+        </div>
+        <div style="font-size:12px;color:var(--text);">${bbLabel}</div>
+        <div style="font-size:11px;color:var(--dim);">${widthNote}</div>
+        ${bbPos != null && bbPos <= 15 ? '<div style="padding:.35rem .6rem;border-radius:5px;background:rgba(0,232,122,.06);font-size:12px;color:var(--green);border-left:2px solid var(--green);">📈 Near BB Lower — historical bounce zone. Gold has mean-reversion tendency. Watch for reversal candle with volume confirmation before entering long.</div>' : ''}
+        ${bbPos != null && bbPos >= 85 ? '<div style="padding:.35rem .6rem;border-radius:5px;background:rgba(240,58,74,.06);font-size:12px;color:var(--red);border-left:2px solid var(--red);">⚠️ Near BB Upper — overbought caution. Gold may pull back to BB Mid before continuing. Do not chase here.</div>' : ''}
+      </div>
+    </div>`;
+  }
+
+  // ── VWAP analysis ─────────────────────────────────
+  let vwapAnalysis = '';
+  if (vwap != null && vwapDist != null) {
+    const vc = price > vwap ? 'var(--green)' : 'var(--red)';
+    vwapAnalysis = `
+    <div style="padding:.45rem .7rem;border-radius:6px;background:rgba(0,0,0,.08);border:1px solid var(--border);margin-top:.35rem;font-size:12px;display:flex;align-items:center;gap:.6rem;">
+      <span style="font-size:14px;">📍</span>
+      <span style="color:var(--dim);">VWAP</span>
+      <span style="font-weight:600;color:${vc};">$${vwap.toFixed(2)}</span>
+      <span style="color:${vc};">${vwapDist >= 0 ? '+' : ''}${vwapDist.toFixed(2)}%</span>
+      <span style="color:var(--dim);font-size:11px;">${vwapLabel}</span>
+    </div>`;
+  }
+
+  el.innerHTML = `
+    <!-- DIRECTION CARD -->
+    <div class="card" style="border-left:3px solid ${dirCol};margin-bottom:.4rem;">
+      <div class="card-hdr" style="color:${dirCol};">
+        <span style="font-size:14px;">${dd.icon}</span> <strong>${goldDir}</strong>
+        <span style="margin-left:.5rem;font-size:13px;color:var(--text);">${dd.title}</span>
+        <span style="margin-left:auto;font-size:18px;font-weight:700;color:${dirCol};">${adjScore.toFixed(0)}/100</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.4rem;">
+        <div style="font-size:13px;color:var(--text);line-height:1.65;">${dd.detail}</div>
+        <div style="font-size:12px;padding:.4rem .65rem;background:rgba(0,0,0,.1);border-radius:6px;border-left:2px solid ${dirCol};color:var(--dim);">
+          <strong style="color:${dirCol};">What to do → </strong>${dd.action}
+        </div>
+      </div>
+    </div>
+
+    <!-- MOMENTUM CARD -->
+    <div class="card" style="border-left:3px solid var(--accent);margin-bottom:.4rem;">
+      <div class="card-hdr"><span class="ci">${md.icon}</span> Gold Momentum: <span style="color:var(--accent);font-weight:700;">${goldMom}</span></div>
+      <div class="card-body" style="font-size:12px;color:var(--dim);line-height:1.6;">${md.tip}</div>
+    </div>
+
+    <!-- TIMING CARD -->
+    <div class="card" style="border-left:3px solid var(--yellow);margin-bottom:.4rem;">
+      <div class="card-hdr" style="color:var(--yellow);"><span class="ci">📖</span> ${td.headline}</div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.4rem;">
+        <div style="font-size:13px;color:var(--text);line-height:1.65;">${td.body}</div>
+        <div style="font-size:12px;color:var(--dim);">
+          <div style="color:var(--yellow);font-weight:600;margin-bottom:.3rem;">Step-by-step:</div>
+          ${td.steps.map((s,i) => `<div style="display:flex;gap:.5rem;padding:.2rem 0;border-bottom:1px solid var(--border);align-items:flex-start;"><span style="color:var(--yellow);font-weight:700;min-width:16px;">${i+1}.</span><span>${s}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    ${bbAnalysis}
+    ${vwapAnalysis}
+
+    <!-- NARRATIVES CARD -->
+    <div class="card" style="margin-top:.4rem;">
+      <div class="card-hdr"><span class="ci">📈</span> Gold Forecast — What happens next?</div>
+      <div class="card-body">
+        <div style="padding:.45rem 0;border-bottom:1px solid var(--border);">
+          <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.2rem;">⏱ Short term (1–3 daily candles)</div>
+          <div style="font-size:12.5px;color:var(--text);line-height:1.6;">${shortNarr}</div>
+        </div>
+        <div style="padding:.45rem 0;border-bottom:1px solid var(--border);">
+          <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);margin-bottom:.2rem;">📅 Medium term (1–3 weeks)</div>
+          <div style="font-size:12.5px;color:var(--text);line-height:1.6;">${medNarr}</div>
+        </div>
+        <div style="padding:.45rem 0;">
+          <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:.2rem;">🌐 Long term (macro trend)</div>
+          <div style="font-size:12.5px;color:var(--text);line-height:1.6;">${longNarr}</div>
+        </div>
+      </div>
+    </div>`;
+})();
 buildTradePlan('gold-price-block', 'gold-tradeplan-card', price, atr, accountSz, riskPct, 'gold');
 }
 function resetGold() {
 ['gold-price','gold-e8','gold-e21','gold-e55','gold-e200',
-'gold-sar','gold-td',
+'gold-sar','gold-td','gold-bbu','gold-bbm','gold-bbl','gold-vwap',
 'gold-rsi','gold-adx','gold-pdi','gold-mdi','gold-adxr',
 'gold-k','gold-d','gold-j',
 'gold-dif','gold-dea','gold-hist',
