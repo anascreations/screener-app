@@ -1012,7 +1012,7 @@ box.innerHTML = `
     ${goldProtectedZoneHtml}
     <div class="prow entry">
       <span class="prow-label">📍 Ideal Entry</span>
-      <span class="prow-val accent">\${price.toFixed(dp)}</span>
+      <span class="prow-val accent">${price.toFixed(dp)}</span>
       <span class="prow-note">Enter on confirmed close above — not on anticipation</span>
     </div>
     <div class="prow sl">
