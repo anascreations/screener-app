@@ -6963,18 +6963,21 @@ window.addEventListener('resize',function(){
 
 
 <!-- ══════════════════════════════════════
-     SCROLL TO TOP BUTTON
+     SCROLL BUTTONS — UP & DOWN
 ══════════════════════════════════════ -->
-<button id="tm-scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Scroll to top">
-  ▲
-</button>
+<div id="tm-scroll-btns" style="position:fixed;bottom:24px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:8px;opacity:0;transform:translateY(16px) scale(0.85);transition:opacity .25s ease,transform .25s ease;pointer-events:none;">
+  <button id="tm-scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Scroll to top">▲</button>
+  <button id="tm-scroll-bot" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Scroll to bottom" aria-label="Scroll to bottom">▼</button>
+</div>
 
 <style>
-#tm-scroll-top {
-  position: fixed;
-  bottom: 24px;
-  right: 18px;
-  z-index: 9999;
+#tm-scroll-btns.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+#tm-scroll-top,
+#tm-scroll-bot {
   width: 46px;
   height: 46px;
   border-radius: 50%;
@@ -6985,27 +6988,25 @@ window.addEventListener('resize',function(){
   line-height: 1;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(124,58,237,0.35);
-  opacity: 0;
-  transform: translateY(16px) scale(0.85);
-  transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s;
-  pointer-events: none;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-#tm-scroll-top.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-#tm-scroll-top:hover {
+#tm-scroll-top:hover,
+#tm-scroll-bot:hover {
   background: var(--accent, #7c3aed);
   color: #fff;
 }
-[data-theme="light"] #tm-scroll-top {
+[data-theme="light"] #tm-scroll-top,
+[data-theme="light"] #tm-scroll-bot {
   background: #fff;
   color: var(--accent, #7c3aed);
   border-color: var(--accent, #7c3aed);
   box-shadow: 0 4px 18px rgba(124,58,237,0.18);
 }
-[data-theme="light"] #tm-scroll-top:hover {
+[data-theme="light"] #tm-scroll-top:hover,
+[data-theme="light"] #tm-scroll-bot:hover {
   background: var(--accent, #7c3aed);
   color: #fff;
 }
@@ -7013,14 +7014,25 @@ window.addEventListener('resize',function(){
 
 <script>
 (function(){
-  var btn = document.getElementById('tm-scroll-top');
-  window.addEventListener('scroll', function(){
-    if (window.scrollY > 280) {
-      btn.classList.add('visible');
+  var wrap = document.getElementById('tm-scroll-btns');
+  var botBtn = document.getElementById('tm-scroll-bot');
+  function updateBtns() {
+    var atTop    = window.scrollY < 280;
+    var atBottom = (window.scrollY + window.innerHeight) >= document.body.scrollHeight - 60;
+    if (!atTop || !atBottom) {
+      wrap.classList.add('visible');
     } else {
-      btn.classList.remove('visible');
+      wrap.classList.remove('visible');
     }
-  }, { passive: true });
+    // Dim the down button when at the bottom, up button when at top
+    botBtn.style.opacity = atBottom ? '0.35' : '1';
+    botBtn.style.pointerEvents = atBottom ? 'none' : 'auto';
+    var topBtn = document.getElementById('tm-scroll-top');
+    topBtn.style.opacity = atTop ? '0.35' : '1';
+    topBtn.style.pointerEvents = atTop ? 'none' : 'auto';
+  }
+  window.addEventListener('scroll', updateBtns, { passive: true });
+  updateBtns();
 })();
 </script>
 
