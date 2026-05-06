@@ -1310,6 +1310,44 @@ if (pass === true) score += w;
 else if (pass === 'warn') score += w * 0.5;
 }
 
+}
+
+// 3-Stop option display
+function buildThreeStopOptions(price, atr, structLevel, dp) {
+  if (!price || !atr) return '';
+  dp = dp || 4;
+  const fmtP = v => v.toFixed(dp);
+  const slA = price - atr * 1.5, slS = structLevel ? structLevel - atr * 0.15 : price - atr * 1.2, slT = price - atr * 0.6;
+  return '<div style="margin-top:.65rem;">' +
+    '<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.4rem;">🛑 STOP LOSS OPTIONS — Choose One Style</div>' +
+    '<div style="display:grid;gap:.3rem;">' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--red);">' +
+      '<span style="font-size:11.5px;font-weight:600;">ATR×1.5 (Standard)</span><span style="font-size:11px;color:var(--dim);">Hit ~22% of valid setups</span><span style="font-family:var(--mono);color:var(--red);font-weight:600;">' + fmtP(slA) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--green);">' +
+      '<span style="font-size:11.5px;font-weight:600;">Structure (Recommended)</span><span style="font-size:11px;color:var(--dim);">Below MA20/EMA21 — hit ~12%</span><span style="font-family:var(--mono);color:var(--green);font-weight:600;">' + fmtP(slS) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--accent);">' +
+      '<span style="font-size:11.5px;font-weight:600;">Tight (Scalp only)</span><span style="font-size:11px;color:var(--dim);">ATR×0.6 — for 1m/5m only</span><span style="font-family:var(--mono);color:var(--accent);font-weight:600;">' + fmtP(slT) + '</span></div>' +
+    '</div></div>';
+}
+
+// Cross-tab conflict tracker
+const _tmLastCalc = { ma: null, ema: null };
+function tmCheckCrossTabConflict(tab, decision, score) {
+  _tmLastCalc[tab] = { decision, score, ts: Date.now() };
+  const other = tab === 'ma' ? 'ema' : 'ma';
+  const o = _tmLastCalc[other];
+  if (!o || (Date.now() - o.ts) > 1800000) return '';
+  const conflict = (decision === 'PROCEED' && o.decision === 'SKIP') || (decision === 'SKIP' && o.decision === 'PROCEED');
+  if (!conflict) return '';
+  const dom = score >= o.score ? tab.toUpperCase() : other.toUpperCase();
+  return '<div style="margin-top:.5rem;padding:.5rem .7rem;border-radius:7px;border-left:3px solid var(--orange);background:rgba(255,112,67,.07);">' +
+    '<div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:.15rem;">⚠️ CROSS-TAB SIGNAL CONFLICT</div>' +
+    '<div style="font-size:11.5px;color:var(--text);line-height:1.6;">MA says <strong>' + (_tmLastCalc.ma?.decision||'—') + '</strong> · EMA says <strong>' + (_tmLastCalc.ema?.decision||'—') + '</strong>. ' +
+    'Trust <strong style="color:var(--accent)">' + dom + '</strong> (higher score). Reduce to 50% size until both align.</div></div>';
+}
+
+function fmtPrice(v, dp) { if (v == null) return '—'; return v.toFixed(dp != null ? dp : (v > 100 ? 2 : v > 1 ? 4 : 6)); }
+
 /* ══════════════════════════════════════════════════════════
    ENHANCED HELPERS — Slope, Crossover, Fan, Divergence,
    VWAP Bands, EMA Compression, Scaled Entry, 3-Stop Display
@@ -1423,48 +1461,14 @@ function buildScaledEntryPlan(score, price, atr, ref1, ref2, dp) {
   return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04);">' +
     '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);font-weight:600;margin-bottom:.35rem;">👀 LOW CONVICTION — PAPER TRADE ONLY</div>' +
     '<div style="font-size:12px;color:var(--dim);line-height:1.6;">Score below threshold. Wait for KDJ fresh cross + volume ≥1.5× + ADX rising above 25.</div></div>';
-}
 
-// 3-Stop option display
-function buildThreeStopOptions(price, atr, structLevel, dp) {
-  if (!price || !atr) return '';
-  dp = dp || 4;
-  const fmtP = v => v.toFixed(dp);
-  const slA = price - atr * 1.5, slS = structLevel ? structLevel - atr * 0.15 : price - atr * 1.2, slT = price - atr * 0.6;
-  return '<div style="margin-top:.65rem;">' +
-    '<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.4rem;">🛑 STOP LOSS OPTIONS — Choose One Style</div>' +
-    '<div style="display:grid;gap:.3rem;">' +
-    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--red);">' +
-      '<span style="font-size:11.5px;font-weight:600;">ATR×1.5 (Standard)</span><span style="font-size:11px;color:var(--dim);">Hit ~22% of valid setups</span><span style="font-family:var(--mono);color:var(--red);font-weight:600;">' + fmtP(slA) + '</span></div>' +
-    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--green);">' +
-      '<span style="font-size:11.5px;font-weight:600;">Structure (Recommended)</span><span style="font-size:11px;color:var(--dim);">Below MA20/EMA21 — hit ~12%</span><span style="font-family:var(--mono);color:var(--green);font-weight:600;">' + fmtP(slS) + '</span></div>' +
-    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--accent);">' +
-      '<span style="font-size:11.5px;font-weight:600;">Tight (Scalp only)</span><span style="font-size:11px;color:var(--dim);">ATR×0.6 — for 1m/5m only</span><span style="font-family:var(--mono);color:var(--accent);font-weight:600;">' + fmtP(slT) + '</span></div>' +
-    '</div></div>';
-}
 
-// Cross-tab conflict tracker
-const _tmLastCalc = { ma: null, ema: null };
-function tmCheckCrossTabConflict(tab, decision, score) {
-  _tmLastCalc[tab] = { decision, score, ts: Date.now() };
-  const other = tab === 'ma' ? 'ema' : 'ma';
-  const o = _tmLastCalc[other];
-  if (!o || (Date.now() - o.ts) > 1800000) return '';
-  const conflict = (decision === 'PROCEED' && o.decision === 'SKIP') || (decision === 'SKIP' && o.decision === 'PROCEED');
-  if (!conflict) return '';
-  const dom = score >= o.score ? tab.toUpperCase() : other.toUpperCase();
-  return '<div style="margin-top:.5rem;padding:.5rem .7rem;border-radius:7px;border-left:3px solid var(--orange);background:rgba(255,112,67,.07);">' +
-    '<div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:.15rem;">⚠️ CROSS-TAB SIGNAL CONFLICT</div>' +
-    '<div style="font-size:11.5px;color:var(--text);line-height:1.6;">MA says <strong>' + (_tmLastCalc.ma?.decision||'—') + '</strong> · EMA says <strong>' + (_tmLastCalc.ema?.decision||'—') + '</strong>. ' +
-    'Trust <strong style="color:var(--accent)">' + dom + '</strong> (higher score). Reduce to 50% size until both align.</div></div>';
-}
-
-function fmtPrice(v, dp) { if (v == null) return '—'; return v.toFixed(dp != null ? dp : (v > 100 ? 2 : v > 1 ? 4 : 6)); }
-
-;
 const result = () => total > 0 ? (score / total) * 100 : 0;
 return { add, result, getTotal: () => total, getScore: () => score };
 }
+
+
+
 function maCalc() {
 const price=num('ma-price'),ma5=num('ma-ma5'),ma20=num('ma-ma20'),ma50=num('ma-ma50');
 if(!price||!ma5||!ma20||!ma50){$('ma-result').style.display='none';return;}
