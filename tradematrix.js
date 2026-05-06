@@ -1308,57 +1308,15 @@ if (pass == null) return;
 total += w;
 if (pass === true) score += w;
 else if (pass === 'warn') score += w * 0.5;
+};
+const result = () => total > 0 ? (score / total) * 100 : 0;
+return { add, result, getTotal: () => total, getScore: () => score };
 }
-
-}
-
-// 3-Stop option display
-function buildThreeStopOptions(price, atr, structLevel, dp) {
-  if (!price || !atr) return '';
-  dp = dp || 4;
-  const fmtP = v => v.toFixed(dp);
-  const slA = price - atr * 1.5, slS = structLevel ? structLevel - atr * 0.15 : price - atr * 1.2, slT = price - atr * 0.6;
-  return '<div style="margin-top:.65rem;">' +
-    '<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.4rem;">🛑 STOP LOSS OPTIONS — Choose One Style</div>' +
-    '<div style="display:grid;gap:.3rem;">' +
-    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--red);">' +
-      '<span style="font-size:11.5px;font-weight:600;">ATR×1.5 (Standard)</span><span style="font-size:11px;color:var(--dim);">Hit ~22% of valid setups</span><span style="font-family:var(--mono);color:var(--red);font-weight:600;">' + fmtP(slA) + '</span></div>' +
-    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--green);">' +
-      '<span style="font-size:11.5px;font-weight:600;">Structure (Recommended)</span><span style="font-size:11px;color:var(--dim);">Below MA20/EMA21 — hit ~12%</span><span style="font-family:var(--mono);color:var(--green);font-weight:600;">' + fmtP(slS) + '</span></div>' +
-    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--accent);">' +
-      '<span style="font-size:11.5px;font-weight:600;">Tight (Scalp only)</span><span style="font-size:11px;color:var(--dim);">ATR×0.6 — for 1m/5m only</span><span style="font-family:var(--mono);color:var(--accent);font-weight:600;">' + fmtP(slT) + '</span></div>' +
-    '</div></div>';
-}
-
-// Cross-tab conflict tracker
-const _tmLastCalc = { ma: null, ema: null };
-function tmCheckCrossTabConflict(tab, decision, score) {
-  _tmLastCalc[tab] = { decision, score, ts: Date.now() };
-  const other = tab === 'ma' ? 'ema' : 'ma';
-  const o = _tmLastCalc[other];
-  if (!o || (Date.now() - o.ts) > 1800000) return '';
-  const conflict = (decision === 'PROCEED' && o.decision === 'SKIP') || (decision === 'SKIP' && o.decision === 'PROCEED');
-  if (!conflict) return '';
-  const dom = score >= o.score ? tab.toUpperCase() : other.toUpperCase();
-  return '<div style="margin-top:.5rem;padding:.5rem .7rem;border-radius:7px;border-left:3px solid var(--orange);background:rgba(255,112,67,.07);">' +
-    '<div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:.15rem;">⚠️ CROSS-TAB SIGNAL CONFLICT</div>' +
-    '<div style="font-size:11.5px;color:var(--text);line-height:1.6;">MA says <strong>' + (_tmLastCalc.ma?.decision||'—') + '</strong> · EMA says <strong>' + (_tmLastCalc.ema?.decision||'—') + '</strong>. ' +
-    'Trust <strong style="color:var(--accent)">' + dom + '</strong> (higher score). Reduce to 50% size until both align.</div></div>';
-}
-
-function fmtPrice(v, dp) { if (v == null) return '—'; return v.toFixed(dp != null ? dp : (v > 100 ? 2 : v > 1 ? 4 : 6)); }
 
 /* ══════════════════════════════════════════════════════════
    ENHANCED HELPERS — Slope, Crossover, Fan, Divergence,
    VWAP Bands, EMA Compression, Scaled Entry, 3-Stop Display
    ══════════════════════════════════════════════════════════ */
-
-// Ticker display helper
-/*function tmShowTicker(tab) {
-  const el = document.getElementById(tab + '-ticker');
-  if (!el) return '';
-  return el.value ? el.value.trim().toUpperCase() : '';
-}*/
 
 // TF-scaled weights — different indicator importance per timeframe
 const TF_WEIGHTS = {
@@ -1461,10 +1419,40 @@ function buildScaledEntryPlan(score, price, atr, ref1, ref2, dp) {
   return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04);">' +
     '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);font-weight:600;margin-bottom:.35rem;">👀 LOW CONVICTION — PAPER TRADE ONLY</div>' +
     '<div style="font-size:12px;color:var(--dim);line-height:1.6;">Score below threshold. Wait for KDJ fresh cross + volume ≥1.5× + ADX rising above 25.</div></div>';
+}
 
+// 3-Stop option display
+function buildThreeStopOptions(price, atr, structLevel, dp) {
+  if (!price || !atr) return '';
+  dp = dp || 4;
+  const fmtP = v => v.toFixed(dp);
+  const slA = price - atr * 1.5, slS = structLevel ? structLevel - atr * 0.15 : price - atr * 1.2, slT = price - atr * 0.6;
+  return '<div style="margin-top:.65rem;">' +
+    '<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.4rem;">🛑 STOP LOSS OPTIONS — Choose One Style</div>' +
+    '<div style="display:grid;gap:.3rem;">' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--red);">' +
+      '<span style="font-size:11.5px;font-weight:600;">ATR×1.5 (Standard)</span><span style="font-size:11px;color:var(--dim);">Hit ~22% of valid setups</span><span style="font-family:var(--mono);color:var(--red);font-weight:600;">' + fmtP(slA) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--green);">' +
+      '<span style="font-size:11.5px;font-weight:600;">Structure (Recommended)</span><span style="font-size:11px;color:var(--dim);">Below MA20/EMA21 — hit ~12%</span><span style="font-family:var(--mono);color:var(--green);font-weight:600;">' + fmtP(slS) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--accent);">' +
+      '<span style="font-size:11.5px;font-weight:600;">Tight (Scalp only)</span><span style="font-size:11px;color:var(--dim);">ATR×0.6 — for 1m/5m only</span><span style="font-family:var(--mono);color:var(--accent);font-weight:600;">' + fmtP(slT) + '</span></div>' +
+    '</div></div>';
+}
 
-const result = () => total > 0 ? (score / total) * 100 : 0;
-return { add, result, getTotal: () => total, getScore: () => score };
+// Cross-tab conflict tracker
+const _tmLastCalc = { ma: null, ema: null };
+function tmCheckCrossTabConflict(tab, decision, score) {
+  _tmLastCalc[tab] = { decision, score, ts: Date.now() };
+  const other = tab === 'ma' ? 'ema' : 'ma';
+  const o = _tmLastCalc[other];
+  if (!o || (Date.now() - o.ts) > 1800000) return '';
+  const conflict = (decision === 'PROCEED' && o.decision === 'SKIP') || (decision === 'SKIP' && o.decision === 'PROCEED');
+  if (!conflict) return '';
+  const dom = score >= o.score ? tab.toUpperCase() : other.toUpperCase();
+  return '<div style="margin-top:.5rem;padding:.5rem .7rem;border-radius:7px;border-left:3px solid var(--orange);background:rgba(255,112,67,.07);">' +
+    '<div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:.15rem;">⚠️ CROSS-TAB SIGNAL CONFLICT</div>' +
+    '<div style="font-size:11.5px;color:var(--text);line-height:1.6;">MA says <strong>' + (_tmLastCalc.ma?.decision||'—') + '</strong> · EMA says <strong>' + (_tmLastCalc.ema?.decision||'—') + '</strong>. ' +
+    'Trust <strong style="color:var(--accent)">' + dom + '</strong> (higher score). Reduce to 50% size until both align.</div></div>';
 }
 
 
@@ -1482,7 +1470,7 @@ const riskPct=num('ma-risk-pct'),accountSz=num('ma-account'),rsi=num('ma-rsi');
 // Prev-bar values for slope + crossover
 const prevMa5=num('ma-prev-ma5'),prevMa20=num('ma-prev-ma20'),prevMa50=num('ma-prev-ma50');
 const prevPrice=num('ma-prev-price'),prevRsi=num('ma-prev-rsi');
-//const ticker=tmShowTicker('ma');
+const ticker=tmShowTicker('ma');
 const dp=price>100?2:price>1?4:6;
 const pAboveMA20=pct(price,ma20),pAboveMA5=pct(price,ma5),pAboveMA50=pct(price,ma50);
 const pAboveMA200=ma200?pct(price,ma200):null;
@@ -1702,7 +1690,7 @@ const prevE8=num('ema-prev-e8'),prevE21=num('ema-prev-e21');
 const prevPrice=num('ema-prev-price'),prevRsi=num('ema-prev-rsi');
 const mtfST15m=document.getElementById('ema-mtf-15m')?.value||'';
 const mtfST1H=document.getElementById('ema-mtf-1h')?.value||'';
-//const ticker=tmShowTicker('ema');
+const ticker=tmShowTicker('ema');
 const dp=price>100?2:price>1?4:6;
 const pAboveE8=pct(price,e8),pAboveE21=pct(price,e21),pAboveE55=pct(price,e55);
 const pAboveE200=e200?pct(price,e200):null;
@@ -3702,7 +3690,7 @@ const bbu=num('sw-bbu'),bbl=num('sw-bbl');
 const w52h=num('sw-52h'),w52l=num('sw-52l');
 const vwap=num('sw-vwap'),bidask=num('sw-bidask');
 const pe=num('sw-pe'),beta=num('sw-beta');
-//const ticker=tmShowTicker('sw');
+const ticker=tmShowTicker('sw');
 const chkHL=$('sw-chk-higher-low')?.checked,chkBB=$('sw-chk-bb-lower')?.checked;
 const chkMA200=$('sw-chk-ma200-above')?.checked,chkSector=$('sw-chk-sector-bull')?.checked;
 const chkNews=$('sw-chk-no-news')?.checked,chkEarn=$('sw-chk-earnings')?.checked;
