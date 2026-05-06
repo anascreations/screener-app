@@ -1470,7 +1470,6 @@ const riskPct=num('ma-risk-pct'),accountSz=num('ma-account'),rsi=num('ma-rsi');
 // Prev-bar values for slope + crossover
 const prevMa5=num('ma-prev-ma5'),prevMa20=num('ma-prev-ma20'),prevMa50=num('ma-prev-ma50');
 const prevPrice=num('ma-prev-price'),prevRsi=num('ma-prev-rsi');
-const ticker=tmShowTicker('ma');
 const dp=price>100?2:price>1?4:6;
 const pAboveMA20=pct(price,ma20),pAboveMA5=pct(price,ma5),pAboveMA50=pct(price,ma50);
 const pAboveMA200=ma200?pct(price,ma200):null;
@@ -1537,10 +1536,8 @@ if(grade.g==='X'&&decision==='PROCEED'&&adjScore<80)decision='WATCH';
 // LULL HARD BLOCK
 if(sessNow.cls==='sess-lull'&&decision==='PROCEED'){decision='WATCH';riskLevel='Lull Window';posSize='0%';}
 // Ticker display
-const tickerHtml=ticker?`<div style="font-size:10px;color:var(--accent);font-family:var(--head);letter-spacing:.1em;font-weight:700;margin-bottom:.2rem;">🏷️ ${ticker}</div>`:'';
 const conflictHtml=tmCheckCrossTabConflict('ma',decision,adjScore);
 setDecisionStrip('ma',decision,riskLevel,grade,
-  tickerHtml+
   `<div>Price:<span style="color:var(--text)">${fmt(price)}</span> MA5:<span style="color:var(--text)">${fmt(ma5)}</span> MA20:<span style="color:var(--text)">${fmt(ma20)}</span> MA50:<span style="color:var(--text)">${fmt(ma50)}</span></div>`+
   `<div>Size:<span style="color:${posSize==='100%'||posSize==='75%'?'var(--green)':posSize==='50%'?'var(--yellow)':'var(--dim)'}">${posSize}</span>&nbsp;Score:<span style="color:var(--accent)">${adjScore.toFixed(0)}/100</span>`+
   (bonus>0?`<span style="color:var(--green);font-size:9px"> +${bonus}pts</span>`:'')+(sessBonus!==0?`<span style="color:${sessBonus>0?'var(--green)':'var(--orange)'};font-size:9px"> ${sessBonus>0?'+':''}${sessBonus}pts sess</span>`:'')+(adxV?`&nbsp;ADX:<span style="color:${adxS.c}">${adxV.toFixed(1)} ${adxS.strength}</span>`:'')+`</div>`+
@@ -1668,7 +1665,6 @@ function resetMA() {
 'ma-risk-pct','ma-account',
 'ma-prev-price','ma-prev-ma5','ma-prev-ma20','ma-prev-ma50','ma-prev-rsi',
 ].forEach(id => { const el = $(id); if (el) el.value = ''; });
-const mt=$('ma-ticker'); if(mt) mt.value='';
 $('ma-result').style.display='none';
 _tmLastCalc.ma=null;
 }
@@ -1690,7 +1686,6 @@ const prevE8=num('ema-prev-e8'),prevE21=num('ema-prev-e21');
 const prevPrice=num('ema-prev-price'),prevRsi=num('ema-prev-rsi');
 const mtfST15m=document.getElementById('ema-mtf-15m')?.value||'';
 const mtfST1H=document.getElementById('ema-mtf-1h')?.value||'';
-const ticker=tmShowTicker('ema');
 const dp=price>100?2:price>1?4:6;
 const pAboveE8=pct(price,e8),pAboveE21=pct(price,e21),pAboveE55=pct(price,e55);
 const pAboveE200=e200?pct(price,e200):null;
@@ -1762,10 +1757,8 @@ if(mtfBear&&decision==='PROCEED'){posSize='25%';riskLevel='MTF Conflict';}
 const sessNow=getUSWindowMYT();
 if(sessNow.cls==='sess-lull'&&decision==='PROCEED'){decision='WATCH';riskLevel='Lull Window';posSize='0%';}
 // Ticker
-const tickerHtml=ticker?`<div style="font-size:10px;color:var(--accent2);font-family:var(--head);letter-spacing:.1em;font-weight:700;margin-bottom:.2rem;">🏷️ ${ticker}</div>`:'';
 const conflictHtml=tmCheckCrossTabConflict('ema',decision,adjScore);
 setDecisionStrip('ema',decision,riskLevel,grade,
-  tickerHtml+
   `<div>Price:<span style="color:var(--text)">${fmt(price)}</span> EMA8:<span style="color:var(--text)">${fmt(e8)}</span> EMA21:<span style="color:var(--text)">${fmt(e21)}</span> EMA55:<span style="color:var(--text)">${fmt(e55)}</span></div>`+
   `<div>Stack:<span style="color:${fullStack?'var(--green)':'var(--red)'}">${fullStack?'✅ Yes':'✘ No'}</span>&nbsp;Size:<span style="color:${posSize==='100%'?'var(--green)':posSize==='50%'?'var(--yellow)':'var(--dim)'}">${posSize}</span>&nbsp;Score:<span style="color:var(--accent)">${adjScore.toFixed(0)}/100</span>`+
   (bonus!==0?`<span style="color:${bonus>0?'var(--green)':'var(--orange)'};font-size:9px"> ${bonus>0?'+':''}${bonus}pts</span>`:'')+
@@ -1928,7 +1921,6 @@ function resetEMA() {
 const ichiEl=$('ema-ichi');if(ichiEl)ichiEl.value='';
 const m15=$('ema-mtf-15m');if(m15)m15.value='';
 const m1h=$('ema-mtf-1h');if(m1h)m1h.value='';
-const et=$('ema-ticker');if(et)et.value='';
 $('ema-result').style.display='none';
 _tmLastCalc.ema=null;
 }
@@ -3690,7 +3682,6 @@ const bbu=num('sw-bbu'),bbl=num('sw-bbl');
 const w52h=num('sw-52h'),w52l=num('sw-52l');
 const vwap=num('sw-vwap'),bidask=num('sw-bidask');
 const pe=num('sw-pe'),beta=num('sw-beta');
-const ticker=tmShowTicker('sw');
 const chkHL=$('sw-chk-higher-low')?.checked,chkBB=$('sw-chk-bb-lower')?.checked;
 const chkMA200=$('sw-chk-ma200-above')?.checked,chkSector=$('sw-chk-sector-bull')?.checked;
 const chkNews=$('sw-chk-no-news')?.checked,chkEarn=$('sw-chk-earnings')?.checked;
@@ -3816,9 +3807,7 @@ if(rebuild.phase.n>=3){phaseGrade.g='BULL';phaseGrade.cls='grade-spp';phaseGrade
 else if(rebuild.phase.n>=2){phaseGrade.g='EARLY';phaseGrade.cls='grade-a';phaseGrade.e='📈';phaseGrade.color='var(--accent)';}
 else if(rebuild.phase.n>=1){phaseGrade.g='REVERSAL';phaseGrade.cls='grade-b';phaseGrade.e='🔄';phaseGrade.color='var(--yellow)';}
 // Ticker
-const tickerHtml=ticker?`<div style="font-size:10px;color:var(--accent2);font-family:var(--head);letter-spacing:.1em;font-weight:700;margin-bottom:.2rem;">🏷️ ${ticker}</div>`:'';
 setDecisionStrip('swing',decision,riskLevel,phaseGrade,
-  tickerHtml+
   `<div>Candle: <span style="color:${candle?.color||'var(--dim)'}">${candle?.pattern||'—'}</span>&nbsp; ST: <span style="color:${s2_pass===true?'var(--green)':s2_pass===false?'var(--red)':'var(--dim)'}">${stDir||'—'}</span></div>`+
   `<div>Score: <span style="color:var(--accent)">${score.toFixed(0)}/100</span>&nbsp; DipCtx: <span style="color:${dipScore>30?'var(--green)':dipScore>15?'var(--yellow)':'var(--dim)'}">+${dipScore.toFixed(0)}pts</span>&nbsp; Rebuild: <span style="color:${rebuild.phase.color}">${rebuild.phase.label}</span></div>`
 );
@@ -3964,7 +3953,7 @@ if(tpCard){
     tpLevels.push({label:'TP3 (ATR×5.0)',price:entryPrice+atrVal*5.0,pct:'20%',note:'Hold for trend'});
   }
   const sl=entryPrice-atrVal*1.5;
-  let tpHtml=`<div class="prow entry"><span class="prow-label">Entry (Candle Close)</span><span class="prow-val accent">${entryPrice.toFixed(dp)}</span><span class="prow-note">${ticker?'['+ticker+'] ':''}Limit order — enter on close confirmation</span></div>
+  let tpHtml=`<div class="prow entry"><span class="prow-label">Entry (Candle Close)</span><span class="prow-val accent">${entryPrice.toFixed(dp)}</span><span class="prow-note">Limit order — enter on close confirmation</span></div>
 <div class="prow sl"><span class="prow-label">Stop Loss (ATR×1.5)</span><span class="prow-val red">${sl.toFixed(dp)}</span><span class="prow-note">Below candle low ${l.toFixed(dp)} — set immediately</span></div>`;
   tpLevels.forEach((tp,i)=>{
     const rr=((tp.price-entryPrice)/(entryPrice-sl)).toFixed(1);
@@ -4004,7 +3993,6 @@ if (stEl) stEl.value = '';
  'sw-chk-sector-bull','sw-chk-no-news','sw-chk-earnings'].forEach(id => {
   const el = $(id); if (el) el.checked = false;
 });
-const swTicker = $('sw-ticker'); if (swTicker) swTicker.value = '';
 const dipCard = $('swing-dip-analysis-card'); if (dipCard) dipCard.style.display = 'none';
 $('swing-result').style.display = 'none';
 _tmLastCalc.ma = null; _tmLastCalc.ema = null;
