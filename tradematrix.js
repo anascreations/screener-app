@@ -1316,11 +1316,11 @@ else if (pass === 'warn') score += w * 0.5;
    ══════════════════════════════════════════════════════════ */
 
 // Ticker display helper
-function tmShowTicker(tab) {
+/*function tmShowTicker(tab) {
   const el = document.getElementById(tab + '-ticker');
   if (!el) return '';
   return el.value ? el.value.trim().toUpperCase() : '';
-}
+}*/
 
 // TF-scaled weights — different indicator importance per timeframe
 const TF_WEIGHTS = {
@@ -1478,7 +1478,7 @@ const riskPct=num('ma-risk-pct'),accountSz=num('ma-account'),rsi=num('ma-rsi');
 // Prev-bar values for slope + crossover
 const prevMa5=num('ma-prev-ma5'),prevMa20=num('ma-prev-ma20'),prevMa50=num('ma-prev-ma50');
 const prevPrice=num('ma-prev-price'),prevRsi=num('ma-prev-rsi');
-const ticker=tmShowTicker('ma');
+//const ticker=tmShowTicker('ma');
 const dp=price>100?2:price>1?4:6;
 const pAboveMA20=pct(price,ma20),pAboveMA5=pct(price,ma5),pAboveMA50=pct(price,ma50);
 const pAboveMA200=ma200?pct(price,ma200):null;
@@ -1698,7 +1698,7 @@ const prevE8=num('ema-prev-e8'),prevE21=num('ema-prev-e21');
 const prevPrice=num('ema-prev-price'),prevRsi=num('ema-prev-rsi');
 const mtfST15m=document.getElementById('ema-mtf-15m')?.value||'';
 const mtfST1H=document.getElementById('ema-mtf-1h')?.value||'';
-const ticker=tmShowTicker('ema');
+//const ticker=tmShowTicker('ema');
 const dp=price>100?2:price>1?4:6;
 const pAboveE8=pct(price,e8),pAboveE21=pct(price,e21),pAboveE55=pct(price,e55);
 const pAboveE200=e200?pct(price,e200):null;
@@ -3698,7 +3698,7 @@ const bbu=num('sw-bbu'),bbl=num('sw-bbl');
 const w52h=num('sw-52h'),w52l=num('sw-52l');
 const vwap=num('sw-vwap'),bidask=num('sw-bidask');
 const pe=num('sw-pe'),beta=num('sw-beta');
-const ticker=tmShowTicker('sw');
+//const ticker=tmShowTicker('sw');
 const chkHL=$('sw-chk-higher-low')?.checked,chkBB=$('sw-chk-bb-lower')?.checked;
 const chkMA200=$('sw-chk-ma200-above')?.checked,chkSector=$('sw-chk-sector-bull')?.checked;
 const chkNews=$('sw-chk-no-news')?.checked,chkEarn=$('sw-chk-earnings')?.checked;
