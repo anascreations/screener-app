@@ -23,8 +23,6 @@ function resetEnhance() {
     ];
     ids.forEach(id => { const el = $(id); if (el) el.value = ''; });
     const selects = ['enh-st-prev-dir','enh-fc-ichi','enh-cp-trend','enh-cp-sr'];
-    const tickerFlds = ['enh-fc-ticker'];
-    tickerFlds.forEach(id => { const el=$(id); if(el) el.value=''; });
     selects.forEach(id => { const el = $(id); if (el) el.value = el.options?.[0]?.value || ''; });
     ['enh-st-result','enh-fc-result','enh-en-result','enh-cp-result'].forEach(id => {
         const el = $(id); if (el) el.style.display = 'none';
@@ -35,26 +33,23 @@ function resetEnhance() {
 
 function fillForecastFromMA() {
     const map = {
-        'ma-price':'enh-fc-price','ma-ma5':'enh-fc-ma5',
-        'ma-ma20':'enh-fc-ma20','ma-ma50':'enh-fc-ma50',
-        'ma-ma200':'enh-fc-ma200',
-        'ma-k':'enh-fc-k','ma-d':'enh-fc-d',
-        'ma-j':'enh-fc-j','ma-rsi':'enh-fc-rsi',
-        'ma-dif':'enh-fc-dif','ma-dea':'enh-fc-dea',
-        'ma-hist':'enh-fc-hist','ma-adx':'enh-fc-adx',
-        'ma-pdi':'enh-fc-pdi','ma-mdi':'enh-fc-mdi',
-        'ma-adxr':'enh-fc-adxr','ma-atr':'enh-fc-atr',
-        'ma-vol':'enh-fc-vol','ma-st':'enh-fc-st',
+        'ma-price' : 'enh-fc-price', 'ma-ma5'  : 'enh-fc-ma5',
+        'ma-ma20'  : 'enh-fc-ma20',  'ma-ma50' : 'enh-fc-ma50',
+        'ma-ma200' : 'enh-fc-ma200',
+        'ma-k'     : 'enh-fc-k',     'ma-d'    : 'enh-fc-d',
+        'ma-j'     : 'enh-fc-j',     'ma-rsi'  : 'enh-fc-rsi',
+        'ma-dif'   : 'enh-fc-dif',   'ma-dea'  : 'enh-fc-dea',
+        'ma-hist'  : 'enh-fc-hist',  'ma-adx'  : 'enh-fc-adx',
+        'ma-pdi'   : 'enh-fc-pdi',   'ma-mdi'  : 'enh-fc-mdi',
+        'ma-adxr'  : 'enh-fc-adxr',  'ma-atr'  : 'enh-fc-atr',
+        'ma-vol'   : 'enh-fc-vol',   'ma-st'   : 'enh-fc-st',
     };
     let filled = 0;
-    Object.entries(map).forEach(([src,dst]) => {
-        const s=$(src),d=$(dst);
-        if(s&&d&&s.value.trim()){d.value=s.value;filled++;}
+    Object.entries(map).forEach(([src, dst]) => {
+        const s = $(src), d = $(dst);
+        if (s && d && s.value.trim()) { d.value = s.value; filled++; }
     });
-    // Copy ticker
-    const srcT=$('ma-ticker'),dstT=$('enh-fc-ticker');
-    if(srcT&&dstT&&srcT.value)dstT.value=srcT.value;
-    if(filled>0){switchTab('enhance');switchEnhTab('fc');}
+    if (filled > 0) { switchTab('enhance'); switchEnhTab('fc'); }
     else alert('Run MA Calc first so there are values to transfer.');
 }
 
@@ -82,9 +77,6 @@ function fillForecastFromEMA() {
         const s = $(src), d = $(dst);
         if (s && d && s.value.trim()) { d.value = s.value; filled++; }
     });
-    // Copy ticker
-    const srcTE=$('ema-ticker'),dstTE=$('enh-fc-ticker');
-    if(srcTE&&dstTE&&srcTE.value)dstTE.value=srcTE.value;
     if (filled > 0) { switchTab('enhance'); switchEnhTab('fc'); }
     else alert('Run EMA Calc first so there are values to transfer.');
 }
@@ -523,15 +515,6 @@ function calcForecastRules() {
     const bearPct = totalPts > 0 ? (bearPts / totalPts * 100) : 50;
     const net     = bullPct - bearPct;
     const conf    = Math.min(96, Math.round(Math.abs(net) * 0.85 + 30));
-    // Probability-weighted TP hit rates (based on conf + ADX + vol)
-    const adxBonus  = adx >= 25 ? 8 : adx >= 20 ? 4 : 0;
-    const volBonus  = vol >= 1.5 ? 6 : vol >= 1.0 ? 2 : 0;
-    const baseProb  = Math.min(88, conf + adxBonus + volBonus);
-    const probTP1   = dir.includes('BULL') ? Math.min(85, baseProb) : Math.max(15, 50 - Math.abs(net)*0.4);
-    const probTP2   = dir.includes('BULL') ? Math.min(72, baseProb * 0.82) : Math.max(8, 35 - Math.abs(net)*0.3);
-    const probTP3   = dir.includes('BULL') ? Math.min(48, baseProb * 0.55) : Math.max(4, 20 - Math.abs(net)*0.2);
-    // Ticker
-    const fcTicker  = document.getElementById('enh-fc-ticker')?.value?.trim()?.toUpperCase() || '';
 
     let dir, dirCls, dirColor, momentum, timing;
     if      (net >=  42) { dir = 'BULLISH';      dirCls = 'proceed'; dirColor = 'var(--green)';  }
@@ -1049,50 +1032,8 @@ function calcEntryZone() {
                  :               'AVOID ENTRY — CONDITIONS NOT MET';
     const sCls   = score >= 80 ? 'proceed' : score >= 60 ? 'watch' : 'skip';
 
-    // ── ENTRY TIMING MODULE ───────────────────
-    let entryTimingLabel = '', entryTimingColor = 'var(--dim)', entryTimingNote = '';
-    const kdjJ = j || 50, distFromMA20 = pct(price, ma20) || 0;
-    const histVal = hist || 0, volVal = vol || 0;
-    const kdjBullish = k != null && d != null && k > d;
-
-    if (kdjJ < 20 && price > ma20) {
-        entryTimingLabel = '🎯 ENTER NOW — Oversold KDJ in uptrend';
-        entryTimingColor = 'var(--green)';
-        entryTimingNote  = `KDJ J=${kdjJ.toFixed(0)} oversold + price above MA20 support = highest-conviction dip entry. Enter at market close on current candle.`;
-    } else if (distFromMA20 > 8) {
-        entryTimingLabel = '⏳ WAIT — Price too stretched above MA20';
-        entryTimingColor = 'var(--orange)';
-        entryTimingNote  = `Price is ${distFromMA20.toFixed(1)}% above MA20 — chasing here risks a 40% wider stop loss for 30% less reward. Ideal entry: pullback to MA20/MA5. Current price is ${(distFromMA20 - 3).toFixed(1)}% above optimal zone.`;
-    } else if (histVal > 0 && Math.abs(histVal) > 0) {
-        entryTimingLabel = '⚡ ENTER — MACD histogram expanding';
-        entryTimingColor = 'var(--accent)';
-        entryTimingNote  = `MACD histogram positive and expanding — momentum accelerating. Enter on current candle or open of next candle. Do not wait.`;
-    } else if (volVal < 1.0) {
-        entryTimingLabel = '⏸️ WAIT — Low volume, no confirmation';
-        entryTimingColor = 'var(--yellow)';
-        entryTimingNote  = `Volume ${volVal.toFixed(2)}× below average — moves on low volume have 60% higher chance of reversal. Wait for volume ≥ 1.3× before entering.`;
-    } else if (kdjJ > 75) {
-        entryTimingLabel = '⚠️ WAIT — KDJ overbought, poor entry timing';
-        entryTimingColor = 'var(--orange)';
-        entryTimingNote  = `KDJ J=${kdjJ.toFixed(0)} overbought (above 75). Entering on overbought KDJ gives lower R:R — wait for J to reset below 60 via pullback.`;
-    } else if (kdjBullish && distFromMA20 <= 5) {
-        entryTimingLabel = '✅ PROCEED — Price in valid entry zone';
-        entryTimingColor = 'var(--green)';
-        entryTimingNote  = `KDJ bullish + price ${distFromMA20.toFixed(1)}% above MA20 (within ideal ≤5% zone). Standard entry — use the stop loss below.`;
-    } else {
-        entryTimingLabel = '👀 WATCH — Await candle close confirmation';
-        entryTimingColor = 'var(--accent)';
-        entryTimingNote  = `Conditions mixed. Enter only on candle CLOSE — not open. A strong bullish close above MA5 with expanding volume = entry. A weak or red close = skip.`;
-    }
-
     $('enh-en-result').style.display = '';
     $('enh-en-result').innerHTML = `
-      <!-- ENTRY TIMING MODULE -->
-      <div style="padding:.65rem .8rem;border-radius:9px;border-left:4px solid ${entryTimingColor};background:rgba(0,0,0,.08);margin-bottom:.5rem;">
-        <div style="font-size:13px;font-weight:700;color:${entryTimingColor};margin-bottom:.25rem;">⏱️ ENTRY TIMING: ${entryTimingLabel}</div>
-        <div style="font-size:12px;color:var(--text);line-height:1.65;">${entryTimingNote}</div>
-      </div>
-
       <div class="decision-strip ${sCls}">
         <div class="d-badge ${sCls}" style="font-size:26px;font-family:var(--head);">${score}%</div>
         <div>
@@ -1228,7 +1169,7 @@ function calcCandlePatterns() {
         const qual = (c1DownShadow >= c1Body * 3 ? '★★★' : '★★☆');
         addPat('Hammer / Bullish Pin Bar', 'BULLISH', qual, 'Reversal at support',
             `Long lower shadow (${(c1DownShadow/atrRef*100).toFixed(0)}% of ATR) with small body near the top of the range. Price was pushed far down intrabar but buyers rejected the lows and closed strong. This rejection is the signal.`,
-            'Wait for the NEXT candle to close bullish (above this candle open) before entering. Do not enter on the hammer candle itself.',
+            'Wait for the NEXT candle to close bullish (above this candle\'s open) before entering. Do not enter on the hammer candle itself.',
             `${fmt(c1 + c1Body * 0.1, dp)} (above this candle close)`,
             `${fmt(l1 - atrRef * 0.3, dp)} (below the wick low)`,
             `Reliability increases dramatically when: (1) at a known support level, (2) volume is above average, (3) KDJ is oversold (J < 20). If all three apply, this is a high-conviction reversal.`);
@@ -1423,43 +1364,6 @@ function calcCandlePatterns() {
     }
 
     /* ══════════════════════════════════════════
-       CANDLE QUALITY SCORING
-    ════════════════════════════════════════════ */
-    // Wick/Body quality metrics for current candle
-    const c1BodyPct  = c1Range > 0 ? (c1Body / c1Range * 100) : 0;
-    const lWickPct   = c1Range > 0 ? (c1DownShadow / c1Range * 100) : 0;
-    const uWickPct   = c1Range > 0 ? (c1UpShadow   / c1Range * 100) : 0;
-    const candleGrade =
-        c1BodyPct >= 65 ? { g:'A — Strong Body',     c:'var(--green)',  star:'★★★', tip:'High body-to-range ratio — strong conviction candle' } :
-        c1BodyPct >= 40 ? { g:'B — Moderate Body',   c:'var(--accent)', star:'★★☆', tip:'Decent body — moderate conviction' } :
-        c1BodyPct >= 20 ? { g:'C — Small Body',       c:'var(--yellow)', star:'★☆☆', tip:'Small body vs range — caution, candle context matters' } :
-                          { g:'D — Doji / Indecision', c:'var(--dim)',   star:'★☆☆', tip:'Tiny body — no conviction either side, wait for next candle' };
-
-    // Next candle prediction engine
-    const getNextCandlePrediction = (patternName, dir) => {
-        const preds = {
-            'Bullish Engulfing':        { prob:68, bull:'Next candle closes above current high — confirms reversal. ADD position.', fail:'Closes below current candle open — pattern failed. EXIT immediately.' },
-            'Hammer / Bullish Pin Bar': { prob:62, bull:'Next candle closes bullish above this open — Hammer confirmed ★★★. ENTER.', fail:'Closes below the wick low — stop triggered. SKIP or cut.' },
-            'Bullish Marubozu — Conviction Bar': { prob:72, bull:'Continuation expected — add on any small dip to this candle body.', fail:'Gap down or full reversal candle — exit, momentum failed.' },
-            'Morning Star':             { prob:74, bull:'Next candle closes strongly bullish — 3-bar reversal confirmed. Enter now.', fail:'Close below star midpoint — pattern voided.' },
-            'Three White Soldiers':     { prob:76, bull:'Momentum continuation — hold full position.', fail:'4th candle reversal on high volume = distribution top. Exit.' },
-            'Bearish Engulfing':        { prob:68, bull:'', fail:'Next candle closes below current low — short confirmed. SELL.' },
-            'Shooting Star / Bearish Pin Bar': { prob:60, bull:'Next candle closes bullish above this open — signal failed. Hold longs.', fail:'Next candle closes lower — exit all longs.' },
-            'Doji — Indecision Candle': { prob:55, bull:'If next candle is bullish close — buy breakout.', fail:'If next candle is bearish — sell breakdown.' },
-            'Inside Bar — Consolidation / Coiling': { prob:62, bull:'Break above inside bar high with volume → BUY.', fail:'Break below inside bar low → SELL / avoid longs.' },
-        };
-        const base = preds[patternName];
-        if (!base) {
-            return dir === 'BULLISH'
-                ? { prob:58, bull:'Next bullish close above this candle high confirms pattern — enter on confirmation.', fail:'Close below this candle low = pattern failed, do not chase.' }
-                : dir === 'BEARISH'
-                ? { prob:58, bull:'', fail:'Next bearish close below this candle low confirms — exit longs.' }
-                : { prob:50, bull:'Watch next candle — direction of close indicates breakout side.', fail:'' };
-        }
-        return base;
-    };
-
-    /* ══════════════════════════════════════════
        RENDER RESULTS
     ════════════════════════════════════════════ */
     const result = $('enh-cp-result');
@@ -1516,34 +1420,9 @@ function calcCandlePatterns() {
           <div style="font-size:12px;">Common reasons: (1) candle is mid-session (pattern not yet complete), (2) this is a continuation bar without a pattern, (3) try adding the previous candle data to unlock 2-bar patterns.</div>
         </div>` : ''}
 
-      <!-- Candle Quality Bar -->
-      <div style="padding:.55rem .75rem;background:rgba(0,0,0,.07);border-radius:8px;margin-bottom:.4rem;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.4rem;">
-        <div style="text-align:center;">
-          <div style="font-size:9px;color:var(--dim);margin-bottom:2px;">BODY %</div>
-          <div style="font-size:13px;font-weight:700;color:${candleGrade.c};">${c1BodyPct.toFixed(0)}%</div>
-          <div style="font-size:9px;color:var(--dim);">Grade: ${candleGrade.star}</div>
-        </div>
-        <div style="text-align:center;">
-          <div style="font-size:9px;color:var(--dim);margin-bottom:2px;">LOWER WICK</div>
-          <div style="font-size:13px;font-weight:700;color:${lWickPct>50?'var(--green)':'var(--dim)'};">${lWickPct.toFixed(0)}%</div>
-          <div style="font-size:9px;color:var(--dim);">${lWickPct>50?'Strong reversal':'Weak'}</div>
-        </div>
-        <div style="text-align:center;">
-          <div style="font-size:9px;color:var(--dim);margin-bottom:2px;">UPPER WICK</div>
-          <div style="font-size:13px;font-weight:700;color:${uWickPct>50?'var(--red)':'var(--dim)'};">${uWickPct.toFixed(0)}%</div>
-          <div style="font-size:9px;color:var(--dim);">${uWickPct>50?'Sellers rejected':'OK'}</div>
-        </div>
-        <div style="text-align:center;">
-          <div style="font-size:9px;color:var(--dim);margin-bottom:2px;">QUALITY</div>
-          <div style="font-size:12px;font-weight:700;color:${candleGrade.c};">${candleGrade.g.split(' — ')[0]}</div>
-          <div style="font-size:9px;color:var(--dim);">${candleGrade.tip.substring(0,22)}…</div>
-        </div>
-      </div>
-
       ${patterns.map(p => {
         const ds = dirMap[p.direction] || dirMap['NEUTRAL'];
         const rc = relMap[p.reliability] || 'var(--dim)';
-        const ncp = getNextCandlePrediction(p.name, p.direction);
         return `
         <div class="card" style="border-left:3px solid ${ds.col};margin-bottom:.4rem;">
           <div class="card-hdr" style="color:${ds.col};">
@@ -1568,14 +1447,6 @@ function calcCandlePatterns() {
                 <span style="color:var(--dim);">Stop Loss: </span>
                 <span style="color:var(--red);font-weight:600;">${p.sl}</span>
               </div>
-            </div>
-            <!-- NEXT CANDLE PREDICTION -->
-            <div style="padding:.45rem .6rem;border-radius:6px;background:rgba(91,33,182,.06);border:1px solid rgba(91,33,182,.2);">
-              <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);margin-bottom:.3rem;">
-                🔮 NEXT CANDLE PREDICTION — ${ncp.prob}% historical accuracy
-              </div>
-              ${ncp.bull ? `<div style="font-size:11.5px;color:var(--green);margin-bottom:.2rem;">✅ If bullish close: ${ncp.bull}</div>` : ''}
-              ${ncp.fail ? `<div style="font-size:11.5px;color:var(--red);">❌ Pattern failure: ${ncp.fail}</div>` : ''}
             </div>
             <div style="font-size:11px;color:var(--dim);padding:.3rem .5rem;background:rgba(0,0,0,.08);border-radius:4px;">
               <span style="color:var(--yellow);">💡 Pro tip: </span>${p.tip}
