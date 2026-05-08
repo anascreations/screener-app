@@ -1403,27 +1403,95 @@ function buildScaledEntryPlan(score, price, atr, ref1, ref2, dp) {
   if (!price || !atr) return '';
   const z1 = price, z2 = ref1 ? (ref1 + price) / 2 : price - atr * 0.5, z3 = ref2 || (price - atr);
   const fmtP = v => v.toFixed(dp || 4);
-const capitalEl = document.getElementById('scaled-entry-capital');
-const capital = capitalEl ? parseFloat(capitalEl.value) || 0 : 0;
-const showAmt = (pct) => capital > 0
-  ? ` <span style="font-size:11px;color:var(--green);font-family:var(--mono);">(= $${(capital * pct).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})})</span>`
-  : '';
-  if (score >= 80) return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.04);">' +
-    '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:.45rem;">⚡ HIGH CONVICTION — SCALED ENTRY (3 Tranches)</div>' +
-    '<div style="display:grid;gap:.3rem;font-size:12px;">' +
-    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 1</span><span style="color:var(--dim);">Enter 60% NOW at current price</span><span style="color:var(--green);font-family:var(--mono);">' + fmtP(z1) + '</span></div>' +
-    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 2</span><span style="color:var(--dim);">Add 25% on pullback to MA5/EMA8 zone</span><span style="color:var(--yellow);font-family:var(--mono);">' + fmtP(z2) + '</span></div>' +
-    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 3</span><span style="color:var(--dim);">Add final 15% at MA20/EMA21 retest</span><span style="color:var(--dim);font-family:var(--mono);">' + fmtP(z3) + '</span></div>' +
-    '</div><div style="margin-top:.4rem;font-size:11px;color:var(--dim);">💡 After TP1: move SL to Tranche 1 entry. After TP2: trail stop 1×ATR below swing highs.</div></div>';
-  if (score >= 65) return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(245,200,66,.2);background:rgba(245,200,66,.04);">' +
-    '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:.45rem;">📊 MEDIUM CONVICTION — STAGED ENTRY (2 Tranches)</div>' +
-    '<div style="display:grid;gap:.3rem;font-size:12px;">' +
-    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 1</span><span style="color:var(--dim);">Enter 50% NOW — confirm with next candle close</span><span style="color:var(--green);font-family:var(--mono);">' + fmtP(z1) + '</span></div>' +
-    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 2</span><span style="color:var(--dim);">Add 50% only if volume ≥1.5× AND KDJ holds bullish</span><span style="color:var(--yellow);font-family:var(--mono);">' + fmtP(z2) + '</span></div>' +
-    '</div><div style="margin-top:.4rem;font-size:11px;color:var(--dim);">⚠️ Do NOT add Tranche 2 if price moves against you after T1.</div></div>';
-  return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04);">' +
-    '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);font-weight:600;margin-bottom:.35rem;">👀 LOW CONVICTION — PAPER TRADE ONLY</div>' +
-    '<div style="font-size:12px;color:var(--dim);line-height:1.6;">Score below threshold. Wait for KDJ fresh cross + volume ≥1.5× + ADX rising above 25.</div></div>';
+
+  // Read capital from embedded input (shared ID — only one tab visible at a time)
+  const capitalEl = document.getElementById('scaled-entry-capital');
+  const capital = capitalEl ? (parseFloat(capitalEl.value) || 0) : 0;
+  const fmtAmt = (pct) => capital > 0
+    ? ' <span style="color:var(--green);font-weight:700;font-size:11.5px;font-family:var(--mono);">'
+      + capital * pct >= 1000
+        ? '(' + (capital * pct).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ')'
+        : '(' + (capital * pct).toFixed(2) + ')'
+      + '</span>'
+    : '';
+
+  // Capital input row — embedded inside the plan card
+  const capRow = '<div style="display:flex;align-items:center;gap:.5rem;padding:.4rem .5rem;'
+    + 'background:rgba(0,0,0,.1);border-radius:6px;margin-bottom:.45rem;">'
+    + '<span style="font-size:12px;">💰</span>'
+    + '<span style="font-size:11.5px;color:var(--dim);white-space:nowrap;">Capital to deploy</span>'
+    + '<input type="number" id="scaled-entry-capital" min="0" step="100" placeholder="e.g. 10000"'
+    + ' value="' + (capital > 0 ? capital : '') + '"'
+    + ' oninput="tmUpdateTranches(this.value)"'
+    + ' style="flex:1;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.15);'
+    + 'outline:none;font-size:13px;font-weight:700;color:var(--green);padding:.1rem .3rem;text-align:right;min-width:0;"/>'
+    + '<span style="font-size:11px;color:var(--dim);">MYR / USD</span>'
+    + '</div>';
+
+  if (score >= 80) {
+    return '<div id="scaled-entry-plan" style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.04);">'
+    + '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:.4rem;">⚡ HIGH CONVICTION — SCALED ENTRY (3 Tranches)</div>'
+    + capRow
+    + '<div style="display:grid;gap:.35rem;font-size:12px;">'
+    + '<div style="display:grid;grid-template-columns:80px 1fr auto;gap:.4rem;align-items:center;">'
+    +   '<span style="color:var(--accent);font-weight:600;">Tranche 1</span>'
+    +   '<span style="color:var(--dim);">60% NOW at current price</span>'
+    +   '<span style="text-align:right;"><span style="color:var(--green);font-family:var(--mono);">' + fmtP(z1) + '</span>'
+    +   '<span class="tranche-amt" data-pct="0.60">' + fmtAmt(0.60) + '</span></span></div>'
+    + '<div style="display:grid;grid-template-columns:80px 1fr auto;gap:.4rem;align-items:center;">'
+    +   '<span style="color:var(--accent);font-weight:600;">Tranche 2</span>'
+    +   '<span style="color:var(--dim);">25% pullback to MA5/EMA8</span>'
+    +   '<span style="text-align:right;"><span style="color:var(--yellow);font-family:var(--mono);">' + fmtP(z2) + '</span>'
+    +   '<span class="tranche-amt" data-pct="0.25">' + fmtAmt(0.25) + '</span></span></div>'
+    + '<div style="display:grid;grid-template-columns:80px 1fr auto;gap:.4rem;align-items:center;">'
+    +   '<span style="color:var(--accent);font-weight:600;">Tranche 3</span>'
+    +   '<span style="color:var(--dim);">15% at MA20/EMA21 retest</span>'
+    +   '<span style="text-align:right;"><span style="color:var(--dim);font-family:var(--mono);">' + fmtP(z3) + '</span>'
+    +   '<span class="tranche-amt" data-pct="0.15">' + fmtAmt(0.15) + '</span></span></div>'
+    + '</div>'
+    + '<div style="margin-top:.4rem;font-size:11px;color:var(--dim);">💡 After TP1: move SL to Tranche 1 entry. After TP2: trail stop 1×ATR below swing highs.</div>'
+    + '</div>';
+  }
+  if (score >= 65) {
+    return '<div id="scaled-entry-plan" style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(245,200,66,.2);background:rgba(245,200,66,.04);">'
+    + '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:.4rem;">📊 MEDIUM CONVICTION — STAGED ENTRY (2 Tranches)</div>'
+    + capRow
+    + '<div style="display:grid;gap:.35rem;font-size:12px;">'
+    + '<div style="display:grid;grid-template-columns:80px 1fr auto;gap:.4rem;align-items:center;">'
+    +   '<span style="color:var(--accent);font-weight:600;">Tranche 1</span>'
+    +   '<span style="color:var(--dim);">50% NOW — confirm next candle close</span>'
+    +   '<span style="text-align:right;"><span style="color:var(--green);font-family:var(--mono);">' + fmtP(z1) + '</span>'
+    +   '<span class="tranche-amt" data-pct="0.50">' + fmtAmt(0.50) + '</span></span></div>'
+    + '<div style="display:grid;grid-template-columns:80px 1fr auto;gap:.4rem;align-items:center;">'
+    +   '<span style="color:var(--accent);font-weight:600;">Tranche 2</span>'
+    +   '<span style="color:var(--dim);">50% only if volume ≥1.5× AND KDJ holds</span>'
+    +   '<span style="text-align:right;"><span style="color:var(--yellow);font-family:var(--mono);">' + fmtP(z2) + '</span>'
+    +   '<span class="tranche-amt" data-pct="0.50">' + fmtAmt(0.50) + '</span></span></div>'
+    + '</div>'
+    + '<div style="margin-top:.4rem;font-size:11px;color:var(--dim);">⚠️ Do NOT add Tranche 2 if price moves against you after T1.</div>'
+    + '</div>';
+  }
+  return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04);">'
+    + '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);font-weight:600;margin-bottom:.35rem;">👀 LOW CONVICTION — PAPER TRADE ONLY</div>'
+    + '<div style="font-size:12px;color:var(--dim);line-height:1.6;">Score below threshold. Wait for KDJ fresh cross + volume ≥1.5× + ADX rising above 25.</div></div>';
+}
+
+// Live update tranche amounts without re-running full calc
+function tmUpdateTranches(val) {
+  const capital = parseFloat(val) || 0;
+  const fmtC = (amt) => capital > 0
+    ? ' <span style="color:var(--green);font-weight:700;font-size:11.5px;font-family:var(--mono);">('
+      + amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})
+      + ')</span>'
+    : '';
+  document.querySelectorAll('.tranche-amt').forEach(el => {
+    const pct = parseFloat(el.getAttribute('data-pct')) || 0;
+    el.innerHTML = fmtC(capital * pct);
+  });
+  // Sync all capital inputs if multiple on page
+  document.querySelectorAll('#scaled-entry-capital').forEach(el => {
+    if (el !== document.activeElement) el.value = val;
+  });
 }
 
 // 3-Stop option display
