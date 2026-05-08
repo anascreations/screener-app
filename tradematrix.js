@@ -1312,509 +1312,617 @@ else if (pass === 'warn') score += w * 0.5;
 const result = () => total > 0 ? (score / total) * 100 : 0;
 return { add, result, getTotal: () => total, getScore: () => score };
 }
+
+/* ══════════════════════════════════════════════════════════
+   ENHANCED HELPERS — Slope, Crossover, Fan, Divergence,
+   VWAP Bands, EMA Compression, Scaled Entry, 3-Stop Display
+   ══════════════════════════════════════════════════════════ */
+
+// TF-scaled weights — different indicator importance per timeframe
+const TF_WEIGHTS = {
+  '1m':  { maStack:15, kdj:22, macd:10, rsi:8,  adx:12, dmi:10, vol:20, st:3  },
+  '5m':  { maStack:16, kdj:20, macd:12, rsi:9,  adx:14, dmi:10, vol:16, st:3  },
+  '15m': { maStack:18, kdj:18, macd:13, rsi:10, adx:15, dmi:11, vol:12, st:3  },
+  '1H':  { maStack:20, kdj:16, macd:14, rsi:10, adx:16, dmi:12, vol:10, st:6  },
+  '4H':  { maStack:22, kdj:14, macd:16, rsi:10, adx:16, dmi:12, vol:8,  st:6  },
+  'D':   { maStack:24, kdj:14, macd:16, rsi:10, adx:16, dmi:12, vol:6,  st:8  },
+  'W':   { maStack:26, kdj:10, macd:18, rsi:8,  adx:18, dmi:14, vol:4,  st:8  },
+};
+function getTFWeights(tab) {
+  return TF_WEIGHTS[activeTF[tab] || 'D'] || TF_WEIGHTS['D'];
+}
+
+// MA slope detection — rate of change per candle
+function scoreMASlope(cur, prev, label) {
+  if (!cur || !prev || prev === 0) return null;
+  const s = ((cur - prev) / prev) * 100;
+  if (s > 0.5)  return { pass: true,  zone: label + ' rising steeply (+' + s.toFixed(3) + '%)', s, c: 'var(--green)'  };
+  if (s > 0.1)  return { pass: true,  zone: label + ' rising (+' + s.toFixed(3) + '%)',         s, c: 'var(--green)'  };
+  if (s > -0.1) return { pass: 'warn', zone: label + ' flat (' + s.toFixed(3) + '%)',            s, c: 'var(--yellow)' };
+  return           { pass: false,  zone: label + ' declining (' + s.toFixed(3) + '%)',           s, c: 'var(--red)'    };
+}
+
+// Fresh MA crossover detection (this candle)
+function detectMACross(cur5, cur20, prev5, prev20, label5, label20) {
+  if (!cur5 || !cur20 || !prev5 || !prev20) return null;
+  if (cur5 > cur20 && prev5 <= prev20) return { type: 'GOLDEN', label: '🔔 FRESH ' + label5 + '/' + label20 + ' GOLDEN CROSS', c: 'var(--green)', bonus: 18 };
+  if (cur5 < cur20 && prev5 >= prev20) return { type: 'DEATH',  label: '🔕 FRESH ' + label5 + '/' + label20 + ' DEATH CROSS',  c: 'var(--red)',   bonus: -18 };
+  return null;
+}
+
+// MA Fan spread analysis — cycle stage detection
+function fanSpread(ma5, ma200) {
+  if (!ma5 || !ma200 || ma200 === 0) return null;
+  const spread = ((ma5 - ma200) / ma200) * 100;
+  if (spread < 0)   return { stage: 'BEARISH',    c: 'var(--red)',    e: '🔻', tip: 'MA5 below MA200 — bear market',                                        bonus: 0 };
+  if (spread <= 2)  return { stage: 'COMPRESSED', c: 'var(--accent)', e: '⚡', tip: 'MAs tightly compressed — early trend / breakout imminent',              bonus: 6 };
+  if (spread <= 5)  return { stage: 'IDEAL',       c: 'var(--green)',  e: '🎯', tip: 'Ideal fan spread — healthy uptrend, best risk/reward entry zone',       bonus: 4 };
+  if (spread <= 10) return { stage: 'EXTENDED',    c: 'var(--yellow)', e: '⚠️', tip: 'Fan extended — trend maturing, reduce position size',                  bonus: 0 };
+  if (spread <= 15) return { stage: 'LATE CYCLE',  c: 'var(--orange)', e: '🟠', tip: 'Late-cycle spread — high risk, scalp entries only',                    bonus: -5 };
+  return               { stage: 'EXHAUSTED',   c: 'var(--red)',    e: '🛑', tip: 'Extreme fan spread — trend likely exhausted, avoid new entries',        bonus: -12 };
+}
+
+// RSI divergence detection
+function detectRSIDivergence(price, prevPrice, rsi, prevRsi) {
+  if (!price || !prevPrice || !rsi || !prevRsi) return null;
+  if (price > prevPrice && rsi < prevRsi && rsi > 58) return { type: 'BEARISH', label: '⚠️ BEARISH DIVERGENCE: Price higher high, RSI lower high — reversal warning', penalty: -15 };
+  if (price < prevPrice && rsi > prevRsi && rsi < 45) return { type: 'BULLISH', label: '💡 BULLISH DIVERGENCE: Price lower low, RSI higher low — reversal setup forming', penalty: 8 };
+  return null;
+}
+
+// VWAP deviation band scoring (uses ATR as SD proxy)
+function scoreVWAPBands(price, vwap, atr) {
+  if (!price || !vwap) return null;
+  const dist = ((price - vwap) / vwap) * 100;
+  if (!atr) {
+    return price > vwap
+      ? { zone: '+' + dist.toFixed(2) + '% above VWAP', pass: true,  c: 'var(--green)', band: 'above', note: 'VWAP = intraday support floor' }
+      : { zone: dist.toFixed(2) + '% below VWAP',        pass: false, c: 'var(--red)',   band: 'below', note: 'Price below VWAP — sellers in control' };
+  }
+  const sd1u = vwap + atr * 0.8, sd1d = vwap - atr * 0.8;
+  const sd2u = vwap + atr * 1.6, sd2d = vwap - atr * 1.6;
+  if (price >= sd2u) return { zone: 'At VWAP +2σ — overbought, mean reversion risk', pass: false, c: 'var(--red)',    band: '+2σ', note: '🔴 Extreme deviation — fade or wait for pullback to VWAP' };
+  if (price >= sd1u) return { zone: 'At VWAP +1σ — upper band',                      pass: true,  c: 'var(--yellow)', band: '+1σ', note: '🟡 Extended — enter only on pullback to VWAP zone' };
+  if (price >= vwap) return { zone: 'Above VWAP — intraday bulls in control',         pass: true,  c: 'var(--green)',  band: 'above', note: '✅ VWAP acts as support — add on retests from above' };
+  if (price >= sd1d) return { zone: 'At VWAP −1σ — institutional support zone',      pass: true,  c: 'var(--green)',  band: '-1σ', note: '💎 PRIME DIP BUY ZONE — −1σ in uptrend is where institutions buy' };
+  if (price >= sd2d) return { zone: 'At VWAP −2σ — deep discount zone',              pass: 'warn', c: 'var(--accent)', band: '-2σ', note: '⚡ Extreme discount — either strong bounce or breakdown. Confirm with volume.' };
+  return { zone: 'Below VWAP −2σ — bearish',                                         pass: false, c: 'var(--red)',    band: '-2σ', note: '🔴 Below extreme deviation — avoid longs until VWAP reclaimed' };
+}
+
+// EMA compression alert (breakout imminent)
+function detectEMACompression(e8, e21, e55, e200) {
+  if (!e8 || !e21 || !e55 || !e200) return null;
+  const spread = Math.abs(e8 - e200) / e200 * 100;
+  if (spread < 1.0) return { level: 'EXTREME', label: '⚡⚡ EXTREME EMA COMPRESSION (' + spread.toFixed(2) + '%) — explosive breakout imminent. Both directions possible. Reduce size, set alerts.', c: 'var(--accent)', spread };
+  if (spread < 2.0) return { level: 'HIGH',    label: '⚡ EMA COMPRESSION (' + spread.toFixed(2) + '%) — breakout likely within 1–3 candles. Prepare entry orders.', c: 'var(--yellow)', spread };
+  return null;
+}
+
+// Scaled entry plan HTML
+function buildScaledEntryPlan(score, price, atr, ref1, ref2, dp) {
+  if (!price || !atr) return '';
+  const z1 = price, z2 = ref1 ? (ref1 + price) / 2 : price - atr * 0.5, z3 = ref2 || (price - atr);
+  const fmtP = v => v.toFixed(dp || 4);
+  if (score >= 80) return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.04);">' +
+    '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:.45rem;">⚡ HIGH CONVICTION — SCALED ENTRY (3 Tranches)</div>' +
+    '<div style="display:grid;gap:.3rem;font-size:12px;">' +
+    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 1</span><span style="color:var(--dim);">Enter 60% NOW at current price</span><span style="color:var(--green);font-family:var(--mono);">' + fmtP(z1) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 2</span><span style="color:var(--dim);">Add 25% on pullback to MA5/EMA8 zone</span><span style="color:var(--yellow);font-family:var(--mono);">' + fmtP(z2) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 3</span><span style="color:var(--dim);">Add final 15% at MA20/EMA21 retest</span><span style="color:var(--dim);font-family:var(--mono);">' + fmtP(z3) + '</span></div>' +
+    '</div><div style="margin-top:.4rem;font-size:11px;color:var(--dim);">💡 After TP1: move SL to Tranche 1 entry. After TP2: trail stop 1×ATR below swing highs.</div></div>';
+  if (score >= 65) return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(245,200,66,.2);background:rgba(245,200,66,.04);">' +
+    '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:.45rem;">📊 MEDIUM CONVICTION — STAGED ENTRY (2 Tranches)</div>' +
+    '<div style="display:grid;gap:.3rem;font-size:12px;">' +
+    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 1</span><span style="color:var(--dim);">Enter 50% NOW — confirm with next candle close</span><span style="color:var(--green);font-family:var(--mono);">' + fmtP(z1) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:80px 1fr 90px;gap:.4rem;align-items:center;"><span style="color:var(--accent);font-weight:600;">Tranche 2</span><span style="color:var(--dim);">Add 50% only if volume ≥1.5× AND KDJ holds bullish</span><span style="color:var(--yellow);font-family:var(--mono);">' + fmtP(z2) + '</span></div>' +
+    '</div><div style="margin-top:.4rem;font-size:11px;color:var(--dim);">⚠️ Do NOT add Tranche 2 if price moves against you after T1.</div></div>';
+  return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04);">' +
+    '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);font-weight:600;margin-bottom:.35rem;">👀 LOW CONVICTION — PAPER TRADE ONLY</div>' +
+    '<div style="font-size:12px;color:var(--dim);line-height:1.6;">Score below threshold. Wait for KDJ fresh cross + volume ≥1.5× + ADX rising above 25.</div></div>';
+}
+
+// 3-Stop option display
+function buildThreeStopOptions(price, atr, structLevel, dp) {
+  if (!price || !atr) return '';
+  dp = dp || 4;
+  const fmtP = v => v.toFixed(dp);
+  const slA = price - atr * 1.5, slS = structLevel ? structLevel - atr * 0.15 : price - atr * 1.2, slT = price - atr * 0.6;
+  return '<div style="margin-top:.65rem;">' +
+    '<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.4rem;">🛑 STOP LOSS OPTIONS — Choose One Style</div>' +
+    '<div style="display:grid;gap:.3rem;">' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--red);">' +
+      '<span style="font-size:11.5px;font-weight:600;">ATR×1.5 (Standard)</span><span style="font-size:11px;color:var(--dim);">Hit ~22% of valid setups</span><span style="font-family:var(--mono);color:var(--red);font-weight:600;">' + fmtP(slA) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--green);">' +
+      '<span style="font-size:11.5px;font-weight:600;">Structure (Recommended)</span><span style="font-size:11px;color:var(--dim);">Below MA20/EMA21 — hit ~12%</span><span style="font-family:var(--mono);color:var(--green);font-weight:600;">' + fmtP(slS) + '</span></div>' +
+    '<div style="display:grid;grid-template-columns:120px 1fr auto;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:5px;border-left:2px solid var(--accent);">' +
+      '<span style="font-size:11.5px;font-weight:600;">Tight (Scalp only)</span><span style="font-size:11px;color:var(--dim);">ATR×0.6 — for 1m/5m only</span><span style="font-family:var(--mono);color:var(--accent);font-weight:600;">' + fmtP(slT) + '</span></div>' +
+    '</div></div>';
+}
+
+// Cross-tab conflict tracker
+const _tmLastCalc = { ma: null, ema: null };
+function tmCheckCrossTabConflict(tab, decision, score) {
+  _tmLastCalc[tab] = { decision, score, ts: Date.now() };
+  const other = tab === 'ma' ? 'ema' : 'ma';
+  const o = _tmLastCalc[other];
+  if (!o || (Date.now() - o.ts) > 1800000) return '';
+  const conflict = (decision === 'PROCEED' && o.decision === 'SKIP') || (decision === 'SKIP' && o.decision === 'PROCEED');
+  if (!conflict) return '';
+  const dom = score >= o.score ? tab.toUpperCase() : other.toUpperCase();
+  return '<div style="margin-top:.5rem;padding:.5rem .7rem;border-radius:7px;border-left:3px solid var(--orange);background:rgba(255,112,67,.07);">' +
+    '<div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:.15rem;">⚠️ CROSS-TAB SIGNAL CONFLICT</div>' +
+    '<div style="font-size:11.5px;color:var(--text);line-height:1.6;">MA says <strong>' + (_tmLastCalc.ma?.decision||'—') + '</strong> · EMA says <strong>' + (_tmLastCalc.ema?.decision||'—') + '</strong>. ' +
+    'Trust <strong style="color:var(--accent)">' + dom + '</strong> (higher score). Reduce to 50% size until both align.</div></div>';
+}
+
+
+
 function maCalc() {
-const price = num('ma-price');
-const ma5 = num('ma-ma5');
-const ma20 = num('ma-ma20');
-const ma50 = num('ma-ma50');
-if (!price || !ma5 || !ma20 || !ma50) { $('ma-result').style.display = 'none'; return; }
-$('ma-result').style.display = '';
-const ma200 = num('ma-ma200');
-const k = num('ma-k');
-const d = num('ma-d');
-const j = num('ma-j');
-const dif = num('ma-dif');
-const dea = num('ma-dea');
-const hist = num('ma-hist');
-const vol = num('ma-vol');
-const atr = num('ma-atr');
-const adxV = num('ma-adx');
-const pdiV = num('ma-pdi');
-const mdiV = num('ma-mdi');
-const adxrV = num('ma-adxr');
-const stV = num('ma-st');
-const bbu = num('ma-bbu');
-const bbl = num('ma-bbl');
-const riskPct = num('ma-risk-pct');
-const accountSz = num('ma-account');
-const pAboveMA20 = pct(price, ma20);
-const pAboveMA5 = pct(price, ma5);
-const pAboveMA50 = pct(price, ma50);
-const pAboveMA200 = ma200 ? pct(price, ma200) : null;
-const ma5AboveMA20 = pct(ma5, ma20);
-const ma20AboveMA50 = pct(ma20, ma50);
-const ma50AbMA200 = ma200 ? pct(ma50, ma200) : null;
-const f1_pass = price > ma5;
-const f2_pass = ma5 > ma20;
-const f3_pass = ma20 > ma50;
-const f4_ma200 = ma200 ? price > ma200 : null;
-const kdj = scoreKDJ(k, d, j);
-const macd = scoreMACDZone(dif, dea, hist);
-const volS = scoreVolume(vol);
-const adxS = scoreADX(adxV);
-const dmiS = scoreDMI(pdiV, mdiV, adxV, adxrV);
-const stS = scoreSupertrend(price, stV);
-const rsiS = scoreRSI(num('ma-rsi'));
-const eng = scoreEngine();
-// Core MA stack — most important
-eng.add(f1_pass, 20);   // Price above MA5: immediate momentum
-eng.add(f2_pass, 18);   // MA5 above MA20: short-term trend
-eng.add(f3_pass, 14);   // MA20 above MA50: medium trend
-eng.add(f4_ma200, 8);   // MA200: macro alignment
-// Momentum oscillators
-eng.add(kdj  ? kdj.pass  : null, 16); // KDJ: short-term momentum
-eng.add(macd ? macd.pass : null, 14); // MACD: trend momentum
-eng.add(rsiS ? rsiS.pass : null, 10); // RSI: overbought/oversold
-// Trend strength
-eng.add(adxS ? adxS.pass : null, 16); // ADX: trend intensity
-eng.add(dmiS ? dmiS.pass : null, 12); // DMI: direction confirmation
-// Supporting
-eng.add(volS ? volS.pass : null, 10); // Volume: institutional confirmation
-eng.add(stS  ? stS.pass  : null, 6);  // Supertrend: trend filter
-const tfCfg = getTFConfig('ma');
-
-// ── Confluence bonus: multiple strong signals ─────────────────────────
-let bonus = 0;
-const strongSignals = [
-  kdj?.pass === true && kdj?.zone?.includes('Cross'),    // fresh KDJ cross
-  macd?.pass === true && (macd?.zone?.includes('Strong') || macd?.zone?.includes('expanding')),
-  adxS?.pass === true && adxS?.strength === 'Very Strong',
-  dmiS?.pass === true && dmiS?.crossZone,                // fresh DMI cross
-  volS?.pass === true && vol >= 2.0,                     // 2x+ volume surge
-  f4_ma200 && ma50AbMA200 > 0,                           // full MA rainbow
+const price=num('ma-price'),ma5=num('ma-ma5'),ma20=num('ma-ma20'),ma50=num('ma-ma50');
+if(!price||!ma5||!ma20||!ma50){$('ma-result').style.display='none';return;}
+$('ma-result').style.display='';
+const ma200=num('ma-ma200'),k=num('ma-k'),d=num('ma-d'),j=num('ma-j');
+const dif=num('ma-dif'),dea=num('ma-dea'),hist=num('ma-hist');
+const vol=num('ma-vol'),atr=num('ma-atr'),adxV=num('ma-adx');
+const pdiV=num('ma-pdi'),mdiV=num('ma-mdi'),adxrV=num('ma-adxr');
+const stV=num('ma-st'),bbu=num('ma-bbu'),bbl=num('ma-bbl');
+const riskPct=num('ma-risk-pct'),accountSz=num('ma-account'),rsi=num('ma-rsi');
+// Prev-bar values for slope + crossover
+const prevMa5=num('ma-prev-ma5'),prevMa20=num('ma-prev-ma20'),prevMa50=num('ma-prev-ma50');
+const prevPrice=num('ma-prev-price'),prevRsi=num('ma-prev-rsi');
+const dp=price>100?2:price>1?4:6;
+const pAboveMA20=pct(price,ma20),pAboveMA5=pct(price,ma5),pAboveMA50=pct(price,ma50);
+const pAboveMA200=ma200?pct(price,ma200):null;
+const ma5AboveMA20=pct(ma5,ma20),ma20AboveMA50=pct(ma20,ma50);
+const ma50AbMA200=ma200?pct(ma50,ma200):null;
+const f1_pass=price>ma5,f2_pass=ma5>ma20,f3_pass=ma20>ma50,f4_ma200=ma200?price>ma200:null;
+const kdj=scoreKDJ(k,d,j),macd=scoreMACDZone(dif,dea,hist);
+const volS=scoreVolume(vol),adxS=scoreADX(adxV),dmiS=scoreDMI(pdiV,mdiV,adxV,adxrV);
+const stS=scoreSupertrend(price,stV),rsiS=scoreRSI(rsi);
+// NEW: Slope, crossover, fan, divergence
+const slopeMA5=scoreMASlope(ma5,prevMa5,'MA5');
+const slopeMA20=scoreMASlope(ma20,prevMa20,'MA20');
+const allSlopesRising=slopeMA5?.s>0&&slopeMA20?.s>0&&(scoreMASlope(ma50,prevMa50,'MA50')?.s||0)>0;
+const momentumAccel=slopeMA5?.s>0.3&&slopeMA20?.s>0.1;
+const cross5_20=detectMACross(ma5,ma20,prevMa5,prevMa20,'MA5','MA20');
+const cross20_50=detectMACross(ma20,ma50,prevMa20,prevMa50,'MA20','MA50');
+const fan=ma200?fanSpread(ma5,ma200):null;
+const rsiDiv=detectRSIDivergence(price,prevPrice,rsi,prevRsi);
+// TF-scaled weights
+const w=getTFWeights('ma');
+const tfCfg=getTFConfig('ma');
+const eng=scoreEngine();
+eng.add(f1_pass,w.maStack*20/24);eng.add(f2_pass,w.maStack*18/24);
+eng.add(f3_pass,w.maStack*14/24);eng.add(f4_ma200,w.maStack*8/24);
+eng.add(kdj?kdj.pass:null,w.kdj);eng.add(macd?macd.pass:null,w.macd);
+eng.add(rsiS?rsiS.pass:null,w.rsi);eng.add(adxS?adxS.pass:null,w.adx);
+eng.add(dmiS?dmiS.pass:null,w.dmi);eng.add(volS?volS.pass:null,w.vol);
+eng.add(stS?stS.pass:null,w.st);
+if(slopeMA5)eng.add(slopeMA5.pass,5);
+if(slopeMA20)eng.add(slopeMA20.pass,3);
+let bonus=0;
+const strongSignals=[
+  kdj?.pass===true&&kdj?.zone?.includes('Cross'),
+  macd?.pass===true&&(macd?.zone?.includes('Strong')||macd?.zone?.includes('expanding')),
+  adxS?.pass===true&&adxS?.strength==='Very Strong',
+  dmiS?.pass===true&&dmiS?.crossZone,
+  volS?.pass===true&&vol>=2.0,
+  f4_ma200&&ma50AbMA200>0,
+  allSlopesRising,momentumAccel,
 ].filter(Boolean).length;
-if (strongSignals >= 4) bonus = 8;
-else if (strongSignals >= 3) bonus = 4;
-else if (strongSignals >= 2) bonus = 2;
-
-// ── Session bonus: trading at prime time ──────────────────────────────
-const sessNow = getUSWindowMYT();
-const sessBonus = sessNow.cls === 'sess-prime' ? 5
-  : sessNow.cls === 'sess-power' ? 3
-  : sessNow.cls === 'sess-lull'  ? -8   // penalize for lull trading
-  : 0;
-
-// ── Over-extension penalty ────────────────────────────────────────────
-let penalty = 0;
-const maHard = tfCfg.f1Warn * 1.6, maMed = tfCfg.f1Warn * 1.2, maSoft = tfCfg.f1Warn;
-if (pAboveMA20 > maHard) penalty = -30;
-else if (pAboveMA20 > maMed) penalty = -20;
-else if (pAboveMA20 > maSoft) penalty = -10;
-
-const adjScore = Math.max(0, Math.min(100, eng.result() + penalty + bonus + sessBonus));
-
-const momentumOk = (!kdj || kdj.pass !== false)
-&& (!macd || macd.pass !== false)
-&& (!adxS || adxS.pass !== false)
-&& (!dmiS || dmiS.pass !== false)
-&& (!kdj || !(j != null && j > 90));
-
-// ── Decision thresholds (tighter = more conservative = better) ───────
-let decision, riskLevel, posSize;
-const kdjBearish = kdj?.pass === false;
-const macdBearish = macd?.pass === false;
-const criticalFail = !f1_pass || !f2_pass || !f3_pass;
-const momentumFail = kdjBearish || macdBearish;
-
-if (criticalFail || (momentumFail && !momentumOk)) {
-decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
-} else if (adjScore >= 78) {
-decision = 'PROCEED'; riskLevel = 'Low Risk';
-posSize = pAboveMA20 > 7 ? '50%' : strongSignals >= 3 ? '100%' : '75%';
-} else if (adjScore >= 68) {
-decision = 'PROCEED'; riskLevel = 'Medium Risk';
-posSize = pAboveMA20 > 5 ? '25%' : '50%';
-} else if (adjScore >= 55) {
-decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
-} else {
-decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
-}
-const grade = getGrade(ma20AboveMA50);
-if (grade.g === 'X' && posSize === '100%') posSize = '50%';
-if (grade.g === 'X' && decision === 'PROCEED' && adjScore < 80) decision = 'WATCH';
-// Lull period: force WATCH even on good scores — no full size during low volume
-if (sessNow.cls === 'sess-lull' && decision === 'PROCEED' && posSize === '100%') posSize = '50%';
-
-setDecisionStrip('ma', decision, riskLevel, grade, `
-    <div>Price: <span style="color:var(--text)">${fmt(price)}</span>
-      &nbsp; MA5: <span style="color:var(--text)">${fmt(ma5)}</span>
-      MA20: <span style="color:var(--text)">${fmt(ma20)}</span>
-      MA50: <span style="color:var(--text)">${fmt(ma50)}</span>
-    </div>
-    <div>Position: <span style="color:${posSize === '100%' || posSize === '75%' ? 'var(--green)' : posSize === '50%' ? 'var(--yellow)' : 'var(--dim)'}">${posSize}</span>
-      &nbsp; Score: <span style="color:var(--accent)">${adjScore.toFixed(0)}/100</span>
-      ${bonus > 0 ? `<span style="color:var(--green);font-size:9px"> +${bonus}pts confluence</span>` : ''}
-      ${sessBonus !== 0 ? `<span style="color:${sessBonus > 0 ? 'var(--green)' : 'var(--orange)'};font-size:9px"> ${sessBonus > 0 ? '+' : ''}${sessBonus}pts session</span>` : ''}
-      ${adxV ? `&nbsp; ADX: <span style="color:${adxS.c}">${adxV.toFixed(1)} ${adxS.strength}</span>` : ''}
-    </div>`
+if(strongSignals>=5)bonus=12;else if(strongSignals>=4)bonus=8;else if(strongSignals>=3)bonus=4;else if(strongSignals>=2)bonus=2;
+if(cross5_20?.type==='GOLDEN')bonus+=15;if(cross20_50?.type==='GOLDEN')bonus+=10;
+if(cross5_20?.type==='DEATH')bonus-=15;if(cross20_50?.type==='DEATH')bonus-=10;
+if(fan)bonus+=fan.bonus;
+if(rsiDiv)bonus+=rsiDiv.penalty;
+const sessNow=getUSWindowMYT();
+const sessBonus=sessNow.cls==='sess-prime'?5:sessNow.cls==='sess-power'?3:sessNow.cls==='sess-lull'?-12:0;
+let penalty=0;
+const maHard=tfCfg.f1Warn*1.6,maMed=tfCfg.f1Warn*1.2;
+if(pAboveMA20>maHard)penalty=-30;else if(pAboveMA20>maMed)penalty=-20;else if(pAboveMA20>tfCfg.f1Warn)penalty=-10;
+const adjScore=Math.max(0,Math.min(100,eng.result()+penalty+bonus+sessBonus));
+const momentumOk=(!kdj||kdj.pass!==false)&&(!macd||macd.pass!==false)&&(!adxS||adxS.pass!==false)&&(!dmiS||dmiS.pass!==false)&&(!kdj||!(j!=null&&j>90));
+let decision,riskLevel,posSize;
+const criticalFail=!f1_pass||!f2_pass||!f3_pass;
+const momentumFail=kdj?.pass===false||macd?.pass===false;
+if(criticalFail||(momentumFail&&!momentumOk)){decision='SKIP';riskLevel='High Risk';posSize='0%';}
+else if(adjScore>=80){decision='PROCEED';riskLevel='Low Risk';posSize=pAboveMA20>7?'50%':strongSignals>=4?'100%':'75%';}
+else if(adjScore>=68){decision='PROCEED';riskLevel='Medium Risk';posSize=pAboveMA20>5?'25%':'50%';}
+else if(adjScore>=55){decision='WATCH';riskLevel='Medium Risk';posSize='25%';}
+else{decision='SKIP';riskLevel='High Risk';posSize='0%';}
+const grade=getGrade(ma20AboveMA50);
+if(grade.g==='X'&&posSize==='100%')posSize='50%';
+if(grade.g==='X'&&decision==='PROCEED'&&adjScore<80)decision='WATCH';
+// LULL HARD BLOCK
+if(sessNow.cls==='sess-lull'&&decision==='PROCEED'){decision='WATCH';riskLevel='Lull Window';posSize='0%';}
+// Ticker display
+const conflictHtml=tmCheckCrossTabConflict('ma',decision,adjScore);
+setDecisionStrip('ma',decision,riskLevel,grade,
+  `<div>Price:<span style="color:var(--text)">${fmt(price)}</span> MA5:<span style="color:var(--text)">${fmt(ma5)}</span> MA20:<span style="color:var(--text)">${fmt(ma20)}</span> MA50:<span style="color:var(--text)">${fmt(ma50)}</span></div>`+
+  `<div>Size:<span style="color:${posSize==='100%'||posSize==='75%'?'var(--green)':posSize==='50%'?'var(--yellow)':'var(--dim)'}">${posSize}</span>&nbsp;Score:<span style="color:var(--accent)">${adjScore.toFixed(0)}/100</span>`+
+  (bonus>0?`<span style="color:var(--green);font-size:9px"> +${bonus}pts</span>`:'')+(sessBonus!==0?`<span style="color:${sessBonus>0?'var(--green)':'var(--orange)'};font-size:9px"> ${sessBonus>0?'+':''}${sessBonus}pts sess</span>`:'')+(adxV?`&nbsp;ADX:<span style="color:${adxS.c}">${adxV.toFixed(1)} ${adxS.strength}</span>`:'')+`</div>`+
+  conflictHtml
 );
-const adv = $('ma-advice');
-if (decision === 'PROCEED') {
-const lines = [
-pAboveMA20 > tfCfg.f1Ok
-? `⚠️ Price ${pAboveMA20.toFixed(1)}% above MA20 — stretched for ${tfCfg.label} (ideal ≤${tfCfg.f1Ideal}%). Consider waiting for pullback toward MA5 (${fmt(ma5)}).`
-: `✅ Full bull MA stack confirmed. Price is ${pAboveMA20.toFixed(1)}% above MA20 (ideal ≤${tfCfg.f1Ideal}% on ${tfCfg.label}).`,
-`⏱️ Timeframe: ${tfCfg.label} — Expected hold: ${tfCfg.hold}. ${tfCfg.sessionNote}.`,
-`📐 Entry: ${fmt(price)} | SL: ${atr ? fmt(price - atr * tfCfg.atrMult) : 'set ' + tfCfg.atrMult + '×ATR below entry'} | Target R:R ≥ 1:2`,
-ma200 && price > ma200 ? `🌐 Macro bullish: Price above MA200 (${fmt(ma200)}) — trend aligned across all timeframes.` : '',
-adxS && adxS.pass === true ? `💪 ADX ${adxV?.toFixed(1)} ${adxS.strength} — ${adxS.declining ? '⚠️ ADX declining, watch momentum' : 'trend strength confirmed'}.` : '',
-dmiS && dmiS.pass === true ? `📊 DMI: ${dmiS.label}` : (dmiS && dmiS.pass === false ? `⚠️ DMI Warning: ${dmiS.label}` : ''),
-strongSignals >= 3 ? `🔥 High-confluence setup: ${strongSignals} strong signals aligned — higher conviction entry.` : '',
-`📦 Position size: ${posSize}. SL set immediately after entry. Never move SL wider.`,
-sessNow.cls === 'sess-prime' ? `🎯 Currently in Prime Window — optimal entry timing.` : '',
-].filter(Boolean).join('\n');
-adv.textContent = lines;
-adv.className = 'advice-box green';
-} else if (decision === 'WATCH') {
-const watchReason = pAboveMA20 > tfCfg.f1Warn ? `Price ${pAboveMA20.toFixed(1)}% extended above MA20` : `Score ${adjScore.toFixed(0)}/100 below threshold`;
-adv.textContent = `⚠️ Partial setup (Score: ${adjScore.toFixed(0)}/100). ${watchReason}. Wait for full MA alignment + momentum confirmation. Ideal entry: pullback to MA5/MA20 with KDJ crossover and expanding volume.`;
-adv.className = 'advice-box yellow';
-} else {
-const missing = [
-!f1_pass && `Price < MA5`,
-!f2_pass && `MA5 < MA20`,
-!f3_pass && `MA20 < MA50`,
-kdj?.pass === false && `KDJ Bearish (K${k?.toFixed(0)}/D${d?.toFixed(0)})`,
-macd?.pass === false && `MACD Bearish`,
-adxS?.pass === false && `ADX Weak (${adxV?.toFixed(1)})`,
-].filter(Boolean);
-adv.textContent = `🔴 Skip — ${missing.length} critical filter${missing.length > 1 ? 's' : ''} failed: ${missing.join(', ')}. Do not force entry against the filter stack. Wait for all conditions to align.`;
-adv.className = 'advice-box red';
+// Advice
+const adv=$('ma-advice');
+if(sessNow.cls==='sess-lull'){
+  adv.innerHTML=`<div style="font-weight:600;color:var(--yellow);margin-bottom:.3rem;">🕐 LULL WINDOW — STAND BY</div><div style="font-size:12.5px;line-height:1.65;">Score <strong>${adjScore.toFixed(0)}/100</strong> — valid setup but lull-window trades have 40% lower follow-through. Wait for Power Hour (2:30 AM MYT).</div>`;
+  adv.className='advice-box yellow';
+}else if(decision==='PROCEED'){
+  const lines=[
+    cross5_20?.type==='GOLDEN'?`🔔 FRESH MA5/MA20 GOLDEN CROSS — highest-conviction entry. +15pts bonus.`:'',
+    cross20_50?.type==='GOLDEN'?`🔔 FRESH MA20/MA50 GOLDEN CROSS — medium-term trend confirmed. +10pts bonus.`:'',
+    fan?`📐 Fan Spread: ${fan.stage} — ${fan.tip}`:'',
+    momentumAccel?`⚡ MA slope acceleration — all MAs rising at increasing rate.`:'',
+    rsiDiv?.type==='BEARISH'?rsiDiv.label:'',
+    pAboveMA20>tfCfg.f1Ok?`⚠️ Price ${pAboveMA20.toFixed(1)}% above MA20 — stretched (ideal ≤${tfCfg.f1Ideal}%). Wait for pullback to MA5 (${fmt(ma5)}).`:`✅ Bull MA stack. Price ${pAboveMA20.toFixed(1)}% above MA20 (ideal ≤${tfCfg.f1Ideal}%).`,
+    `⏱️ ${tfCfg.label} — Hold: ${tfCfg.hold}. ${tfCfg.sessionNote}`,
+    ma200&&price>ma200?`🌐 Macro bullish: Price above MA200 (${fmt(ma200)}).`:'',
+    adxS?.pass===true?`💪 ADX ${adxV?.toFixed(1)} ${adxS.strength}${adxS.declining?' ⚠️ declining':''}`:'',
+    dmiS?.pass===true?`📊 DMI: ${dmiS.label}`:(dmiS?.pass===false?`⚠️ DMI: ${dmiS.label}`:''),
+    strongSignals>=3?`🔥 High-confluence: ${strongSignals} strong signals aligned.`:'',
+    sessNow.cls==='sess-prime'?`🎯 Prime Window — optimal timing.`:'',
+    `📦 Position: ${posSize}. Set SL immediately.`,
+  ].filter(Boolean).join('\n');
+  adv.textContent=lines;adv.className='advice-box green';
+}else if(decision==='WATCH'){
+  const r=pAboveMA20>tfCfg.f1Warn?`Price ${pAboveMA20.toFixed(1)}% extended`:`Score ${adjScore.toFixed(0)}/100 below threshold`;
+  adv.textContent=`⚠️ Partial setup (${adjScore.toFixed(0)}/100). ${r}. Wait for MA5/MA20 pullback + KDJ crossover + volume.`;adv.className='advice-box yellow';
+}else{
+  const miss=[!f1_pass&&'Price<MA5',!f2_pass&&'MA5<MA20',!f3_pass&&'MA20<MA50',kdj?.pass===false&&`KDJ Bearish`,macd?.pass===false&&'MACD Bearish',adxS?.pass===false&&`ADX Weak`,cross5_20?.type==='DEATH'?'FRESH DEATH CROSS':''].filter(Boolean);
+  adv.textContent=`🔴 Skip — ${miss.join(', ')}.`;adv.className='advice-box red';
 }
-updateDial('ma-dial-arc', 'ma-dial-score', adjScore);
-drawPie('ma-pie', 'ma-pie-legend', [
-{ label: 'MA Stack', value: (f1_pass ? 1 : 0) + (f2_pass ? 1 : 0) + (f3_pass ? 1 : 0) + (f4_ma200 ? 1 : 0), color: 'var(--accent)' },
-{ label: 'KDJ', value: kdj ? (kdj.pass === true ? 1 : kdj.pass === 'warn' ? .5 : 0) : 0, color: 'var(--green)' },
-{ label: 'MACD', value: macd ? (macd.pass === true ? 1 : macd.pass === 'warn' ? .5 : 0) : 0, color: 'var(--yellow)' },
-{ label: 'Volume', value: volS ? (volS.pass === true ? 1 : volS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--orange)' },
-{ label: 'ADX', value: adxS ? (adxS.pass === true ? 1 : adxS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--accent2)' },
-{ label: 'Supertrend', value: stS ? (stS.pass === true ? 1 : 0) : 0, color: 'var(--green2)' },
-{ label: 'RSI', value: rsiS ? (rsiS.pass === true ? 1 : rsiS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--red)' },
-].filter(s => s.value > 0));
-const passArr = [f1_pass, f2_pass, f3_pass,
-kdj?.pass === true, macd?.pass === true,
-volS?.pass === true, adxS?.pass === true,
-rsiS?.pass === true,
-].filter(Boolean);
-$('ma-checklist').innerHTML = [
-buildCheck('F1 — Price > MA5', f1_pass, fmt2(pAboveMA5)),
-buildCheck('F2 — MA5 > MA20', f2_pass, fmt2(ma5AboveMA20)),
-buildCheck('F3 — MA20 > MA50', f3_pass, fmt2(ma20AboveMA50)),
-ma200 != null
-? buildCheck('F4 — Price > MA200 (Macro)', f4_ma200, `${fmt2(pAboveMA200)} ${f4_ma200 ? '✅' : '🔴'}`)
-: buildCheck('F4 — MA200 (Macro)', null, 'Not provided'),
-kdj
-? buildCheck(`F5 — KDJ ${kdj.zone}`, kdj.pass === true ? true : kdj.pass === false ? false : null, `K:${k?.toFixed(1)} D:${d?.toFixed(1)} J:${j?.toFixed(1)}`)
-: buildCheck('F5 — KDJ', null, 'Not provided'),
-macd
-? buildCheck(`F6 — MACD ${macd.zone}`, macd.pass === true ? true : macd.pass === false ? false : null, `DIF:${dif} DEA:${dea}${hist != null ? ` H:${hist}` : ''}`)
-: buildCheck('F6 — MACD', null, 'Not provided'),
-volS
-? buildCheck(`F7 — Volume ${volS.zone}`, volS.pass === true ? true : volS.pass === false ? false : null, `${vol}× ${volS.zone}`)
-: buildCheck('F7 — Volume', null, 'Not provided'),
-adxS
-? buildCheck(`ADX ${adxS.zone}${adxS.declining ? ' ↓' : ''}`, adxS.pass === true ? true : adxS.pass === false ? false : null, `ADX: ${adxV?.toFixed(1)}`)
-: buildCheck('ADX Trend Strength', null, 'Not provided'),
-dmiS
-? buildCheck(`DMI ${dmiS.zone}`, dmiS.pass === true ? true : dmiS.pass === false ? false : null, dmiS.label)
-: buildCheck('DMI (PDI/MDI)', null, 'Optional — enter PDI, MDI, ADXR'),
-stS
-? buildCheck(`Supertrend ${stS.zone}`, stS.pass, `Price:${fmt(price)} ST:${fmt(stV)}`)
-: buildCheck('Supertrend', null, 'Not provided'),
-rsiS
-? buildCheck(`RSI ${rsiS.zone}`, rsiS.pass === true ? true : rsiS.pass === false ? false : null, `RSI: ${num('ma-rsi')?.toFixed(1)}`)
-: buildCheck('RSI14', null, 'Not provided'),
-].join('');
-updateMeter('ma-signal-meter', passArr.length, 8);
-const alignRows = [
-['Price vs MA20', pAboveMA20, pAboveMA20 >= 0 && pAboveMA20 <= 2 ? 'green' : pAboveMA20 > 10 ? 'red' : pAboveMA20 > 5 ? 'yellow' : 'accent'],
-['Price vs MA5', pAboveMA5, pAboveMA5 >= 0 ? 'green' : 'red'],
-['Price vs MA50', pAboveMA50, pAboveMA50 >= 0 ? 'green' : 'red'],
-['MA5 vs MA20', ma5AboveMA20, ma5AboveMA20 > 0 ? 'green' : 'red'],
-['MA20 vs MA50', ma20AboveMA50, ma20AboveMA50 > 0 ? 'green' : 'red'],
+// Cross banner
+let cb=$('ma-cross-banner');
+if(!cb){cb=document.createElement('div');cb.id='ma-cross-banner';$('ma-advice').insertAdjacentElement('afterend',cb);}
+if(cross5_20||cross20_50){
+  const cx=cross5_20||cross20_50;
+  cb.innerHTML=`<div style="padding:.55rem .8rem;border-radius:8px;border-left:4px solid ${cx.c};background:rgba(0,0,0,.1);margin:.4rem 0;"><div style="font-family:var(--head);font-size:15px;font-weight:700;color:${cx.c};">${cx.label}</div><div style="font-size:12px;color:var(--dim);margin-top:.2rem;">${cx.type==='GOLDEN'?'Enter on next candle open. SL = below crossover low.':'DEATH CROSS — exit all longs immediately.'}</div></div>`;
+  cb.style.display='';
+}else cb.style.display='none';
+// Pullback zone banner
+let pb=$('ma-pullback-banner');
+if(!pb){pb=document.createElement('div');pb.id='ma-pullback-banner';$('ma-advice').insertAdjacentElement('afterend',pb);}
+const inPZ=f2_pass&&price>=ma20&&price<=ma5;
+const distToPZ=f2_pass?((price-ma5)/ma5*100):null;
+if(f2_pass&&decision!=='SKIP'){
+  const zc=inPZ?'var(--green)':'var(--accent)';
+  pb.innerHTML=`<div style="padding:.5rem .7rem;border-radius:7px;border:1px solid ${zc}33;background:${inPZ?'rgba(0,232,122,.05)':'rgba(0,200,240,.03)'};margin:.35rem 0;">
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${zc};margin-bottom:.3rem;">🎯 ${inPZ?'PRIME PULLBACK ENTRY ZONE ◀ YOU ARE HERE':'IDEAL PULLBACK ENTRY ZONE'}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem;font-family:var(--mono);font-size:12px;margin-bottom:.3rem;">
+      <div style="padding:.3rem .45rem;background:rgba(0,0,0,.1);border-radius:4px;"><div style="font-size:9px;color:var(--dim);margin-bottom:2px;">FLOOR (MA20)</div><div style="color:var(--accent);font-weight:700;">${fmtPrice(ma20,dp)}</div></div>
+      <div style="padding:.3rem .45rem;background:rgba(0,0,0,.1);border-radius:4px;"><div style="font-size:9px;color:var(--dim);margin-bottom:2px;">CEILING (MA5)</div><div style="color:var(--accent);font-weight:700;">${fmtPrice(ma5,dp)}</div></div>
+    </div>
+    <div style="font-size:11.5px;color:${inPZ?'var(--green)':'var(--dim)'};">${inPZ?'✅ Price in zone — highest-probability entry. Tight SL below MA20.':distToPZ>0?`Price ${distToPZ.toFixed(1)}% above zone — wait for pullback to MA5 for best R:R.`:'Price below MA5 — watch for MA5 to act as resistance first.'}</div></div>`;
+  pb.style.display='';
+}else if(pb)pb.style.display='none';
+// Fan banner
+let fb=$('ma-fan-banner');
+if(!fb){fb=document.createElement('div');fb.id='ma-fan-banner';const r=$('ma-result');if(r){const fc=r.querySelector('.card');if(fc)fc.insertAdjacentElement('beforebegin',fb);}}
+if(fan||slopeMA5){
+  fb.innerHTML=`<div style="display:grid;grid-template-columns:${fan&&slopeMA5?'1fr 1fr':'1fr'};gap:.5rem;margin-bottom:.5rem;">`+
+    (fan?`<div style="padding:.5rem .65rem;border-radius:7px;border-left:3px solid ${fan.c};background:rgba(0,0,0,.08);"><div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:${fan.c};font-weight:600;margin-bottom:.2rem;">${fan.e} MA Fan — ${fan.stage}</div><div style="font-size:11.5px;color:var(--dim);line-height:1.5;">${fan.tip}</div>${ma200?`<div style="font-size:10.5px;color:var(--dim);margin-top:.2rem;font-family:var(--mono);">Spread: ${((ma5-ma200)/ma200*100).toFixed(1)}% (MA5 vs MA200)</div>`:''}  </div>`:'')+
+    (slopeMA5?`<div style="padding:.5rem .65rem;border-radius:7px;border-left:3px solid ${slopeMA5.c};background:rgba(0,0,0,.08);"><div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:${slopeMA5.c};font-weight:600;margin-bottom:.2rem;">MA Slope Momentum</div><div style="font-size:11.5px;color:var(--dim);line-height:1.5;">MA5 ${slopeMA5.s>0?'▲':'▼'} ${Math.abs(slopeMA5.s).toFixed(3)}%/bar${slopeMA20?' · MA20 '+(slopeMA20.s>0?'▲':'▼')+' '+Math.abs(slopeMA20.s).toFixed(3)+'%/bar':''}</div>${momentumAccel?'<div style="font-size:10.5px;color:var(--green);margin-top:.2rem;">⚡ Acceleration detected</div>':''}</div>`:'')+
+    '</div>';
+  fb.style.display='';
+}else if(fb)fb.style.display='none';
+// Standard UI updates
+updateDial('ma-dial-arc','ma-dial-score',adjScore);
+const pieData=[
+  {label:'MA Stack', value:(f1_pass?20:0)+(f2_pass?18:0)+(f3_pass?14:0)+(f4_ma200?8:0), color:'var(--accent)'},
+  {label:'KDJ/MACD', value:(kdj?.pass===true?16:0)+(macd?.pass===true?14:0),             color:'var(--green)'},
+  {label:'ADX/DMI',  value:(adxS?.pass===true?16:0)+(dmiS?.pass===true?12:0),            color:'var(--yellow)'},
+  {label:'Vol/ST/RSI',value:(volS?.pass===true?10:0)+(stS?.pass===true?6:0)+(rsiS?.pass===true?10:0), color:'var(--orange)'},
+].filter(s=>s.value>0);
+drawPie('ma-pie','ma-pie-legend',pieData);
+const checkRows=[
+  buildCheck('F1: Price > MA5',  f1_pass, `${fmt(price)} vs ${fmt(ma5)} (${(pAboveMA5||0).toFixed(2)}%)`),
+  buildCheck('F2: MA5 > MA20',   f2_pass, `${fmt(ma5)} vs ${fmt(ma20)} (${(ma5AboveMA20||0).toFixed(2)}%)`),
+  buildCheck('F3: MA20 > MA50',  f3_pass, `${fmt(ma20)} vs ${fmt(ma50)} (${(ma20AboveMA50||0).toFixed(2)}%)`),
+  f4_ma200!==null?buildCheck('F4: Price > MA200',f4_ma200,`${fmt(ma200)} macro`):'',
+  kdj ?buildCheck('KDJ',kdj.pass,`${kdj.zone}`):'',
+  macd?buildCheck('MACD',macd.pass,`${macd.zone}`):'',
+  rsiS?buildCheck('RSI',rsiS.pass,`${rsiS.zone}`):'',
+  adxS?buildCheck('ADX',adxS.pass,`${adxV?.toFixed(1)} — ${adxS.zone}`):'',
+  dmiS?buildCheck('DMI',dmiS.pass,dmiS.label):'',
+  volS?buildCheck('Volume',volS.pass,`${vol?.toFixed(2)}× ${volS.zone}`):'',
+  stS ?buildCheck('Supertrend',stS.pass,stS.zone):'',
+  slopeMA5?buildCheck('MA5 Slope',slopeMA5.pass,slopeMA5.zone):'',
+  rsiDiv?buildCheck('RSI Divergence',rsiDiv.type==='BULLISH'?true:false,rsiDiv.label.replace(/.*DIVERGENCE: /,'')):'',
+].filter(Boolean).join('');
+$('ma-checklist').innerHTML=checkRows;
+updateMeter('ma-signal-meter',(checkRows.match(/check-pass/g)||[]).length,14);
+const alignRows=[
+  ['Price vs MA5',pAboveMA5,pAboveMA5>=0?'green':'red'],
+  ['Price vs MA20',pAboveMA20,pAboveMA20>=0?'green':'red'],
+  ['Price vs MA50',pAboveMA50,pAboveMA50>=0?'green':'red'],
+  ['MA5 vs MA20',ma5AboveMA20,ma5AboveMA20>0?'green':'red'],
+  ['MA20 vs MA50',ma20AboveMA50,ma20AboveMA50>0?'green':'red'],
 ];
-if (ma200) {
-alignRows.push(['Price vs MA200', pAboveMA200, pAboveMA200 >= 0 ? 'green' : 'red']);
-alignRows.push(['MA50 vs MA200', ma50AbMA200, ma50AbMA200 >= 0 ? 'green' : 'red']);
+if(ma200){alignRows.push(['Price vs MA200',pAboveMA200,pAboveMA200>=0?'green':'red']);alignRows.push(['MA50 vs MA200',ma50AbMA200,ma50AbMA200>=0?'green':'red']);}
+$('ma-alignment-grid').innerHTML=alignRows.map(([l,v,c])=>`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v!=null?(v>=0?'+':'')+v.toFixed(2)+'%':'—'}</div></div>`).join('');
+updateRange('ma-range-fill','ma-range-marker','ma-range-label',Math.max(0,pAboveMA20||0),12);
+const bbSection=$('ma-bb-section');
+if(bbu!=null&&bbl!=null&&bbl<bbu){
+  bbSection.style.display='';
+  const bbRange=bbu-bbl,bbPos=bbRange>0?((price-bbl)/bbRange)*100:50;
+  const bF=$('ma-bb-fill'),bM=$('ma-bb-marker'),bL=$('ma-bb-label');
+  if(bF)bF.style.width=Math.min(100,Math.max(0,bbPos))+'%';
+  if(bM)bM.style.left=Math.min(100,Math.max(0,bbPos))+'%';
+  if(bL)bL.textContent=bbPos.toFixed(1)+'% of BB width';
+}else bbSection.style.display='none';
+buildTradePlan('ma-price-block','ma-tradeplan-card',price,atr,accountSz,riskPct);
+const stopHtml=buildThreeStopOptions(price,atr,ma20,dp);
+const scaledHtml=buildScaledEntryPlan(adjScore,price,atr,ma5,ma20,dp);
+const tpBox=$('ma-price-block');
+if(tpBox&&(stopHtml||scaledHtml)){let ex=$('ma-extra-plan');if(!ex){ex=document.createElement('div');ex.id='ma-extra-plan';tpBox.insertAdjacentElement('afterend',ex);}ex.innerHTML=stopHtml+scaledHtml;}
 }
-$('ma-alignment-grid').innerHTML = alignRows.map(([l, v, c]) =>
-`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${v != null ? (v >= 0 ? '+' : '') + v.toFixed(2) + '%' : '—'}</div></div>`
-).join('');
-updateRange('ma-range-fill', 'ma-range-marker', 'ma-range-label', Math.max(0, pAboveMA20 || 0), 12);
-const bbSection = $('ma-bb-section');
-if (bbu != null && bbl != null && bbl < bbu) {
-bbSection.style.display = '';
-const bbRange = bbu - bbl;
-const bbPos = bbRange > 0 ? ((price - bbl) / bbRange) * 100 : 50;
-const bbFill = $('ma-bb-fill');
-const bbMark = $('ma-bb-marker');
-const bbLbl = $('ma-bb-label');
-if (bbFill) bbFill.style.width = Math.min(100, Math.max(0, bbPos)) + '%';
-if (bbMark) bbMark.style.left = Math.min(100, Math.max(0, bbPos)) + '%';
-if (bbLbl) bbLbl.textContent = `${bbPos.toFixed(1)}% of BB width`;
-} else {
-bbSection.style.display = 'none';
-}
-buildTradePlan('ma-price-block', 'ma-tradeplan-card', price, atr, accountSz, riskPct);
-}
+
 function resetMA() {
-['ma-price', 'ma-ma5', 'ma-ma20', 'ma-ma50', 'ma-ma200',
-'ma-k', 'ma-d', 'ma-j', 'ma-dif', 'ma-dea', 'ma-hist',
-'ma-vol', 'ma-rsi', 'ma-atr', 'ma-adx', 'ma-pdi', 'ma-mdi', 'ma-adxr', 'ma-st', 'ma-bbu', 'ma-bbl',
-'ma-risk-pct', 'ma-account',
+['ma-price','ma-ma5','ma-ma20','ma-ma50','ma-ma200',
+'ma-k','ma-d','ma-j','ma-dif','ma-dea','ma-hist',
+'ma-vol','ma-rsi','ma-atr','ma-adx','ma-pdi','ma-mdi','ma-adxr','ma-st','ma-bbu','ma-bbl',
+'ma-risk-pct','ma-account',
+'ma-prev-price','ma-prev-ma5','ma-prev-ma20','ma-prev-ma50','ma-prev-rsi',
 ].forEach(id => { const el = $(id); if (el) el.value = ''; });
-$('ma-result').style.display = 'none';
+$('ma-result').style.display='none';
+_tmLastCalc.ma=null;
 }
 function emaCalc() {
-const price = num('ema-price');
-const e8 = num('ema-ema8');
-const e21 = num('ema-ema21');
-const e55 = num('ema-ema55');
-if (!price || !e8 || !e21 || !e55) { $('ema-result').style.display = 'none'; return; }
-$('ema-result').style.display = '';
-const e200 = num('ema-ema200');
-const k = num('ema-k');
-const d = num('ema-d');
-const j = num('ema-j');
-const dif = num('ema-dif');
-const dea = num('ema-dea');
-const vol = num('ema-vol');
-const atr = num('ema-atr');
-const adxV = num('ema-adx');
-const pdiV = num('ema-pdi');
-const mdiV = num('ema-mdi');
-const adxrV = num('ema-adxr');
-const stV = num('ema-st');
-const vwapV = num('ema-vwap');
-const ichiP = sel('ema-ichi');
-const bidask = num('ema-bidask');
-const beta = num('ema-beta');
-const open = num('ema-open');
-const prev = num('ema-prev');
-const high = num('ema-high');
-const low = num('ema-low');
-const w52h = num('ema-52h');
-const w52l = num('ema-52l');
-const riskPct = num('ema-risk-pct');
-const accountSz = num('ema-account');
-const pAboveE8 = pct(price, e8);
-const pAboveE21 = pct(price, e21);
-const pAboveE55 = pct(price, e55);
-const pAboveE200 = e200 ? pct(price, e200) : null;
-const e8AboveE21 = pct(e8, e21);
-const e21AboveE55 = pct(e21, e55);
-const e55AbE200 = e200 ? pct(e55, e200) : null;
-const f1_pass = price > e8;
-const f2_pass = e8 > e21;
-const f3_pass = e21 > e55;
-const f4_e200 = e200 ? price > e200 : null;
-const fullStack = f1_pass && f2_pass && f3_pass;
-const kdj = scoreKDJ(k, d, j);
-const macd = scoreMACDZone(dif, dea);
-const volS = scoreVolume(vol);
-const adxS = scoreADX(adxV);
-const dmiS = scoreDMI(pdiV, mdiV, adxV, adxrV);
-const stS = scoreSupertrend(price, stV);
-const ichiS = ichiP ? scoreIchimoku(ichiP) : null;
-const vwapS = scoreVWAP(price, vwapV);
-const rsiS = scoreRSI(num('ema-rsi'));
-const eng = scoreEngine();
-eng.add(f1_pass, 18);
-eng.add(f2_pass, 18);
-eng.add(f3_pass, 16);
-eng.add(f4_e200, 6);
-eng.add(kdj ? kdj.pass : null, 14);
-eng.add(macd ? macd.pass : null, 12);
-eng.add(volS ? volS.pass : null, 8);
-eng.add(adxS ? adxS.pass : null, 16);
-eng.add(dmiS ? dmiS.pass : null, 12);
-eng.add(ichiS ? ichiS.pass : null, 6);
-eng.add(vwapS ? vwapS.pass : null, 4);
-eng.add(stS ? stS.pass : null, 4);
-eng.add(rsiS ? rsiS.pass : null, 10);
-const stretchPct = Math.abs(pAboveE8 || 0);
-const tfCfg = getTFConfig('ema');
-let penalty = 0;
-const eHard = tfCfg.f1Warn * 1.6, eMed = tfCfg.f1Warn * 1.2, eSoft = tfCfg.f1Warn;
-if (stretchPct > eHard) penalty = -30;
-else if (stretchPct > eMed) penalty = -20;
-else if (stretchPct > eSoft) penalty = -10;
-const adjScore = Math.min(100, Math.max(0, eng.result() + penalty));
-const grade = getGrade(e21AboveE55 || 0);
-const momentumOk = (!kdj || kdj.pass !== false)
-&& (!macd || macd.pass !== false)
-&& (!adxS || adxS.pass !== false)
-&& (!dmiS || dmiS.pass !== false)
-&& (!kdj || !(j != null && j > 85));
-let decision, riskLevel, posSize;
-if (!f1_pass || !f2_pass || !f3_pass || !momentumOk) {
-decision = 'SKIP'; riskLevel = 'High Risk'; posSize = '0%';
-} else if (adjScore >= 75) {
-decision = 'PROCEED'; riskLevel = 'Low Risk'; posSize = stretchPct > 5 ? '50%' : '100%';
-} else if (adjScore >= 65) {
-decision = 'PROCEED'; riskLevel = 'Medium Risk'; posSize = '50%';
-} else {
-decision = 'WATCH'; riskLevel = 'Medium Risk'; posSize = '25%';
+const price=num('ema-price'),e8=num('ema-ema8'),e21=num('ema-ema21'),e55=num('ema-ema55');
+if(!price||!e8||!e21||!e55){$('ema-result').style.display='none';return;}
+$('ema-result').style.display='';
+const e200=num('ema-ema200'),k=num('ema-k'),d=num('ema-d'),j=num('ema-j');
+const dif=num('ema-dif'),dea=num('ema-dea'),hist=num('ema-hist');
+const vol=num('ema-vol'),atr=num('ema-atr'),adxV=num('ema-adx');
+const pdiV=num('ema-pdi'),mdiV=num('ema-mdi'),adxrV=num('ema-adxr');
+const stV=num('ema-st'),vwapV=num('ema-vwap'),ichiP=sel('ema-ichi');
+const bidask=num('ema-bidask'),beta=num('ema-beta');
+const open=num('ema-open'),prev=num('ema-prev'),high=num('ema-high'),low=num('ema-low');
+const w52h=num('ema-52h'),w52l=num('ema-52l');
+const riskPct=num('ema-risk-pct'),accountSz=num('ema-account'),rsiV=num('ema-rsi');
+// NEW: previous-bar values
+const prevE8=num('ema-prev-e8'),prevE21=num('ema-prev-e21');
+const prevPrice=num('ema-prev-price'),prevRsi=num('ema-prev-rsi');
+const mtfST15m=document.getElementById('ema-mtf-15m')?.value||'';
+const mtfST1H=document.getElementById('ema-mtf-1h')?.value||'';
+const dp=price>100?2:price>1?4:6;
+const pAboveE8=pct(price,e8),pAboveE21=pct(price,e21),pAboveE55=pct(price,e55);
+const pAboveE200=e200?pct(price,e200):null;
+const e8AboveE21=pct(e8,e21),e21AboveE55=pct(e21,e55);
+const e55AbE200=e200?pct(e55,e200):null;
+const f1_pass=price>e8,f2_pass=e8>e21,f3_pass=e21>e55,f4_e200=e200?price>e200:null;
+const fullStack=f1_pass&&f2_pass&&f3_pass;
+const kdj=scoreKDJ(k,d,j),macd=scoreMACDZone(dif,dea,hist);
+const volS=scoreVolume(vol),adxS=scoreADX(adxV),dmiS=scoreDMI(pdiV,mdiV,adxV,adxrV);
+const stS=scoreSupertrend(price,stV),rsiS=scoreRSI(rsiV);
+// Expanded Ichimoku scoring
+const ichiBase=ichiP?.startsWith('above_tkcross')?'above':ichiP?.startsWith('above')?'above':ichiP?.startsWith('inside')?'inside':ichiP?.startsWith('below')?'below':ichiP?.startsWith('twist')?'above':ichiP||'';
+const ichiScored=ichiBase?scoreIchimoku(ichiBase):null;
+const ichiTKBull=ichiP==='above_tkcross_bull',ichiTKBear=ichiP==='above_tkcross_bear';
+const ichiTwistBull=ichiP==='twist_bull',ichiTwistBear=ichiP==='twist_bear';
+// VWAP band scoring
+const vwapBS=scoreVWAPBands(price,vwapV,atr);
+// EMA crossover
+const emaCross=detectMACross(e8,e21,prevE8,prevE21,'EMA8','EMA21');
+// RSI divergence
+const rsiDiv=detectRSIDivergence(price,prevPrice,rsiV,prevRsi);
+// EMA55 institutional level
+let e55Score=null;
+if(e55){
+  const d55=((price-e55)/e55)*100;
+  if(d55>=0&&d55<=1.5&&vol>=1.5){e55Score={pass:true,zone:`Price at EMA55 retest (+${d55.toFixed(2)}%) + volume — 🏛️ institutional bounce zone`,c:'var(--green)',bonus:12};}
+  else if(d55<0&&d55>-2){e55Score={pass:false,zone:`Price just below EMA55 (${d55.toFixed(2)}%) — structural bearish shift`,c:'var(--red)',bonus:-12};}
+  else if(d55<-2){e55Score={pass:false,zone:`EMA55 resistance — price ${Math.abs(d55).toFixed(1)}% below`,c:'var(--red)',bonus:-8};}
 }
-if (grade.g === 'X' && posSize === '100%') posSize = '50%';
-if (grade.g === 'X' && decision === 'PROCEED' && adjScore < 80) decision = 'WATCH';
-setDecisionStrip('ema', decision, riskLevel, grade, `
-    <div>Price: <span style="color:var(--text)">${fmt(price)}</span>
-      EMA8: <span style="color:var(--text)">${fmt(e8)}</span>
-      EMA21: <span style="color:var(--text)">${fmt(e21)}</span>
-      EMA55: <span style="color:var(--text)">${fmt(e55)}</span>
-    </div>
-    <div>Bull Stack: <span style="color:${fullStack ? 'var(--green)' : 'var(--red)'}">${fullStack ? '✅ Yes' : '✘ No'}</span>
-      &nbsp; Size: <span style="color:${posSize === '100%' ? 'var(--green)' : 'var(--yellow)'}">${posSize}</span>
-      ${adxV ? `&nbsp; ADX: <span style="color:${adxS.c}">${adxV.toFixed(1)}</span>` : ''}
-    </div>`
+// EMA compression
+const emaCompress=e200?detectEMACompression(e8,e21,e55,e200):null;
+// MTF
+const mtfBull=mtfST15m==='bull'&&mtfST1H==='bull';
+const mtfBear=mtfST15m==='bear'||mtfST1H==='bear';
+// TF-scaled weights
+const w=getTFWeights('ema');
+const tfCfg=getTFConfig('ema');
+const eng=scoreEngine();
+eng.add(f1_pass,w.maStack*18/24);eng.add(f2_pass,w.maStack*18/24);
+eng.add(f3_pass,w.maStack*16/24);eng.add(f4_e200,w.maStack*6/24);
+eng.add(kdj?kdj.pass:null,w.kdj);eng.add(macd?macd.pass:null,w.macd);
+eng.add(rsiS?rsiS.pass:null,w.rsi);eng.add(adxS?adxS.pass:null,w.adx);
+eng.add(dmiS?dmiS.pass:null,w.dmi);eng.add(volS?volS.pass:null,w.vol);
+eng.add(ichiScored?ichiScored.pass:null,6);
+eng.add(vwapBS?vwapBS.pass:null,5);
+eng.add(stS?stS.pass:null,w.st);
+const stretchPct=Math.abs(pAboveE8||0);
+let penalty=0;
+const eHard=tfCfg.f1Warn*1.6,eMed=tfCfg.f1Warn*1.2;
+if(stretchPct>eHard)penalty=-30;else if(stretchPct>eMed)penalty=-20;else if(stretchPct>tfCfg.f1Warn)penalty=-10;
+let bonus=0;
+if(emaCross?.type==='GOLDEN')bonus+=18;if(emaCross?.type==='DEATH')bonus-=18;
+if(ichiTKBull)bonus+=8;if(ichiTKBear)bonus-=6;
+if(ichiTwistBull)bonus+=5;if(ichiTwistBear)bonus-=5;
+if(e55Score?.bonus)bonus+=e55Score.bonus;
+if(rsiDiv)bonus+=rsiDiv.penalty;
+if(mtfBull)bonus+=10;if(mtfBear)bonus-=15;
+const adjScore=Math.max(0,Math.min(100,eng.result()+penalty+bonus));
+const grade=getGrade(e21AboveE55||0);
+const momentumOk=(!kdj||kdj.pass!==false)&&(!macd||macd.pass!==false)&&(!adxS||adxS.pass!==false)&&(!dmiS||dmiS.pass!==false)&&(!kdj||!(j!=null&&j>85));
+let decision,riskLevel,posSize;
+if(!f1_pass||!f2_pass||!f3_pass||!momentumOk){decision='SKIP';riskLevel='High Risk';posSize='0%';}
+else if(adjScore>=80){decision='PROCEED';riskLevel='Low Risk';posSize=stretchPct>5?'50%':emaCross?.type==='GOLDEN'?'100%':'75%';}
+else if(adjScore>=65){decision='PROCEED';riskLevel='Medium Risk';posSize='50%';}
+else{decision='WATCH';riskLevel='Medium Risk';posSize='25%';}
+if(grade.g==='X'&&posSize==='100%')posSize='50%';
+if(grade.g==='X'&&decision==='PROCEED'&&adjScore<80)decision='WATCH';
+if(mtfBear&&decision==='PROCEED'){posSize='25%';riskLevel='MTF Conflict';}
+const sessNow=getUSWindowMYT();
+if(sessNow.cls==='sess-lull'&&decision==='PROCEED'){decision='WATCH';riskLevel='Lull Window';posSize='0%';}
+// Ticker
+const conflictHtml=tmCheckCrossTabConflict('ema',decision,adjScore);
+setDecisionStrip('ema',decision,riskLevel,grade,
+  `<div>Price:<span style="color:var(--text)">${fmt(price)}</span> EMA8:<span style="color:var(--text)">${fmt(e8)}</span> EMA21:<span style="color:var(--text)">${fmt(e21)}</span> EMA55:<span style="color:var(--text)">${fmt(e55)}</span></div>`+
+  `<div>Stack:<span style="color:${fullStack?'var(--green)':'var(--red)'}">${fullStack?'✅ Yes':'✘ No'}</span>&nbsp;Size:<span style="color:${posSize==='100%'?'var(--green)':posSize==='50%'?'var(--yellow)':'var(--dim)'}">${posSize}</span>&nbsp;Score:<span style="color:var(--accent)">${adjScore.toFixed(0)}/100</span>`+
+  (bonus!==0?`<span style="color:${bonus>0?'var(--green)':'var(--orange)'};font-size:9px"> ${bonus>0?'+':''}${bonus}pts</span>`:'')+
+  (mtfBull?`<span style="color:var(--green);font-size:9px"> ✅MTF</span>`:'')+
+  (mtfBear?`<span style="color:var(--red);font-size:9px"> ⚠️MTF</span>`:'')+`</div>`+
+  conflictHtml
 );
-const adv = $('ema-advice');
-if (decision === 'PROCEED') {
-const lines = [
-stretchPct > tfCfg.f1Ok
-? `⚠️ EMA stack confirmed but price is ${pAboveE8?.toFixed(1)}% above EMA8 — stretched for ${tfCfg.label} (ideal ≤${tfCfg.f1Ideal}%). Wait for pullback to EMA8 (${fmt(e8)}).`
-: `✅ Full EMA bull stack. Price ${pAboveE8?.toFixed(1)}% above EMA8 (ideal ≤${tfCfg.f1Ideal}% on ${tfCfg.label}).`,
-`⏱️ Timeframe: ${tfCfg.label} — Expected hold: ${tfCfg.hold}. ${tfCfg.sessionNote}.`,
-e200 && price > e200 ? `🌐 Macro confirmed: Price above EMA200 — institutional trend alignment.` : '',
-adxS?.pass === true ? `💪 ADX ${adxV?.toFixed(1)} — ${adxS.strength} trend. High-probability entry.` : '',
-dmiS && dmiS.pass === true ? `📊 DMI: ${dmiS.label}` : (dmiS && dmiS.pass === false ? `⚠️ DMI Warning: ${dmiS.label}` : ''),
-ichiS?.pass === true ? `☁️ Price above Ichimoku cloud — trend confirmed.` : '',
-vwapV && price > vwapV ? `📊 Price above VWAP — intraday bulls in control.` : '',
-`📦 Use ${posSize} position. Stop Loss = Price − (ATR × ${tfCfg.atrMult}). Trail after TP1.`,
-].filter(Boolean).join('\n');
-adv.textContent = lines;
-adv.className = 'advice-box green';
-} else if (decision === 'WATCH') {
-adv.textContent = `⚠️ Partial EMA setup (Score: ${adjScore.toFixed(0)}/100). Wait for Price > EMA8 > EMA21 > EMA55 with all momentum indicators aligned.`;
-adv.className = 'advice-box yellow';
-} else {
-const missing = [
-!f1_pass && 'Price < EMA8',
-!f2_pass && 'EMA8 < EMA21',
-!f3_pass && 'EMA21 < EMA55',
-kdj?.pass === false && 'KDJ Bearish',
-macd?.pass === false && 'MACD Bearish',
-adxS?.pass === false && `ADX Weak (${adxV?.toFixed(1)})`,
-].filter(Boolean);
-adv.textContent = `🔴 Skip — broken EMA stack. Failed: ${missing.join(', ')}.`;
-adv.className = 'advice-box red';
+// EMA21 Protected Zone
+const gZoneLow=e21,gZoneHigh=atr?+(e21+atr*2).toFixed(dp):e21*1.02;
+const gIdeal=e8?(e8+e21)/2:e21+(gZoneHigh-e21)*0.4;
+const inPZ=price>=gZoneLow&&price<=gZoneHigh;
+const gBandPct=Math.min(97,Math.max(3,(price-gZoneLow)/Math.max(gZoneHigh-gZoneLow,0.0001)*100));
+const gZoneColor=inPZ?'var(--green)':price<gZoneLow?'var(--red)':'var(--yellow)';
+let pzEl=$('ema-protected-zone');
+if(!pzEl){pzEl=document.createElement('div');pzEl.id='ema-protected-zone';$('ema-advice').insertAdjacentElement('beforebegin',pzEl);}
+if(decision!=='SKIP'){
+  pzEl.innerHTML=`<div style="border:1.5px solid ${gZoneColor};border-radius:8px;padding:.7rem .8rem;margin-bottom:.5rem;background:rgba(0,0,0,.07);">
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;"><span style="font-size:15px;">🛡️</span>
+      <span style="font-family:var(--head);font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${gZoneColor};">EMA21 PROTECTED ZONE</span>
+      ${inPZ?'<span style="font-size:10px;padding:1px 8px;border-radius:10px;background:rgba(0,232,122,.15);color:var(--green);font-weight:600;border:1px solid var(--green);">◀ YOU ARE HERE</span>':''}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.35rem;font-family:var(--mono);font-size:12px;margin-bottom:.45rem;">
+      <div style="padding:.3rem .45rem;background:rgba(0,0,0,.1);border-radius:5px;"><div style="font-size:8.5px;color:var(--dim);margin-bottom:2px;">FLOOR (EMA21)</div><div style="color:var(--accent);font-weight:700;">${fmtPrice(gZoneLow,dp)}</div></div>
+      <div style="padding:.3rem .45rem;background:rgba(0,0,0,.1);border-radius:5px;"><div style="font-size:8.5px;color:var(--dim);margin-bottom:2px;">CEILING (+2×ATR)</div><div style="color:var(--accent);font-weight:700;">${fmtPrice(gZoneHigh,dp)}</div></div>
+      <div style="padding:.3rem .45rem;background:rgba(245,200,66,.08);border-radius:5px;border:1px solid rgba(245,200,66,.25);"><div style="font-size:8.5px;color:var(--dim);margin-bottom:2px;">IDEAL ENTRY</div><div style="color:var(--yellow);font-weight:700;">${fmtPrice(gIdeal,dp)}</div></div>
+      <div style="padding:.3rem .45rem;border-radius:5px;border:1px solid ${gZoneColor}33;"><div style="font-size:8.5px;color:var(--dim);margin-bottom:2px;">CURRENT</div><div style="color:${gZoneColor};font-weight:700;">${fmtPrice(price,dp)}</div></div>
+    </div>
+    <div style="position:relative;height:8px;background:var(--border);border-radius:4px;overflow:visible;margin:.2rem 0;">
+      <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,232,122,.25),rgba(0,200,240,.2),rgba(245,200,66,.2));border-radius:4px;"></div>
+      <div style="position:absolute;top:-2px;bottom:-2px;width:3px;background:${gZoneColor};border-radius:2px;left:${gBandPct}%;transform:translateX(-50%);"></div>
+    </div>
+    <div style="font-size:11.5px;color:${gZoneColor};margin-top:.3rem;line-height:1.6;">
+      ${inPZ?'✅ Price INSIDE Protected Zone — EMA21 support below, optimal institutional entry.':price<gZoneLow?'🔴 Below EMA21 — key support broken. Wait for reclaim.':'⚠️ Above Protected Zone — '+((price-gZoneHigh)/price*100).toFixed(1)+'% extended. Wait for pullback to EMA21.'}
+    </div></div>`;
+  pzEl.style.display='';
+}else pzEl.style.display='none';
+// EMA Cross banner
+let ecb=$('ema-cross-banner');
+if(!ecb){ecb=document.createElement('div');ecb.id='ema-cross-banner';$('ema-advice').insertAdjacentElement('beforebegin',ecb);}
+if(emaCross){
+  ecb.innerHTML=`<div style="padding:.6rem .85rem;border-radius:8px;border-left:4px solid ${emaCross.c};background:rgba(0,0,0,.1);margin:.3rem 0;"><div style="font-family:var(--head);font-size:16px;font-weight:700;color:${emaCross.c};">${emaCross.label}</div><div style="font-size:12px;color:var(--dim);margin-top:.2rem;">${emaCross.type==='GOLDEN'?`EMA8 crossed ABOVE EMA21 — Tier 1 entry. SL below EMA21 (${fmtPrice(e21,dp)}).`:'EMA8 crossed BELOW EMA21 — Exit all longs immediately.'}</div></div>`;
+  ecb.style.display='';
+}else ecb.style.display='none';
+// EMA Compression
+let compBanner=$('ema-compress-banner');
+if(!compBanner){compBanner=document.createElement('div');compBanner.id='ema-compress-banner';$('ema-advice').insertAdjacentElement('beforebegin',compBanner);}
+if(emaCompress){
+  compBanner.innerHTML=`<div style="padding:.55rem .75rem;border-radius:7px;border:1px solid var(--accent);background:rgba(0,200,240,.05);margin:.3rem 0;"><div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:.2rem;">${emaCompress.label}</div><div style="font-size:11.5px;color:var(--dim);">KDJ: ${kdj?kdj.zone:'—'} · MACD: ${macd?macd.zone:'—'} — likely breakout direction.</div></div>`;
+  compBanner.style.display='';
+}else compBanner.style.display='none';
+// Advice
+const adv=$('ema-advice');
+if(sessNow.cls==='sess-lull'){
+  adv.innerHTML=`<div style="font-weight:600;color:var(--yellow);margin-bottom:.3rem;">🕐 LULL WINDOW — STAND BY</div><div style="font-size:12.5px;line-height:1.65;">Score: <strong>${adjScore.toFixed(0)}/100</strong> — valid setup but lull-window entries have 40% lower follow-through. Wait for Power Hour (2:30 AM MYT).</div>`;
+  adv.className='advice-box yellow';
+}else if(decision==='PROCEED'){
+  const lines=[
+    emaCross?.type==='GOLDEN'?`⚡ FRESH EMA8/21 GOLDEN CROSS — Tier 1 entry. Full position justified.`:'',
+    inPZ?`🛡️ Price inside EMA21 Protected Zone — optimal institutional entry zone.`:'',
+    stretchPct>tfCfg.f1Ok?`⚠️ Price ${pAboveE8?.toFixed(1)}% above EMA8 — stretched. Wait for pullback to EMA8 (${fmtPrice(e8,dp)}).`:`✅ Full EMA bull stack. ${pAboveE8?.toFixed(1)}% above EMA8 (ideal ≤${tfCfg.f1Ideal}%).`,
+    e55Score?e55Score.zone:'',
+    vwapBS?.note||'',
+    ichiTKBull?'☁️ Ichimoku: Above cloud + bullish TK Cross — dual confirmation. +8pts bonus.':'',
+    ichiTwistBull?'☁️ Kumo Twist ↑ — cloud flipping bullish, 2–3 candles predictive signal.':'',
+    mtfBull?'✅ MTF CONFIRMED: 15m + 1H Supertrend both bullish — trade with full conviction.':'',
+    mtfBear?'⚠️ MTF CONFLICT: Higher TF bearish — reduced to 25% size.':'',
+    rsiDiv?.type==='BEARISH'?rsiDiv.label:'',
+    e200&&price>e200?`🌐 Macro: Price above EMA200 — institutional trend alignment.`:'',
+    adxS?.pass===true?`💪 ADX ${adxV?.toFixed(1)} — ${adxS.strength}`:'',
+    `📦 Size: ${posSize}. SL: below EMA21 (${fmtPrice(e21,dp)}).`,
+  ].filter(Boolean).join('\n');
+  adv.textContent=lines;adv.className='advice-box green';
+}else if(decision==='WATCH'){
+  adv.textContent=`⚠️ Partial EMA setup (${adjScore.toFixed(0)}/100). Wait for Price>EMA8>EMA21>EMA55 + momentum confirmation.`;
+  adv.className='advice-box yellow';
+}else{
+  const miss=[!f1_pass&&'Price<EMA8',!f2_pass&&'EMA8<EMA21',!f3_pass&&'EMA21<EMA55',emaCross?.type==='DEATH'?'FRESH DEATH CROSS':'',kdj?.pass===false&&'KDJ Bearish',macd?.pass===false&&'MACD Bearish',adxS?.pass===false&&`ADX Weak`].filter(Boolean);
+  adv.textContent=`🔴 Skip — ${miss.join(', ')}.`;adv.className='advice-box red';
 }
-updateDial('ema-dial-arc', 'ema-dial-score', adjScore);
-drawPie('ema-pie', 'ema-pie-legend', [
-{ label: 'EMA Stack', value: (f1_pass ? 1 : 0) + (f2_pass ? 1 : 0) + (f3_pass ? 1 : 0) + (f4_e200 ? 1 : 0), color: 'var(--accent)' },
-{ label: 'KDJ', value: kdj ? (kdj.pass === true ? 1 : kdj.pass === 'warn' ? .5 : 0) : 0, color: 'var(--green)' },
-{ label: 'MACD', value: macd ? (macd.pass === true ? 1 : macd.pass === 'warn' ? .5 : 0) : 0, color: 'var(--yellow)' },
-{ label: 'Volume', value: volS ? (volS.pass === true ? 1 : volS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--orange)' },
-{ label: 'ADX', value: adxS ? (adxS.pass === true ? 1 : adxS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--accent2)' },
-{ label: 'Ichimoku', value: ichiS ? (ichiS.pass === true ? 1 : ichiS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--red)' },
-{ label: 'VWAP', value: vwapS ? (vwapS.pass === true ? 1 : 0) : 0, color: 'var(--green2)' },
-{ label: 'RSI', value: rsiS ? (rsiS.pass === true ? 1 : rsiS.pass === 'warn' ? .5 : 0) : 0, color: 'var(--accent)' },
-].filter(s => s.value > 0));
-const passArr = [f1_pass, f2_pass, f3_pass,
-kdj?.pass === true, macd?.pass === true,
-volS?.pass === true, adxS?.pass === true,
-rsiS?.pass === true,
-].filter(Boolean);
-$('ema-checklist').innerHTML = [
-buildCheck('F1 — Price > EMA8', f1_pass, fmt2(pAboveE8)),
-buildCheck('F2 — EMA8 > EMA21', f2_pass, fmt2(e8AboveE21)),
-buildCheck('F3 — EMA21 > EMA55', f3_pass, fmt2(e21AboveE55)),
-e200 != null
-? buildCheck('F4 — Price > EMA200', f4_e200, `${fmt2(pAboveE200)} ${f4_e200 ? '✅' : '🔴'}`)
-: buildCheck('F4 — EMA200 (Macro)', null, 'Not provided'),
-kdj
-? buildCheck(`F5 — KDJ ${kdj.zone}`, kdj.pass === true ? true : kdj.pass === false ? false : null, `K${k?.toFixed(1)} D${d?.toFixed(1)} J${j?.toFixed(1)}`)
-: buildCheck('F5 — KDJ', null, 'Not provided'),
-macd
-? buildCheck(`F6 — MACD ${macd.zone}`, macd.pass === true ? true : macd.pass === false ? false : null, `DIF:${dif} DEA:${dea}`)
-: buildCheck('F6 — MACD', null, 'Not provided'),
-volS
-? buildCheck(`F7 — Volume ${volS.zone}`, volS.pass === true ? true : volS.pass === false ? false : null, `${vol}× ${volS.zone}`)
-: buildCheck('F7 — Volume', null, 'Not provided'),
-adxS
-? buildCheck(`ADX — ${adxS.zone}`, adxS.pass === true ? true : adxS.pass === false ? false : null, `ADX: ${adxV?.toFixed(1)}`)
-: buildCheck('ADX Trend Strength', null, 'Not provided'),
-dmiS
-? buildCheck(`DMI ${dmiS.zone}`, dmiS.pass === true ? true : dmiS.pass === false ? false : null, dmiS.label)
-: buildCheck('DMI (PDI/MDI)', null, 'Optional — enter PDI, MDI, ADXR'),
-ichiS
-? buildCheck(`Ichimoku — ${ichiS.zone}`, ichiS.pass === true ? true : ichiS.pass === false ? false : null, ichiS.zone)
-: buildCheck('Ichimoku Cloud', null, 'Not provided'),
-vwapS
-? buildCheck(`VWAP — ${vwapS.zone}`, vwapS.pass === true ? true : vwapS.pass === false ? false : null, `VWAP:${fmt(vwapV)}`)
-: buildCheck('VWAP', null, 'Not provided'),
-rsiS
-? buildCheck(`RSI ${rsiS.zone}`, rsiS.pass === true ? true : rsiS.pass === false ? false : null, `RSI: ${num('ema-rsi')?.toFixed(1)}`)
-: buildCheck('RSI14', null, 'Not provided'),
-].join('');
-updateMeter('ema-signal-meter', passArr.length, 8);
-const alignRows = [
-['% Above EMA8', pAboveE8, pAboveE8 >= 0 && pAboveE8 <= 2 ? 'green' : pAboveE8 > 10 ? 'red' : pAboveE8 > 5 ? 'yellow' : pAboveE8 >= 0 ? 'accent' : 'red'],
-['% Above EMA21', pAboveE21, pAboveE21 >= 0 ? 'accent' : 'red'],
-['% Above EMA55', pAboveE55, pAboveE55 >= 0 ? 'green' : 'red'],
-['EMA8 vs EMA21', e8AboveE21, e8AboveE21 > 0 ? 'green' : 'red'],
-['EMA21 vs EMA55', e21AboveE55, e21AboveE55 > 0 ? 'green' : 'red'],
-['Full Bull Stack', null, fullStack ? 'green' : 'red', fullStack ? '✅ Yes' : '✘ No'],
+// Charts + checklist
+updateDial('ema-dial-arc','ema-dial-score',adjScore);
+drawPie('ema-pie','ema-pie-legend',[
+  {label:'EMA Stack',value:(f1_pass?1:0)+(f2_pass?1:0)+(f3_pass?1:0)+(f4_e200?1:0),color:'var(--accent)'},
+  {label:'KDJ',     value:kdj?(kdj.pass===true?1:kdj.pass==='warn'?.5:0):0,color:'var(--green)'},
+  {label:'MACD',    value:macd?(macd.pass===true?1:macd.pass==='warn'?.5:0):0,color:'var(--yellow)'},
+  {label:'Volume',  value:volS?(volS.pass===true?1:volS.pass==='warn'?.5:0):0,color:'var(--orange)'},
+  {label:'ADX',     value:adxS?(adxS.pass===true?1:adxS.pass==='warn'?.5:0):0,color:'var(--accent2)'},
+  {label:'Ichimoku',value:ichiScored?(ichiScored.pass===true?1:ichiScored.pass==='warn'?.5:0):0,color:'var(--red)'},
+  {label:'VWAP',    value:vwapBS?(vwapBS.pass===true?1:0):0,color:'var(--green2)'},
+  {label:'RSI',     value:rsiS?(rsiS.pass===true?1:rsiS.pass==='warn'?.5:0):0,color:'var(--accent)'},
+].filter(s=>s.value>0));
+const passArr=[f1_pass,f2_pass,f3_pass,kdj?.pass===true,macd?.pass===true,volS?.pass===true,adxS?.pass===true,rsiS?.pass===true].filter(Boolean);
+$('ema-checklist').innerHTML=[
+  buildCheck('F1 — Price > EMA8',   f1_pass, `${fmtPrice(price,dp)} vs ${fmtPrice(e8,dp)} (${(pAboveE8||0).toFixed(2)}%)`),
+  buildCheck('F2 — EMA8 > EMA21',   f2_pass, `${fmtPrice(e8,dp)} vs ${fmtPrice(e21,dp)} (${(e8AboveE21||0).toFixed(2)}%)`),
+  buildCheck('F3 — EMA21 > EMA55',  f3_pass, `${fmtPrice(e21,dp)} vs ${fmtPrice(e55,dp)} (${(e21AboveE55||0).toFixed(2)}%)`),
+  e200!=null?buildCheck('F4 — Price > EMA200',f4_e200,`${fmtPrice(e200,dp)} macro`):buildCheck('F4 — EMA200',null,'Not provided'),
+  kdj?buildCheck(`F5 — KDJ ${kdj.zone}`,kdj.pass===true?true:kdj.pass===false?false:null,`K${k?.toFixed(1)} D${d?.toFixed(1)} J${j?.toFixed(1)}`):buildCheck('F5 — KDJ',null,'Not provided'),
+  macd?buildCheck(`F6 — MACD ${macd.zone}`,macd.pass===true?true:macd.pass===false?false:null,`DIF:${dif} DEA:${dea}`):buildCheck('F6 — MACD',null,'Not provided'),
+  volS?buildCheck(`F7 — Volume`,volS.pass===true?true:volS.pass===false?false:null,`${vol}× ${volS.zone}`):buildCheck('F7 — Volume',null,'Not provided'),
+  adxS?buildCheck(`ADX — ${adxS.zone}`,adxS.pass===true?true:adxS.pass===false?false:null,`ADX: ${adxV?.toFixed(1)}`):buildCheck('ADX',null,'Not provided'),
+  dmiS?buildCheck(`DMI ${dmiS.zone}`,dmiS.pass===true?true:dmiS.pass===false?false:null,dmiS.label):buildCheck('DMI',null,'Optional'),
+  ichiScored?buildCheck(`Ichimoku — ${ichiScored.zone}${ichiTKBull?' + TK Bull Cross':''}${ichiTwistBull?' + Kumo Twist↑':''}`,ichiScored.pass===true?true:ichiScored.pass===false?false:null,ichiP||''):buildCheck('Ichimoku',null,'Not provided'),
+  vwapBS?buildCheck(`VWAP — ${vwapBS.zone}`,vwapBS.pass===true?true:vwapBS.pass===false?false:null,`Band: ${vwapBS.band||'—'}`):buildCheck('VWAP',null,'Not provided'),
+  rsiS?buildCheck(`RSI ${rsiS.zone}`,rsiS.pass===true?true:rsiS.pass===false?false:null,`RSI: ${rsiV?.toFixed(1)}`):buildCheck('RSI14',null,'Not provided'),
+  emaCross?buildCheck(`EMA8/21 Cross`,emaCross.type==='GOLDEN'?true:false,emaCross.label):'',
+  e55Score?buildCheck('EMA55 Institutional',e55Score.pass,e55Score.zone):'',
+  rsiDiv?buildCheck('RSI Divergence',rsiDiv.type==='BULLISH'?true:false,rsiDiv.label.replace(/.*DIVERGENCE: /,'')):'',
+  mtfBull?buildCheck('MTF Supertrend',true,'All higher TFs bullish — full conviction'):'',
+  mtfBear?buildCheck('MTF Supertrend',false,'Higher TF bearish — MTF conflict'):'',
+].filter(Boolean).join('');
+updateMeter('ema-signal-meter',passArr.length,8);
+const alignRows=[
+  ['% Above EMA8',pAboveE8,pAboveE8>=0&&pAboveE8<=2?'green':pAboveE8>10?'red':pAboveE8>5?'yellow':pAboveE8>=0?'accent':'red'],
+  ['% Above EMA21',pAboveE21,pAboveE21>=0?'accent':'red'],
+  ['% Above EMA55',pAboveE55,pAboveE55>=0?'green':'red'],
+  ['EMA8 vs EMA21',e8AboveE21,e8AboveE21>0?'green':'red'],
+  ['EMA21 vs EMA55',e21AboveE55,e21AboveE55>0?'green':'red'],
+  ['Full Bull Stack',null,fullStack?'green':'red',fullStack?'✅ Yes':'✘ No'],
 ];
-if (e200) alignRows.push(['% Above EMA200', pAboveE200, pAboveE200 >= 0 ? 'green' : 'red']);
-$('ema-alignment-grid').innerHTML = alignRows.map(([l, v, c, ov]) => {
-const display = ov || (v != null ? (v >= 0 ? '+' : '') + v.toFixed(2) + '%' : '—');
-return `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${display}</div></div>`;
+if(e200)alignRows.push(['% Above EMA200',pAboveE200,pAboveE200>=0?'green':'red']);
+$('ema-alignment-grid').innerHTML=alignRows.map(([l,v,c,ov])=>{
+  const disp=ov||(v!=null?(v>=0?'+':'')+v.toFixed(2)+'%':'—');
+  return `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${c}">${disp}</div></div>`;
 }).join('');
-updateRange('ema-range-fill', 'ema-range-marker', 'ema-range-label', Math.max(0, e21AboveE55 || 0), 12);
-const ctx = $('ema-price-context');
-const hasCtx = (high != null && low != null) || prev != null || (w52h != null && w52l != null) || beta != null || bidask != null;
-ctx.style.display = hasCtx ? '' : 'none';
-if (hasCtx) {
-const cells = [];
-if (prev != null) {
-const chg = pct(price, prev);
-cells.push(`<div class="stat-cell"><div class="stat-label">vs Prev Close</div><div class="stat-value ${chg >= 0 ? 'green' : 'red'}">${chg >= 0 ? '+' : ''}${chg?.toFixed(2)}%</div></div>`);
+updateRange('ema-range-fill','ema-range-marker','ema-range-label',Math.max(0,e21AboveE55||0),12);
+// Price context
+const ctx=$('ema-price-context');
+const hasCtx=(high!=null&&low!=null)||prev!=null||(w52h!=null&&w52l!=null)||beta!=null||bidask!=null;
+ctx.style.display=hasCtx?'':'none';
+if(hasCtx){
+  const cells=[];
+  if(prev!=null){const chg=pct(price,prev);cells.push(`<div class="stat-cell"><div class="stat-label">vs Prev Close</div><div class="stat-value ${chg>=0?'green':'red'}">${chg>=0?'+':''}${chg?.toFixed(2)}%</div></div>`);}
+  if(open!=null){const gapPct=pct(price,open);cells.push(`<div class="stat-cell"><div class="stat-label">Gap from Open</div><div class="stat-value ${gapPct>=0?'green':'red'}">${gapPct>=0?'+':''}${gapPct?.toFixed(2)}%</div></div>`);}
+  if(w52h!=null&&w52l!=null){const fromH=pct(price,w52h),fromL=pct(price,w52l);cells.push(`<div class="stat-cell"><div class="stat-label">From 52wk High</div><div class="stat-value ${fromH>=-5?'green':fromH>=-20?'accent':'red'}">${fromH?.toFixed(2)}%</div></div>`);cells.push(`<div class="stat-cell"><div class="stat-label">From 52wk Low</div><div class="stat-value accent">+${fromL?.toFixed(2)}%</div></div>`);}
+  if(beta!=null){const bc=beta>1.5?'red':beta>1.0?'yellow':'green';cells.push(`<div class="stat-cell"><div class="stat-label">Beta</div><div class="stat-value ${bc}">${beta.toFixed(3)}</div></div>`);}
+  if(bidask!=null){const bc=bidask>=60?'green':bidask>=40?'accent':'red';cells.push(`<div class="stat-cell"><div class="stat-label">Bid/Ask Ratio</div><div class="stat-value ${bc}">${bidask.toFixed(1)}%</div><div class="stat-sub">${bidask>=60?'Strong demand':bidask>=40?'Balanced':'Sellers dominate'}</div></div>`);}
+  $('ema-ctx-grid').innerHTML=cells.join('');
+  if(high!=null&&low!=null&&high>low){
+    const rng=((price-low)/(high-low))*100,clamped=Math.min(100,Math.max(0,rng));
+    const fill=$('ema-day-fill'),marker=$('ema-day-marker'),pctEl=$('ema-day-pct');
+    if(fill)fill.style.width=clamped+'%';if(marker)marker.style.left=clamped+'%';
+    if(pctEl)pctEl.textContent=rng.toFixed(1)+'% of range';
+    $('ema-day-low').textContent='Low '+fmt(low,4);$('ema-day-high').textContent='High '+fmt(high,4);
+  }
 }
-if (open != null) {
-const gapPct = pct(price, open);
-cells.push(`<div class="stat-cell"><div class="stat-label">Gap from Open</div><div class="stat-value ${gapPct >= 0 ? 'green' : 'red'}">${gapPct >= 0 ? '+' : ''}${gapPct?.toFixed(2)}%</div></div>`);
-}
-if (w52h != null && w52l != null) {
-const fromH = pct(price, w52h), fromL = pct(price, w52l);
-cells.push(`<div class="stat-cell"><div class="stat-label">From 52wk High</div><div class="stat-value ${fromH >= -5 ? 'green' : fromH >= -20 ? 'accent' : 'red'}">${fromH?.toFixed(2)}%</div></div>`);
-cells.push(`<div class="stat-cell"><div class="stat-label">From 52wk Low</div><div class="stat-value accent">+${fromL?.toFixed(2)}%</div></div>`);
-}
-if (beta != null) {
-const bc = beta > 1.5 ? 'red' : beta > 1.0 ? 'yellow' : 'green';
-cells.push(`<div class="stat-cell"><div class="stat-label">Beta</div><div class="stat-value ${bc}">${beta.toFixed(3)}</div><div class="stat-sub">${beta > 1.5 ? 'High vol' : beta > 1.0 ? 'Above mkt' : 'Normal'}</div></div>`);
-}
-if (bidask != null) {
-const bc = bidask >= 60 ? 'green' : bidask >= 40 ? 'accent' : 'red';
-cells.push(`<div class="stat-cell"><div class="stat-label">Bid/Ask Ratio</div><div class="stat-value ${bc}">${bidask.toFixed(1)}%</div><div class="stat-sub">${bidask >= 60 ? 'Strong demand' : bidask >= 40 ? 'Balanced' : 'Sellers dominate'}</div></div>`);
-}
-$('ema-ctx-grid').innerHTML = cells.join('');
-if (high != null && low != null && high > low) {
-const rng = ((price - low) / (high - low)) * 100;
-const clamped = Math.min(100, Math.max(0, rng));
-const fill = $('ema-day-fill');
-const marker = $('ema-day-marker');
-const pctEl = $('ema-day-pct');
-if (fill) fill.style.width = clamped + '%';
-if (marker) marker.style.left = clamped + '%';
-if (pctEl) pctEl.textContent = rng.toFixed(1) + '% of range';
-$('ema-day-low').textContent = 'Low ' + fmt(low, 4);
-$('ema-day-high').textContent = 'High ' + fmt(high, 4);
-}
-}
-buildTradePlan('ema-price-block', 'ema-tradeplan-card', price, atr, accountSz, riskPct);
+buildTradePlan('ema-price-block','ema-tradeplan-card',price,atr,accountSz,riskPct);
+const stopHtml=buildThreeStopOptions(price,atr,e21,dp);
+const scaledHtml=buildScaledEntryPlan(adjScore,price,atr,e8,e21,dp);
+const tpBox=$('ema-price-block');
+if(tpBox&&(stopHtml||scaledHtml)){let ex=$('ema-extra-plan');if(!ex){ex=document.createElement('div');ex.id='ema-extra-plan';tpBox.insertAdjacentElement('afterend',ex);}ex.innerHTML=stopHtml+scaledHtml;}
 }
 function resetEMA() {
-['ema-price', 'ema-ema8', 'ema-ema21', 'ema-ema55', 'ema-ema200',
-'ema-k', 'ema-d', 'ema-j', 'ema-dif', 'ema-dea', 'ema-hist',
-'ema-vol', 'ema-rsi', 'ema-atr', 'ema-adx', 'ema-pdi', 'ema-mdi', 'ema-adxr', 'ema-st', 'ema-vwap',
-'ema-open', 'ema-prev', 'ema-high', 'ema-low', 'ema-52h', 'ema-52l',
-'ema-bidask', 'ema-beta', 'ema-risk-pct', 'ema-account',
-].forEach(id => { const el = $(id); if (el) el.value = ''; });
-const ichiEl = $('ema-ichi');
-if (ichiEl) ichiEl.value = '';
-$('ema-result').style.display = 'none';
+['ema-price','ema-ema8','ema-ema21','ema-ema55','ema-ema200',
+'ema-k','ema-d','ema-j','ema-dif','ema-dea','ema-hist',
+'ema-vol','ema-rsi','ema-atr','ema-adx','ema-pdi','ema-mdi','ema-adxr','ema-st','ema-vwap',
+'ema-open','ema-prev','ema-high','ema-low','ema-52h','ema-52l',
+'ema-bidask','ema-beta','ema-risk-pct','ema-account',
+'ema-prev-price','ema-prev-e8','ema-prev-e21','ema-prev-rsi',
+].forEach(id=>{const el=$(id);if(el)el.value='';});
+const ichiEl=$('ema-ichi');if(ichiEl)ichiEl.value='';
+const m15=$('ema-mtf-15m');if(m15)m15.value='';
+const m1h=$('ema-mtf-1h');if(m1h)m1h.value='';
+$('ema-result').style.display='none';
+_tmLastCalc.ema=null;
 }
 function goldCalc() {
 const price = num('gold-price');
@@ -3556,274 +3664,338 @@ else phase = { label: 'Phase 4 — Full Bull Stack ✅', color: 'var(--green)', 
 return { checks, passed, total, score, phase };
 }
 function swingCalc() {
-const o = num('sw-open');
-const h = num('sw-high');
-const l = num('sw-low');
-const c = num('sw-close');
-if (!o || !h || !l || !c) { $('swing-result').style.display = 'none'; return; }
-$('swing-result').style.display = '';
-const prevClose = num('sw-prev-close');
-const price = num('sw-price') || c;
-const stPrev = num('sw-st-prev');
-const stCurr = num('sw-st-curr');
-const stDir = document.getElementById('sw-st-dir')?.value || '';
-const maPrice = num('sw-ma-price') || price;
-const ma5 = num('sw-ma5');
-const ma20 = num('sw-ma20');
-const ma50 = num('sw-ma50');
-const ma200 = num('sw-ma200');
-const res1 = num('sw-res1');
-const res2 = num('sw-res2');
-const res3 = num('sw-res3');
-const kVal = num('sw-k');
-const dVal = num('sw-d');
-const jVal = num('sw-j');
-const rsi = num('sw-rsi');
-const dif = num('sw-dif');
-const dea = num('sw-dea');
-const vol = num('sw-vol');
-const adxV = num('sw-adx');
-const pdiV = num('sw-pdi');
-const mdiV = num('sw-mdi');
-const adxrV = num('sw-adxr');
-const atr = num('sw-atr');
-const account = num('sw-account');
-const riskPct = num('sw-riskpct');
-const candle = detectCandlePattern(o, h, l, c);
-const s1_pass = candle ? (candle.bullish === true ? true : candle.bullish === null ? 'warn' : false) : null;
-let s2_pass = null, stNote = 'Not provided';
-if (stDir === 'flipped_bull') { s2_pass = true; stNote = '🟢 JUST FLIPPED BULLISH — strongest signal'; }
-else if (stDir === 'bullish') { s2_pass = true; stNote = '✅ Dots below price — trend bullish'; }
-else if (stDir === 'bearish') { s2_pass = false; stNote = '🔴 Dots still above — not yet'; }
-else if (stDir === 'flipped_bear') { s2_pass = false; stNote = '⬇️ Flipped bearish — avoid long'; }
-if (stPrev != null && stCurr != null && price != null) {
-const prevAbove = stPrev > price;
-const currBelow = stCurr < price;
-if (prevAbove && currBelow && !stDir.includes('bear')) { s2_pass = true; stNote = '🟢 Supertrend confirmed flip: prev above → now below price'; }
+const o=num('sw-open'),h=num('sw-high'),l=num('sw-low'),c=num('sw-close');
+if(!o||!h||!l||!c){$('swing-result').style.display='none';return;}
+$('swing-result').style.display='';
+const prevClose=num('sw-prev-close'),price=num('sw-price')||c;
+const stPrev=num('sw-st-prev'),stCurr=num('sw-st-curr');
+const stDir=document.getElementById('sw-st-dir')?.value||'';
+const maPrice=num('sw-ma-price')||price;
+const ma5=num('sw-ma5'),ma20=num('sw-ma20'),ma50=num('sw-ma50'),ma200=num('sw-ma200');
+const res1=num('sw-res1'),res2=num('sw-res2'),res3=num('sw-res3');
+const kVal=num('sw-k'),dVal=num('sw-d'),jVal=num('sw-j'),rsi=num('sw-rsi');
+const dif=num('sw-dif'),dea=num('sw-dea'),vol=num('sw-vol');
+const adxV=num('sw-adx'),pdiV=num('sw-pdi'),mdiV=num('sw-mdi'),adxrV=num('sw-adxr');
+const atr=num('sw-atr'),account=num('sw-account'),riskPct=num('sw-riskpct');
+// NEW dip context
+const bbu=num('sw-bbu'),bbl=num('sw-bbl');
+const w52h=num('sw-52h'),w52l=num('sw-52l');
+const vwap=num('sw-vwap'),bidask=num('sw-bidask');
+const pe=num('sw-pe'),beta=num('sw-beta');
+const chkHL=$('sw-chk-higher-low')?.checked,chkBB=$('sw-chk-bb-lower')?.checked;
+const chkMA200=$('sw-chk-ma200-above')?.checked,chkSector=$('sw-chk-sector-bull')?.checked;
+const chkNews=$('sw-chk-no-news')?.checked,chkEarn=$('sw-chk-earnings')?.checked;
+const dp=price>10?2:price>1?3:4;
+// ─── S1: Candle Pattern ───────────────────────────────────────────
+const candle=detectCandlePattern(o,h,l,c);
+let s1_pass=candle?(candle.bullish===true?true:candle.bullish===null?'warn':false):null;
+// Quality boost: lower wick > 50% of range = high quality reversal candle
+const range=h-l,body=Math.abs(c-o);
+const lowerWick=Math.min(o,c)-l,upperWick=h-Math.max(o,c);
+const wickScore=range>0?(lowerWick/range)*100:0;
+const candleQuality=wickScore>60?'HIGH':wickScore>40?'MEDIUM':'LOW';
+// ─── S2: Supertrend Flip ──────────────────────────────────────────
+let s2_pass=null,stNote='Not provided';
+if(stDir==='flipped_bull'){s2_pass=true;stNote='🟢 JUST FLIPPED BULLISH — strongest signal';}
+else if(stDir==='bullish'){s2_pass=true;stNote='✅ Dots below price — trend bullish';}
+else if(stDir==='bearish'){s2_pass=false;stNote='🔴 Dots still above — not yet';}
+else if(stDir==='flipped_bear'){s2_pass=false;stNote='⬇️ Flipped bearish — avoid long';}
+if(stPrev!=null&&stCurr!=null&&price!=null){
+  const prevAbove=stPrev>price,currBelow=stCurr<price;
+  if(prevAbove&&currBelow&&!stDir.includes('bear')){s2_pass=true;stNote='🟢 ST confirmed flip: prev above → now below price';}
 }
-let s3_pass = null, kdjNote = 'Not provided';
-if (kVal != null && dVal != null) {
-const kdj = scoreKDJ(kVal, dVal, jVal);
-s3_pass = kdj.pass;
-const jNote = jVal != null ? ` (J=${jVal.toFixed(1)})` : '';
-kdjNote = `K${kVal.toFixed(1)} D${dVal.toFixed(1)}${jNote} — ${kdj.zone}`;
-// Extra: oversold bounce = J < 20 turning up
-if (jVal != null && jVal < 20 && kVal > dVal) { s3_pass = true; kdjNote += ' — OVERSOLD BOUNCE ★'; }
+// ─── S3: KDJ Oversold ────────────────────────────────────────────
+let s3_pass=null,kdjNote='Not provided';
+if(kVal!=null&&dVal!=null){
+  const kdj=scoreKDJ(kVal,dVal,jVal);
+  s3_pass=kdj.pass;kdjNote=`K${kVal.toFixed(1)} D${dVal.toFixed(1)}${jVal!=null?' J'+jVal.toFixed(1):''} — ${kdj.zone}`;
+  if(jVal!=null&&jVal<20&&kVal>dVal){s3_pass=true;kdjNote+=' — OVERSOLD BOUNCE ★';}
+  if(jVal!=null&&jVal<10){kdjNote+=' — EXTREME OVERSOLD 🎯';}
 }
-let s4_pass = null, rsiNote = 'Not provided';
-if (rsi != null) {
-if (rsi < 30) { s4_pass = true; rsiNote = `RSI ${rsi.toFixed(1)} — extreme oversold bounce zone`; }
-else if (rsi < 40) { s4_pass = true; rsiNote = `RSI ${rsi.toFixed(1)} — oversold, bounce likely`; }
-else if (rsi < 50) { s4_pass = 'warn'; rsiNote = `RSI ${rsi.toFixed(1)} — building momentum`; }
-else if (rsi < 70) { s4_pass = true; rsiNote = `RSI ${rsi.toFixed(1)} — bullish momentum zone`; }
-else { s4_pass = 'warn'; rsiNote = `RSI ${rsi.toFixed(1)} — overbought, caution`; }
+// ─── S4: RSI Dip Level ───────────────────────────────────────────
+let s4_pass=null,rsiNote='Not provided',rsiBounceGrade='';
+if(rsi!=null){
+  if(rsi<25){s4_pass=true;rsiNote=`RSI ${rsi.toFixed(1)} — EXTREME oversold (< 25), V-bounce zone`;rsiBounceGrade='★★★';}
+  else if(rsi<35){s4_pass=true;rsiNote=`RSI ${rsi.toFixed(1)} — strong oversold bounce zone`;rsiBounceGrade='★★☆';}
+  else if(rsi<45){s4_pass=true;rsiNote=`RSI ${rsi.toFixed(1)} — approaching oversold, dip quality`;rsiBounceGrade='★☆☆';}
+  else if(rsi<55){s4_pass='warn';rsiNote=`RSI ${rsi.toFixed(1)} — building momentum`;}
+  else if(rsi<70){s4_pass=true;rsiNote=`RSI ${rsi.toFixed(1)} — bullish momentum zone`;}
+  else{s4_pass='warn';rsiNote=`RSI ${rsi.toFixed(1)} — overbought, late entry`;}
 }
-let s5_pass = null, macdNote = 'Not provided';
-if (dif != null && dea != null) {
-const macd = scoreMACDZone(dif, dea);
-s5_pass = macd.pass;
-macdNote = `DIF:${dif} DEA:${dea} — ${macd.zone}`;
-if (dif > dea && Math.abs(dif - dea) / Math.abs(dea || 1) < 0.2) {
-macdNote += ' — Fresh crossover (high accuracy)';
-s5_pass = true;
+// ─── S5: MACD (cross or building) ────────────────────────────────
+let s5_pass=null,macdNote='Not provided';
+if(dif!=null&&dea!=null){
+  const macdS=scoreMACDZone(dif,dea);
+  s5_pass=macdS.pass;macdNote=`DIF:${dif} DEA:${dea} — ${macdS.zone}`;
+  // For dip buying: DIF rising toward DEA = setup forming (even if still negative)
+  if(dif<0&&dea<0&&dif>dea){s5_pass='warn';macdNote+=' — DIF crossing above DEA: bullish cross forming';}
+  if(dif>dea&&Math.abs(dif-dea)/Math.abs(dea||0.001)<0.15){s5_pass=true;macdNote+=' — Fresh MACD crossover (high accuracy)';}
 }
+// ─── S6: Volume ──────────────────────────────────────────────────
+let s6_pass=null,volNote='Not provided';
+if(vol!=null){
+  const volS=scoreVolume(vol);s6_pass=volS.pass;volNote=`${vol}× avg — ${volS.zone}`;
+  if(vol>=2.0)volNote+=' — Capitulation/Exhaustion spike ★★★';
+  else if(vol>=1.5)volNote+=' — Above-average dip confirmation ★★';
 }
-let s6_pass = null, volNote = 'Not provided';
-if (vol != null) {
-const volS = scoreVolume(vol);
-s6_pass = volS.pass;
-volNote = `${vol}× avg — ${volS.zone}`;
-if (vol >= 2.0) volNote += ' — Capitulation/Exhaustion spike ★';
+// ─── S7: MA Rebuild Phase ────────────────────────────────────────
+const rebuild=maRebuildPhase(maPrice,ma5,ma20,ma50,ma200);
+const s7_pass=rebuild.score>=75?true:rebuild.score>=50?'warn':rebuild.score>0?'warn':false;
+// ─── S8: Dip Context — NEW ───────────────────────────────────────
+let dipScore=0,dipNotes=[];
+// BB Lower proximity
+let bbPosPct=null;
+if(bbl!=null&&bbu!=null&&bbu>bbl){
+  bbPosPct=((price-bbl)/(bbu-bbl))*100;
+  if(bbPosPct<=20){dipScore+=15;dipNotes.push('✅ Price at/near BB Lower band — classic mean-reversion dip buy zone');}
+  else if(bbPosPct<=35){dipScore+=8;dipNotes.push('🟡 Price in lower BB quadrant — decent dip zone');}
+  else if(bbPosPct>=80){dipScore-=8;dipNotes.push('⚠️ Price near BB Upper — NOT a dip, avoid buying here');}
 }
-const rebuild = maRebuildPhase(maPrice, ma5, ma20, ma50, ma200);
-const s7_pass = rebuild.score >= 75 ? true : rebuild.score >= 50 ? 'warn' : rebuild.score > 0 ? 'warn' : false;
-const eng = scoreEngine();
-eng.add(s1_pass, 18);
-eng.add(s2_pass, 22);
-eng.add(s3_pass, 16);
-eng.add(s4_pass, 12);
-eng.add(s5_pass, 12);
-eng.add(s6_pass, 12);
-eng.add(s7_pass, 8);
-const score = eng.result();
-const criticalPass = s2_pass !== false && s1_pass !== false;
-let decision, riskLevel;
-if (!criticalPass || score < 35) {
-decision = 'SKIP'; riskLevel = 'High Risk';
-} else if (score >= 72) {
-decision = 'PROCEED'; riskLevel = 'Low Risk';
-} else if (score >= 52) {
-decision = 'PROCEED'; riskLevel = 'Medium Risk';
-} else {
-decision = 'WATCH'; riskLevel = 'Medium Risk';
+// 52-week position
+let pos52=null;
+if(w52h&&w52l&&w52h>w52l){
+  pos52=((price-w52l)/(w52h-w52l))*100;
+  const fromHigh=((price-w52h)/w52h)*100;
+  const fromLow=((price-w52l)/w52l)*100;
+  if(pos52<=25){dipScore+=12;dipNotes.push(`✅ In lowest 25% of 52wk range (${pos52.toFixed(0)}%) — deep value dip zone`);}
+  else if(pos52<=40){dipScore+=6;dipNotes.push(`🟡 In lower 40% of 52wk range — moderate dip zone`);}
+  else if(pos52>=75){dipScore-=5;dipNotes.push(`⚠️ Near 52wk highs (${pos52.toFixed(0)}%) — this is NOT a dip to buy`);}
+  if(fromHigh<=-30){dipScore+=8;dipNotes.push(`💡 Price ${Math.abs(fromHigh).toFixed(0)}% below 52wk high — significant retracement, mean reversion likely`);}
 }
-const phaseGrade = { n: 0, g: 'BEAR', cls: 'grade-x', e: '🔴' };
-if (rebuild.phase.n >= 3) { phaseGrade.g = 'BULL'; phaseGrade.cls = 'grade-spp'; phaseGrade.e = '🚀'; }
-else if (rebuild.phase.n >= 2) { phaseGrade.g = 'EARLY'; phaseGrade.cls = 'grade-a'; phaseGrade.e = '📈'; }
-else if (rebuild.phase.n >= 1) { phaseGrade.g = 'REVERSAL'; phaseGrade.cls = 'grade-b'; phaseGrade.e = '🔄'; }
-setDecisionStrip('swing', decision, riskLevel, phaseGrade, `
-<div>Candle: <span style="color:${candle?.color || 'var(--dim)'}">${candle?.pattern || '—'}</span>
-  &nbsp; Supertrend: <span style="color:${s2_pass === true ? 'var(--green)' : s2_pass === false ? 'var(--red)' : 'var(--dim)'}">${stDir || '—'}</span>
-</div>
-<div>MA Rebuild: <span style="color:${rebuild.phase.color}">${rebuild.phase.label}</span>
-  &nbsp; Score: <span style="color:var(--accent)">${score.toFixed(0)}/100</span>
-</div>`
+// VWAP proximity
+if(vwap){
+  const distV=((price-vwap)/vwap)*100;
+  if(distV<-5){dipScore+=8;dipNotes.push(`💎 Price ${Math.abs(distV).toFixed(1)}% below VWAP — deep intraday discount`);}
+  else if(distV<0){dipScore+=4;dipNotes.push(`✅ Price below VWAP — sellers have controlled, bounce zone`);}
+  else{dipScore-=3;}
+}
+// Bid/Ask order flow
+if(bidask!=null){
+  if(bidask>60){dipScore+=6;dipNotes.push(`✅ Bid/Ask ${bidask.toFixed(1)}% — buy side dominating, accumulation signal`);}
+  else if(bidask<35){dipScore-=5;dipNotes.push(`⚠️ Bid/Ask ${bidask.toFixed(1)}% — heavy selling pressure, wait for ratio to recover`);}
+}
+// Checklist bonuses
+if(chkHL){dipScore+=8;dipNotes.push('✅ Higher low vs previous swing — uptrend structure intact');}
+if(chkBB){dipScore+=5;dipNotes.push('✅ Price confirmed touching BB Lower');}
+if(chkMA200){dipScore+=6;dipNotes.push('✅ Above MA200 — macro uptrend intact, dip is buyable');}
+if(chkSector){dipScore+=4;dipNotes.push('✅ Sector ETF still bullish — not a sector breakdown');}
+if(chkNews){dipScore+=5;dipNotes.push('✅ No negative news — technical dip only');}
+if(chkEarn){dipScore+=4;dipNotes.push('✅ Earnings ≥3 weeks away — no event risk');}
+dipScore=Math.max(0,Math.min(60,dipScore));
+// ─── Scoring Engine ───────────────────────────────────────────────
+const eng=scoreEngine();
+eng.add(s1_pass,18);eng.add(s2_pass,22);eng.add(s3_pass,16);
+eng.add(s4_pass,12);eng.add(s5_pass,10);eng.add(s6_pass,12);eng.add(s7_pass,8);
+const baseScore=eng.result();
+// Blend dip score: 70% signal score + 30% dip context (scaled)
+const score=Math.min(100,baseScore+(dipScore*0.4));
+// Score display
+const swScoreEl=$('sw-score-display');
+if(swScoreEl)swScoreEl.textContent=score.toFixed(0);
+// ─── Decision ────────────────────────────────────────────────────
+const criticalPass=s2_pass!==false&&s1_pass!==false;
+let decision,riskLevel;
+// For dip buying: lower threshold — we want to catch early bottoms
+if(!criticalPass&&baseScore<30){decision='SKIP';riskLevel='High Risk';}
+else if(score>=72){decision='PROCEED';riskLevel='Low Risk';}
+else if(score>=52){decision='PROCEED';riskLevel='Medium Risk';}
+else if(score>=35){decision='WATCH';riskLevel='Medium Risk';}
+else{decision='SKIP';riskLevel='High Risk';}
+// Grade by MA rebuild phase
+const phaseGrade={n:0,g:'BEAR',cls:'grade-x',e:'🔴',color:'var(--red)'};
+if(rebuild.phase.n>=3){phaseGrade.g='BULL';phaseGrade.cls='grade-spp';phaseGrade.e='🚀';phaseGrade.color='var(--green)';}
+else if(rebuild.phase.n>=2){phaseGrade.g='EARLY';phaseGrade.cls='grade-a';phaseGrade.e='📈';phaseGrade.color='var(--accent)';}
+else if(rebuild.phase.n>=1){phaseGrade.g='REVERSAL';phaseGrade.cls='grade-b';phaseGrade.e='🔄';phaseGrade.color='var(--yellow)';}
+// Ticker
+setDecisionStrip('swing',decision,riskLevel,phaseGrade,
+  `<div>Candle: <span style="color:${candle?.color||'var(--dim)'}">${candle?.pattern||'—'}</span>&nbsp; ST: <span style="color:${s2_pass===true?'var(--green)':s2_pass===false?'var(--red)':'var(--dim)'}">${stDir||'—'}</span></div>`+
+  `<div>Score: <span style="color:var(--accent)">${score.toFixed(0)}/100</span>&nbsp; DipCtx: <span style="color:${dipScore>30?'var(--green)':dipScore>15?'var(--yellow)':'var(--dim)'}">+${dipScore.toFixed(0)}pts</span>&nbsp; Rebuild: <span style="color:${rebuild.phase.color}">${rebuild.phase.label}</span></div>`
 );
-const adv = $('swing-advice');
-if (decision === 'PROCEED') {
-const lines = [
-stDir === 'flipped_bull'
-? `🟢 SUPERTREND FLIP CONFIRMED — Highest-conviction reversal signal. Enter on this candle close or next open.`
-: `✅ Reversal conditions met (Score: ${score.toFixed(0)}/100).`,
-candle ? `🕯️ ${candle.pattern} detected — ${candle.note}` : '',
-jVal != null && jVal < 20 ? `📊 KDJ J=${jVal.toFixed(1)} — extreme oversold. Historical bounce rate >75% from this level.` : '',
-rsi != null && rsi < 35 ? `📉 RSI ${rsi.toFixed(1)} — extreme oversold. Mean reversion favors the bull.` : '',
-vol != null && vol >= 1.5 ? `⚡ Volume ${vol}× — ${vol >= 2 ? 'Capitulation spike (sellers exhausted)' : 'Above average conviction'}.` : '',
-res1 ? `📐 Next resistance levels: ${res1.toFixed(4)}${res2 ? ' → ' + res2.toFixed(4) : ''}${res3 ? ' → ' + res3.toFixed(4) : ''}` : '',
-`📦 Entry: ${c.toFixed(4)} | SL: ${atr ? (c - atr * 1.5).toFixed(4) + ' (ATR×1.5)' : 'set 1×ATR below candle low'}. Scale in across MA rebuilds.`,
-].filter(Boolean).join('\n');
-adv.textContent = lines;
-adv.className = 'advice-box green';
-} else if (decision === 'WATCH') {
-const waiting = [
-s2_pass !== true && 'Supertrend flip confirmation',
-s1_pass !== true && 'Stronger reversal candle (hammer/engulfing)',
-s6_pass !== true && 'Volume spike ≥ 1.5×',
-rebuild.score < 50 && `MA rebuild to Phase 2+ (currently Phase ${rebuild.phase.n})`,
-].filter(Boolean);
-adv.textContent = `⚠️ Partial reversal setup (Score: ${score.toFixed(0)}/100). Waiting for: ${waiting.join(', ')}.`;
-adv.className = 'advice-box yellow';
-} else {
-const failed = [
-s2_pass === false && stNote,
-s1_pass === false && `${candle?.pattern} — bearish candle`,
-score < 35 && `Score too low (${score.toFixed(0)}/100)`,
-].filter(Boolean);
-adv.textContent = `🔴 Skip. No valid reversal signal. ${failed.join(' | ')}. Wait for Supertrend flip + hammer candle + volume spike to all appear together.`;
-adv.className = 'advice-box red';
+// ─── Advice ──────────────────────────────────────────────────────
+const adv=$('swing-advice');
+// CAPITALA-style narrative: buy on dip
+const isOversold=(jVal!=null&&jVal<30)||(rsi!=null&&rsi<45);
+const isNearBBLow=bbPosPct!=null&&bbPosPct<=25;
+const isDeepDip=pos52!=null&&pos52<=35;
+if(decision==='PROCEED'){
+  const lines=[
+    stDir==='flipped_bull'?'🟢 SUPERTREND FLIP CONFIRMED — Highest-conviction reversal. Enter on this candle close or next open.':
+    stDir==='bullish'?'✅ Supertrend bullish — dip occurs within ongoing uptrend (pullback buy).':'',
+    isOversold?`📊 OVERSOLD CONFIRMED: KDJ J=${jVal?.toFixed(1)||'—'} + RSI ${rsi?.toFixed(1)||'—'} — deep oversold dip, mean reversion strongly favoured.`:'',
+    isNearBBLow?`📉 Price near BB Lower (${bbPosPct?.toFixed(0)}% of band) — Bollinger squeeze support, historically high bounce rate.`:'',
+    isDeepDip?`📐 Price in lowest ${pos52?.toFixed(0)}% of 52-week range — significant value discount, long-term dip buyer's zone.`:'',
+    candle?`🕯️ ${candle.pattern} (Quality: ${candleQuality}) — ${candle.note}${wickScore>55?' | Wick ratio '+wickScore.toFixed(0)+'% — strong reversal signal':''}`:'' ,
+    vol!=null&&vol>=1.5?`⚡ Volume ${vol}× — ${vol>=2?'capitulation spike (sellers exhausted)':'conviction confirmation'}.`:'',
+    res1?`📐 Target levels: TP1=${res1.toFixed(dp)}${res2?' → TP2='+res2.toFixed(dp):''}${res3?' → TP3='+res3.toFixed(dp):''}. Scale in; each MA reclaim is an add-on.`:'',
+    `📦 Entry: ${c.toFixed(dp)} | SL: ${atr?(c-atr*1.5).toFixed(dp)+'(ATR×1.5)':'set 1×ATR below candle low '+l.toFixed(dp)}. Scale 33%→33%→34% across MA phases.`,
+    dipNotes.slice(0,3).join(' | '),
+  ].filter(Boolean).join('\n');
+  adv.textContent=lines;adv.className='advice-box green';
+}else if(decision==='WATCH'){
+  const waiting=[
+    s2_pass!==true&&'Supertrend flip confirmation',
+    s1_pass!==true&&'Stronger reversal candle (hammer / engulfing)',
+    s6_pass!==true&&'Volume spike ≥ 1.5×',
+    !isOversold&&'Deeper oversold reading (KDJ J<20 or RSI<40)',
+    rebuild.score<50&&`MA rebuild to Phase 2+ (currently Phase ${rebuild.phase.n})`,
+    dipScore<15&&'Better dip context (BB Lower, higher low, no bad news)',
+  ].filter(Boolean);
+  adv.textContent=`⏳ PARTIAL DIP BUY SETUP (${score.toFixed(0)}/100). Waiting for: ${waiting.join(', ')}. ${isOversold?'Oversold conditions present — monitor for ST flip.':''}`;
+  adv.className='advice-box yellow';
+}else{
+  const failed=[
+    s2_pass===false&&stNote,
+    s1_pass===false&&`${candle?.pattern||'Candle'} — bearish`,
+    baseScore<30&&`Score too low (${score.toFixed(0)}/100)`,
+    bbPosPct!=null&&bbPosPct>75&&'Price near BB Upper — NOT a dip entry',
+    pos52!=null&&pos52>70&&'Near 52wk high — momentum trade, not a dip buy',
+  ].filter(Boolean);
+  adv.textContent=`🔴 Skip. ${failed.join(' | ')}. Dip buy conditions not met — wait for ST flip + hammer/engulfing + volume spike + KDJ oversold to converge.`;
+  adv.className='advice-box red';
 }
-updateDial('swing-dial-arc', 'swing-dial-score', score);
-drawPie('swing-pie', 'swing-pie-legend', [
-{ label: 'Candle', value: s1_pass === true ? 1 : s1_pass === 'warn' ? .5 : 0, color: 'var(--yellow)' },
-{ label: 'Supertrend', value: s2_pass === true ? 2 : s2_pass === 'warn' ? 1 : 0, color: 'var(--green)' },
-{ label: 'KDJ', value: s3_pass === true ? 1 : s3_pass === 'warn' ? .5 : 0, color: 'var(--accent)' },
-{ label: 'RSI', value: s4_pass === true ? 1 : s4_pass === 'warn' ? .5 : 0, color: 'var(--accent2)' },
-{ label: 'MACD', value: s5_pass === true ? 1 : s5_pass === 'warn' ? .5 : 0, color: 'var(--orange)' },
-{ label: 'Volume', value: s6_pass === true ? 1 : s6_pass === 'warn' ? .5 : 0, color: 'var(--red)' },
-{ label: 'MA Rebuild', value: rebuild.score / 100, color: 'var(--green2)' },
-].filter(s => s.value > 0));
-const passArr = [s1_pass, s2_pass, s3_pass, s4_pass, s5_pass, s6_pass, s7_pass].filter(v => v === true);
-$('swing-checklist').innerHTML = [
-buildCheck(`S1 — Candle: ${candle?.pattern || '—'}`, s1_pass, `${candle?.strength || 0}% strength`),
-buildCheck(`S2 — Supertrend: ${stDir || '—'}`, s2_pass, stNote.length > 40 ? stNote.slice(0, 40) + '…' : stNote),
-buildCheck(`S3 — KDJ Oversold`, s3_pass, kdjNote),
-buildCheck(`S4 — RSI Bounce`, s4_pass, rsi ? `RSI: ${rsi.toFixed(1)}` : 'Not provided'),
-buildCheck(`S5 — MACD ${dif != null && dea != null ? (dif > dea ? 'Bullish' : 'Bearish') : ''}`, s5_pass, macdNote),
-buildCheck(`S6 — Volume Spike`, s6_pass, volNote),
-buildCheck(`S7 — MA Rebuild Phase ${rebuild.phase.n}/4`, s7_pass, rebuild.phase.label),
-].join('');
-updateMeter('swing-signal-meter', passArr.length, 7);
-const range = h - l;
-const body = Math.abs(c - o);
-const lowerWick = Math.min(o, c) - l;
-const upperWick = h - Math.max(o, c);
-const wickScore = range > 0 ? (lowerWick / range) * 100 : 0;
-$('swing-candle-grid').innerHTML = [
-{ l: 'Pattern', v: candle?.pattern || '—', c: candle?.bullish === true ? 'green' : candle?.bullish === false ? 'red' : 'yellow' },
-{ l: 'Candle Range', v: range.toFixed(4), c: 'accent' },
-{ l: 'Body Size', v: `${(body / range * 100).toFixed(0)}%`, c: body / range > 0.5 ? 'green' : 'yellow' },
-{ l: 'Lower Wick', v: `${wickScore.toFixed(0)}%`, c: wickScore > 50 ? 'green' : wickScore > 30 ? 'accent' : 'dim' },
-{ l: 'Upper Wick', v: `${(upperWick / range * 100).toFixed(0)}%`, c: upperWick / range > 0.3 ? 'red' : 'green' },
-{ l: 'Candle Close', v: c > o ? '▲ Bullish' : '▼ Bearish', c: c > o ? 'green' : 'red' },
-prevClose ? { l: 'Body vs Prev', v: `${((c - prevClose) / prevClose * 100).toFixed(2)}%`, c: c > prevClose ? 'green' : 'red' } : null,
-].filter(Boolean).map(({ l, v, c: col }) =>
-`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${col}">${v}</div></div>`
-).join('');
-const fill = $('swing-wick-fill'), mark = $('swing-wick-marker'), lbl = $('swing-wick-label');
-if (fill) fill.style.width = Math.min(100, wickScore) + '%';
-if (mark) mark.style.left = Math.min(100, wickScore) + '%';
-if (lbl) lbl.textContent = `${wickScore.toFixed(0)}% lower wick ratio`;
-$('swing-rebuild-grid').innerHTML = rebuild.checks.map(ch =>
-`<div class="check-row">
-<span class="${ch.pass === true ? 'check-pass' : ch.pass === false ? 'check-fail' : 'check-neutral'}">${ch.pass === true ? '✔' : ch.pass === false ? '✘' : '○'}</span>
-<span class="check-label">${ch.label}</span>
-<span class="check-val ${ch.pass === true ? 'pass' : ch.pass === false ? 'fail' : 'warn'}">${ch.pass === true ? '✅ Done' : ch.pass === false ? '⏳ Pending' : '—'}</span>
-</div>`
-).join('');
-const pct = rebuild.score;
-const rf = $('swing-rebuild-fill'), rm = $('swing-rebuild-marker'), rl = $('swing-rebuild-label');
-if (rf) rf.style.width = pct + '%';
-if (rm) rm.style.left = pct + '%';
-if (rl) rl.textContent = `Phase ${rebuild.phase.n}/4 — ${rebuild.phase.label}`;
-const tpCard = $('swing-tradeplan-card');
-if (tpCard) {
-tpCard.style.display = '';
-const phEl = $('swing-phase-info');
-if (phEl) {
-phEl.innerHTML = `<div class="swing-phase-banner" style="border-color:${rebuild.phase.color}">
-<span style="color:${rebuild.phase.color};font-weight:700">${rebuild.phase.e} ${rebuild.phase.label}</span>
-<span style="color:var(--dim);font-size:10.5px;margin-left:.75rem">${rebuild.phase.n < 4 ? `Next: ${['Price>MA5', 'MA5>MA20', 'MA20>MA50', 'Full stack'][rebuild.phase.n]}` : 'All MAs aligned — ride the trend'}</span>
-</div>`;
+// ─── Charts ──────────────────────────────────────────────────────
+updateDial('swing-dial-arc','swing-dial-score',score);
+drawPie('swing-pie','swing-pie-legend',[
+  {label:'Candle', value:s1_pass===true?1:s1_pass==='warn'?.5:0,color:'var(--yellow)'},
+  {label:'Supertrend',value:s2_pass===true?2:s2_pass==='warn'?1:0,color:'var(--green)'},
+  {label:'KDJ',    value:s3_pass===true?1:s3_pass==='warn'?.5:0,color:'var(--accent)'},
+  {label:'RSI',    value:s4_pass===true?1:s4_pass==='warn'?.5:0,color:'var(--accent2)'},
+  {label:'MACD',   value:s5_pass===true?1:s5_pass==='warn'?.5:0,color:'var(--orange)'},
+  {label:'Volume', value:s6_pass===true?1:s6_pass==='warn'?.5:0,color:'var(--red)'},
+  {label:'MA Rebuild',value:rebuild.score/100,color:'var(--green2)'},
+  {label:'Dip Context',value:dipScore/60,color:'var(--accent)'},
+].filter(s=>s.value>0));
+const passArr=[s1_pass,s2_pass,s3_pass,s4_pass,s5_pass,s6_pass,s7_pass].filter(v=>v===true);
+$('swing-checklist').innerHTML=[
+  buildCheck(`S1 — Candle: ${candle?.pattern||'—'} [${candleQuality}]`,s1_pass,`Wick ${wickScore.toFixed(0)}% · ${candle?.strength||0}% strength`),
+  buildCheck(`S2 — Supertrend: ${stDir||'—'}`,s2_pass,stNote.length>45?stNote.slice(0,45)+'…':stNote),
+  buildCheck(`S3 — KDJ ${jVal!=null&&jVal<20?'OVERSOLD':''}`,s3_pass,kdjNote),
+  buildCheck(`S4 — RSI Dip ${rsiBounceGrade}`,s4_pass,rsi?`RSI: ${rsi.toFixed(1)}`:'Not provided'),
+  buildCheck(`S5 — MACD ${dif!=null&&dea!=null?(dif>dea?'Bull':'Bear / Building'):''}`,s5_pass,macdNote),
+  buildCheck(`S6 — Volume Spike`,s6_pass,volNote),
+  buildCheck(`S7 — MA Rebuild Phase ${rebuild.phase.n}/4`,s7_pass,rebuild.phase.label),
+  dipScore>0?buildCheck(`S8 — Dip Context (+${dipScore.toFixed(0)}pts)`,dipScore>25?true:'warn',`BB:${bbPosPct!=null?bbPosPct.toFixed(0)+'%':'—'} · 52wk:${pos52!=null?pos52.toFixed(0)+'%':'—'} · Checks:${[chkHL,chkBB,chkMA200,chkSector,chkNews,chkEarn].filter(Boolean).length}/6`):'',
+].filter(Boolean).join('');
+updateMeter('swing-signal-meter',passArr.length,7);
+// ─── Candle Grid ──────────────────────────────────────────────────
+$('swing-candle-grid').innerHTML=[
+  {l:'Pattern',v:candle?.pattern||'—',c:candle?.bullish===true?'green':candle?.bullish===false?'red':'yellow'},
+  {l:'Candle Range',v:range.toFixed(dp),c:'accent'},
+  {l:'Body Size',v:`${(body/range*100).toFixed(0)}%`,c:body/range>0.5?'green':'yellow'},
+  {l:'Lower Wick',v:`${wickScore.toFixed(0)}%`,c:wickScore>55?'green':wickScore>35?'accent':'dim'},
+  {l:'Upper Wick',v:`${(upperWick/range*100).toFixed(0)}%`,c:upperWick/range>0.35?'red':'green'},
+  {l:'Candle Close',v:c>o?'▲ Bullish':'▼ Bearish',c:c>o?'green':'red'},
+  prevClose?{l:'Body vs Prev',v:`${((c-prevClose)/prevClose*100).toFixed(2)}%`,c:c>prevClose?'green':'red'}:null,
+  {l:'Wick Quality',v:candleQuality,c:candleQuality==='HIGH'?'green':candleQuality==='MEDIUM'?'yellow':'red'},
+].filter(Boolean).map(({l,v,c:col})=>`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${col}">${v}</div></div>`).join('');
+const fill=$('swing-wick-fill'),mark=$('swing-wick-marker'),lbl=$('swing-wick-label');
+if(fill)fill.style.width=Math.min(100,wickScore)+'%';
+if(mark)mark.style.left=Math.min(100,wickScore)+'%';
+if(lbl)lbl.textContent=wickScore.toFixed(0)+'% lower wick ratio';
+$('swing-rebuild-grid').innerHTML=rebuild.checks.map(ch=>`<div class="check-row"><span class="${ch.pass===true?'check-pass':ch.pass===false?'check-fail':'check-neutral'}">${ch.pass===true?'✔':ch.pass===false?'✘':'○'}</span><span class="check-label">${ch.label}</span><span class="check-val ${ch.pass===true?'pass':ch.pass===false?'fail':'warn'}">${ch.pass===true?'✅ Done':ch.pass===false?'⏳ Pending':'—'}</span></div>`).join('');
+const pct=rebuild.score,rf=$('swing-rebuild-fill'),rm=$('swing-rebuild-marker'),rl=$('swing-rebuild-label');
+if(rf)rf.style.width=pct+'%';if(rm)rm.style.left=pct+'%';if(rl)rl.textContent=`Phase ${rebuild.phase.n}/4 — ${rebuild.phase.label}`;
+// ─── Dip Analysis Card ─────────────────────────────────────────────
+const dipCard=$('swing-dip-analysis-card');
+if(dipCard){
+  dipCard.style.display='';
+  const dipCells=[
+    bbu&&bbl?{l:'BB Position',v:bbPosPct!=null?bbPosPct.toFixed(1)+'%':'—',c:bbPosPct<=20?'green':bbPosPct<=40?'accent':bbPosPct>=80?'red':'yellow',sub:bbPosPct<=20?'Near BB Lower ★':''}:null,
+    w52h&&w52l?{l:'52wk Range %',v:pos52!=null?pos52.toFixed(1)+'%':'—',c:pos52<=25?'green':pos52<=40?'accent':pos52>=75?'red':'yellow',sub:pos52<=25?'Deep value zone':''}:null,
+    vwap?{l:'vs VWAP',v:(((price-vwap)/vwap)*100).toFixed(2)+'%',c:price<vwap?'green':'yellow',sub:price<vwap?'Below VWAP — discount':'Above VWAP'}:null,
+    bidask?{l:'Bid/Ask Ratio',v:bidask.toFixed(1)+'%',c:bidask>55?'green':bidask<40?'red':'yellow',sub:bidask>55?'Buy pressure':''}:null,
+    pe?{l:'P/E Ratio',v:pe.toFixed(2),c:pe<10?'green':pe<20?'accent':'yellow',sub:pe<10?'Cheap':''}:null,
+    beta?{l:'Beta',v:beta.toFixed(3),c:beta>2?'red':beta>1.2?'yellow':'green',sub:beta>1.5?'High vol':''}:null,
+    w52h?{l:'From 52wk High',v:(((price-w52h)/w52h)*100).toFixed(1)+'%',c:((price-w52h)/w52h)<-0.3?'green':((price-w52h)/w52h)<-0.15?'accent':'yellow',sub:''}:null,
+    w52l?{l:'From 52wk Low',v:(((price-w52l)/w52l)*100).toFixed(1)+'%',c:'accent',sub:''}:null,
+  ].filter(Boolean);
+  $('swing-dip-grid').innerHTML=dipCells.map(({l,v,c:col,sub})=>`<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value ${col}">${v}</div>${sub?`<div class="stat-sub">${sub}</div>`:''}</div>`).join('');
+  // Dip narrative
+  const dipGrade=dipScore>=40?'🟢 STRONG DIP BUY CONDITIONS':dipScore>=25?'🟡 MODERATE DIP SETUP':dipScore>=10?'🟠 WEAK DIP SIGNAL':'🔴 NOT A DIP BUY';
+  $('swing-dip-narrative').innerHTML=`<div style="font-weight:700;color:${dipScore>=40?'var(--green)':dipScore>=25?'var(--yellow)':'var(--orange)'};margin-bottom:.4rem;">${dipGrade} — Dip Score: ${dipScore.toFixed(0)}/60</div><div style="font-size:12px;line-height:1.65;color:var(--dim);">${dipNotes.length?dipNotes.join('<br/>'):''}</div>`;
+  // BB position bar
+  const bbSec=$('swing-bb-section');
+  if(bbSec&&bbu!=null&&bbl!=null){
+    bbSec.style.display='';
+    const bbP=Math.min(100,Math.max(0,bbPosPct||0));
+    const bfill=$('sw-bb-fill'),bmark=$('sw-bb-marker'),bplbl=$('sw-bb-pos-lbl');
+    if(bfill)bfill.style.width=bbP+'%';if(bmark)bmark.style.left=bbP+'%';
+    if(bplbl)bplbl.textContent=bbP.toFixed(1)+'% of band';
+    $('sw-bb-low-lbl').textContent='BB Lower '+bbl.toFixed(dp);
+    $('sw-bb-high-lbl').textContent='BB Upper '+bbu.toFixed(dp);
+  }else if(bbSec)bbSec.style.display='none';
+  // 52wk bar
+  const wkSec=$('swing-52wk-section');
+  if(wkSec&&w52h&&w52l){
+    wkSec.style.display='';
+    const p52=Math.min(100,Math.max(0,pos52||0));
+    const wfill=$('sw-52-fill'),wmark=$('sw-52-marker'),wplbl=$('sw-52-pos-lbl');
+    if(wfill)wfill.style.width=p52+'%';if(wmark)wmark.style.left=p52+'%';
+    if(wplbl)wplbl.textContent=p52.toFixed(1)+'% of 52wk range';
+    $('sw-52-low-lbl').textContent=w52l.toFixed(dp);
+    $('sw-52-high-lbl').textContent=w52h.toFixed(dp);
+  }else if(wkSec)wkSec.style.display='none';
 }
-const entryPrice = c;
-const atrVal = atr || (range * 2);
-const tpLevels = [];
-if (res1) tpLevels.push({ label: 'Phase 1 TP — Resistance 1', price: res1, pct: '30%', note: 'MA cluster / key level — partial exit, move SL to breakeven' });
-if (res2) tpLevels.push({ label: 'Phase 2 TP — Resistance 2', price: res2, pct: '40%', note: 'Next resistance — add at each MA cross above (scale in)' });
-if (res3) tpLevels.push({ label: 'Phase 3 TP — Resistance 3', price: res3, pct: '30%', note: 'Full trend target — trail stop ATR×1.0' });
-if (!res1) {
-tpLevels.push({ label: 'TP1 (ATR×1.5)', price: entryPrice + atrVal * 1.5, pct: '40%', note: 'Move SL to breakeven' });
-tpLevels.push({ label: 'TP2 (ATR×3.0)', price: entryPrice + atrVal * 3.0, pct: '40%', note: 'Trail stop' });
-tpLevels.push({ label: 'TP3 (ATR×5.0)', price: entryPrice + atrVal * 5.0, pct: '20%', note: 'Hold for trend' });
-}
-const sl = entryPrice - atrVal * 1.5;
-const dp = entryPrice > 10 ? 2 : 4;
-let tpHtml = `<div class="prow entry"><span class="prow-label">Entry (Candle Close)</span><span class="prow-val accent">${entryPrice.toFixed(dp)}</span><span class="prow-note">Limit order — enter on close confirmation</span></div>
+// ─── Trade Plan ──────────────────────────────────────────────────
+const tpCard=$('swing-tradeplan-card');
+if(tpCard){
+  tpCard.style.display='';
+  const phEl=$('swing-phase-info');
+  if(phEl)phEl.innerHTML=`<div class="swing-phase-banner" style="border-color:${rebuild.phase.color}"><span style="color:${rebuild.phase.color};font-weight:700">${rebuild.phase.e} ${rebuild.phase.label}</span><span style="color:var(--dim);font-size:10.5px;margin-left:.75rem">${rebuild.phase.n<4?`Next: ${['Price>MA5','MA5>MA20','MA20>MA50','Full stack'][rebuild.phase.n]}`:'All MAs aligned — ride the trend'}</span></div>`;
+  const entryPrice=c,atrVal=atr||(range*2);
+  const tpLevels=[];
+  if(res1)tpLevels.push({label:'Phase 1 TP — Resistance 1',price:res1,pct:'30%',note:'MA cluster / key level — partial exit, move SL to breakeven'});
+  if(res2)tpLevels.push({label:'Phase 2 TP — Resistance 2',price:res2,pct:'40%',note:'Next resistance — add at each MA cross above'});
+  if(res3)tpLevels.push({label:'Phase 3 TP — Resistance 3',price:res3,pct:'30%',note:'Full trend target — trail stop ATR×1.0'});
+  if(!res1){
+    tpLevels.push({label:'TP1 (ATR×1.5)',price:entryPrice+atrVal*1.5,pct:'40%',note:'Move SL to breakeven'});
+    tpLevels.push({label:'TP2 (ATR×3.0)',price:entryPrice+atrVal*3.0,pct:'40%',note:'Trail stop'});
+    tpLevels.push({label:'TP3 (ATR×5.0)',price:entryPrice+atrVal*5.0,pct:'20%',note:'Hold for trend'});
+  }
+  const sl=entryPrice-atrVal*1.5;
+  let tpHtml=`<div class="prow entry"><span class="prow-label">Entry (Candle Close)</span><span class="prow-val accent">${entryPrice.toFixed(dp)}</span><span class="prow-note">Limit order — enter on close confirmation</span></div>
 <div class="prow sl"><span class="prow-label">Stop Loss (ATR×1.5)</span><span class="prow-val red">${sl.toFixed(dp)}</span><span class="prow-note">Below candle low ${l.toFixed(dp)} — set immediately</span></div>`;
-tpLevels.forEach((tp, i) => {
-const rr = ((tp.price - entryPrice) / (entryPrice - sl)).toFixed(1);
-const cls = i === 0 ? 'tp1' : i === 1 ? 'tp2' : 'tp3';
-tpHtml += `<div class="prow ${cls}"><span class="prow-label">${tp.label} (${tp.pct})</span><span class="prow-val ${i === 0 ? 'green' : i === 1 ? 'g2' : 'g3'}">${tp.price.toFixed(dp)}</span><span class="prow-note">R:R 1:${rr} — ${tp.note}</span></div>`;
-});
-$('swing-price-block').innerHTML = tpHtml;
-const scEl = $('swing-scaling-guide');
-if (scEl) {
-scEl.innerHTML = `<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;font-weight:700">📐 Position Scaling Strategy</div>
-<div class="wf-step"><span class="wf-n">1</span><span>Initial entry: <strong>33% of planned position</strong> at ${entryPrice.toFixed(dp)} — reversal just confirmed, not full conviction yet</span></div>
-${ma5 ? `<div class="wf-step"><span class="wf-n">2</span><span>Add <strong>33% more</strong> when Price > MA5 (${ma5.toFixed(dp)}) is confirmed — MA5 crossed = momentum valid</span></div>` : ''}
-${ma20 ? `<div class="wf-step"><span class="wf-n">3</span><span>Add <strong>final 34%</strong> when MA5 > MA20 (${ma20.toFixed(dp)}) confirmed — full bull signal</span></div>` : ''}
-<div class="wf-step"><span class="wf-n">4</span><span>At TP1: take 30% profit, move SL to breakeven — trade now "free"</span></div>
-<div class="wf-step"><span class="wf-n">5</span><span>At TP2: take 40% more, trail remaining 30% using ATR×1.0 below each new high</span></div>`;
-}
-const kellyEl = $('swing-kelly-block');
-if (account && riskPct && kellyEl) {
-kellyEl.style.display = '';
-const riskAmt = account * (riskPct / 100);
-const riskUnit = Math.abs(entryPrice - sl);
-const units = riskUnit > 0 ? Math.floor(riskAmt / riskUnit) : 0;
-const posVal = units * entryPrice;
-kellyEl.innerHTML = `<div class="kelly-block">
-<div class="kelly-title">⚖️ Reversal Trade Sizing</div>
-<div class="kelly-row"><span class="kelly-label">Account</span><span class="kelly-val">$${account.toLocaleString()}</span></div>
-<div class="kelly-row"><span class="kelly-label">Risk (${riskPct}%)</span><span class="kelly-val" style="color:var(--red)">$${riskAmt.toFixed(2)}</span></div>
-<div class="kelly-row"><span class="kelly-label">Initial Entry (33%)</span><span class="kelly-val green">${Math.floor(units * 0.33)} units @ ${entryPrice.toFixed(dp)}</span></div>
-<div class="kelly-row"><span class="kelly-label">Full Position</span><span class="kelly-val">${units} units = $${posVal.toFixed(2)}</span></div>
-<div class="kelly-row" style="border-top:1px solid var(--border);padding-top:.3rem;margin-top:.2rem">
-<span class="kelly-label" style="color:var(--muted);font-size:9.5px">💡 Scale in 33% → 33% → 34% as each MA phase confirms. Never risk full position at reversal entry.</span>
-</div>
-</div>`;
-} else if (kellyEl) kellyEl.style.display = 'none';
+  tpLevels.forEach((tp,i)=>{
+    const rr=((tp.price-entryPrice)/(entryPrice-sl)).toFixed(1);
+    const cls=i===0?'tp1':i===1?'tp2':'tp3';
+    tpHtml+=`<div class="prow ${cls}"><span class="prow-label">${tp.label} (${tp.pct})</span><span class="prow-val ${i===0?'green':i===1?'g2':'g3'}">${tp.price.toFixed(dp)}</span><span class="prow-note">R:R 1:${rr} — ${tp.note}</span></div>`;
+  });
+  $('swing-price-block').innerHTML=tpHtml;
+  const scEl=$('swing-scaling-guide');
+  if(scEl)scEl.innerHTML=`<div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;font-weight:700">📐 DIP BUY — Scaled Entry Strategy</div>
+<div class="wf-step"><span class="wf-n">1</span><span>Initial entry: <strong>33% of planned position</strong> at ${entryPrice.toFixed(dp)} — reversal just forming, not full conviction yet</span></div>
+${ma5?`<div class="wf-step"><span class="wf-n">2</span><span>Add <strong>33% more</strong> when Price closes ABOVE MA5 (${ma5.toFixed(dp)}) — MA5 reclaim confirms bounce is real</span></div>`:''}
+${ma20?`<div class="wf-step"><span class="wf-n">3</span><span>Add <strong>final 34%</strong> when MA5 > MA20 (${ma20.toFixed(dp)}) confirmed — full bull structure restored</span></div>`:''}
+<div class="wf-step"><span class="wf-n">4</span><span>At TP1: take 30% profit, move SL to breakeven — trade now risk-free</span></div>
+<div class="wf-step"><span class="wf-n">5</span><span>At TP2: take 40% more, trail remaining 30% using ATR×1.0 below each new high</span></div>
+<div class="wf-step"><span class="wf-n">⚠️</span><span>If price breaks below candle LOW before any MA reclaim → EXIT FULL POSITION immediately. The dip failed.</span></div>`;
+  const kellyEl=$('swing-kelly-block');
+  if(account&&riskPct&&kellyEl){
+    kellyEl.style.display='';
+    const riskAmt=account*(riskPct/100),riskUnit=Math.abs(entryPrice-sl);
+    const units=riskUnit>0?Math.floor(riskAmt/riskUnit):0;
+    const posVal=units*entryPrice;
+    kellyEl.innerHTML=`<div class="kelly-block"><div class="kelly-title">⚖️ Dip Buy Position Sizing</div><div class="kelly-row"><span class="kelly-label">Account</span><span class="kelly-val">$${account.toLocaleString()}</span></div><div class="kelly-row"><span class="kelly-label">Risk (${riskPct}%)</span><span class="kelly-val" style="color:var(--red)">$${riskAmt.toFixed(2)}</span></div><div class="kelly-row"><span class="kelly-label">Initial Entry (33%)</span><span class="kelly-val green">${Math.floor(units*0.33)} units @ ${entryPrice.toFixed(dp)}</span></div><div class="kelly-row"><span class="kelly-label">Full Position (after MA confirm)</span><span class="kelly-val">${units} units = $${posVal.toFixed(2)}</span></div><div class="kelly-row" style="border-top:1px solid var(--border);padding-top:.3rem;margin-top:.2rem"><span class="kelly-label" style="color:var(--muted);font-size:9.5px">💡 Scale in 33%→33%→34% only as each MA phase confirms. Hard cut if price breaks below SL before Phase 1 confirm.</span></div></div>`;
+  }else if(kellyEl)kellyEl.style.display='none';
 }
 }
+
 function resetSwing() {
-['sw-open', 'sw-high', 'sw-low', 'sw-close', 'sw-prev-close', 'sw-price',
-'sw-st-prev', 'sw-st-curr', 'sw-ma-price', 'sw-ma5', 'sw-ma20', 'sw-ma50', 'sw-ma200',
-'sw-res1', 'sw-res2', 'sw-res3', 'sw-k', 'sw-d', 'sw-j', 'sw-rsi',
-'sw-dif', 'sw-dea', 'sw-vol', 'sw-adx', 'sw-atr', 'sw-account', 'sw-riskpct',
+['sw-open','sw-high','sw-low','sw-close','sw-prev-close','sw-price',
+'sw-st-prev','sw-st-curr','sw-ma-price','sw-ma5','sw-ma20','sw-ma50','sw-ma200',
+'sw-res1','sw-res2','sw-res3','sw-k','sw-d','sw-j','sw-rsi',
+'sw-dif','sw-dea','sw-vol','sw-adx','sw-atr','sw-account','sw-riskpct',
+'sw-bbu','sw-bbl','sw-52h','sw-52l','sw-vwap','sw-bidask','sw-pe','sw-beta',
 ].forEach(id => { const el = $(id); if (el) el.value = ''; });
 const stEl = document.getElementById('sw-st-dir');
 if (stEl) stEl.value = '';
+['sw-chk-higher-low','sw-chk-bb-lower','sw-chk-ma200-above',
+ 'sw-chk-sector-bull','sw-chk-no-news','sw-chk-earnings'].forEach(id => {
+  const el = $(id); if (el) el.checked = false;
+});
+const dipCard = $('swing-dip-analysis-card'); if (dipCard) dipCard.style.display = 'none';
 $('swing-result').style.display = 'none';
+_tmLastCalc.ma = null; _tmLastCalc.ema = null;
 }
 const QPP_PROFILES = [
 {
@@ -5869,13 +6041,16 @@ const IMG_FIELD_MAP = {
 	},
 	sw: {
 		PRICE:    'sw-price',
-		MA5:      'sw-ma5',    MA20:'sw-ma20',  MA50:'sw-ma50',  MA200:'sw-ma200',
+		MA5:      'sw-ma5',    MA20:'sw-ma20',   MA50:'sw-ma50',  MA200:'sw-ma200',
 		RSI:      'sw-rsi',
-		K:        'sw-k',      D:'sw-d',         J:'sw-j',
-		DIF:      'sw-dif',    DEA:'sw-dea',     HIST:'sw-hist',
+		K:        'sw-k',      D:'sw-d',          J:'sw-j',
+		DIF:      'sw-dif',    DEA:'sw-dea',      HIST:'sw-hist',
 		ATR:      'sw-atr',
-		ADX:      'sw-adx',    PDI:'sw-pdi',     MDI:'sw-mdi',   ADXR:'sw-adxr',
-		OPEN:     'sw-open',   HIGH:'sw-high',   LOW:'sw-low',   CLOSE:'sw-close',
+		ADX:      'sw-adx',    PDI:'sw-pdi',      MDI:'sw-mdi',   ADXR:'sw-adxr',
+		OPEN:     'sw-open',   HIGH:'sw-high',    LOW:'sw-low',   CLOSE:'sw-close',
+		BB_UPPER: 'sw-bbu',    BB_LOWER:'sw-bbl',
+		HIGH52:   'sw-52h',    LOW52:'sw-52l',
+		VWAP:     'sw-vwap',   BETA:'sw-beta',    PE:'sw-pe',
 	},
 };
 
@@ -6191,6 +6366,15 @@ function tmParseIndicators(text) {
 	if (beta)  v.BETA   = beta;
 	if (h52)   v.HIGH52 = h52;
 	if (l52)   v.LOW52  = l52;
+
+	// VWAP: "VWAP:1.234" or Ichimoku CL line used as VWAP proxy
+	const vwap = grab(/VWAP[:\s]([\d.]+)/i) || grab(/CL[:\s]([\d.]+)/i);
+	if (vwap) v.VWAP = vwap;
+
+	// Bid/Ask Ratio and Volume Ratio (already handled above)
+	// P/E Forward used as pe proxy
+	const peV = grab(/P\/E\s*(?:FWD|TTM|LFY)?[:\s]*([\d.]+)/i);
+	if (peV && peV < 200) v.PE = peV;
 
 	// Candle close (from "Prev Close" context fallback used for sw-close)
 	// For swing tab — use the last price or close shown
