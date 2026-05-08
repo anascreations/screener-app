@@ -1403,6 +1403,11 @@ function buildScaledEntryPlan(score, price, atr, ref1, ref2, dp) {
   if (!price || !atr) return '';
   const z1 = price, z2 = ref1 ? (ref1 + price) / 2 : price - atr * 0.5, z3 = ref2 || (price - atr);
   const fmtP = v => v.toFixed(dp || 4);
+const capitalEl = document.getElementById('scaled-entry-capital');
+const capital = capitalEl ? parseFloat(capitalEl.value) || 0 : 0;
+const showAmt = (pct) => capital > 0
+  ? ` <span style="font-size:11px;color:var(--green);font-family:var(--mono);">(= $${(capital * pct).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})})</span>`
+  : '';
   if (score >= 80) return '<div style="margin-top:.6rem;padding:.65rem .75rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.04);">' +
     '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:.45rem;">⚡ HIGH CONVICTION — SCALED ENTRY (3 Tranches)</div>' +
     '<div style="display:grid;gap:.3rem;font-size:12px;">' +
