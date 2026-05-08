@@ -439,10 +439,7 @@
       </div>
     </div>
 
-    <div class="card" id="ma-tradeplan-card" style="display:none">
-      <div class="card-hdr"><span class="ci">$</span> Trade Plan</div>
-      <div class="card-body">
-           <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;padding:.45rem .7rem;background:rgba(0,232,122,.05);border:1px solid rgba(0,232,122,.15);border-radius:7px;">
+       <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;padding:.45rem .7rem;background:rgba(0,232,122,.05);border:1px solid rgba(0,232,122,.15);border-radius:7px;">
   <span style="font-size:12px;">💰</span>
   <label style="font-size:12px;color:var(--dim);white-space:nowrap;">Capital to deploy</label>
   <input type="number" id="scaled-entry-capital" placeholder="e.g. 10000" min="0" step="100"
@@ -450,6 +447,10 @@
     style="flex:1;background:transparent;border:none;outline:none;font-size:13px;font-weight:600;color:var(--green);"/>
   <span style="font-size:11px;color:var(--dim);">USD / MYR</span>
 </div>
+       
+    <div class="card" id="ma-tradeplan-card" style="display:none">
+      <div class="card-hdr"><span class="ci">$</span> Trade Plan</div>
+      <div class="card-body">
         <div class="price-block" id="ma-price-block"></div>
         <div id="ma-kelly-block" style="margin-top:.75rem;display:none"></div>
         <!-- Query Price Planner -->
@@ -772,10 +773,7 @@
       </div>
     </div>
 
-    <div class="card" id="ema-tradeplan-card" style="display:none">
-      <div class="card-hdr"><span class="ci">$</span> Trade Plan</div>
-      <div class="card-body">
-           <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;padding:.45rem .7rem;background:rgba(0,232,122,.05);border:1px solid rgba(0,232,122,.15);border-radius:7px;">
+       <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;padding:.45rem .7rem;background:rgba(0,232,122,.05);border:1px solid rgba(0,232,122,.15);border-radius:7px;">
   <span style="font-size:12px;">💰</span>
   <label style="font-size:12px;color:var(--dim);white-space:nowrap;">Capital to deploy</label>
   <input type="number" id="scaled-entry-capital" placeholder="e.g. 10000" min="0" step="100"
@@ -783,6 +781,11 @@
     style="flex:1;background:transparent;border:none;outline:none;font-size:13px;font-weight:600;color:var(--green);"/>
   <span style="font-size:11px;color:var(--dim);">USD / MYR</span>
 </div>
+       
+    <div class="card" id="ema-tradeplan-card" style="display:none">
+      <div class="card-hdr"><span class="ci">$</span> Trade Plan</div>
+      <div class="card-body">
+           
         <div class="price-block" id="ema-price-block"></div>
         <div id="ema-kelly-block" style="margin-top:.75rem;display:none"></div>
         <!-- Query Price Planner -->
@@ -807,7 +810,7 @@
     </div>
     <div class="gold-session-info">
       <div class="gold-session-label">TRADING SESSION</div>
-      <div class="gold-session-status" id="gold-session-status">Detecting…</div>
+      <div class="gold-session-sttus" id="gold-session-status">Detecting…</div>
       <div class="gold-session-time" id="gold-session-time">—</div>
     </div>
   </div>
