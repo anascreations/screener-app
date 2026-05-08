@@ -343,7 +343,7 @@ function calcForecastRules() {
     };
 
     /* ─ MA Stack  (60 pts) ─────────────────── */
-    const f1 = price > ma5,   f2 = ma5 > ma20,   f3 = ma20 > ma50;
+   /* const f1 = price > ma5,   f2 = ma5 > ma20,   f3 = ma20 > ma50;
     const f4 = ma200 != null ? price > ma200 : null;
     rec(f1?20:0, f1?0:20, 20, 'Price vs MA5/EMA8',
         `Price ${Math.abs(pct(price,ma5)||0).toFixed(2)}% above MA5 — short-term bull`,
@@ -355,6 +355,27 @@ function calcForecastRules() {
         'MA5 flat with MA20');
     rec(f3?20:0, f3?0:20, 20, 'MA20 vs MA50 (medium trend)',
         `MA20>${fmt(ma20,dp)} > MA50${fmt(ma50,dp)} — medium bull`,
+        'MA20 below MA50 — medium bearish',
+        'MA20 flat with MA50');
+    if (f4 !== null) {
+        rec(f4?12:0, f4?0:12, 12, 'Price vs MA200 (macro)',
+            `Above MA200 ${fmt(ma200,dp)} — macro trend bullish`,
+            `Below MA200 ${fmt(ma200,dp)} — macro bearish`,
+            '');
+    } */
+
+    const f1 = price > ma5,   f2 = ma5 > ma20,   f3 = ma20 > ma50;
+    const f4 = ma200 != null ? price > ma200 : null;
+    rec(f1?20:0, f1?0:20, 20, 'Price vs MA5/EMA8',
+        `Price ${Math.abs(pct(price,ma5)||0).toFixed(2)}% above MA5 — short-term bull`,
+        `Price ${Math.abs(pct(price,ma5)||0).toFixed(2)}% below MA5 — short-term bear`,
+        'At MA5 — watch for breakout direction');
+    rec(f2?20:0, f2?0:20, 20, 'MA5 vs MA20 (trend structure)',
+        `MA5: ${fmt(ma5,dp)} > MA20: ${fmt(ma20,dp)} — bull structure`,
+        `MA5 below MA20 — bearish structure`,
+        'MA5 flat with MA20');
+    rec(f3?20:0, f3?0:20, 20, 'MA20 vs MA50 (medium trend)',
+        `MA20: ${fmt(ma20,dp)} > MA50: ${fmt(ma50,dp)} — medium bull`,
         'MA20 below MA50 — medium bearish',
         'MA20 flat with MA50');
     if (f4 !== null) {
