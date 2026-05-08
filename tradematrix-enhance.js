@@ -23,8 +23,6 @@ function resetEnhance() {
     ];
     ids.forEach(id => { const el = $(id); if (el) el.value = ''; });
     const selects = ['enh-st-prev-dir','enh-fc-ichi','enh-cp-trend','enh-cp-sr'];
-    const tickerFlds = ['enh-fc-ticker'];
-    tickerFlds.forEach(id => { const el=$(id); if(el) el.value=''; });
     selects.forEach(id => { const el = $(id); if (el) el.value = el.options?.[0]?.value || ''; });
     ['enh-st-result','enh-fc-result','enh-en-result','enh-cp-result'].forEach(id => {
         const el = $(id); if (el) el.style.display = 'none';
@@ -51,9 +49,6 @@ function fillForecastFromMA() {
         const s=$(src),d=$(dst);
         if(s&&d&&s.value.trim()){d.value=s.value;filled++;}
     });
-    // Copy ticker
-    const srcT=$('ma-ticker'),dstT=$('enh-fc-ticker');
-    if(srcT&&dstT&&srcT.value)dstT.value=srcT.value;
     if(filled>0){switchTab('enhance');switchEnhTab('fc');}
     else alert('Run MA Calc first so there are values to transfer.');
 }
@@ -82,9 +77,6 @@ function fillForecastFromEMA() {
         const s = $(src), d = $(dst);
         if (s && d && s.value.trim()) { d.value = s.value; filled++; }
     });
-    // Copy ticker
-    const srcTE=$('ema-ticker'),dstTE=$('enh-fc-ticker');
-    if(srcTE&&dstTE&&srcTE.value)dstTE.value=srcTE.value;
     if (filled > 0) { switchTab('enhance'); switchEnhTab('fc'); }
     else alert('Run EMA Calc first so there are values to transfer.');
 }
@@ -523,16 +515,6 @@ function calcForecastRules() {
     const bearPct = totalPts > 0 ? (bearPts / totalPts * 100) : 50;
     const net     = bullPct - bearPct;
     const conf    = Math.min(96, Math.round(Math.abs(net) * 0.85 + 30));
-    // Probability-weighted TP hit rates (based on conf + ADX + vol)
-    const adxBonus  = adx >= 25 ? 8 : adx >= 20 ? 4 : 0;
-    const volBonus  = vol >= 1.5 ? 6 : vol >= 1.0 ? 2 : 0;
-    const baseProb  = Math.min(88, conf + adxBonus + volBonus);
-    const probTP1   = dir.includes('BULL') ? Math.min(85, baseProb) : Math.max(15, 50 - Math.abs(net)*0.4);
-    const probTP2   = dir.includes('BULL') ? Math.min(72, baseProb * 0.82) : Math.max(8, 35 - Math.abs(net)*0.3);
-    const probTP3   = dir.includes('BULL') ? Math.min(48, baseProb * 0.55) : Math.max(4, 20 - Math.abs(net)*0.2);
-    // Ticker
-    const fcTicker  = document.getElementById('enh-fc-ticker')?.value?.trim()?.toUpperCase() || '';
-
     let dir, dirCls, dirColor, momentum, timing;
     if      (net >=  42) { dir = 'BULLISH';      dirCls = 'proceed'; dirColor = 'var(--green)';  }
     else if (net >=  18) { dir = 'LEANING BULL'; dirCls = 'proceed'; dirColor = 'var(--accent)'; }
@@ -545,6 +527,14 @@ function calcForecastRules() {
     const macdBull = dif != null && dea != null && dif > dea;
     const volHigh  = vol != null && vol >= 1.5;
     const trendOk  = adx != null && adx >= 25;
+
+    // Probability-weighted TP hit rates — calculated AFTER dir is defined
+    const adxBonus = adx >= 25 ? 8 : adx >= 20 ? 4 : 0;
+    const volBonus = vol >= 1.5 ? 6 : vol >= 1.0 ? 2 : 0;
+    const baseProb = Math.min(88, conf + adxBonus + volBonus);
+    const probTP1  = dir.includes('BULL') ? Math.min(85, baseProb)       : Math.max(15, 50 - Math.abs(net)*0.4);
+    const probTP2  = dir.includes('BULL') ? Math.min(72, baseProb * 0.82): Math.max(8,  35 - Math.abs(net)*0.3);
+    const probTP3  = dir.includes('BULL') ? Math.min(48, baseProb * 0.55): Math.max(4,  20 - Math.abs(net)*0.2);
 
     if (maFull && kdjBull && macdBull && trendOk)       momentum = 'ACCELERATING';
     else if (maFull && (kdjBull || macdBull) && trendOk) momentum = 'STEADY';
@@ -729,7 +719,35 @@ function calcForecastRules() {
     $('enh-fc-result').style.display = '';
     $('enh-fc-result').innerHTML = `
 
-      <!-- ① TOP DECISION STRIP -->
+      <!-- ① WIN PROBABILITY PANEL -->
+      <div style="padding:.75rem;background:rgba(0,0,0,.08);border-radius:10px;margin-bottom:.5rem;border:1px solid rgba(255,255,255,.06);">
+        <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:.5rem;">📊 WIN PROBABILITY — based on ${sigs.length} indicator groups</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.4rem;">
+          <div style="text-align:center;padding:.4rem;background:rgba(0,0,0,.1);border-radius:7px;">
+            <div style="font-size:10px;color:var(--dim);margin-bottom:.2rem;">Overall</div>
+            <div style="font-size:22px;font-weight:700;color:${dirColor};">${conf}%</div>
+            <div style="font-size:9px;color:var(--dim);">confidence</div>
+          </div>
+          <div style="text-align:center;padding:.4rem;background:rgba(0,232,122,.06);border-radius:7px;border:1px solid rgba(0,232,122,.15);">
+            <div style="font-size:10px;color:var(--dim);margin-bottom:.2rem;">TP1 Prob</div>
+            <div style="font-size:20px;font-weight:700;color:var(--green);">${probTP1.toFixed(0)}%</div>
+            <div style="font-size:9px;color:var(--dim);">reach TP1</div>
+          </div>
+          <div style="text-align:center;padding:.4rem;background:rgba(0,200,240,.05);border-radius:7px;">
+            <div style="font-size:10px;color:var(--dim);margin-bottom:.2rem;">TP2 Prob</div>
+            <div style="font-size:20px;font-weight:700;color:var(--accent);">${probTP2.toFixed(0)}%</div>
+            <div style="font-size:9px;color:var(--dim);">reach TP2</div>
+          </div>
+          <div style="text-align:center;padding:.4rem;background:rgba(91,33,182,.06);border-radius:7px;">
+            <div style="font-size:10px;color:var(--dim);margin-bottom:.2rem;">TP3 Prob</div>
+            <div style="font-size:20px;font-weight:700;color:var(--accent2);">${probTP3.toFixed(0)}%</div>
+            <div style="font-size:9px;color:var(--dim);">reach TP3</div>
+          </div>
+        </div>
+        <div style="margin-top:.5rem;font-size:11px;color:var(--dim);">Based on: ${sigs.length} signals · ADX ${adx ? adx.toFixed(0)+'pts' : '—'} · Volume ${vol ? vol.toFixed(1)+'×' : '—'}. Entering near MA20/EMA21 support maximises these probabilities.</div>
+      </div>
+
+      <!-- ② TOP DECISION STRIP -->
       <div class="decision-strip ${dirCls}" style="gap:.6rem;">
         <div class="d-badge ${dirCls}" style="font-size:19px;">${dir}</div>
         <div class="risk-pill ${riskPillCls}">${momentum}</div>
