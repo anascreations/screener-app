@@ -308,7 +308,6 @@
   <div class="card">
     <div class="card-hdr"><span class="ci">∿</span> MA 7-Filter Stack <span class="badge-new">+ADX +Supertrend</span></div>
     <div class="card-body">
-
       <div class="tf-selector">
         <span class="tf-sel-label">Timeframe</span>
         <div class="tf-pills" id="ma-tf-pills">
@@ -341,6 +340,15 @@
         <div class="fld"><label>Supertrend Val <span class="opt-tag">opt</span></label><input type="number" id="ma-st" step="0.0001" placeholder="1.28" oninput="maCalc()"/></div>
         <div class="fld"><label>BB Upper <span class="opt-tag">opt</span></label><input type="number" id="ma-bbu" step="0.0001" placeholder="1.51" oninput="maCalc()"/></div>
         <div class="fld"><label>BB Lower <span class="opt-tag">opt</span></label><input type="number" id="ma-bbl" step="0.0001" placeholder="1.22" oninput="maCalc()"/></div>
+      </div>
+
+      <div class="sec-label">⚡ Previous Bar <span class="opt-tag">opt — unlocks slope + crossover alerts</span></div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Prev Price</label><input type="number" id="ma-prev-price" step="0.0001" placeholder="1.415" oninput="maCalc()"/></div>
+        <div class="fld"><label>Prev MA5</label><input type="number" id="ma-prev-ma5" step="0.0001" placeholder="1.375" oninput="maCalc()"/></div>
+        <div class="fld"><label>Prev MA20</label><input type="number" id="ma-prev-ma20" step="0.0001" placeholder="1.305" oninput="maCalc()"/></div>
+        <div class="fld"><label>Prev MA50</label><input type="number" id="ma-prev-ma50" step="0.0001" placeholder="1.248" oninput="maCalc()"/></div>
+        <div class="fld"><label>Prev RSI</label><input type="number" id="ma-prev-rsi" step="0.1" placeholder="52.0" oninput="maCalc()"/></div>
       </div>
 
       <div class="sec-label">KDJ Oscillator (Step 4)</div>
@@ -577,7 +585,6 @@
 
     <div class="card-hdr"><span class="ci">≋</span> EMA 7-Filter Stack <span class="badge-new">+ADX +Ichimoku</span></div>
     <div class="card-body">
-
       <div class="tf-selector">
         <span class="tf-sel-label">Timeframe</span>
         <div class="tf-pills" id="ema-tf-pills">
@@ -610,9 +617,13 @@
         <div class="fld"><label>Ichimoku Kumo <span class="opt-tag">opt</span></label>
           <select id="ema-ichi" onchange="emaCalc()">
             <option value="">— Not Set —</option>
-            <option value="above">Price Above Cloud</option>
-            <option value="inside">Price Inside Cloud</option>
-            <option value="below">Price Below Cloud</option>
+            <option value="above_tkcross_bull">☁️ Above Cloud + TK Bull Cross ⭐</option>
+            <option value="above">☁️ Above Cloud (No Cross)</option>
+            <option value="twist_bull">🌀 Kumo Twist ↑ Bullish (predictive)</option>
+            <option value="inside">⚠️ Price Inside Cloud</option>
+            <option value="above_tkcross_bear">⚠️ Above Cloud + TK Bear Cross</option>
+            <option value="twist_bear">🌀 Kumo Twist ↓ Bearish</option>
+            <option value="below">🔴 Price Below Cloud</option>
           </select>
         </div>
         <div class="fld"><label>Supertrend Val <span class="opt-tag">opt</span></label><input type="number" id="ema-st" step="0.0001" placeholder="1.28" oninput="emaCalc()"/></div>
@@ -641,6 +652,32 @@
         <div class="fld"><label>DIF</label><input type="number" id="ema-dif" step="0.001" placeholder="0.013" oninput="emaCalc()"/></div>
         <div class="fld"><label>DEA</label><input type="number" id="ema-dea" step="0.001" placeholder="0.011" oninput="emaCalc()"/></div>
         <div class="fld"><label>Histogram</label><input type="number" id="ema-hist" step="0.001" placeholder="0.004" oninput="emaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">⚡ Previous Bar <span class="opt-tag">opt — unlocks EMA cross + slope + RSI divergence</span></div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Prev Price</label><input type="number" id="ema-prev-price" step="0.0001" placeholder="1.415" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Prev EMA8</label><input type="number" id="ema-prev-e8" step="0.0001" placeholder="1.375" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Prev EMA21</label><input type="number" id="ema-prev-e21" step="0.0001" placeholder="1.305" oninput="emaCalc()"/></div>
+        <div class="fld"><label>Prev RSI</label><input type="number" id="ema-prev-rsi" step="0.1" placeholder="52.0" oninput="emaCalc()"/></div>
+      </div>
+
+      <div class="sec-label">📡 Multi-TF Supertrend <span class="opt-tag">opt — higher timeframe conflict check</span></div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>15m ST Direction</label>
+          <select id="ema-mtf-15m" onchange="emaCalc()">
+            <option value="">— Not Set —</option>
+            <option value="bull">▲ Bullish (dots below)</option>
+            <option value="bear">▼ Bearish (dots above)</option>
+          </select>
+        </div>
+        <div class="fld"><label>1H ST Direction</label>
+          <select id="ema-mtf-1h" onchange="emaCalc()">
+            <option value="">— Not Set —</option>
+            <option value="bull">▲ Bullish (dots below)</option>
+            <option value="bear">▼ Bearish (dots above)</option>
+          </select>
+        </div>
       </div>
 
       <div class="sec-label">Volume &amp; Risk</div>
@@ -1606,9 +1643,8 @@
 </div>
 
   <div class="card">
-    <div class="card-hdr"><span class="ci swing-ci">🔄</span> Swing Reversal Inputs — V-Bottom Detection</div>
+    <div class="card-hdr"><span class="ci swing-ci">🔄</span> Swing Reversal — Dip Buyer Strategy <span class="badge-new">Buy on Dip · V-Bottom · Oversold Bounce</span></div>
     <div class="card-body">
-
       <div class="tf-selector" style="border-color:rgba(91,33,182,0.3);background:rgba(91,33,182,0.06)">
         <span class="tf-sel-label">Timeframe</span>
         <div class="tf-pills" id="swing-tf-pills">
@@ -1671,6 +1707,46 @@
         <div class="fld"><label>PDI (+DI) <span class="opt-tag">opt</span></label><input type="number" id="sw-pdi" step="0.1" placeholder="40.8" oninput="swingCalc()"/></div>
         <div class="fld"><label>MDI (−DI) <span class="opt-tag">opt</span></label><input type="number" id="sw-mdi" step="0.1" placeholder="10.2" oninput="swingCalc()"/></div>
         <div class="fld"><label>ADXR <span class="opt-tag">opt</span></label><input type="number" id="sw-adxr" step="0.1" placeholder="18.1" oninput="swingCalc()"/></div>
+      </div>
+
+      <div class="sec-label">🎯 Dip Context — Support & Valuation Levels <span class="opt-tag">opt — for buy-on-dip scoring</span></div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>BB Upper</label><input type="number" id="sw-bbu" step="0.0001" placeholder="0.467" oninput="swingCalc()"/></div>
+        <div class="fld"><label>BB Lower</label><input type="number" id="sw-bbl" step="0.0001" placeholder="0.420" oninput="swingCalc()"/></div>
+        <div class="fld"><label>52wk High</label><input type="number" id="sw-52h" step="0.0001" placeholder="0.645" oninput="swingCalc()"/></div>
+        <div class="fld"><label>52wk Low</label><input type="number" id="sw-52l" step="0.0001" placeholder="0.227" oninput="swingCalc()"/></div>
+        <div class="fld"><label>VWAP <span class="opt-tag">opt</span></label><input type="number" id="sw-vwap" step="0.0001" placeholder="0.435" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Bid/Ask Ratio %</label><input type="number" id="sw-bidask" step="0.1" placeholder="51.83" oninput="swingCalc()"/></div>
+        <div class="fld"><label>P/E (TTM) <span class="opt-tag">opt</span></label><input type="number" id="sw-pe" step="0.01" placeholder="9.29" oninput="swingCalc()"/></div>
+        <div class="fld"><label>Beta <span class="opt-tag">opt</span></label><input type="number" id="sw-beta" step="0.001" placeholder="1.211" oninput="swingCalc()"/></div>
+      </div>
+
+      <div class="sec-label">🏦 Dip Quality Checklist <span class="opt-tag">tick what applies to this dip</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .6rem;margin-bottom:.9rem;padding:.6rem .7rem;background:rgba(0,0,0,.06);border-radius:8px;">
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="sw-chk-higher-low" onchange="swingCalc()"/>
+          <span>Higher low vs. previous swing</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="sw-chk-bb-lower" onchange="swingCalc()"/>
+          <span>Price near / touching BB Lower</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="sw-chk-ma200-above" onchange="swingCalc()"/>
+          <span>Price above MA200 (macro uptrend)</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:.5span;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="sw-chk-sector-bull" onchange="swingCalc()"/>
+          <span>Sector ETF still bullish</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="sw-chk-no-news" onchange="swingCalc()"/>
+          <span>No negative fundamental news</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="sw-chk-earnings" onchange="swingCalc()"/>
+          <span>Earnings ≥ 3 weeks away</span>
+        </label>
       </div>
 
       <div class="sec-label">Risk Management</div>
@@ -1757,6 +1833,32 @@
     </div>
 
     <!-- Multi-Level Trade Plan -->
+    <div class="card" id="swing-dip-analysis-card" style="display:none">
+      <div class="card-hdr"><span class="ci swing-ci">🎯</span> Dip Buy Analysis — Support Levels &amp; Entry Quality</div>
+      <div class="card-body">
+        <div class="stat-grid" id="swing-dip-grid"></div>
+        <div id="swing-dip-narrative" style="margin-top:.65rem;font-size:12.5px;color:var(--text);line-height:1.7;"></div>
+        <!-- BB Position Bar -->
+        <div id="swing-bb-section" style="display:none;margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem;color:var(--dim)">Price Position in Bollinger Band</div>
+          <div class="range-track">
+            <div class="range-fill" id="sw-bb-fill" style="background:linear-gradient(90deg,var(--green),var(--accent),var(--red))"></div>
+            <div class="range-marker" id="sw-bb-marker"></div>
+          </div>
+          <div class="range-labels"><span id="sw-bb-low-lbl">BB Lower</span><span id="sw-bb-pos-lbl" style="color:var(--accent)">—</span><span id="sw-bb-high-lbl">BB Upper</span></div>
+        </div>
+        <!-- 52wk position -->
+        <div id="swing-52wk-section" style="display:none;margin-top:.75rem">
+          <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem;color:var(--dim)">Price in 52-Week Range</div>
+          <div class="range-track">
+            <div class="range-fill" id="sw-52-fill" style="background:linear-gradient(90deg,var(--red),var(--green))"></div>
+            <div class="range-marker" id="sw-52-marker"></div>
+          </div>
+          <div class="range-labels"><span id="sw-52-low-lbl">52wk Low</span><span id="sw-52-pos-lbl" style="color:var(--accent)">—</span><span id="sw-52-high-lbl">52wk High</span></div>
+        </div>
+      </div>
+    </div>
+
     <div class="card" id="swing-tradeplan-card" style="display:none">
       <div class="card-hdr"><span class="swing-ci">📐</span> Multi-Level Swing Trade Plan</div>
       <div class="card-body">
