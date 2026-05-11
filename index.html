@@ -4389,49 +4389,84 @@
 
   <!-- ── SUB: Source Map ── -->
   <div class="mm-panel" id="mm-map">
-    <div class="card">
+   <div class="card">
       <div class="card-hdr"><span class="ci">🗺️</span> Where to Find Every Value</div>
       <div class="card-body">
-        <div style="overflow-x:auto">
-          <table class="biz-table" style="font-size:12px">
-            <thead><tr>
-              <th>TradeMatrix Field</th>
-              <th>Location</th>
-              <th>Page / Tab</th>
-              <th>How to Get It</th>
-              <th>If Missing</th>
-            </tr></thead>
-            <tbody>
-              <tr><td><strong>Market Price</strong></td><td>Top of stock page — large green/red number</td><td>Quote page</td><td>Auto — always visible</td><td style="color:var(--green)">Never missing</td></tr>
-              <tr><td><strong>MA5 / MA20 / MA50 / MA200</strong></td><td>Indicator row above chart: "MA MA5:X.XX MA20:X.XX…"</td><td>Chart</td><td>Add MA indicator, set periods 5,20,50,200</td><td>Use MA Calculator in Deriver tab</td></tr>
-              <tr><td><strong>EMA8 / EMA21 / EMA55 / EMA200</strong></td><td>Indicator row: "EMA EMA8:X.XX…"</td><td>Chart</td><td>Add separate EMA indicator, set periods 8,21,55,200</td><td>Use MA Calculator (EMA mode)</td></tr>
-              <tr><td><strong>BB Upper / Lower</strong></td><td>"BOLL(2,0) MID:X UPPER:X LOWER:X" on chart</td><td>Chart</td><td>Add BOLL(20,2) indicator</td><td>Optional — skip for MA tab</td></tr>
-              <tr><td><strong>RSI</strong></td><td>Sub-panel: "RSI RSI1:XX.XXX"</td><td>Chart</td><td>Add RSI indicator, period 14</td><td>Use RSI Calculator in Deriver tab</td></tr>
-              <tr><td><strong>KDJ (K, D, J)</strong></td><td>Sub-panel: "KDJ(9,3,3) K:XX D:XX J:XX"</td><td>Chart</td><td>Add KDJ indicator, default (9,3,3)</td><td style="color:var(--yellow)">No easy manual calc — use 50/50/50 as neutral</td></tr>
-              <tr><td><strong>MACD (DIF, DEA, HIST)</strong></td><td>Sub-panel: "MACD(12,26,9) DIF:X DEA:X MACD:X"</td><td>Chart</td><td>Add MACD indicator, default (12,26,9)</td><td style="color:var(--yellow)">Optional — note: bullish if DIF > DEA</td></tr>
-              <tr><td><strong style="color:var(--gold)">Volume Ratio ★</strong></td><td>Stock data grid: "Volume Ratio: 1.72"</td><td><strong>Quote page (not chart!)</strong></td><td>Screenshot quote page separately. Use Dual OCR.</td><td>Use Vol Ratio Estimator in Deriver tab</td></tr>
-              <tr><td><strong style="color:var(--red)">ATR ★</strong></td><td>Sub-panel: "ATR ATR1:X.XXX"</td><td>Chart</td><td>Add ATR indicator, period 1</td><td>Use ATR Calculator in Deriver tab (OHLC method)</td></tr>
-              <tr><td><strong style="color:var(--red)">PDI / MDI / ADX / ADXR ★</strong></td><td>Sub-panel: "DMI(14,6) PDI:XX MDI:XX ADX:XX ADXR:XX"</td><td>Chart</td><td>Add DMI indicator, params (14,6)</td><td>Enter ADX=25 as neutral if truly unavailable</td></tr>
-              <tr><td><strong>Open</strong></td><td>Stock data grid: "Open: X.XXX"</td><td>Quote page</td><td>Screenshot quote page</td><td>Use Prev Close as approximation</td></tr>
-              <tr><td><strong>High / Low</strong></td><td>Top-right of stock page: "High: X.XXX Low: X.XXX"</td><td>Quote page</td><td>Always visible on quote page</td><td style="color:var(--green)">Always available</td></tr>
-              <tr><td><strong>Prev Close</strong></td><td>Stock data grid: "Prev Close: X.XXX"</td><td>Quote page</td><td>Screenshot quote page</td><td style="color:var(--green)">Always available</td></tr>
-              <tr><td><strong>52wk High / Low</strong></td><td>Stock data grid: "52wk High / Low"</td><td>Quote page</td><td>Screenshot quote page</td><td>Optional — skip for calculation</td></tr>
-              <tr><td><strong>Beta</strong></td><td>Stock data grid: "Beta: X.XXX"</td><td>Quote page</td><td>Screenshot quote page</td><td>Optional — informational only</td></tr>
-            </tbody>
-          </table>
+
+        <!-- Filter bar -->
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.85rem">
+          <button onclick="mmFilter('all')" id="mmf-all" style="padding:.3rem .75rem;border-radius:20px;border:1px solid var(--accent);background:var(--accent);color:#000;font-size:11px;font-weight:700;cursor:pointer">All</button>
+          <button onclick="mmFilter('chart')" id="mmf-chart" style="padding:.3rem .75rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:11px;cursor:pointer">📊 Chart</button>
+          <button onclick="mmFilter('quote')" id="mmf-quote" style="padding:.3rem .75rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:11px;cursor:pointer">📄 Quote Page</button>
+          <button onclick="mmFilter('missing')" id="mmf-missing" style="padding:.3rem .75rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:11px;cursor:pointer">⚠️ Often Missing</button>
         </div>
+
+        <!-- Cards grid -->
+        <div id="mm-field-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem"></div>
+
         <div class="mm-tip-box" style="margin-top:.85rem">
           <div class="mm-tip-title">★ = Most Frequently Missing — Action Required</div>
           <div class="mm-tip-grid">
-            <div class="mm-tip-item yellow">⭐ ATR — Add ATR(1) indicator to chart NOW. It's used for stop loss and position sizing.</div>
-            <div class="mm-tip-item yellow">⭐ DMI/ADX — Add DMI(14,6) indicator. ADX confirms trend strength. Without it score is incomplete.</div>
-            <div class="mm-tip-item yellow">⭐ Volume Ratio — Always screenshot the quote PAGE not just the chart. Use Dual OCR.</div>
+            <div class="mm-tip-item yellow">⭐ ATR — Add ATR(1) indicator to chart NOW. Used for stop loss and position sizing.</div>
+            <div class="mm-tip-item yellow">⭐ DMI/ADX — Add DMI(14,6) indicator. ADX confirms trend strength.</div>
+            <div class="mm-tip-item yellow">⭐ Volume Ratio — Screenshot the quote PAGE not just the chart. Use Dual OCR.</div>
           </div>
         </div>
       </div>
     </div>
   </div><!-- /mm-map -->
+<script>
+  (function(){
+    const fields = [
+      { name:'Market Price', loc:'Top of stock page — large green/red number', page:'quote', how:'Auto — always visible', missing:'Never missing', missingColor:'var(--green)', star:false },
+      { name:'MA5 / MA20 / MA50 / MA200', loc:'Indicator row: "MA MA5:X.XX MA20:X.XX…"', page:'chart', how:'Add MA indicator, periods 5,20,50,200', missing:'Use MA Calculator in Deriver tab', missingColor:'', star:false },
+      { name:'EMA8 / EMA21 / EMA55 / EMA200', loc:'Indicator row: "EMA EMA8:X.XX…"', page:'chart', how:'Add EMA indicator, periods 8,21,55,200', missing:'Use MA Calculator (EMA mode)', missingColor:'', star:false },
+      { name:'BB Upper / Lower', loc:'"BOLL(2,0) MID:X UPPER:X LOWER:X" on chart', page:'chart', how:'Add BOLL(20,2) indicator', missing:'Optional — skip for MA tab', missingColor:'var(--dim)', star:false },
+      { name:'RSI', loc:'Sub-panel: "RSI RSI1:XX.XXX"', page:'chart', how:'Add RSI indicator, period 14', missing:'Use RSI Calculator in Deriver tab', missingColor:'', star:false },
+      { name:'KDJ (K, D, J)', loc:'Sub-panel: "KDJ(9,3,3) K:XX D:XX J:XX"', page:'chart', how:'Add KDJ indicator, default (9,3,3)', missing:'No easy manual calc — use 50/50/50 as neutral', missingColor:'var(--yellow)', star:false },
+      { name:'MACD (DIF, DEA, HIST)', loc:'Sub-panel: "MACD(12,26,9) DIF:X DEA:X MACD:X"', page:'chart', how:'Add MACD indicator, default (12,26,9)', missing:'Optional — bullish if DIF > DEA', missingColor:'var(--yellow)', star:false },
+      { name:'Volume Ratio ★', loc:'Stock data grid: "Volume Ratio: 1.72"', page:'quote', how:'Screenshot quote page. Use Dual OCR.', missing:'Use Vol Ratio Estimator in Deriver tab', missingColor:'', star:true },
+      { name:'ATR ★', loc:'Sub-panel: "ATR ATR1:X.XXX"', page:'chart', how:'Add ATR indicator, period 1', missing:'Use ATR Calculator in Deriver tab (OHLC)', missingColor:'', star:true },
+      { name:'PDI / MDI / ADX / ADXR ★', loc:'Sub-panel: "DMI(14,6) PDI:XX MDI:XX ADX:XX"', page:'chart', how:'Add DMI indicator, params (14,6)', missing:'Enter ADX=25 as neutral if unavailable', missingColor:'', star:true },
+      { name:'Open', loc:'Stock data grid: "Open: X.XXX"', page:'quote', how:'Screenshot quote page', missing:'Use Prev Close as approximation', missingColor:'', star:false },
+      { name:'High / Low', loc:'Top-right: "High: X.XXX Low: X.XXX"', page:'quote', how:'Always visible on quote page', missing:'Always available', missingColor:'var(--green)', star:false },
+      { name:'Prev Close', loc:'Stock data grid: "Prev Close: X.XXX"', page:'quote', how:'Screenshot quote page', missing:'Always available', missingColor:'var(--green)', star:false },
+      { name:'52wk High / Low', loc:'Stock data grid: "52wk High / Low"', page:'quote', how:'Screenshot quote page', missing:'Optional — skip for calculation', missingColor:'var(--dim)', star:false },
+      { name:'Beta', loc:'Stock data grid: "Beta: X.XXX"', page:'quote', how:'Screenshot quote page', missing:'Optional — informational only', missingColor:'var(--dim)', star:false },
+    ];
 
+    function render(filter){
+      const grid = document.getElementById('mm-field-grid');
+      if(!grid) return;
+      const list = filter === 'all' ? fields
+                 : filter === 'chart' ? fields.filter(f => f.page === 'chart')
+                 : filter === 'quote' ? fields.filter(f => f.page === 'quote')
+                 : fields.filter(f => f.star);
+      grid.innerHTML = list.map(f => `
+        <div style="background:var(--card);border:1px solid ${f.star?'rgba(240,58,74,.3)':'var(--border)'};border-radius:10px;padding:.7rem .85rem;display:flex;flex-direction:column;gap:.3rem;transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='${f.star?'rgba(240,58,74,.3)':'var(--border)'}'">
+          <div style="font-size:12px;font-weight:700;color:${f.star?'var(--red)':'var(--text)'}">${f.name}</div>
+          <div style="font-size:11px;color:var(--dim);display:flex;gap:.35rem;align-items:center">
+            <span style="padding:.1rem .45rem;border-radius:4px;background:${f.page==='chart'?'rgba(0,200,240,.1)':'rgba(245,200,66,.1)'};color:${f.page==='chart'?'var(--accent)':'var(--yellow)'};font-size:10px">${f.page==='chart'?'📊 Chart':'📄 Quote'}</span>
+            ${f.loc}
+          </div>
+          <div style="font-size:11px;color:var(--text);border-top:1px solid var(--border);padding-top:.3rem">🔧 ${f.how}</div>
+          <div style="font-size:11px;color:${f.missingColor||'var(--text)'}">⚡ ${f.missing}</div>
+        </div>`).join('');
+    }
+
+    window.mmFilter = function(f){
+      ['all','chart','quote','missing'].forEach(k => {
+        const b = document.getElementById('mmf-'+k);
+        if(!b) return;
+        b.style.background = k===f ? 'var(--accent)' : 'transparent';
+        b.style.color      = k===f ? '#000' : 'var(--dim)';
+        b.style.borderColor= k===f ? 'var(--accent)' : 'var(--border)';
+      });
+      render(f);
+    };
+    render('all');
+  })();
+  </script>
 </div><!-- /panel-moomoo -->
 
 <div class="panel" id="panel-scalp">
