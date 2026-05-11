@@ -3893,11 +3893,50 @@
               <option value="below">Price Below Cloud</option>
             </select></div>
         </div>
- 
+ <div class="sec-label">Momentum Slope <span class="opt-tag">OPT — previous bar values detect acceleration/divergence</span></div>
+        <div class="fg" style="margin-bottom:.75rem;">
+          <div class="fld"><label>Prev RSI <span class="opt-tag">OPT</span></label>
+            <input type="number" id="enh-fc-prsi"   step="0.01"   placeholder="Last bar's RSI"/></div>
+          <div class="fld"><label>Prev MACD HIST <span class="opt-tag">OPT</span></label>
+            <input type="number" id="enh-fc-phist"  step="0.0001" placeholder="Last bar's histogram"/></div>
+          <div class="fld"><label>Prev J (KDJ) <span class="opt-tag">OPT</span></label>
+            <input type="number" id="enh-fc-pj"     step="0.01"   placeholder="Last bar's J value"/></div>
+          <div class="fld"><label>Prev Price <span class="opt-tag">OPT · for divergence</span></label>
+            <input type="number" id="enh-fc-pprice" step="0.0001" placeholder="Previous swing high/low"/></div>
+          <div class="fld"><label>Prev BB Width <span class="opt-tag">OPT · squeeze</span></label>
+            <input type="number" id="enh-fc-pbbw"   step="0.0001" placeholder="Last bar BB Upper−Lower"/></div>
+        </div>
+
+        <div class="sec-label">Trade Context <span class="opt-tag">OPT</span></div>
+        <div class="fg" style="margin-bottom:.75rem;">
+          <div class="fld"><label>Timeframe <span class="opt-tag">OPT</span></label>
+            <select id="enh-fc-tf">
+              <option value="">— Not Set —</option>
+              <option value="5m">5 min</option>
+              <option value="15m">15 min</option>
+              <option value="1H">1 Hour</option>
+              <option value="4H">4 Hour</option>
+              <option value="Daily">Daily</option>
+              <option value="Weekly">Weekly</option>
+            </select></div>
+          <div class="fld"><label>Current Candle <span class="opt-tag">OPT</span></label>
+            <select id="enh-fc-candle">
+              <option value="">— Not Set —</option>
+              <option value="bullish">Bullish (green close)</option>
+              <option value="bearish">Bearish (red close)</option>
+              <option value="doji">Doji / indecision</option>
+              <option value="hammer">Hammer / Pin bar</option>
+              <option value="engulf_bull">Bullish Engulfing</option>
+              <option value="engulf_bear">Bearish Engulfing</option>
+            </select></div>
+        </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="calcForecastRules()">RUN FORECAST ▶</button>
           <button class="btn btn-secondary"
-                  onclick="['enh-fc-price','enh-fc-ma5','enh-fc-ma20','enh-fc-ma50','enh-fc-ma200','enh-fc-k','enh-fc-d','enh-fc-j','enh-fc-rsi','enh-fc-dif','enh-fc-dea','enh-fc-hist','enh-fc-adx','enh-fc-pdi','enh-fc-mdi','enh-fc-adxr','enh-fc-atr','enh-fc-vol','enh-fc-st','enh-fc-bbu','enh-fc-bbl','enh-fc-vwap'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const ic=document.getElementById('enh-fc-ichi');if(ic)ic.value='';document.getElementById('enh-fc-result').style.display='none';">
+                  onclick="['enh-fc-price','enh-fc-ma5','enh-fc-ma20','enh-fc-ma50','enh-fc-ma200','enh-fc-k','enh-fc-d','enh-fc-j','enh-fc-rsi','enh-fc-dif','enh-fc-dea','enh-fc-hist','enh-fc-adx','enh-fc-pdi','enh-fc-mdi','enh-fc-adxr','enh-fc-atr','enh-fc-vol','enh-fc-st','enh-fc-bbu','enh-fc-bbl','enh-fc-vwap','enh-fc-prsi','enh-fc-phist','enh-fc-pj','enh-fc-pprice','enh-fc-pbbw'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const ic=document.getElementById('enh-fc-ichi');if(ic)ic.value='';
+				  const tf=document.getElementById('enh-fc-tf');if(tf)tf.value='';
+				  const cn=document.getElementById('enh-fc-candle');if(cn)cn.value='';
+				  document.getElementById('enh-fc-result').style.display='none';">
             RESET
           </button>
         </div>
