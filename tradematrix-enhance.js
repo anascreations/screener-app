@@ -328,6 +328,15 @@ function calcForecastRules() {
     const bbu   = num('enh-fc-bbu'), bbl  = num('enh-fc-bbl');
     const vwap  = num('enh-fc-vwap');
     const ichiSel = document.getElementById('enh-fc-ichi')?.value || '';
+	// ── New optional slope / context inputs ──────────
+    const prevRsi   = num('enh-fc-prsi');
+    const prevHist  = num('enh-fc-phist');
+    const prevJ     = num('enh-fc-pj');
+    const prevPrice = num('enh-fc-pprice');
+    const prevBBW   = num('enh-fc-pbbw');
+    const tfSel     = document.getElementById('enh-fc-tf')?.value    || '';
+    const candleSel = document.getElementById('enh-fc-candle')?.value || '';
+    const tfMult    = {'5m':0.7,'15m':0.8,'1H':0.9,'4H':1.0,'Daily':1.15,'Weekly':1.3}[tfSel] || 1.0;
     const dp    = price > 100 ? 2 : price > 1 ? 4 : 6;
 
     /* ── Weighted score engine ──────────────── */
@@ -531,6 +540,78 @@ function calcForecastRules() {
         }
     }
 
+/* ─ RSI Slope  (8 pts) ─────────────────── */
+    if (rsi != null && prevRsi != null) {
+        const slope = rsi - prevRsi;
+        if      (slope >=  5) rec(8, 0, 8, `RSI Slope +${slope.toFixed(1)} Rising Fast`, 'RSI accelerating — momentum building rapidly', '', '');
+        else if (slope >=  2) rec(5, 0, 8, `RSI Slope +${slope.toFixed(1)} Climbing`,    'RSI rising steadily — momentum improving', '', '');
+        else if (slope <= -5) rec(0, 8, 8, `RSI Slope ${slope.toFixed(1)} Falling Fast`, '', 'RSI dropping sharply — momentum fading fast', '');
+        else if (slope <= -2) rec(0, 5, 8, `RSI Slope ${slope.toFixed(1)} Declining`,    '', 'RSI weakening — watch for bearish cross', '');
+        else                  rec(3, 3, 8, `RSI Flat Slope (${slope.toFixed(1)})`,         '', '', 'RSI flat — no directional acceleration');
+    }
+
+    /* ─ MACD Histogram Slope  (8 pts) ──────── */
+    if (hist != null && prevHist != null) {
+        const growing = hist > prevHist;
+        if      (hist > 0 &&  growing)  rec(8, 0, 8, `MACD Hist Expanding +${(hist - prevHist).toFixed(4)}`, 'Histogram growing above zero — bull momentum accelerating', '', '');
+        else if (hist > 0 && !growing)  rec(3, 5, 8, `MACD Hist Shrinking (still +)`,                        '', 'Histogram shrinking — bull energy fading, watch for cross', '');
+        else if (hist < 0 && !growing)  rec(0, 8, 8, `MACD Hist Deepening Bear ${hist.toFixed(4)}`,          '', 'Bear histogram deepening — sellers accelerating', '');
+        else                            rec(5, 0, 8,  `MACD Hist Contracting Bear`,                           'Bearish histogram shrinking — potential reversal forming', '', '');
+    }
+
+    /* ─ KDJ J Slope  (6 pts) ───────────────── */
+    if (j != null && prevJ != null) {
+        const jSlope = j - prevJ;
+        if      (jSlope >=  8 && j < 88)  rec(6, 0, 6, `KDJ J +${jSlope.toFixed(0)} Turning Up Fast`, 'J accelerating — momentum surging', '', '');
+        else if (jSlope >=  3)             rec(4, 0, 6, `KDJ J +${jSlope.toFixed(0)} Climbing`,        'J rising — momentum building', '', '');
+        else if (jSlope <= -8)             rec(0, 6, 6, `KDJ J ${jSlope.toFixed(0)} Falling Fast`,     '', 'J dropping sharply — sell pressure building', '');
+        else if (jSlope <= -3)             rec(0, 4, 6, `KDJ J ${jSlope.toFixed(0)} Declining`,        '', 'J weakening — watch for K/D bearish cross', '');
+        else                               rec(2, 2, 6, `KDJ J Flat (${jSlope.toFixed(0)})`,            '', '', 'J flat — no momentum change this bar');
+    }
+
+    /* ─ RSI Divergence  (10 pts) ───────────── */
+    if (rsi != null && prevRsi != null && prevPrice != null && prevPrice !== price) {
+        const bullDiv = price < prevPrice && rsi > prevRsi;
+        const bearDiv = price > prevPrice && rsi < prevRsi;
+        if      (bullDiv) rec(10, 0,  10, 'RSI Bullish Divergence ⚡', 'Price lower but RSI higher — momentum shifting to bulls, reversal likely', '', '');
+        else if (bearDiv) rec(0,  10, 10, 'RSI Bearish Divergence ⚠️', '', 'Price higher but RSI lower — bull momentum weakening, reversal risk', '');
+    }
+
+    /* ─ MACD Divergence  (10 pts) ──────────── */
+    if (hist != null && prevHist != null && prevPrice != null && prevPrice !== price) {
+        const macdBullDiv = price < prevPrice && hist > prevHist && hist < 0;
+        const macdBearDiv = price > prevPrice && hist < prevHist && hist > 0;
+        if      (macdBullDiv) rec(10, 0,  10, 'MACD Bullish Divergence ⚡', 'Price falling but MACD hist rising — bearish momentum losing grip', '', '');
+        else if (macdBearDiv) rec(0,  10, 10, 'MACD Bearish Divergence ⚠️', '', 'Price rising but MACD hist shrinking — bull momentum topping out', '');
+    }
+
+    /* ─ BB Squeeze / Expansion  (7 pts) ────── */
+    if (bbu != null && bbl != null && prevBBW != null) {
+        const curBBW   = bbu - bbl;
+        const squeeze  = curBBW < prevBBW * 0.88;
+        const expand   = curBBW > prevBBW * 1.12;
+        const bullBias = bullPts >= bearPts;
+        if      (squeeze) rec(4, 0, 7, 'BB Squeeze 🔔 — Breakout Pending', 'Bands contracting — explosive move imminent, direction = other signals above', '', '');
+        else if (expand && bullBias) rec(7, 0, 7, 'BB Bullish Expansion', 'Bands expanding with bull bias — breakout direction confirmed upward', '', '');
+        else if (expand && !bullBias) rec(0, 7, 7, 'BB Bearish Expansion', '', 'Bands expanding with bear bias — downside breakout underway', '');
+    }
+
+    /* ─ Candle Context  (6 pts) ─────────────── */
+    if (candleSel) {
+        const cNames = {bullish:'Bullish Candle', bearish:'Bearish Candle', doji:'Doji', hammer:'Hammer / Pin Bar', engulf_bull:'Bullish Engulfing', engulf_bear:'Bearish Engulfing'};
+        const pts    = (candleSel === 'engulf_bull' || candleSel === 'engulf_bear' || candleSel === 'hammer') ? 6 : 4;
+        if      (['bullish','hammer','engulf_bull'].includes(candleSel)) rec(pts, 0,   6, `Candle: ${cNames[candleSel]}`, `${cNames[candleSel]} close — price action confirms bullish bias`, '', '');
+        else if (['bearish','engulf_bear'].includes(candleSel))          rec(0,   pts, 6, `Candle: ${cNames[candleSel]}`, '', `${cNames[candleSel]} — price action confirms selling pressure`, '');
+        else                                                              rec(2,   2,   6, `Candle: ${cNames[candleSel]}`, '', '', 'Doji — indecision, wait for next candle to confirm direction');
+    }
+
+    /* ─ Timeframe Reliability  (5 pts) ─────── */
+    if (tfSel) {
+        const tfInfo = {'5m':'Entry timing only — confirm bias on 15m/1H first','15m':'Intraday TF — signals valid 2–4h','1H':'Swing TF — signals valid 1–3 days','4H':'Medium-swing — valid 3–7 days','Daily':'Positional — valid 1–3 weeks','Weekly':'Macro bias only — highest reliability'};
+        if      (tfMult >= 1.1) rec(5, 0, 5, `TF: ${tfSel} — High Signal Reliability`, tfInfo[tfSel], '', '');
+        else if (tfMult >= 0.9) rec(3, 0, 5, `TF: ${tfSel} — Normal Reliability`,       tfInfo[tfSel], '', '');
+        else                    rec(2, 1, 5, `TF: ${tfSel} — Lower Reliability`,         '', '', tfInfo[tfSel]);
+    }
     /* ── Derived scores ──────────────────── */
     const bullPct = totalPts > 0 ? (bullPts / totalPts * 100) : 50;
     const bearPct = totalPts > 0 ? (bearPts / totalPts * 100) : 50;
