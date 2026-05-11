@@ -3405,44 +3405,98 @@
     </div><!-- /guide-card -->
   </div><!-- /g-grade -->
 
-     <!-- ── Smart Tools Guide ── -->
   <div class="guide-section" id="g-smarttools">
-    <div class="guide-card">
-      <div class="guide-card-hdr">🔮 Smart Tools — How to Use Every Sub-Tool</div>
+
+    <!-- ── Tool Cards ── -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.85rem;margin-bottom:1.25rem">
+
+      <!-- Supertrend -->
+      <div class="guide-card" style="border-color:rgba(0,200,240,.25);background:rgba(0,200,240,.04)">
+        <div class="guide-card-hdr" style="color:var(--accent)">📟 Supertrend Calculator</div>
+        <div class="guide-card-body">
+          <p>Enter <strong>High, Low, Close + ATR</strong>. Outputs the active ST value and direction (lower band = bullish, upper band = bearish).</p>
+          <p style="margin-top:.5rem">Plug the value into the <strong>Supertrend</strong> field in MA / EMA tabs. Enter previous bar's ST + direction to trigger <strong>Flip Detection</strong> — direction change = highest-reliability signal.</p>
+        </div>
+      </div>
+
+      <!-- Trend Forecast -->
+      <div class="guide-card" style="border-color:rgba(167,139,250,.25);background:rgba(167,139,250,.04)">
+        <div class="guide-card-hdr" style="color:#a78bfa">🔮 Trend Forecast</div>
+        <div class="guide-card-body">
+          <p>Scores up to <strong>14 indicator groups</strong> and returns Direction, Momentum State, Timing Signal and <strong>Confidence %</strong>.</p>
+          <p style="margin-top:.5rem"><strong>Required:</strong> Price, MA5, MA20, KDJ K/D/J, MACD DIF/DEA<br><strong>Optional:</strong> BB, VWAP, Ichimoku, ADX, Volume</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-top:.75rem;font-size:11px">
+            <div style="padding:.35rem .5rem;border-radius:6px;background:rgba(0,232,122,.1);color:var(--green)">75–100 → Full size</div>
+            <div style="padding:.35rem .5rem;border-radius:6px;background:rgba(0,232,122,.06);color:var(--green)">55–74 → 50–75% size</div>
+            <div style="padding:.35rem .5rem;border-radius:6px;background:rgba(240,58,74,.07);color:var(--red)">Below 55 → Skip</div>
+            <div style="padding:.35rem .5rem;border-radius:6px;background:rgba(240,58,74,.12);color:var(--red)">Below 40 → No trade</div>
+          </div>
+          <p style="margin-top:.6rem;font-size:11px;color:var(--yellow)">⚠️ <strong>WAIT FOR PULLBACK</strong> — price stretched above MA20. Queue at MA20 or MA5.</p>
+        </div>
+      </div>
+
+      <!-- Entry Optimizer -->
+      <div class="guide-card" style="border-color:rgba(0,232,122,.25);background:rgba(0,232,122,.04)">
+        <div class="guide-card-hdr" style="color:var(--green)">🎯 Entry Optimizer</div>
+        <div class="guide-card-body">
+          <p>Enter <strong>Price, MA20, MA5, ATR, KDJ + account size</strong>. Use only after Forecast returns PROCEED or ENTER NOW.</p>
+          <div style="display:flex;flex-direction:column;gap:.3rem;margin-top:.65rem;font-size:12px">
+            <div style="display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--dim)">Protected Zone</span><strong>MA20 → MA20 + 2×ATR</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--dim)">Outputs</span><strong>Ideal Entry · SL · TP1/2/3</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:.3rem 0"><span style="color:var(--dim)">Verdict</span><strong>HIGH / MEDIUM / LOW probability</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candle Scanner -->
+      <div class="guide-card" style="border-color:rgba(245,200,66,.25);background:rgba(245,200,66,.04)">
+        <div class="guide-card-hdr" style="color:var(--yellow)">🕯️ Candle Pattern Scanner</div>
+        <div class="guide-card-body">
+          <p>Enter OHLC for <strong>up to 3 bars</strong>. Detects 18 patterns across 3 categories:</p>
+          <div style="margin-top:.5rem;font-size:11px;display:flex;flex-direction:column;gap:.3rem">
+            <div style="padding:.3rem .6rem;border-radius:5px;background:rgba(245,200,66,.08)">1-bar — Hammer · Shooting Star · Doji · Marubozu</div>
+            <div style="padding:.3rem .6rem;border-radius:5px;background:rgba(245,200,66,.08)">2-bar — Engulfing · Tweezer · Inside Bar · Harami</div>
+            <div style="padding:.3rem .6rem;border-radius:5px;background:rgba(245,200,66,.08)">3-bar — Morning/Evening Star · 3 Soldiers/Crows</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-top:.65rem;font-size:11px;text-align:center">
+            <div style="padding:.3rem;border-radius:5px;background:rgba(0,232,122,.1);color:var(--green)">★★★<br>High</div>
+            <div style="padding:.3rem;border-radius:5px;background:rgba(245,200,66,.1);color:var(--yellow)">★★☆<br>Moderate</div>
+            <div style="padding:.3rem;border-radius:5px;background:rgba(240,58,74,.07);color:var(--red)">★☆☆<br>Weak</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Workflow Steps ── -->
+    <div class="guide-card" style="border-color:rgba(0,200,240,.15)">
+      <div class="guide-card-hdr">📐 Workflow — Smart Tools in Order</div>
       <div class="guide-card-body">
-
-        <div class="guide-sub-hdr">📟 Supertrend Calculator</div>
-        <p>Enter the current candle High, Low, Close and your ATR. The tool outputs the active Supertrend value (lower band = bullish, upper band = bearish) and the direction. Use the output value as the <strong>Supertrend</strong> input in the MA and EMA tabs. Also enter the previous bar's ST value and direction to trigger Flip Detection — a bar that changes direction is the highest-reliability ST signal.</p>
-
-        <div class="guide-sub-hdr">🔮 Trend Forecast (Rule-Based)</div>
-        <p>Enter all indicator values from your chart. The engine scores up to 14 indicator groups and returns: <strong>Direction</strong> (Bullish → Bearish), <strong>Momentum State</strong> (Accelerating → Fading), <strong>Timing Signal</strong> (Enter / Wait / Avoid), and a <strong>Confidence %</strong>. Minimum required fields: Price, MA5, MA20, KDJ K/D/J, MACD DIF/DEA. Optional fields (BB, VWAP, Ichimoku, ADX, Volume) each add scoring weight.</p>
-        <p><strong>Confidence % guide:</strong> 75–100 = strong setup, full size. 55–74 = acceptable, 50–75% size. Below 55 = skip or minimal size. Below 40 = do not trade.</p>
-        <p><strong>WAIT FOR PULLBACK</strong> means price is stretched more than the timeframe threshold above MA20. The risk/reward is poor at current price — queue entry at MA20 or MA5 instead.</p>
-
-        <div class="guide-sub-hdr">🎯 Entry Optimizer</div>
-        <p>Enter Price, MA20, MA5, ATR, KDJ and account size. The tool outputs a <strong>Protected Zone</strong> (MA20 to MA20+2×ATR — the safest buy area), <strong>Ideal Entry</strong> price, <strong>Stop Loss</strong>, and <strong>TP1/2/3</strong> targets. It also checks 5 entry conditions and gives a HIGH / MEDIUM / LOW probability verdict. Use this after Trend Forecast confirms PROCEED or ENTER NOW.</p>
-
-        <div class="guide-sub-hdr">🕯️ Candle Pattern Scanner</div>
-        <p>Enter OHLC for up to 3 bars (current + 2 prior). The scanner identifies 18 professional patterns across single-bar (Hammer, Shooting Star, Doji, Marubozu), two-bar (Engulfing, Tweezer, Inside Bar, Harami) and three-bar (Morning/Evening Star, Three Soldiers/Crows) setups. Each pattern shows its trade action, entry price, stop loss, and reliability rating (★★★ = high, ★★☆ = moderate, ★☆☆ = weak). Always combine with the Trend Forecast direction — a bullish pattern in a BEARISH forecast has low probability.</p>
-
-        <div class="guide-sub-hdr">⭐ Reliability ratings explained</div>
-        <ul>
-          <li><strong>★★★ High</strong> — 60–70%+ historical win rate in correct context. Enter with normal size on next candle confirmation.</li>
-          <li><strong>★★☆ Moderate</strong> — Requires at least one additional confirmation (volume above average, at S/R zone, KDJ oversold/overbought). Use 50% size.</li>
-          <li><strong>★☆☆ Weak / Early</strong> — Do not trade on pattern alone. Wait for the next candle to confirm direction first.</li>
-        </ul>
-
-        <div class="guide-sub-hdr">📐 Workflow — how to use Smart Tools together</div>
-        <ol>
-          <li>Run <strong>MA or EMA Calc</strong> first — then tap "→ Smart Tools Forecast" to auto-fill all values</li>
-          <li>Run <strong>Trend Forecast</strong> — if PROCEED or ENTER NOW, continue to step 3. If WATCH or AVOID, stop here.</li>
-          <li>Run <strong>Entry Optimizer</strong> — confirm price is inside the Protected Zone. Note the Ideal Entry and Stop Loss.</li>
-          <li>Run <strong>Candle Scanner</strong> — enter the last 2–3 candles. Look for a bullish pattern (Hammer, Engulfing, Morning Star) to confirm entry timing.</li>
-          <li>Enter the trade with the position size recommended by the Forecast confidence score.</li>
-        </ol>
-
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.5rem .75rem;border-radius:8px;background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.15)">
+            <span style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--accent);flex-shrink:0;width:22px">1</span>
+            <span>Run <strong>MA or EMA Calc</strong> → tap <strong>"→ Smart Tools Forecast"</strong> to auto-fill all values</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.5rem .75rem;border-radius:8px;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.15)">
+            <span style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:#a78bfa;flex-shrink:0;width:22px">2</span>
+            <span>Run <strong>Trend Forecast</strong> — if PROCEED or ENTER NOW → step 3. If WATCH or AVOID → stop</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.5rem .75rem;border-radius:8px;background:rgba(0,232,122,.05);border:1px solid rgba(0,232,122,.15)">
+            <span style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--green);flex-shrink:0;width:22px">3</span>
+            <span>Run <strong>Entry Optimizer</strong> — confirm price is inside the Protected Zone, note Ideal Entry + SL</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.5rem .75rem;border-radius:8px;background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.15)">
+            <span style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--yellow);flex-shrink:0;width:22px">4</span>
+            <span>Run <strong>Candle Scanner</strong> — look for a bullish pattern (Hammer, Engulfing, Morning Star) to confirm timing</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.5rem .75rem;border-radius:8px;background:rgba(240,58,74,.05);border:1px solid rgba(240,58,74,.15)">
+            <span style="font-family:var(--head);font-size:1.1rem;font-weight:800;color:var(--red);flex-shrink:0;width:22px">5</span>
+            <span>Enter trade — use <strong>position size recommended by the Confidence %</strong> from Trend Forecast</span>
+          </div>
+        </div>
       </div>
     </div>
+
   </div><!-- /g-smarttools -->
 
 </div><!-- /panel-guide -->
