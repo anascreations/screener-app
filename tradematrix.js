@@ -888,7 +888,7 @@ full: Math.max(0, Math.min(100, kelly * 100)),
 half: Math.max(0, Math.min(100, kelly * 50)),
 };
 }
-function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, context = 'default') {
+function buildTradePlan(containerId, cardId, price, atr, accountSize, riskPct, context = 'default', maCtx = null) {
 const card = $(cardId);
 const box = $(containerId);
 if (!card || !box || !price || !atr) { if (card) card.style.display = 'none'; return; }
@@ -2866,7 +2866,7 @@ sessGrid.innerHTML = sessData.map(s =>
       </div>
     </div>`;
 })();
-buildTradePlan('gold-price-block', 'gold-tradeplan-card', price, atr, accountSz, riskPct, 'gold');
+buildTradePlan('gold-price-block', 'gold-tradeplan-card', price, atr, accountSz, riskPct, 'gold', { ma20: e21, ma5: e8 });
 }
 function resetGold() {
 ['gold-price','gold-e8','gold-e21','gold-e55','gold-e200',
