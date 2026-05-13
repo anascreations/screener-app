@@ -989,7 +989,63 @@
         </div>
         <div class="fld"><label>Volume Ratio</label><input type="number" id="gold-vol" step="0.01" placeholder="1.50" oninput="goldCalc()"/></div>
       </div>
+<div class="sec-label">Multi-Timeframe Context <span class="opt-tag">OPT — improves forecast accuracy</span></div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Weekly Bias <span class="opt-tag">OPT</span></label>
+          <select id="gold-htf-weekly" onchange="goldCalc()">
+            <option value="">— Not Set —</option>
+            <option value="bull">📈 Bullish (above EMA200 weekly)</option>
+            <option value="neutral">➡️ Neutral (inside range)</option>
+            <option value="bear">📉 Bearish (below EMA200 weekly)</option>
+          </select></div>
+        <div class="fld"><label>Daily Trend <span class="opt-tag">OPT</span></label>
+          <select id="gold-htf-daily" onchange="goldCalc()">
+            <option value="">— Not Set —</option>
+            <option value="bull">📈 Uptrend (higher highs)</option>
+            <option value="range">↔️ Range / Consolidation</option>
+            <option value="bear">📉 Downtrend (lower lows)</option>
+          </select></div>
+        <div class="fld"><label>4H Structure <span class="opt-tag">OPT</span></label>
+          <select id="gold-htf-4h" onchange="goldCalc()">
+            <option value="">— Not Set —</option>
+            <option value="bull">📈 Bull structure (4H EMA aligned)</option>
+            <option value="neutral">↔️ Mixed / At resistance</option>
+            <option value="bear">📉 Bear structure (4H EMA broken)</option>
+          </select></div>
+        <div class="fld"><label>US 10Y Yield <span class="opt-tag">OPT</span></label>
+          <select id="gold-yield-dir" onchange="goldCalc()">
+            <option value="">— Not Set —</option>
+            <option value="falling">📉 Falling (Bullish Gold)</option>
+            <option value="flat">➡️ Flat</option>
+            <option value="rising">📈 Rising (Bearish Gold)</option>
+          </select></div>
+        <div class="fld"><label>Risk Sentiment <span class="opt-tag">OPT</span></label>
+          <select id="gold-risk-sent" onchange="goldCalc()">
+            <option value="">— Not Set —</option>
+            <option value="off">🛡️ Risk-Off (Bullish Gold)</option>
+            <option value="neutral">➡️ Neutral</option>
+            <option value="on">📈 Risk-On (Bearish Gold)</option>
+          </select></div>
+        <div class="fld"><label>COT Bias <span class="opt-tag">OPT</span></label>
+          <select id="gold-cot" onchange="goldCalc()">
+            <option value="">— Not Set —</option>
+            <option value="bull">📈 Net Long (Commercials bullish)</option>
+            <option value="neutral">➡️ Mixed</option>
+            <option value="bear">📉 Net Short (Commercials bearish)</option>
+          </select></div>
+      </div>
 
+      <div class="sec-label">Intraday Range <span class="opt-tag">OPT — unlocks daily range forecast</span></div>
+      <div class="fg" style="margin-bottom:.9rem">
+        <div class="fld"><label>Prev Day High <span class="opt-tag">PDH</span></label>
+          <input type="number" id="gold-pdh" step="0.01" placeholder="e.g. 3350.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Prev Day Low <span class="opt-tag">PDL</span></label>
+          <input type="number" id="gold-pdl" step="0.01" placeholder="e.g. 3290.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Today's High so far</label>
+          <input type="number" id="gold-day-high" step="0.01" placeholder="e.g. 3340.00" oninput="goldCalc()"/></div>
+        <div class="fld"><label>Today's Low so far</label>
+          <input type="number" id="gold-day-low" step="0.01" placeholder="e.g. 3300.00" oninput="goldCalc()"/></div>
+      </div>
       <div class="sec-label">Fibonacci Analysis <span class="badge-new">Confluence + Accuracy Score</span></div>
       <div class="fib-note">Primary swing: required for all analysis. Secondary swing: optional for confluence confluence scoring (highest accuracy when two swings agree).</div>
       <div class="fg" style="margin-bottom:.6rem">
