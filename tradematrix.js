@@ -4967,6 +4967,19 @@ pivotLevels.forEach(pl => levels.push(pl));
 const vpLevels = srGetVPLevels();
 vpLevels.forEach(vl => levels.push(vl));
 
+// ── ATR zone thickness ──────────────────────────────
+const srAtr = num('sr-atr');
+const srConfluenceRadius = srAtr ? (srAtr / price * 100) * 0.4 : 1.5;
+
+// ── Fibonacci levels ────────────────────────────────
+const fibLevels = srGetFibLevels();
+fibLevels.forEach(fl => levels.push(fl));
+
+// ── Liquidity pools ─────────────────────────────────
+const swHi = num('sr-swing-hi'), swLo = num('sr-swing-lo');
+if (swHi) levels.push({ price: swHi, label: '💧 Liq Pool (sell stops)', source: 'liquidity', liquidity: 'sell' });
+if (swLo) levels.push({ price: swLo, label: '💧 Liq Pool (buy stops)',  source: 'liquidity', liquidity: 'buy' });
+
 if (levels.length === 0) {
 if (chartWrap) chartWrap.style.display = 'none';
 if (analysisWrap) analysisWrap.style.display = 'none';
@@ -4980,18 +4993,23 @@ levels.sort((a, b) => a.price - b.price);
 // Classify and compute distances
 levels.forEach(lv => {
 lv.distPct = ((lv.price - price) / price) * 100;
-if (lv.price < price * 0.9995) lv.type = 'support';
-else if (lv.price > price * 1.0005) lv.type = 'resistance';
-else lv.type = 'current';
+if (lv.price < price * 0.9995)       lv.type = 'support';
+else if (lv.price > price * 1.0005)  lv.type = 'resistance';
+else                                   lv.type = 'current';
+// Zone flip detection — label previously-resistance levels now below price
+if (lv.source === 'manual' && lv.type === 'support' && lv.label && /R[123]|resist/i.test(lv.label))
+  lv.flipped = true;
+// Liquidity pool warning — stops above swing high / below swing low get hunted first
+if (lv.source === 'liquidity') lv.type = lv.liquidity === 'sell' ? 'resistance' : 'support';
 });
 
-// Confluence detection — count how many other levels are within 1.5%
+// Confluence detection — ATR-aware radius
 levels.forEach((lv, i) => {
 lv.confluence = 1;
 for (let j = 0; j < levels.length; j++) {
 if (i !== j) {
 const diff = Math.abs(levels[j].price - lv.price) / lv.price * 100;
-if (diff <= 1.5) lv.confluence++;
+if (diff <= srConfluenceRadius) lv.confluence++;
 }
 }
 });
@@ -5028,6 +5046,37 @@ return [
 { price: S2, label: 'S2', source: 'pivot' },
 { price: S3, label: 'S3', source: 'pivot' },
 ];
+}
+function srGetFibLevels() {
+  const hi = num('sr-fib-hi'), lo = num('sr-fib-lo');
+  if (!hi || !lo || hi <= lo) return [];
+  const range = hi - lo;
+  return [
+    { price: +(lo + range * 0.236).toFixed(4), label: 'Fib 23.6%', source: 'fib' },
+    { price: +(lo + range * 0.382).toFixed(4), label: 'Fib 38.2%', source: 'fib' },
+    { price: +(lo + range * 0.500).toFixed(4), label: 'Fib 50.0%', source: 'fib' },
+    { price: +(lo + range * 0.618).toFixed(4), label: 'Fib 61.8% ★', source: 'fib' },
+    { price: +(lo + range * 0.786).toFixed(4), label: 'Fib 78.6%', source: 'fib' },
+    { price: +(lo + range * 1.000).toFixed(4), label: 'Fib 100%', source: 'fib' },
+  ];
+}
+
+function srFibCalc() {
+  const hi = num('sr-fib-hi'), lo = num('sr-fib-lo');
+  const el = $('sr-fib-results');
+  if (!hi || !lo || hi <= lo) { if (el) el.style.display = 'none'; return; }
+  const range = hi - lo;
+  const row = (label, val, cls) =>
+    `<div class="sr-pivot-row"><span class="sr-pivot-label ${cls}">${label}</span><span class="sr-pivot-val">${fmtPrice(val)}</span></div>`;
+  const levels = [
+    [0.236,'23.6%','accent'], [0.382,'38.2%','yellow'], [0.500,'50.0%','accent'],
+    [0.618,'61.8% ★','red'], [0.786,'78.6%','red'], [1.000,'100%','dim']
+  ];
+  if (el) {
+    el.innerHTML = levels.map(([r, lbl, cls]) => row(`Fib ${lbl}`, lo + range * r, cls)).join('');
+    el.style.display = '';
+  }
+  srCalc();
 }
 
 function srPivotCalc() {
@@ -5385,6 +5434,25 @@ const statCard = (icon, label, val, cls, sub) => `
 <div class="sr-stat-sub">${sub}</div>
 </div>`;
 
+// ── Plain English Trade Verdict ──────────────────────
+const nsD = ns ? Math.abs(ns.distPct) : null;
+const nrD = nr ? Math.abs(nr.distPct) : null;
+const tooCloseRes = nrD != null && nrD < 1.5;
+const tooFarSup   = nsD != null && nsD > 5;
+const goodRR      = rr != null && rr >= 2;
+let verdictHtml = '';
+if (tooCloseRes) {
+  verdictHtml = `<div class="advice-box red" style="font-size:13px">🚫 <strong>Do NOT enter now.</strong> Price is only ${nrD.toFixed(2)}% below resistance at ${fmtPrice(nr.price)}. Risk/reward is poor — wait for a pullback to support or a confirmed breakout above resistance.</div>`;
+} else if (!ns) {
+  verdictHtml = `<div class="advice-box yellow" style="font-size:13px">⚠️ <strong>No support below.</strong> No mapped support levels found — define more levels before trading.</div>`;
+} else if (goodRR && nsD < 3) {
+  verdictHtml = `<div class="advice-box green" style="font-size:13px">✅ <strong>Good entry zone.</strong> Nearest support ${fmtPrice(ns.price)} is ${nsD.toFixed(2)}% away with R:R ${rr.toFixed(1)}:1. Look for a bullish candle (Hammer, Engulfing) at or near ${fmtPrice(ns.price)} to enter. Set SL just below ${fmtPrice(ns.price)}.</div>`;
+} else if (tooFarSup) {
+  verdictHtml = `<div class="advice-box yellow" style="font-size:13px">⏳ <strong>Wait for pullback.</strong> Support is ${nsD.toFixed(2)}% away — entering here means a wide stop. Queue a limit order near ${fmtPrice(ns.price)} instead.</div>`;
+} else {
+  verdictHtml = `<div class="advice-box yellow" style="font-size:13px">🟡 <strong>Neutral zone.</strong> R:R is ${rr ? rr.toFixed(1)+':1' : 'unknown'}. Wait for price to either reach support ${ns ? fmtPrice(ns.price) : '—'} or break above resistance ${nr ? fmtPrice(nr.price) : '—'} with volume before entering.</div>`;
+}
+
 let html = '<div class="card"><div class="card-hdr"><span class="ci sr-ci">◎</span> Zone Analysis</div><div class="card-body">';
 html += '<div class="sr-stat-grid">';
 html += statCard('🟢', 'Nearest Support', ns ? fmtPrice(ns.price) : '—', 'green', ns ? `${ns.label} · ${ns.distPct.toFixed(2)}%` : 'None below');
@@ -5395,6 +5463,7 @@ html += statCard('⚖️', 'R:R Ratio', rr ? '1 : ' + rr.toFixed(2) : '—', rrC
 html += statCard('⚡', 'Confluence Zones', strongZones.length.toString(), strongZones.length > 0 ? 'yellow' : 'dim', majorZones.length > 0 ? `${majorZones.length} major zone(s)` : 'No major zones');
 html += '</div>';
 
+html += verdictHtml;
 if (adviceHtml) html += adviceHtml;
 
 // Strong zones table
@@ -5415,6 +5484,19 @@ html += `<div class="sr-zones-row">
 </div>`;
 });
 html += '</div>';
+}
+// ── Flipped zones notice ─────────────────────────
+const flipped = levels.filter(l => l.flipped);
+if (flipped.length > 0) {
+  html += '<div class="advice-box accent" style="font-size:12px;margin-top:.5rem">🔁 <strong>Flipped Zones:</strong> ' +
+    flipped.map(f => `${f.label} at ${fmtPrice(f.price)} was resistance — now acting as support`).join(' · ') + '</div>';
+}
+
+// ── Liquidity pool notice ────────────────────────
+const liqLevels = levels.filter(l => l.source === 'liquidity');
+if (liqLevels.length > 0) {
+  html += '<div class="advice-box red" style="font-size:12px;margin-top:.35rem">💧 <strong>Liquidity Pools:</strong> ' +
+    liqLevels.map(l => `${l.label} at ${fmtPrice(l.price)} — smart money likely sweeps here before reversing`).join(' · ') + '</div>';
 }
 
 html += '</div></div>';
@@ -5504,6 +5586,8 @@ const vp = $(`sr-vp${i}`); const vt = $(`sr-vp-t${i}`);
 if (vp) vp.value = ''; if (vt) vt.value = '';
 }
 const pivot = $('sr-pivot-results'); if (pivot) pivot.style.display = 'none';
+const fib = $('sr-fib-results'); if (fib) fib.style.display = 'none';
+['sr-fib-hi','sr-fib-lo','sr-atr','sr-swing-hi','sr-swing-lo'].forEach(id => { const el=$(id); if(el) el.value=''; });
 [$('sr-chart-wrap'), $('sr-analysis-wrap'), $('sr-bar-wrap')].forEach(el => { if (el) el.style.display = 'none'; });
 }
 
