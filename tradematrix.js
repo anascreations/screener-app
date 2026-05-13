@@ -2029,6 +2029,17 @@ const bbm  = num('gold-bbm');
 const bbl  = num('gold-bbl');
 const vwap = num('gold-vwap');
 const dxyDir = (typeof sel === 'function' ? sel('gold-dxy-dir') : null) || (document.getElementById('gold-dxy-dir') ? document.getElementById('gold-dxy-dir').value : '');
+// ── New optional context inputs ──────────────────────
+const htfWeekly  = document.getElementById('gold-htf-weekly')?.value  || '';
+const htfDaily   = document.getElementById('gold-htf-daily')?.value   || '';
+const htf4h      = document.getElementById('gold-htf-4h')?.value      || '';
+const yieldDir   = document.getElementById('gold-yield-dir')?.value   || '';
+const riskSent   = document.getElementById('gold-risk-sent')?.value   || '';
+const cotBias    = document.getElementById('gold-cot')?.value         || '';
+const pdh        = num('gold-pdh');
+const pdl        = num('gold-pdl');
+const dayHigh    = num('gold-day-high');
+const dayLow     = num('gold-day-low');
 const fibH = num('gold-fibh');
 const fibL = num('gold-fibl');
 const fibDir = (typeof sel === 'function' ? sel('gold-fib-dir') : null) || (document.getElementById('gold-fib-dir') ? document.getElementById('gold-fib-dir').value : 'retrace');
@@ -2101,6 +2112,22 @@ eng.add(haPass, 4);                    // Heikin Ashi
 eng.add(volS ? volS.pass : null, 3);
 // Context
 eng.add(dxyPass, 4);
+
+// ── HTF Alignment (9 pts optional) ──────────────────
+const htfWeeklyPass = htfWeekly === 'bull' ? true : htfWeekly === 'bear' ? false : htfWeekly === 'neutral' ? null : undefined;
+const htfDailyPass  = htfDaily  === 'bull' ? true : htfDaily  === 'bear' ? false : htfDaily  === 'range'   ? null : undefined;
+const htf4hPass     = htf4h     === 'bull' ? true : htf4h     === 'bear' ? false : htf4h     === 'neutral' ? null : undefined;
+if (htfWeeklyPass !== undefined) eng.add(htfWeeklyPass, 4);
+if (htfDailyPass  !== undefined) eng.add(htfDailyPass,  3);
+if (htf4hPass     !== undefined) eng.add(htf4hPass,     2);
+
+// ── Macro drivers (8 pts optional) ──────────────────
+const yieldPass   = yieldDir  === 'falling' ? true  : yieldDir  === 'rising'  ? false : yieldDir  === 'flat' ? null : undefined;
+const riskPass    = riskSent  === 'off'     ? true  : riskSent  === 'on'      ? false : riskSent  === 'neutral' ? null : undefined;
+const cotPass     = cotBias   === 'bull'    ? true  : cotBias   === 'bear'    ? false : cotBias   === 'neutral' ? null : undefined;
+if (yieldPass !== undefined) eng.add(yieldPass, 4);
+if (riskPass  !== undefined) eng.add(riskPass,  3);
+if (cotPass   !== undefined) eng.add(cotPass,   1);
 eng.add(sessPass, 3);
 // BB Position scoring (8 pts)
 let bbPass = null, bbPos = null, bbLabel = '—', bbZone = '—';
@@ -2597,6 +2624,151 @@ sessGrid.innerHTML = sessData.map(s =>
     ? `Price above EMA200 ($${e200.toFixed(2)}) — institutional macro trend remains bullish. Long-term gold investors are not threatened. Use dips to EMA200 as long-term accumulation levels if macro thesis is intact.`
     : `Price below EMA200 ($${e200.toFixed(2)}) — macro institutional trend has broken down. This is a significant structural warning. Long-term holders should reassess positions. Only a weekly close back above EMA200 restores the long-term bullish case.`;
 
+// ── Horizon-split win probabilities ──────────────────
+  const htfBonus   = (htfWeekly === 'bull' ? 6 : htfWeekly === 'bear' ? -6 : 0)
+                   + (htfDaily  === 'bull' ? 5 : htfDaily  === 'bear' ? -5 : 0)
+                   + (htf4h     === 'bull' ? 3 : htf4h     === 'bear' ? -3 : 0);
+  const macroBonus = (yieldDir === 'falling' ? 4 : yieldDir === 'rising' ? -4 : 0)
+                   + (riskSent === 'off'     ? 3 : riskSent === 'on'     ? -3 : 0)
+                   + (cotBias  === 'bull'    ? 2 : cotBias  === 'bear'   ? -2 : 0);
+
+  // TF-aware ADX threshold: adjust per selected TF
+  const tfPill   = document.querySelector('#gold-tf-pills .tf-pill.active')?.dataset?.tf || 'D';
+  const adxThresh = {'1m':18,'5m':20,'15m':22,'1H':23,'4H':25,'D':25,'W':20}[tfPill] || 25;
+  const adxOkTF   = adxV != null && adxV >= adxThresh;
+
+  const baseConf  = adjScore;
+  const adxBonusTF = adxOkTF ? 7 : adxV >= adxThresh * 0.8 ? 3 : 0;
+  const volBonus  = vol != null && vol >= 1.5 ? 5 : vol >= 1.2 ? 2 : 0;
+
+  const intradayConf  = Math.min(92, Math.max(10, Math.round(baseConf + (sess.score >= 70 ? 8 : sess.score >= 40 ? 2 : -8) + adxBonusTF + volBonus)));
+  const swingConf     = Math.min(92, Math.max(10, Math.round(baseConf + htfBonus   + adxBonusTF)));
+  const positionConf  = Math.min(92, Math.max(10, Math.round(baseConf + htfBonus   + macroBonus)));
+
+  const intradayDir   = intradayConf >= 62 ? goldDir : intradayConf <= 38 ? 'BEARISH' : 'NEUTRAL';
+  const swingDir      = swingConf    >= 62 ? goldDir : swingConf    <= 38 ? 'BEARISH' : 'NEUTRAL';
+  const positionDir   = positionConf >= 62 ? goldDir : positionConf <= 38 ? 'BEARISH' : 'NEUTRAL';
+
+  const confColor = c => c >= 70 ? 'var(--green)' : c >= 50 ? 'var(--yellow)' : 'var(--red)';
+  const dirIcon   = d => d === 'BULLISH' || d === 'LEANING BULL' ? '📈' : d === 'BEARISH' || d === 'LEANING BEAR' ? '📉' : '↔️';
+
+  // ── Daily range analysis ──────────────────────────
+  let rangeHTML = '';
+  if (pdh != null && pdl != null && atr != null) {
+    const pdRange     = pdh - pdl;
+    const pdRangePct  = (pdRange / atr * 100).toFixed(0);
+    const dayRangeUsed= (dayHigh != null && dayLow != null) ? (dayHigh - dayLow) : null;
+    const rangeUsedPct= dayRangeUsed != null ? (dayRangeUsed / atr * 100).toFixed(0) : null;
+    const remainingPct= rangeUsedPct != null ? Math.max(0, 100 - parseInt(rangeUsedPct)) : null;
+    const abovePDH    = price > pdh;
+    const belowPDL    = price < pdl;
+    const insideRange = !abovePDH && !belowPDL;
+    const pdLvl       = abovePDH ? `✅ Above PDH $${pdh.toFixed(2)} — breakout confirmed` : belowPDL ? `🔴 Below PDL $${pdl.toFixed(2)} — breakdown` : `↔️ Inside PDH/PDL range ($${pdl.toFixed(2)}–$${pdh.toFixed(2)})`;
+    rangeHTML = `
+    <div class="card" style="border-left:3px solid #FFD700;margin-top:.35rem;">
+      <div class="card-hdr" style="color:#FFD700;"><span class="ci">📏</span> Intraday Range Intelligence</div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.5rem;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.4rem;font-size:12px;">
+          <div style="padding:.4rem .6rem;border-radius:7px;background:rgba(0,0,0,.08);">
+            <div style="color:var(--dim);font-size:10px;">PREV DAY RANGE</div>
+            <div style="color:var(--text);font-weight:600;">$${pdRange.toFixed(2)}</div>
+            <div style="color:var(--dim);font-size:10px;">${pdRangePct}% of ATR</div>
+          </div>
+          ${rangeUsedPct != null ? `<div style="padding:.4rem .6rem;border-radius:7px;background:rgba(0,0,0,.08);">
+            <div style="color:var(--dim);font-size:10px;">TODAY USED</div>
+            <div style="color:${parseInt(rangeUsedPct)>=80?'var(--red)':parseInt(rangeUsedPct)>=50?'var(--yellow)':'var(--green)'};font-weight:600;">${rangeUsedPct}%</div>
+            <div style="color:var(--dim);font-size:10px;">${remainingPct}% remaining</div>
+          </div>` : ''}
+          <div style="padding:.4rem .6rem;border-radius:7px;background:rgba(0,0,0,.08);">
+            <div style="color:var(--dim);font-size:10px;">EXPECTED RANGE</div>
+            <div style="color:var(--text);font-weight:600;">±$${(atr*0.7).toFixed(0)}–$${atr.toFixed(0)}</div>
+            <div style="color:var(--dim);font-size:10px;">Based on ATR</div>
+          </div>
+          <div style="padding:.4rem .6rem;border-radius:7px;background:rgba(0,0,0,.08);">
+            <div style="color:var(--dim);font-size:10px;">PROJ HIGH</div>
+            <div style="color:var(--green);font-weight:600;">$${(price + atr * 0.75).toFixed(2)}</div>
+            <div style="color:var(--dim);font-size:10px;">0.75×ATR above</div>
+          </div>
+          <div style="padding:.4rem .6rem;border-radius:7px;background:rgba(0,0,0,.08);">
+            <div style="color:var(--dim);font-size:10px;">PROJ LOW</div>
+            <div style="color:var(--red);font-weight:600;">$${(price - atr * 0.75).toFixed(2)}</div>
+            <div style="color:var(--dim);font-size:10px;">0.75×ATR below</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text);padding:.3rem .5rem;border-radius:5px;background:rgba(0,0,0,.05);">
+          ${pdLvl}
+          ${insideRange ? ' — Wait for PDH/PDL break with volume to confirm intraday direction.' : ''}
+          ${rangeUsedPct != null && parseInt(rangeUsedPct) >= 80 ? ' ⚠️ Daily range >80% consumed — avoid new intraday entries, range likely exhausted.' : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── HTF + Macro context card ──────────────────────
+  const htfAnySet = htfWeekly || htfDaily || htf4h || yieldDir || riskSent || cotBias;
+  let htfHTML = '';
+  if (htfAnySet) {
+    const htfRows = [
+      htfWeekly  && ['Weekly Bias',   htfWeekly === 'bull' ? '📈 Bullish' : htfWeekly === 'bear' ? '📉 Bearish' : '↔️ Neutral',   htfWeekly  === 'bull' ? 'var(--green)' : htfWeekly  === 'bear' ? 'var(--red)' : 'var(--yellow)'],
+      htfDaily   && ['Daily Trend',   htfDaily  === 'bull' ? '📈 Uptrend' : htfDaily  === 'bear' ? '📉 Downtrend' : '↔️ Range',   htfDaily   === 'bull' ? 'var(--green)' : htfDaily   === 'bear' ? 'var(--red)' : 'var(--yellow)'],
+      htf4h      && ['4H Structure',  htf4h     === 'bull' ? '📈 Bullish' : htf4h     === 'bear' ? '📉 Bearish' : '↔️ Mixed',    htf4h      === 'bull' ? 'var(--green)' : htf4h      === 'bear' ? 'var(--red)' : 'var(--yellow)'],
+      yieldDir   && ['US 10Y Yield',  yieldDir  === 'falling' ? '📉 Falling ✅' : yieldDir === 'rising' ? '📈 Rising ⚠️' : '➡️ Flat', yieldDir === 'falling' ? 'var(--green)' : yieldDir === 'rising' ? 'var(--red)' : 'var(--dim)'],
+      riskSent   && ['Risk Sentiment',riskSent  === 'off' ? '🛡️ Risk-Off ✅' : riskSent === 'on' ? '📈 Risk-On ⚠️' : '➡️ Neutral', riskSent === 'off' ? 'var(--green)' : riskSent === 'on' ? 'var(--red)' : 'var(--dim)'],
+      cotBias    && ['COT Positioning',cotBias  === 'bull' ? '📈 Net Long ✅' : cotBias === 'bear' ? '📉 Net Short ⚠️' : '➡️ Mixed', cotBias === 'bull' ? 'var(--green)' : cotBias === 'bear' ? 'var(--red)' : 'var(--dim)'],
+    ].filter(Boolean);
+    const htfAllBull = [htfWeekly,htfDaily,htf4h].filter(Boolean).every(v => v === 'bull');
+    const htfMixed   = !htfAllBull;
+    htfHTML = `
+    <div class="card" style="border-left:3px solid ${htfAllBull?'var(--green)':'var(--yellow)'};margin-top:.35rem;">
+      <div class="card-hdr" style="color:${htfAllBull?'var(--green)':'var(--yellow)'};">
+        <span class="ci">🏗️</span> Multi-Timeframe Structure
+        <span style="margin-left:.5rem;font-size:11px;color:var(--dim);">HTF bonus: ${htfBonus > 0 ? '+' : ''}${htfBonus} · Macro: ${macroBonus > 0 ? '+' : ''}${macroBonus}</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.3rem;">
+        ${htfRows.map(([label,val,col]) => `<div style="display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="color:var(--dim)">${label}</span><strong style="color:${col}">${val}</strong></div>`).join('')}
+        <div style="font-size:11px;color:var(--dim);margin-top:.3rem;padding:.35rem .5rem;background:rgba(0,0,0,.08);border-radius:5px;">
+          ${htfAllBull ? '✅ All HTF timeframes aligned bullish — highest conviction for long entries. Position sizing can be full.' : htfMixed ? '⚠️ Mixed HTF context — reduce position to 50%. Only trade in direction of Daily trend.' : '🔴 HTF bearish — avoid longs regardless of LTF signals.'}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Horizon probability panel HTML ───────────────
+  const horizonHTML = `
+  <div class="card" style="border-left:3px solid #FFD700;margin-bottom:.4rem;">
+    <div class="card-hdr" style="color:#FFD700;"><span class="ci">📊</span> Gold Win Probability by Horizon</div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;text-align:center;margin-bottom:.5rem;">
+        <div style="padding:.5rem .4rem;border-radius:8px;border:1px solid rgba(255,215,0,.2);background:rgba(255,215,0,.04);">
+          <div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem;">⏱ Intraday</div>
+          <div style="font-size:22px;font-weight:700;color:${confColor(intradayConf)};">${intradayConf}%</div>
+          <div style="font-size:10px;color:var(--dim);">${dirIcon(intradayDir)} ${intradayDir}</div>
+          <div style="font-size:9px;color:var(--dim);margin-top:.15rem;">1H–4H · Session-weighted</div>
+        </div>
+        <div style="padding:.5rem .4rem;border-radius:8px;border:1px solid rgba(255,215,0,.2);background:rgba(255,215,0,.04);">
+          <div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem;">📅 Swing</div>
+          <div style="font-size:22px;font-weight:700;color:${confColor(swingConf)};">${swingConf}%</div>
+          <div style="font-size:10px;color:var(--dim);">${dirIcon(swingDir)} ${swingDir}</div>
+          <div style="font-size:9px;color:var(--dim);margin-top:.15rem;">1–2 weeks · HTF-weighted</div>
+        </div>
+        <div style="padding:.5rem .4rem;border-radius:8px;border:1px solid rgba(255,215,0,.2);background:rgba(255,215,0,.04);">
+          <div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem;">🌐 Position</div>
+          <div style="font-size:22px;font-weight:700;color:${confColor(positionConf)};">${positionConf}%</div>
+          <div style="font-size:10px;color:var(--dim);">${dirIcon(positionDir)} ${positionDir}</div>
+          <div style="font-size:9px;color:var(--dim);margin-top:.15rem;">1–4 weeks · Macro-weighted</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--dim);padding:.35rem .5rem;background:rgba(0,0,0,.08);border-radius:5px;">
+        ${intradayConf >= 65 && swingConf >= 65 ? '✅ Intraday + Swing aligned — enter full size, run for swing target.' :
+          intradayConf >= 65 && swingConf < 50 ? '⚠️ Intraday setup valid but swing is weak. Take intraday profit (TP1) — do not hold overnight.' :
+          intradayConf < 50 && swingConf >= 65 ? '📅 Swing setup is building but intraday is not ready yet. Wait for session to improve.' :
+          positionConf >= 70 ? '🌐 Strong positional bias. Use dips as accumulation opportunities.' :
+          '↔️ No strong alignment across horizons. Trade smallest size or wait.'}
+        ${!htfAnySet ? ' Add HTF context above to improve Swing/Position accuracy.' : ''}
+      </div>
+    </div>
+  </div>`;
+  
   // ── BB analysis ───────────────────────────────────
   let bbAnalysis = '';
   if (bbu != null && bbl != null && bbPos != null) {
@@ -2638,7 +2810,7 @@ sessGrid.innerHTML = sessData.map(s =>
     </div>`;
   }
 
-  el.innerHTML = `
+  el.innerHTML = horizonHTML + htfHTML + rangeHTML + `
     <!-- DIRECTION CARD -->
     <div class="card" style="border-left:3px solid ${dirCol};margin-bottom:.4rem;">
       <div class="card-hdr" style="color:${dirCol};">
@@ -2698,14 +2870,14 @@ buildTradePlan('gold-price-block', 'gold-tradeplan-card', price, atr, accountSz,
 }
 function resetGold() {
 ['gold-price','gold-e8','gold-e21','gold-e55','gold-e200',
-'gold-sar','gold-td','gold-bbu','gold-bbm','gold-bbl','gold-vwap',
+'gold-sar','gold-td','gold-bbu','gold-bbm','gold-bbl','gold-vwap','gold-vwap','gold-htf-weekly','gold-htf-daily','gold-htf-4h','gold-yield-dir','gold-risk-sent','gold-cot','gold-pdh','gold-pdl','gold-day-high','gold-day-low',
 'gold-rsi','gold-adx','gold-pdi','gold-mdi','gold-adxr',
 'gold-k','gold-d','gold-j',
 'gold-dif','gold-dea','gold-hist',
 'gold-dxy','gold-vol','gold-atr','gold-risk-pct','gold-account','gold-lotsize',
 'gold-fibh','gold-fibl','gold-fibh2','gold-fibl2','gold-prev-close',
 ].forEach(id => { const el = $(id); if (el) el.value = ''; });
-['gold-dxy-dir','gold-fib-dir','gold-ha'].forEach(id => {
+['gold-dxy-dir','gold-fib-dir','gold-ha','enh-fc-vwap'].forEach(id => {
   const el = $(id); if (el && el.options) el.value = el.options[0].value;
 });
 $('gold-result').style.display = 'none';
