@@ -2340,6 +2340,12 @@
           <div class="fg" style="margin-bottom:.6rem">
             <div class="fld fld-wide"><label>Market Price <span style="color:var(--accent)">★</span></label><input type="number" id="sr-price" step="0.0001" placeholder="1.4200" oninput="srCalc()"/></div>
           </div>
+          <div class="sec-label">Context Inputs <span class="opt-tag">OPT — improves accuracy</span></div>
+          <div class="fg" style="margin-bottom:.6rem">
+            <div class="fld"><label>ATR <span class="opt-tag">OPT · zone thickness</span></label><input type="number" id="sr-atr" step="0.0001" placeholder="e.g. 0.05" oninput="srCalc()"/></div>
+            <div class="fld"><label>Swing High <span class="opt-tag">OPT · liquidity</span></label><input type="number" id="sr-swing-hi" step="0.0001" placeholder="Recent swing high" oninput="srCalc()"/></div>
+            <div class="fld"><label>Swing Low <span class="opt-tag">OPT · liquidity</span></label><input type="number" id="sr-swing-lo" step="0.0001" placeholder="Recent swing low" oninput="srCalc()"/></div>
+          </div>
           <div class="sec-label">Price Levels (Support &amp; Resistance)</div>
           <div class="sr-levels-grid">
             <div class="sr-level-hdr"><span>Label</span><span>Price</span></div>
@@ -2367,6 +2373,15 @@
             <div class="sr-pivot-note">Pivot levels auto-add to the chart below.</div>
           </div>
 
+         <div class="sec-label" style="margin-top:1rem">Fibonacci Retracement <span class="opt-tag">OPT</span></div>
+          <div class="sr-pivot-box">
+            <div class="fg" style="margin-bottom:.5rem">
+              <div class="fld"><label>Swing High</label><input type="number" id="sr-fib-hi" step="0.0001" placeholder="High of move" oninput="srFibCalc()"/></div>
+              <div class="fld"><label>Swing Low</label><input type="number" id="sr-fib-lo" step="0.0001" placeholder="Low of move" oninput="srFibCalc()"/></div>
+            </div>
+            <div id="sr-fib-results" style="display:none"></div>
+            <div class="sr-pivot-note">Key fib levels auto-add to chart. 0.382 + 0.618 are highest-probability bounce zones.</div>
+          </div>
           <div class="sec-label" style="margin-top:1rem">Confluence Detection</div>
           <div class="sr-confluence-info">
             <div class="sr-conf-row"><span class="sr-conf-dot" style="background:var(--yellow)"></span><span>2+ levels within 1.5% = <strong>Confluence Zone</strong></span></div>
