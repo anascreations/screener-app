@@ -1659,14 +1659,62 @@ if(!pb){pb=document.createElement('div');pb.id='ma-pullback-banner';$('ma-advice
 const inPZ=f2_pass&&price>=ma20&&price<=ma5;
 const distToPZ=f2_pass?((price-ma5)/ma5*100):null;
 if(f2_pass&&decision!=='SKIP'){
-  const zc=inPZ?'var(--green)':'var(--accent)';
-  pb.innerHTML=`<div style="padding:.5rem .7rem;border-radius:7px;border:1px solid ${zc}33;background:${inPZ?'rgba(0,232,122,.05)':'rgba(0,200,240,.03)'};margin:.35rem 0;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${zc};margin-bottom:.3rem;">🎯 ${inPZ?'PRIME PULLBACK ENTRY ZONE ◀ YOU ARE HERE':'IDEAL PULLBACK ENTRY ZONE'}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem;font-family:var(--mono);font-size:12px;margin-bottom:.3rem;">
-      <div style="padding:.3rem .45rem;background:rgba(0,0,0,.1);border-radius:4px;"><div style="font-size:9px;color:var(--dim);margin-bottom:2px;">FLOOR (MA20)</div><div style="color:var(--accent);font-weight:700;">${fmtPrice(ma20,dp)}</div></div>
-      <div style="padding:.3rem .45rem;background:rgba(0,0,0,.1);border-radius:4px;"><div style="font-size:9px;color:var(--dim);margin-bottom:2px;">CEILING (MA5)</div><div style="color:var(--accent);font-weight:700;">${fmtPrice(ma5,dp)}</div></div>
+  // ── 3-Tier pullback system ─────────────────────────────
+  const pbAtr   = atr || (ma5 - ma20) * 0.5;  // fallback if ATR not entered
+  const rsiVal  = rsiS?.raw ?? null;
+  const adxVal  = adxV ?? null;
+  const bbuVal  = bbu  ?? null;
+
+  const overbought  = rsiVal != null && rsiVal > 70;
+  const megaTrend   = adxVal != null && adxVal > 50;
+  const strongTrend = adxVal != null && adxVal > 30;
+
+  // Tier 1 — Shallow (RSI overbought + strong ADX → first bounce is shallow)
+  const t1Hi = +(price - pbAtr * 0.5).toFixed(dp);
+  const t1Lo = +(price - pbAtr * 1.0).toFixed(dp);
+  // Tier 2 — Normal (BB Upper or MA5 / MA200 zone)
+  const t2Hi = bbuVal ? +Math.min(bbuVal, ma5).toFixed(dp) : +ma5.toFixed(dp);
+  const t2Lo = ma200  ? +Math.max(ma200, ma5 - pbAtr).toFixed(dp) : +(ma5 - pbAtr).toFixed(dp);
+  // Tier 3 — Deep (MA20 to MA5 — the original, only if trend weakens)
+  const t3Hi = +ma5.toFixed(dp);
+  const t3Lo = +ma20.toFixed(dp);
+
+  // Most likely tier based on conditions
+  const likelyTier = overbought && megaTrend ? 1 : overbought && strongTrend ? 2 : 3;
+
+  const tierInfo = {
+    1: { label:'🔥 SHALLOW PULLBACK (Most Likely)',  bg:'rgba(251,113,133,.05)', border:'var(--red)',    note:`RSI ${rsiVal?.toFixed(0)} overbought + ADX ${adxVal?.toFixed(0)} mega-trend. First pullback rarely reaches MA20. Expect ${fmtPrice(t1Lo,dp)}–${fmtPrice(t1Hi,dp)} dip only.`, action:`Buy limit at ${fmtPrice(t1Lo,dp)}–${fmtPrice(t1Hi,dp)}. SL below ${fmtPrice(t2Lo,dp)}. Miss it → wait for Tier 2.` },
+    2: { label:'📊 NORMAL PULLBACK (If Tier 1 fails)', bg:'rgba(245,200,66,.05)',  border:'var(--yellow)', note:`BB Upper ${bbuVal?fmtPrice(bbuVal,dp):'—'} + MA200 ${ma200?fmtPrice(ma200,dp):'—'} = institutional support zone. Strong hands reload here.`, action:`Buy limit at ${fmtPrice(t2Lo,dp)}–${fmtPrice(t2Hi,dp)}. SL below MA200 ${ma200?fmtPrice(ma200,dp):'—'}.` },
+    3: { label:'🎯 DEEP PULLBACK (Trend weakness only)', bg:'rgba(0,200,240,.03)', border:'var(--accent)', note:`MA20 ${fmtPrice(t3Lo,dp)}–MA5 ${fmtPrice(t3Hi,dp)} zone. Only reached if ADX drops below 25 or RSI crosses back under 50. Highest R:R but rarest.`, action:`Buy limit at MA20 ${fmtPrice(t3Lo,dp)}. SL 1 ATR below MA20.` }
+  };
+
+  const zc = inPZ ? 'var(--green)' : `var(--${likelyTier===1?'red':likelyTier===2?'yellow':'accent'})`;
+
+  pb.innerHTML = `<div style="border-radius:9px;border:1px solid ${zc}44;background:rgba(0,0,0,.05);margin:.35rem 0;overflow:hidden;">
+    <div style="padding:.45rem .7rem;background:${zc}18;display:flex;align-items:center;gap:.5rem;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${zc};">🎯 PULLBACK ENTRY TIERS ${inPZ?'◀ PRICE IN ZONE':''}</span>
+      ${overbought?`<span style="font-size:10px;padding:.1rem .4rem;border-radius:4px;background:rgba(240,58,74,.15);color:var(--red);">RSI ${rsiVal?.toFixed(0)} OVERBOUGHT</span>`:''}
+      ${megaTrend?`<span style="font-size:10px;padding:.1rem .4rem;border-radius:4px;background:rgba(245,200,66,.15);color:var(--yellow);">ADX ${adxVal?.toFixed(0)} MEGA TREND</span>`:''}
     </div>
-    <div style="font-size:11.5px;color:${inPZ?'var(--green)':'var(--dim)'};">${inPZ?'✅ Price in zone — highest-probability entry. Tight SL below MA20.':distToPZ>0?`Price ${distToPZ.toFixed(1)}% above zone — wait for pullback to MA5 for best R:R.`:'Price below MA5 — watch for MA5 to act as resistance first.'}</div></div>`;
+    ${[1,2,3].map(t => {
+      const ti   = tierInfo[t];
+      const isLikely = t === likelyTier;
+      const tLo  = t===1?t1Lo:t===2?t2Lo:t3Lo;
+      const tHi  = t===1?t1Hi:t===2?t2Hi:t3Hi;
+      const inT  = price >= tLo && price <= tHi;
+      return `<div style="padding:.4rem .7rem;border-left:3px solid ${isLikely?ti.border:'var(--border)'};background:${isLikely?ti.bg:'transparent'};border-bottom:1px solid var(--border)22;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.25rem;margin-bottom:.2rem;">
+          <span style="font-size:10px;font-weight:700;color:${isLikely?ti.border:'var(--dim)'};">${ti.label}${isLikely?' ⭐':''}</span>
+          <span style="font-family:var(--mono);font-size:11px;color:${inT?'var(--green)':'var(--text)'};">${fmtPrice(tLo,dp)} – ${fmtPrice(tHi,dp)}${inT?' ◀ NOW':''}</span>
+        </div>
+        <div style="font-size:11px;color:var(--dim);margin-bottom:.2rem;">${ti.note}</div>
+        <div style="font-size:11px;color:${isLikely?'var(--text)':'var(--dim)'};padding:.2rem .4rem;border-radius:4px;background:rgba(0,0,0,.08);">🎯 ${ti.action}</div>
+      </div>`;
+    }).join('')}
+    <div style="padding:.35rem .7rem;font-size:10.5px;color:var(--dim);">
+      ${pbAtr?`ATR ${fmtPrice(pbAtr,dp)} · `:''}${overbought&&megaTrend?'Overbought mega-trend: expect Tier 1 or 2 pullback only. Tier 3 needs trend break confirmation.':overbought?'Overbought: Tier 2 most likely. Do not pre-empt — wait for candle confirmation.':'Normal: all 3 tiers valid. Enter Tier 3 for best R:R.'}
+    </div>
+  </div>`;
   pb.style.display='';
 }else if(pb)pb.style.display='none';
 // Fan banner
