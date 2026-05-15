@@ -1929,6 +1929,42 @@ if(emaCompress){
   compBanner.innerHTML=`<div style="padding:.55rem .75rem;border-radius:7px;border:1px solid var(--accent);background:rgba(0,200,240,.05);margin:.3rem 0;"><div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:.2rem;">${emaCompress.label}</div><div style="font-size:11.5px;color:var(--dim);">KDJ: ${kdj?kdj.zone:'—'} · MACD: ${macd?macd.zone:'—'} — likely breakout direction.</div></div>`;
   compBanner.style.display='';
 }else compBanner.style.display='none';
+	// EMA Pullback Tier Banner
+let epb=$('ema-pullback-banner');
+if(!epb){epb=document.createElement('div');epb.id='ema-pullback-banner';$('ema-advice').insertAdjacentElement('beforebegin',epb);}
+const inPZe=f2_pass&&price>=e21&&price<=e8;
+if(f2_pass&&decision!=='SKIP'){
+  const pbAtr   = atr || (e8 - e21) * 0.5;
+  const rsiVal  = rsiS?.raw ?? rsiV ?? null;
+  const adxVal  = adxV ?? null;
+  const bbuVal  = bbu  ?? null;
+  const overbought  = rsiVal != null && rsiVal > 70;
+  const megaTrend   = adxVal != null && adxVal > 50;
+  const strongTrend = adxVal != null && adxVal > 30;
+  const t1Hi = +(price - pbAtr * 0.5).toFixed(dp);
+  const t1Lo = +(price - pbAtr * 1.0).toFixed(dp);
+  const t2Hi = bbuVal ? +Math.min(bbuVal, e8).toFixed(dp) : +e8.toFixed(dp);
+  const t2Lo = e200   ? +Math.max(e200, e8 - pbAtr).toFixed(dp) : +(e8 - pbAtr).toFixed(dp);
+  const t3Hi = +e8.toFixed(dp);
+  const t3Lo = +e21.toFixed(dp);
+  const likelyTier = overbought && megaTrend ? 1 : overbought && strongTrend ? 2 : 3;
+  const tierInfo = {
+    1: { label:'🔥 SHALLOW PULLBACK (Most Likely)',     bg:'rgba(251,113,133,.05)', border:'var(--red)',    note:`RSI ${rsiVal?.toFixed(0)} overbought + ADX ${adxVal?.toFixed(0)} mega-trend. EMA reacts fast — first dip is ${fmtPrice(t1Lo,dp)}–${fmtPrice(t1Hi,dp)} only.`,  action:`Buy limit ${fmtPrice(t1Lo,dp)}–${fmtPrice(t1Hi,dp)}. SL below EMA21 ${fmtPrice(e21,dp)}. Miss it → Tier 2.` },
+    2: { label:'📊 NORMAL PULLBACK (If Tier 1 fails)',  bg:'rgba(245,200,66,.05)',  border:'var(--yellow)', note:`BB Upper ${bbuVal?fmtPrice(bbuVal,dp):'—'} + EMA200 ${e200?fmtPrice(e200,dp):'—'} institutional zone. EMA8 often acts as bounce here.`, action:`Buy limit ${fmtPrice(t2Lo,dp)}–${fmtPrice(t2Hi,dp)}. SL below EMA200 ${e200?fmtPrice(e200,dp):'—'}.` },
+    3: { label:'🎯 DEEP PULLBACK (Trend weakness only)', bg:'rgba(0,200,240,.03)',   border:'var(--accent)', note:`EMA21 ${fmtPrice(t3Lo,dp)}–EMA8 ${fmtPrice(t3Hi,dp)}. Only if ADX < 25 or death cross forms. Highest R:R, rarest.`, action:`Buy limit at EMA21 ${fmtPrice(t3Lo,dp)}. SL 1×ATR below EMA21.` }
+  };
+  const zc = inPZe ? 'var(--green)' : `var(--${likelyTier===1?'red':likelyTier===2?'yellow':'accent'})`;
+  epb.innerHTML=`<div style="border-radius:9px;border:1px solid ${zc}44;background:rgba(0,0,0,.05);margin:.35rem 0;overflow:hidden;">
+    <div style="padding:.45rem .7rem;background:${zc}18;display:flex;align-items:center;gap:.5rem;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${zc};">🎯 EMA PULLBACK TIERS ${inPZe?'◀ PRICE IN ZONE':''}</span>
+      ${overbought?`<span style="font-size:10px;padding:.1rem .4rem;border-radius:4px;background:rgba(240,58,74,.15);color:var(--red);">RSI ${rsiVal?.toFixed(0)} OVERBOUGHT</span>`:''}
+      ${megaTrend?`<span style="font-size:10px;padding:.1rem .4rem;border-radius:4px;background:rgba(245,200,66,.15);color:var(--yellow);">ADX ${adxVal?.toFixed(0)} MEGA TREND</span>`:''}
+    </div>
+    ${[1,2,3].map(t=>{const ti=tierInfo[t];const isL=t===likelyTier;const tLo=t===1?t1Lo:t===2?t2Lo:t3Lo;const tHi=t===1?t1Hi:t===2?t2Hi:t3Hi;const inT=price>=tLo&&price<=tHi;return`<div style="padding:.4rem .7rem;border-left:3px solid ${isL?ti.border:'var(--border)'};background:${isL?ti.bg:'transparent'};border-bottom:1px solid var(--border)22;"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.25rem;margin-bottom:.2rem;"><span style="font-size:10px;font-weight:700;color:${isL?ti.border:'var(--dim)'};">${ti.label}${isL?' ⭐':''}</span><span style="font-family:var(--mono);font-size:11px;color:${inT?'var(--green)':'var(--text)'};">${fmtPrice(tLo,dp)} – ${fmtPrice(tHi,dp)}${inT?' ◀ NOW':''}</span></div><div style="font-size:11px;color:var(--dim);margin-bottom:.2rem;">${ti.note}</div><div style="font-size:11px;color:${isL?'var(--text)':'var(--dim)'};padding:.2rem .4rem;border-radius:4px;background:rgba(0,0,0,.08);">🎯 ${ti.action}</div></div>`}).join('')}
+    <div style="padding:.35rem .7rem;font-size:10.5px;color:var(--dim);">${pbAtr?`ATR ${fmtPrice(pbAtr,dp)} · `:''}${overbought&&megaTrend?'EMA reacts faster than MA — overbought mega-trend: Tier 1 is most likely. Tier 3 needs EMA8/21 death cross.':overbought?'Overbought: Tier 2 most likely. Confirm with EMA8 flattening before entry.':'Normal: all tiers valid. EMA8/21 crossover = Tier 3 confirmed entry.'}</div>
+  </div>`;
+  epb.style.display='';
+}else if(epb)epb.style.display='none';
 // Advice
 const adv=$('ema-advice');
 if(sessNow.cls==='sess-lull'){
