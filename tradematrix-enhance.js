@@ -647,7 +647,20 @@ function calcForecastRules() {
 
     const pAboveMA20 = pct(price, ma20) || 0;
     if      (dir.includes('BULL') && pAboveMA20 < 3 && kdjBull)  timing = '🎯 ENTER NOW — confluence at support zone';
-    else if (dir.includes('BULL') && pAboveMA20 > 8)              timing = '⏳ WAIT FOR PULLBACK — price stretched above MA20';
+   else if (dir.includes('BULL') && pAboveMA20 > 8) {
+  const fcRsi = num('enh-fc-rsi');
+  const fcAdx = num('enh-fc-adx');
+  const fcAtr = num('enh-fc-atr');
+  const obMega = fcRsi > 70 && fcAdx > 50;
+  const obNorm = fcRsi > 70;
+  const t1 = (fcAtr && price) ? `Tier 1: ~${(price - fcAtr).toFixed(4)}` : '1×ATR dip';
+  const t2 = (fcAtr && price) ? `Tier 2: ~${(price - fcAtr * 1.5).toFixed(4)}` : '1.5×ATR';
+  timing = obMega
+    ? `⏳ WAIT FOR PULLBACK — RSI ${fcRsi?.toFixed(0)} overbought + ADX ${fcAdx?.toFixed(0)} mega-trend. ${t1} (most likely). ${t2}. Do NOT queue at MA20.`
+    : obNorm
+    ? `⏳ WAIT FOR PULLBACK — RSI ${fcRsi?.toFixed(0)} overbought. First support: BB Upper or MA5. Avoid chasing at current price.`
+    : `⏳ WAIT FOR PULLBACK — price ${pAboveMA20.toFixed(1)}% above MA20. Queue limit at MA5 or MA20.`;
+}
     else if (dir.includes('BULL'))                                timing = '✅ PROCEED — valid setup, manage entry size by TF';
     else if (dir === 'NEUTRAL')                                   timing = '👀 WATCH — wait for clear directional break';
     else                                                          timing = '🔴 AVOID LONGS — bearish indicators dominant';
