@@ -646,17 +646,17 @@ function calcForecastRules() {
     else                                                 momentum = 'MIXED';
 
     const pAboveMA20 = pct(price, ma20) || 0;
-	const adxRising = adxV != null && adxV > 20 && adxV < 30; // ADX turning up from low = range ending
+	const adxRising = adx != null && adx > 20 && adx < 30;
 if (dir.includes('BULL') && adxRising && pAboveMA20 < 5 && vol >= 2.0)
   timing = '🌀 PROCEED — Wyckoff Phase D signal: ADX turning up from range + volume surge. Markup phase beginning. Full size valid.';
 else
     if      (dir.includes('BULL') && pAboveMA20 < 3 && kdjBull)  timing = '🎯 ENTER NOW — confluence at support zone';
    else if (dir.includes('BULL') && pAboveMA20 > 8) {
-  const fcRsi = num('enh-fc-rsi');
-  const fcAdx = num('enh-fc-adx');
+ const fcRsi = rsi;
+  const fcAdx = adx;
   const fcAtr = num('enh-fc-atr');
-  const obMega = fcRsi > 70 && fcAdx > 50;
-  const obNorm = fcRsi > 70;
+  const obMega = fcRsi != null && fcRsi > 70 && fcAdx != null && fcAdx > 50;
+  const obNorm = fcRsi != null && fcRsi > 70;
   const t1 = (fcAtr && price) ? `Tier 1: ~${(price - fcAtr).toFixed(4)}` : '1×ATR dip';
   const t2 = (fcAtr && price) ? `Tier 2: ~${(price - fcAtr * 1.5).toFixed(4)}` : '1.5×ATR';
   timing = obMega
