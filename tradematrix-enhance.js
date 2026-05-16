@@ -646,6 +646,10 @@ function calcForecastRules() {
     else                                                 momentum = 'MIXED';
 
     const pAboveMA20 = pct(price, ma20) || 0;
+	const adxRising = adxV != null && adxV > 20 && adxV < 30; // ADX turning up from low = range ending
+if (dir.includes('BULL') && adxRising && pAboveMA20 < 5 && vol >= 2.0)
+  timing = '🌀 PROCEED — Wyckoff Phase D signal: ADX turning up from range + volume surge. Markup phase beginning. Full size valid.';
+else
     if      (dir.includes('BULL') && pAboveMA20 < 3 && kdjBull)  timing = '🎯 ENTER NOW — confluence at support zone';
    else if (dir.includes('BULL') && pAboveMA20 > 8) {
   const fcRsi = num('enh-fc-rsi');
