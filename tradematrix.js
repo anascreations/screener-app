@@ -1661,7 +1661,7 @@ const distToPZ=f2_pass?((price-ma5)/ma5*100):null;
 if(f2_pass&&decision!=='SKIP'){
   // ── 3-Tier pullback system ─────────────────────────────
   const pbAtr   = atr || (ma5 - ma20) * 0.5;  // fallback if ATR not entered
-  const rsiVal  = rsiS?.raw ?? null;
+ const rsiVal  = rsi ?? null;
   const adxVal  = adxV ?? null;
   const bbuVal  = bbu  ?? null;
 
