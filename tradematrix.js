@@ -776,7 +776,7 @@ return { zone: `${pctAbove.toFixed(2)}% below VWAP`, pass: false, c: 'var(--red)
 function scoreVolume(vol) {
 if (vol == null) return null;
 if (vol >= 3.0) return { zone: 'Institutional Surge ⚡', pass: true, c: 'var(--green)', e: '⚡',
-  note: '3×+ avg volume = smart money accumulation — very high conviction' };
+  note: '3×+ avg volume = smart money accumulation — SOS (Wyckoff Sign of Strength). If at resistance breakout = Phase D markup beginning.' };
 if (vol >= 2.0) return { zone: 'Very Strong', pass: true, c: 'var(--green)', e: '⚡',
   note: '2×+ avg = strong institutional interest' };
 if (vol >= 1.5) return { zone: 'Strong', pass: true, c: 'var(--green)', e: '✅' };
@@ -5574,6 +5574,16 @@ const flipped = levels.filter(l => l.flipped);
 if (flipped.length > 0) {
   html += '<div class="advice-box accent" style="font-size:12px;margin-top:.5rem">🔁 <strong>Flipped Zones:</strong> ' +
     flipped.map(f => `${f.label} at ${fmtPrice(f.price)} was resistance — now acting as support`).join(' · ') + '</div>';
+}
+
+// ── Wyckoff Spring / Upthrust detection ─────────────
+if (ns && vol != null) {
+  const springCondition  = price > ns.price && dayLow != null && dayLow < ns.price && vol < 1.2;
+  const upthrustCondition = nr && price < nr.price && dayHigh != null && dayHigh > nr.price && vol > 2.0;
+  if (springCondition)
+    html += `<div class="advice-box green" style="font-size:12px;margin-top:.35rem">🌀 <strong>Wyckoff Spring Detected (Phase C)</strong> — Today's low pierced support ${fmtPrice(ns.price)} but price closed back above on low volume (${vol.toFixed(2)}×). This is the highest-probability Wyckoff buy signal. Enter on next bullish candle with SL below today's low ${dayLow?fmtPrice(dayLow):'-'}.</div>`;
+  if (upthrustCondition)
+    html += `<div class="advice-box red" style="font-size:12px;margin-top:.35rem">⚡ <strong>Wyckoff Upthrust Detected (Phase C Bear)</strong> — Today's high pierced resistance ${fmtPrice(nr.price)} but rejected on high volume (${vol.toFixed(2)}×). Distribution signal — avoid longs, watch for breakdown.</div>`;
 }
 
 // ── Liquidity pool notice ────────────────────────
