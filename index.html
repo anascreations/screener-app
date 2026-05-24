@@ -3694,7 +3694,175 @@
         </div>
       </div>
     </div>
+	  <!-- ══ FORMULA LIBRARY ══════════════════════════════════════════ -->
+
+    <!-- MACD -->
+    <div class="guide-card" style="border-color:rgba(0,200,240,.2);margin-top:.5rem">
+      <div class="guide-card-hdr">📈 MACD — Momentum & Cross Detection</div>
+      <div class="guide-card-body">
+        <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:.65rem .9rem;margin-bottom:.6rem;font-family:var(--mono);font-size:13px;">
+          <div style="color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Formula</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">DIF  = EMA(12) − EMA(26)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">DEA  = EMA(DIF, 9)  ← signal line</div>
+          <div style="color:var(--yellow)">HIST = DIF − DEA   ← histogram</div>
+        </div>
+        <div style="font-size:11px;color:var(--yellow);padding:.3rem .6rem;border-radius:6px;background:rgba(245,200,66,.07);margin-bottom:.6rem">⚠️ <strong>Moomoo:</strong> displays HIST as (DIF−DEA)×2 — halve the value before comparing. TradingView shows true value.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.5rem;margin-bottom:.65rem">
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.05)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">🟢 GOLDEN CROSS — BUY</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.25rem">prev HIST ≤ 0 → curr HIST &gt; 0</div><div style="font-size:11px;color:var(--text)">First bar above zero = entry. ★★★ if cross is below zero line (full reversal). ★★ above zero (pullback ended).</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.12);background:rgba(0,232,122,.03)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">⚡ MOMENTUM SOLID — HOLD</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.25rem">HIST growing · DIF &gt; DEA &gt; 0</div><div style="font-size:11px;color:var(--text)">Trail stop below MA5. Add if RSI &lt;75 + ADX &gt;25. If HIST bar shrinks → prepare partial exit.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(245,200,66,.25);background:rgba(245,200,66,.04)"><div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.25rem">⚠️ NEAR DEATH — EXIT 50%</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.25rem">HIST shrinking toward 0</div><div style="font-size:11px;color:var(--text)">Momentum dying. Move stop to breakeven. Confirm with RSI dropping from overbought.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(240,58,74,.25);background:rgba(240,58,74,.05)"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.25rem">🔴 DEATH CROSS — SELL ALL</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.25rem">prev HIST ≥ 0 → curr HIST &lt; 0</div><div style="font-size:11px;color:var(--text)">★★★ if cross happens above zero line. Already below zero = late exit. Re-enter on next Golden Cross only.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(100,100,120,.3);background:rgba(100,100,120,.04)"><div style="font-size:11px;font-weight:700;color:var(--dim);margin-bottom:.25rem">➡️ SIDEWAYS — WAIT</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.25rem">|HIST| ≈ 0 for 3+ bars</div><div style="font-size:11px;color:var(--text)">No trade. Confirm with ADX &lt;20. HIST oscillating ±tiny = accumulation range, not signal.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(167,139,250,.25);background:rgba(167,139,250,.04)"><div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:.25rem">🌀 DIVERGENCE — EARLY WARNING</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.25rem">Bear: Price H2&gt;H1 · HIST peak2&lt;peak1<br>Bull: Price L2&lt;L1 · HIST trough2&gt;trough1</div><div style="font-size:11px;color:var(--text)">Min 5 bars apart. Daily TF = highest reliability. Bearish div: exit 50% even if price still rising.</div></div>
+        </div>
+        <div style="background:rgba(0,0,0,.1);border-radius:8px;padding:.5rem .75rem"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">Quick Decisions</div><div style="display:flex;flex-direction:column;gap:.25rem;font-size:11px">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(0,232,122,.07)"><span style="color:var(--dim)">prev ≤0, curr &gt;0</span><span style="color:var(--green);font-weight:700">BUY</span><span style="color:var(--dim)">Golden Cross ★★★ below zero</span></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(0,232,122,.04)"><span style="color:var(--dim)">HIST &gt;0 growing</span><span style="color:var(--green);font-weight:700">HOLD</span><span style="color:var(--dim)">Momentum accelerating</span></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(245,200,66,.05)"><span style="color:var(--dim)">HIST &gt;0 shrinking</span><span style="color:var(--yellow);font-weight:700">EXIT 50%</span><span style="color:var(--dim)">Momentum fading</span></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(240,58,74,.06)"><span style="color:var(--dim)">prev ≥0, curr &lt;0</span><span style="color:var(--red);font-weight:700">SELL ALL</span><span style="color:var(--dim)">Death Cross ★★★ above zero</span></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(167,139,250,.05)"><span style="color:var(--dim)">Price up · HIST peak lower</span><span style="color:var(--red);font-weight:700">PREPARE EXIT</span><span style="color:var(--dim)">Bearish divergence</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- RSI -->
+    <div class="guide-card" style="border-color:rgba(0,232,122,.2);margin-top:.5rem">
+      <div class="guide-card-hdr">💚 RSI — Overbought / Oversold / Divergence</div>
+      <div class="guide-card-body">
+        <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:.65rem .9rem;margin-bottom:.6rem;font-family:var(--mono);font-size:13px;">
+          <div style="color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Formula</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">RS   = Avg Gain(14) ÷ Avg Loss(14)</div>
+          <div style="color:var(--yellow)">RSI  = 100 − (100 ÷ (1 + RS))</div>
+          <div style="color:var(--dim);font-size:11px;margin-top:.3rem">Wilder smoothing: Avg = (prev×13 + current) ÷ 14</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.5rem;margin-bottom:.65rem">
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(240,58,74,.25);background:rgba(240,58,74,.05)"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.25rem">🔴 EXTREME OB: RSI &gt; 80</div><div style="font-size:11px;color:var(--text)">Exit full position or tighten stop aggressively. Price can stay overbought in strong trends — only sell if MACD HIST also shrinking.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(245,200,66,.25);background:rgba(245,200,66,.04)"><div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.25rem">⚠️ OVERBOUGHT: RSI 70–80</div><div style="font-size:11px;color:var(--text)">Exit 50%. If ADX &gt;50 (mega trend) — hold and trail stop. Overbought can persist for weeks in strong trends.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.05)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">✅ SWEET SPOT: RSI 50–70</div><div style="font-size:11px;color:var(--text)">Best entry zone. Trend running but not exhausted. Full size valid. RSI 55–65 = highest probability continuation.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.04)"><div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.25rem">🟡 BUILDING: RSI 45–50</div><div style="font-size:11px;color:var(--text)">Trend forming. Half size entry. Wait for RSI to cross 50 with volume confirmation before full size.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(245,200,66,.2);background:rgba(245,200,66,.03)"><div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.25rem">⚠️ OVERSOLD: RSI 25–40</div><div style="font-size:11px;color:var(--text)">Do NOT buy falling knife. Wait for RSI to turn up AND cross 40 before entry. Oversold = cheap, not ready.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04)"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.25rem">🔴 EXTREME OS: RSI &lt; 25</div><div style="font-size:11px;color:var(--text)">Avoid entirely until RSI &gt;30 + bullish candle. Possible value trap — check if MA20 trend is still down.</div></div>
+        </div>
+        <div style="background:rgba(0,0,0,.1);border-radius:8px;padding:.5rem .75rem"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">RSI Rules Professionals Use</div><div style="display:flex;flex-direction:column;gap:.25rem;font-size:11px">
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(0,232,122,.06);color:var(--text)">✅ RSI &gt;50 + rising = trend intact. RSI crosses 50 from below = momentum shift — entry signal</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(245,200,66,.05);color:var(--text)">⚠️ RSI can stay 70–85 for weeks in strong ADX &gt;50 trend — do not short just because it's "overbought"</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(167,139,250,.05);color:var(--text)">🌀 RSI Divergence on Daily = most reliable reversal warning. On 1H = noise, needs confirmation</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(240,58,74,.05);color:var(--text)">🔴 RSI &lt;40 during uptrend = structural damage — exit before it breaks 30</div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- KDJ -->
+    <div class="guide-card" style="border-color:rgba(245,200,66,.2);margin-top:.5rem">
+      <div class="guide-card-hdr">🌀 KDJ — Fast Momentum & Cross Signals</div>
+      <div class="guide-card-body">
+        <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:.65rem .9rem;margin-bottom:.6rem;font-family:var(--mono);font-size:13px;">
+          <div style="color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Formula (9,3,3)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">RSV = (Close−Low9) ÷ (High9−Low9) × 100</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">K   = (2÷3)×K_prev + (1÷3)×RSV</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">D   = (2÷3)×D_prev + (1÷3)×K</div>
+          <div style="color:var(--yellow)">J   = 3×K − 2×D  ← most sensitive, leads K&D</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.5rem;margin-bottom:.65rem">
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.05)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">✅ GOLDEN CROSS — BUY</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">K crosses above D · J turning up</div><div style="font-size:11px;color:var(--text)">Strongest when K&lt;20 and J&lt;0 (deep oversold). J rising fast = momentum surging. Confirm with MACD &gt;0.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.12);background:rgba(0,232,122,.03)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">⚡ BULL ZONE: K,D &gt; 50</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">K &gt; D &gt; 50 · J above both</div><div style="font-size:11px;color:var(--text)">Trend healthy. Hold position. J pulling back to K level = add opportunity, not exit signal.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(245,200,66,.25);background:rgba(245,200,66,.04)"><div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.25rem">⚠️ OVERBOUGHT: K,D &gt; 80</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">J &gt; 100 (extreme)</div><div style="font-size:11px;color:var(--text)">Reduce size. J &gt;100 = overextended but can persist. Wait for J to hook DOWN before selling.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(240,58,74,.25);background:rgba(240,58,74,.05)"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.25rem">🔴 DEATH CROSS — SELL</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">K crosses below D · J diving</div><div style="font-size:11px;color:var(--text)">★★★ if K&gt;80 when cross happens (overbought cross). J &lt;0 = extreme sell pressure — exit all.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(100,100,120,.3);background:rgba(100,100,120,.04)"><div style="font-size:11px;font-weight:700;color:var(--dim);margin-bottom:.25rem">➡️ NEUTRAL: K≈D≈50</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">K,D oscillating near 50</div><div style="font-size:11px;color:var(--text)">No clear direction. Use MACD and RSI as primary signal. KDJ unreliable in sideways market.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.04)"><div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.25rem">🟢 OVERSOLD: K,D &lt; 20</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">J &lt; 0 (below floor)</div><div style="font-size:11px;color:var(--text)">Accumulation zone. Wait for K to cross D upward. J turning up from below 0 = highest conviction buy signal.</div></div>
+        </div>
+        <div style="background:rgba(0,0,0,.1);border-radius:8px;padding:.5rem .75rem"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">Key KDJ Rules</div><div style="display:flex;flex-direction:column;gap:.25rem;font-size:11px">
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(0,232,122,.06)">✅ J line is the FASTEST — it leads K and D by 1–2 bars. Watch J for earliest signal</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(245,200,66,.05)">⚠️ KDJ whipsaws badly in sideways markets — only reliable when ADX &gt;20</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(0,200,240,.05)">📌 Use 50/50/50 as neutral default if KDJ not available on your platform</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(167,139,250,.05)">🌀 KDJ cross below 20 + MACD Golden Cross = dual confirmation, highest win rate</div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ADX / DMI -->
+    <div class="guide-card" style="border-color:rgba(251,113,133,.2);margin-top:.5rem">
+      <div class="guide-card-hdr">💪 ADX / DMI — Trend Strength & Direction</div>
+      <div class="guide-card-body">
+        <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:.65rem .9rem;margin-bottom:.6rem;font-family:var(--mono);font-size:13px;">
+          <div style="color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Formula (14,6)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">+DM = High − PrevHigh  (if &gt;0 and &gt; PrevLow−Low)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">−DM = PrevLow − Low    (if &gt;0 and &gt; High−PrevHigh)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">+DI = 100 × Wilder(+DM,14) ÷ ATR(14)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">−DI = 100 × Wilder(−DM,14) ÷ ATR(14)</div>
+          <div style="color:var(--yellow)">ADX = Wilder smooth of |+DI−−DI| ÷ (+DI+−DI) × 100</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.5rem;margin-bottom:.65rem">
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(100,100,120,.3);background:rgba(100,100,120,.04)"><div style="font-size:11px;font-weight:700;color:var(--dim);margin-bottom:.25rem">ADX &lt; 20 — NO TREND</div><div style="font-size:11px;color:var(--text)">All trend-following signals (MACD, MA cross) are unreliable. Only range strategies valid. Wait for ADX to cross 20.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.04)"><div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.25rem">ADX 20–25 — TREND FORMING</div><div style="font-size:11px;color:var(--text)">Half size. Trend trying to establish. Watch for ADX to cross 25 before adding. Can still fail here.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.05)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">ADX 25–35 — CONFIRMED TREND</div><div style="font-size:11px;color:var(--text)">Full size valid. All trend-following tools reliable. Enter on pullback to MA5/EMA8. SL below MA20.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.15);background:rgba(0,232,122,.03)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">ADX 35–50 — STRONG TREND</div><div style="font-size:11px;color:var(--text)">Hold positions. Trail stop aggressively. RSI can stay overbought. Shallow pullbacks (Tier 1) only.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(245,200,66,.25);background:rgba(245,200,66,.04)"><div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.25rem">ADX &gt; 50 — MEGA TREND</div><div style="font-size:11px;color:var(--text)">Institutional move. MA20 pullback unlikely — only 1×ATR dip. Watch for ADX to peak and roll over = distribution signal.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.04)"><div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:.25rem">+DI &gt; −DI — BULL CONTROL</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">PDI &gt; MDI · ADX rising</div><div style="font-size:11px;color:var(--text)">Bulls in charge. Buy only. −DI crossing above +DI = trend flip — exit all longs immediately.</div></div>
+        </div>
+        <div style="background:rgba(0,0,0,.1);border-radius:8px;padding:.5rem .75rem"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">ADX Rules Professionals Use</div><div style="display:flex;flex-direction:column;gap:.25rem;font-size:11px">
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(0,232,122,.06)">✅ ADX rising = trend getting stronger regardless of direction. ADX falling = trend weakening</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(245,200,66,.05)">⚠️ ADX does NOT tell direction — use +DI vs −DI for that. ADX only measures strength</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(240,58,74,.05)">🔴 ADX peaks then falls sharply = trend exhaustion. Reduce all positions even if price still up</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(0,200,240,.05)">📌 ADXR = smoothed ADX. If ADX &gt; ADXR = trend accelerating ✅. ADX &lt; ADXR = decelerating ⚠️</div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- Bollinger Bands -->
+    <div class="guide-card" style="border-color:rgba(0,200,240,.15);margin-top:.5rem">
+      <div class="guide-card-hdr">🎯 Bollinger Bands — Volatility & Breakout</div>
+      <div class="guide-card-body">
+        <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:.65rem .9rem;margin-bottom:.6rem;font-family:var(--mono);font-size:13px;">
+          <div style="color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Formula (20, 2)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">MID   = SMA(20)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">UPPER = MID + 2 × StdDev(20)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">LOWER = MID − 2 × StdDev(20)</div>
+          <div style="color:var(--yellow)">WIDTH = (UPPER − LOWER) ÷ MID × 100  ← volatility measure</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.5rem;margin-bottom:.65rem">
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(245,200,66,.25);background:rgba(245,200,66,.04)"><div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.25rem">🔔 BB SQUEEZE</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">WIDTH narrowing for 3+ bars</div><div style="font-size:11px;color:var(--text)">Explosive breakout imminent. Direction = use MACD + ADX. Enter on first candle that breaks Upper or Lower band with volume.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.05)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">✅ UPPER BAND WALK</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Price touches Upper 3+ candles</div><div style="font-size:11px;color:var(--text)">Strong trend. Do NOT sell at upper band alone. Only sell when price closes back inside band after walking the upper.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.04)"><div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.25rem">📌 MID BAND (MA20) BOUNCE</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Price pulls back to MID in uptrend</div><div style="font-size:11px;color:var(--text)">Best pullback entry in a trend. MA20 = BB Mid = same level. Hammer or engulfing candle here = high probability buy.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04)"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.25rem">🔴 LOWER BAND TOUCH</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Price hits Lower Band</div><div style="font-size:11px;color:var(--text)">In uptrend = buy opportunity (oversold dip). In downtrend = do NOT buy, price can walk the lower band down.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.04)"><div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:.25rem">🌀 BAND EXPANSION</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">WIDTH growing rapidly</div><div style="font-size:11px;color:var(--text)">Breakout in progress. Direction confirmed by which band price is hugging. Do not fade an expansion move.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(100,100,120,.3);background:rgba(100,100,120,.04)"><div style="font-size:11px;font-weight:700;color:var(--dim);margin-bottom:.25rem">➡️ MID-BAND OSCILLATION</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Price crossing MID repeatedly</div><div style="font-size:11px;color:var(--text)">Sideways market. Range trade between Upper and Lower. Stop trading trend signals until WIDTH expands.</div></div>
+        </div>
+        <div style="background:rgba(0,0,0,.1);border-radius:8px;padding:.5rem .75rem"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">BB Rules Professionals Use</div><div style="display:flex;flex-direction:column;gap:.25rem;font-size:11px">
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(0,232,122,.06)">✅ 95% of price action stays inside the bands — closes outside = rare, high-significance event</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(245,200,66,.05)">⚠️ Never use BB alone — combine with RSI (close above upper + RSI &gt;70 = sell signal)</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(0,200,240,.05)">📌 BB Mid = MA20 = same value. It's the mean reversion magnet — price always returns here eventually</div>
+          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(167,139,250,.05)">🔔 Squeeze followed by expansion in direction of ADX trend = highest probability breakout setup</div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ATR -->
+    <div class="guide-card" style="border-color:rgba(245,200,66,.15);margin-top:.5rem">
+      <div class="guide-card-hdr">📏 ATR — Stop Loss & Position Sizing</div>
+      <div class="guide-card-body">
+        <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:.65rem .9rem;margin-bottom:.6rem;font-family:var(--mono);font-size:13px;">
+          <div style="color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Formula (14)</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">TR  = max(High−Low, |High−PrevClose|, |Low−PrevClose|)</div>
+          <div style="color:var(--yellow)">ATR = Wilder Smooth of TR over 14 periods</div>
+          <div style="color:var(--dim);font-size:11px;margin-top:.3rem">Use ATR(1) on moomoo for same-bar true range</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.5rem;margin-bottom:.65rem">
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04)"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.25rem">🛑 STOP LOSS PLACEMENT</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">SL = Entry − 1.5×ATR (long)<br>SL = Entry + 1.5×ATR (short)</div><div style="font-size:11px;color:var(--text)">1.5×ATR avoids normal noise. 2×ATR for volatile stocks. Never use fixed % — use ATR multiples.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.2);background:rgba(0,232,122,.04)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">🎯 TAKE PROFIT TARGETS</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">TP1=Entry+1.5×ATR · TP2=+3×ATR<br>TP3=+5×ATR</div><div style="font-size:11px;color:var(--text)">Exit 50% at TP1. Trail stop to entry at TP1. Let 50% run to TP2/TP3. Never exit 100% at TP1.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.04)"><div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.25rem">📐 DAILY RANGE ESTIMATE</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Expect 0.7×ATR–1.0×ATR per day</div><div style="font-size:11px;color:var(--text)">If today already moved 1×ATR — range likely exhausted. Avoid new entries. Wait for next session.</div></div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.04)"><div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:.25rem">💰 POSITION SIZING</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Units = (Account × Risk%) ÷ (ATR × 1.5)</div><div style="font-size:11px;color:var(--text)">Risk 1% per trade max. If ATR is large = smaller position. If ATR is small = larger position. Never override this.</div></div>
+        </div>
+        <div style="background:rgba(0,0,0,.1);border-radius:8px;padding:.5rem .75rem"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">ATR Multiplier Guide by Asset</div><div style="display:flex;flex-direction:column;gap:.25rem;font-size:11px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(0,0,0,.08)"><span style="color:var(--dim)">Bursa stocks</span><span style="color:var(--text)">SL: 1.5×ATR</span><span style="color:var(--dim)">Low liquidity = wider</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(0,0,0,.06)"><span style="color:var(--dim)">Gold (XAU/USD)</span><span style="color:var(--text)">SL: 1.5–2×ATR</span><span style="color:var(--dim)">High volatility asset</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(0,0,0,.08)"><span style="color:var(--dim)">Intraday (1H)</span><span style="color:var(--text)">SL: 1×ATR</span><span style="color:var(--dim)">Tighter — faster exit</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;padding:.25rem .4rem;border-radius:5px;background:rgba(0,0,0,.06)"><span style="color:var(--dim)">Swing (Daily)</span><span style="color:var(--text)">SL: 1.5–2×ATR</span><span style="color:var(--dim)">Allows daily noise</span></div>
+        </div></div>
+      </div>
+    </div>
   </div><!-- /g-smarttools -->
+	
 
 </div><!-- /panel-guide -->
 
