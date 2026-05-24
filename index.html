@@ -3696,6 +3696,9 @@
       </div>
     </div>
   </div><!-- /g-smarttools -->
+<div class="guide-section" id="g-formula">
+    <div class="guide-intro" style="border-left-color:var(--yellow)">Key technical indicator formulas — exact calculations, signal thresholds, and professional decision rules used inside TradeMatrix.</div>
+
 	 <!-- MACD -->
     <div class="guide-card" style="border-color:rgba(0,200,240,.2);margin-top:.5rem">
       <div class="guide-card-hdr">📈 MACD — Momentum & Cross Detection</div>
@@ -3861,7 +3864,6 @@
         </div></div>
       </div>
     </div>
-<div class="guide-section" id="g-formula">
     <!-- VWAP -->
     <div class="guide-card" style="border-color:rgba(167,139,250,.2)">
       <div class="guide-card-hdr">🔷 VWAP — Institutional Price Anchor</div>
@@ -3917,37 +3919,6 @@
       </div>
     </div>
 
-    <!-- Supertrend -->
-    <div class="guide-card" style="border-color:rgba(0,200,240,.2);margin-top:.5rem">
-      <div class="guide-card-hdr">📟 Supertrend — Dynamic Trend Direction</div>
-      <div class="guide-card-body">
-        <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:.65rem .9rem;margin-bottom:.6rem;font-family:var(--mono);font-size:13px;">
-          <div style="color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">Formula (10, 3)</div>
-          <div style="color:var(--accent);margin-bottom:.2rem">HL2        = (High + Low) ÷ 2</div>
-          <div style="color:var(--accent);margin-bottom:.2rem">Upper Band = HL2 + (Multiplier × ATR)</div>
-          <div style="color:var(--accent);margin-bottom:.2rem">Lower Band = HL2 − (Multiplier × ATR)</div>
-          <div style="color:var(--yellow);margin-bottom:.2rem">If Close &gt; prev Upper → trend = BULLISH → use Lower Band</div>
-          <div style="color:var(--red)">If Close &lt; prev Lower → trend = BEARISH → use Upper Band</div>
-          <div style="color:var(--dim);font-size:11px;margin-top:.3rem">Default: Period=10, Multiplier=3. Moomoo uses same defaults.</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.5rem;margin-bottom:.65rem">
-          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.3);background:rgba(0,232,122,.06)"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">✅ BULLISH — LOWER BAND ACTIVE</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Price above Lower Band (green line)</div><div style="font-size:11px;color:var(--text)">Trend up. Lower Band = dynamic stop loss — trail your SL here. Buy pullbacks to Lower Band level. Hold until flip.</div></div>
-          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(240,58,74,.25);background:rgba(240,58,74,.05)"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.25rem">🔴 BEARISH — UPPER BAND ACTIVE</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Price below Upper Band (red line)</div><div style="font-size:11px;color:var(--text)">Trend down. No longs. Upper Band = resistance ceiling. Any rally to Upper Band = short or exit opportunity.</div></div>
-          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(245,200,66,.3);background:rgba(245,200,66,.05)"><div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.25rem">⚡ FLIP — HIGHEST SIGNAL</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Direction changes this bar</div><div style="font-size:11px;color:var(--text)">Bearish → Bullish flip = strongest buy signal in Supertrend. Enter immediately on close. This is what the Flip Detection in Smart Tools detects.</div></div>
-          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.04)"><div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.25rem">📐 USING AS DYNAMIC SL</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">SL = Supertrend Lower Band value</div><div style="font-size:11px;color:var(--text)">Update SL every bar to the current Lower Band value. Never move SL down — only trail it up as band rises.</div></div>
-          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.04)"><div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:.25rem">🔮 MULTI-TF CONFIRMATION</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Daily bullish + 1H bullish</div><div style="font-size:11px;color:var(--text)">Both timeframes on same direction = highest win rate. Daily flip + 1H already bullish = full size entry. Never fight Daily Supertrend direction.</div></div>
-          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(100,100,120,.3);background:rgba(100,100,120,.04)"><div style="font-size:11px;font-weight:700;color:var(--dim);margin-bottom:.25rem">⚙️ MULTIPLIER GUIDE</div><div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Lower mult = more signals (noisier)<br>Higher mult = fewer signals (cleaner)</div><div style="font-size:11px;color:var(--text)">Volatile stocks: use 3–4×. Stable stocks: use 2–3×. Gold/Forex: use 3×. Never below 2× — too many false flips.</div></div>
-        </div>
-        <div style="background:rgba(0,0,0,.1);border-radius:8px;padding:.5rem .75rem"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">Supertrend vs MA — When to Use Each</div><div style="display:flex;flex-direction:column;gap:.25rem;font-size:11px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:.3rem .4rem;border-radius:5px;background:rgba(0,0,0,.08)">
-            <div><div style="color:var(--accent);font-weight:700;margin-bottom:.2rem">Use Supertrend when:</div><div style="color:var(--dim)">Trending market · ADX &gt;25 · Need dynamic SL · Fast-moving stocks · Gold intraday</div></div>
-            <div><div style="color:var(--yellow);font-weight:700;margin-bottom:.2rem">Use MA when:</div><div style="color:var(--dim)">Confirming trend structure · Slower Bursa stocks · Identifying pullback zones · Lower ADX markets</div></div>
-          </div>
-          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(0,232,122,.06)">✅ Best combo: Supertrend flip on Daily + MA5&gt;MA20 on Daily + volume surge = triple confirmation entry</div>
-          <div style="padding:.25rem .4rem;border-radius:5px;background:rgba(240,58,74,.05)">🔴 Supertrend unreliable when ADX &lt;20 — will generate many false flips in sideways market</div>
-        </div></div>
-      </div>
-    </div>
 <!-- Pullback -->
     <div class="guide-card" style="border-color:rgba(251,113,133,.2);margin-top:.5rem">
       <div class="guide-card-hdr">🔄 Pullback — Detection, Depth & End Confirmation</div>
