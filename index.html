@@ -3950,7 +3950,142 @@
         </div></div>
       </div>
     </div>
+<!-- Pullback -->
+    <div class="guide-card" style="border-color:rgba(251,113,133,.2);margin-top:.5rem">
+      <div class="guide-card-hdr">🔄 Pullback — Detection, Depth & End Confirmation</div>
+      <div class="guide-card-body">
 
+        <div style="background:rgba(0,0,0,.15);border-radius:8px;padding:.65rem .9rem;margin-bottom:.6rem;font-family:var(--mono);font-size:13px;">
+          <div style="color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">3 Ways to Measure Pullback Depth</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">ATR method:  Shallow=0.5–1×ATR · Normal=1–1.5×ATR · Deep=1.5–2×ATR</div>
+          <div style="color:var(--accent);margin-bottom:.2rem">Fibonacci:   23.6%=tiny · 38.2%=normal · 50%=deep · 61.8%=last defense</div>
+          <div style="color:var(--yellow)">MA reversion: MA5=shallow · MA20=normal · MA50=deep · MA200=structural</div>
+          <div style="color:var(--dim);font-size:11px;margin-top:.3rem">Trend intact = pullback. Trend broken = reversal. Volume is the deciding factor.</div>
+        </div>
+
+        <!-- Pullback depth tiers -->
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">Pullback Depth by Trend Strength</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.5rem;margin-bottom:.75rem">
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,232,122,.3);background:rgba(0,232,122,.06)">
+            <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.25rem">ADX &gt;50 — MEGA TREND</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Depth: 0.5–1×ATR only</div>
+            <div style="font-size:11px;color:var(--text)">Barely pulls back. MA20 rarely touched. Queue at 0.75×ATR below current price. Miss it → wait for next shallow dip.</div>
+            <div style="font-size:10px;color:var(--dim);margin-top:.2rem">Fib 23.6% zone only</div>
+          </div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.04)">
+            <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:.25rem">ADX 35–50 — STRONG TREND</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Depth: 1–1.5×ATR · MA5 zone</div>
+            <div style="font-size:11px;color:var(--text)">Dips to MA5 or BB Upper. Rarely reaches MA20. RSI pulls to 50–55. Buy MA5 bounce with candle confirmation.</div>
+            <div style="font-size:10px;color:var(--dim);margin-top:.2rem">Fib 23.6–38.2% zone</div>
+          </div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(245,200,66,.25);background:rgba(245,200,66,.04)">
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.25rem">ADX 25–35 — NORMAL TREND</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Depth: 1.5×ATR · MA20 zone</div>
+            <div style="font-size:11px;color:var(--text)">Classic MA20 pullback. RSI dips to 45–50. This is the TradeMatrix Tier 3 zone — highest R:R entry. Wait for hammer at MA20.</div>
+            <div style="font-size:10px;color:var(--dim);margin-top:.2rem">Fib 38.2–50% zone</div>
+          </div>
+          <div style="padding:.55rem .7rem;border-radius:8px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04)">
+            <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.25rem">ADX &lt;25 — WEAK / RANGING</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:.2rem">Depth: 2×ATR+ · MA50 zone</div>
+            <div style="font-size:11px;color:var(--text)">Deep retracement possible. Fib 61.8% = last line. If RSI breaks below 40 in uptrend = this is NOT a pullback, it's a reversal.</div>
+            <div style="font-size:10px;color:var(--dim);margin-top:.2rem">Fib 50–61.8% zone</div>
+          </div>
+        </div>
+
+        <!-- Detect pullback incoming -->
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">🔍 Detecting a Pullback Before It Happens</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.5rem;margin-bottom:.75rem">
+          <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid var(--border);background:rgba(0,0,0,.05)">
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.2rem">⚠️ MACD HIST Shrinking</div>
+            <div style="font-size:11px;color:var(--text)">HIST still positive but 2–3 bars shrinking = momentum fading. Price likely stalling in 1–3 bars. Tighten stop, don't add.</div>
+          </div>
+          <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid var(--border);background:rgba(0,0,0,.05)">
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.2rem">⚠️ RSI Bearish Divergence</div>
+            <div style="font-size:11px;color:var(--text)">Price makes new high, RSI makes lower high = sellers building. Pullback in 1–5 bars. Exit 50% at resistance.</div>
+          </div>
+          <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid var(--border);background:rgba(0,0,0,.05)">
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.2rem">⚠️ Volume Drying Up</div>
+            <div style="font-size:11px;color:var(--text)">Vol Ratio drops below 0.8× on up-candles = no institutional buying. Price advancing on thin air. Pullback imminent.</div>
+          </div>
+          <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid var(--border);background:rgba(0,0,0,.05)">
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.2rem">⚠️ Price at BB Upper</div>
+            <div style="font-size:11px;color:var(--text)">First touch of BB Upper = 70% chance of pullback. If RSI &gt;70 simultaneously = reduce position to 50%.</div>
+          </div>
+          <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid var(--border);background:rgba(0,0,0,.05)">
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.2rem">⚠️ KDJ J &gt;100</div>
+            <div style="font-size:11px;color:var(--text)">J above 100 = extreme overbought. J hooking downward from above 100 = pullback starting. Watch for K/D cross to confirm.</div>
+          </div>
+          <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid var(--border);background:rgba(0,0,0,.05)">
+            <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:.2rem">⚠️ ADX Plateauing</div>
+            <div style="font-size:11px;color:var(--text)">ADX stops rising after long climb = trend losing steam. Not a reversal — expect consolidation/pullback for 3–10 bars.</div>
+          </div>
+        </div>
+
+        <!-- Pullback ending -->
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">✅ Identifying Pullback End — Re-Entry Signals</div>
+        <div style="background:rgba(0,0,0,.08);border-radius:8px;padding:.5rem .75rem;margin-bottom:.65rem">
+          <div style="display:flex;flex-direction:column;gap:.35rem;font-size:12px">
+            <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:start;padding:.3rem .4rem;border-radius:5px;background:rgba(0,232,122,.07)">
+              <span style="color:var(--green);font-weight:700;text-align:center">1</span>
+              <span><strong style="color:var(--green)">Hammer / Bullish Engulfing at MA20</strong> — Single most reliable signal. Candle closes back above MA20 after dipping below. Enter on close.</span>
+            </div>
+            <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:start;padding:.3rem .4rem;border-radius:5px;background:rgba(0,232,122,.05)">
+              <span style="color:var(--green);font-weight:700;text-align:center">2</span>
+              <span><strong style="color:var(--green)">RSI bounces from 40–50 zone</strong> — In a healthy uptrend RSI rarely breaks 40. Bounce from 45–50 = pullback complete. Confirm with next green candle.</span>
+            </div>
+            <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:start;padding:.3rem .4rem;border-radius:5px;background:rgba(0,200,240,.05)">
+              <span style="color:var(--accent);font-weight:700;text-align:center">3</span>
+              <span><strong style="color:var(--accent)">MACD HIST stops declining + flattens</strong> — HIST makes a higher trough than previous = selling pressure exhausted. 1–2 bars before price turns up.</span>
+            </div>
+            <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:start;padding:.3rem .4rem;border-radius:5px;background:rgba(0,200,240,.04)">
+              <span style="color:var(--accent);font-weight:700;text-align:center">4</span>
+              <span><strong style="color:var(--accent)">Volume spike on a down-bar + price holds</strong> — Absorption: big sellers entering, buyers absorbing every share. Price stops going down despite high volume = floor found.</span>
+            </div>
+            <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:start;padding:.3rem .4rem;border-radius:5px;background:rgba(245,200,66,.05)">
+              <span style="color:var(--yellow);font-weight:700;text-align:center">5</span>
+              <span><strong style="color:var(--yellow)">KDJ J turns up from below 20</strong> — J crossing back above 20 after being oversold = momentum resuming. Best when K still above D (only J dipped).</span>
+            </div>
+            <div style="display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:start;padding:.3rem .4rem;border-radius:5px;background:rgba(167,139,250,.05)">
+              <span style="color:#a78bfa;font-weight:700;text-align:center">6</span>
+              <span><strong style="color:#a78bfa">Supertrend Lower Band intact</strong> — Price dipped but Supertrend never flipped bearish = pullback confirmed, not reversal. Enter when price reclaims MA5.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pullback vs Reversal -->
+        <div style="background:rgba(0,0,0,.1);border-radius:8px;padding:.5rem .75rem">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">⚠️ Pullback vs Reversal — How to Tell the Difference</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:11px">
+            <div style="padding:.4rem .6rem;border-radius:7px;background:rgba(0,232,122,.06)">
+              <div style="color:var(--green);font-weight:700;margin-bottom:.3rem">✅ PULLBACK (Buy the dip)</div>
+              <div style="color:var(--dim);display:flex;flex-direction:column;gap:.2rem">
+                <span>• Volume LOW during decline</span>
+                <span>• RSI stays above 40</span>
+                <span>• Supertrend still bullish</span>
+                <span>• MA20 still rising</span>
+                <span>• Fib retracement ≤61.8%</span>
+                <span>• MACD still above zero</span>
+              </div>
+            </div>
+            <div style="padding:.4rem .6rem;border-radius:7px;background:rgba(240,58,74,.06)">
+              <div style="color:var(--red);font-weight:700;margin-bottom:.3rem">🔴 REVERSAL (Exit — do not buy)</div>
+              <div style="color:var(--dim);display:flex;flex-direction:column;gap:.2rem">
+                <span>• Volume HIGH during decline</span>
+                <span>• RSI breaks below 40</span>
+                <span>• Supertrend flips bearish</span>
+                <span>• MA20 starts curling down</span>
+                <span>• Fib breaks below 61.8%</span>
+                <span>• MACD Death Cross fires</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:.5rem;font-size:11px;padding:.3rem .5rem;border-radius:5px;background:rgba(245,200,66,.07);color:var(--yellow)">
+            ⭐ Golden rule: <strong>3 of the 6 reversal signals appearing = exit all. 2 or fewer = hold, likely just a pullback.</strong>
+          </div>
+        </div>
+
+      </div>
+	</div>
   </div><!-- /g-formula -->
 </div><!-- /panel-guide -->
 
