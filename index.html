@@ -3650,130 +3650,310 @@
       <span style="color:var(--red)">★☆☆ Wait</span>
     </div>
 
-    <!-- Candle Anatomy -->
+    <!-- ══ CANDLE ANATOMY + PATTERNS ══ -->
     <div style="margin-top:.9rem">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.55rem">📖 Fasa 1 — Baca Chart: Anatomy Satu Candle</div>
 
-      <!-- Anatomy diagram -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.65rem">
+      <!-- Anatomy: Bullish vs Bearish -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.75rem">
 
-        <!-- Bullish candle anatomy -->
         <div style="padding:.6rem .75rem;border-radius:8px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.04)">
-          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.45rem">🟢 BULLISH CANDLE</div>
-          <div style="display:flex;gap:.75rem;align-items:center">
-            <svg width="36" height="80" viewBox="0 0 36 80" style="flex-shrink:0">
-              <line x1="18" y1="0" x2="18" y2="14" stroke="#4e6d88" stroke-width="2"/>
-              <text x="22" y="10" font-size="7" fill="#6b8299">HIGH</text>
-              <rect x="8" y="14" width="20" height="36" rx="2" fill="#00e87a"/>
-              <text x="22" y="24" font-size="6.5" fill="#003d1a">UPPER WICK</text>
-              <text x="1" y="26" font-size="6.5" fill="#00e87a">CLOSE</text>
-              <text x="22" y="42" font-size="7" fill="#003d1a">BODY</text>
-              <text x="1" y="48" font-size="6.5" fill="#00e87a">OPEN</text>
-              <text x="22" y="58" font-size="6.5" fill="#4e6d88">LOWER WICK</text>
-              <line x1="18" y1="50" x2="18" y2="72" stroke="#00e87a" stroke-width="2"/>
-              <text x="22" y="76" font-size="7" fill="#6b8299">LOW</text>
+          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:.4rem">🟢 BULLISH CANDLE — Close &gt; Open</div>
+          <div style="display:flex;gap:.75rem;align-items:flex-start">
+            <svg width="52" height="88" viewBox="0 0 52 88" style="flex-shrink:0">
+              <line x1="18" y1="0" x2="18" y2="12" stroke="#6b8299" stroke-width="1.5"/>
+              <line x1="12" y1="2" x2="24" y2="2" stroke="#6b8299" stroke-width="1"/>
+              <rect x="8" y="12" width="20" height="40" rx="2" fill="#00e87a"/>
+              <line x1="18" y1="52" x2="18" y2="72" stroke="#00e87a" stroke-width="1.5"/>
+              <line x1="12" y1="70" x2="24" y2="70" stroke="#00e87a" stroke-width="1"/>
+              <text x="30" y="5" font-size="7" fill="#6b8299">HIGH</text>
+              <text x="30" y="20" font-size="6.5" fill="#4e9a6a">UPPER WICK</text>
+              <text x="30" y="30" font-size="6.5" fill="#00e87a">CLOSE ↑</text>
+              <text x="30" y="44" font-size="7" fill="#4e9a6a">BODY</text>
+              <text x="30" y="56" font-size="6.5" fill="#00e87a">OPEN</text>
+              <text x="30" y="66" font-size="6.5" fill="#4e9a6a">LOWER WICK</text>
+              <text x="30" y="76" font-size="7" fill="#6b8299">LOW</text>
             </svg>
-            <div style="display:flex;flex-direction:column;gap:.3rem;font-size:11px;color:var(--text)">
-              <div><span style="color:var(--green);font-weight:700">Close &gt; Open</span> — buyers won</div>
-              <div style="color:var(--dim);font-size:10px">• Close lebih tinggi daripada open</div>
-              <div style="color:var(--dim);font-size:10px">• Buyer lebih dominan</div>
-              <div style="color:var(--dim);font-size:10px">• Harga cenderung naik</div>
+            <div style="font-size:10.5px;color:var(--dim);display:flex;flex-direction:column;gap:.25rem;margin-top:.2rem">
+              <span>• Close lebih tinggi daripada open</span>
+              <span>• Buyer lebih dominan</span>
+              <span>• Harga cenderung naik</span>
+              <span style="color:var(--green);margin-top:.2rem">✅ Semakin panjang body = semakin kuat buyers</span>
             </div>
           </div>
         </div>
 
-        <!-- Bearish candle anatomy -->
         <div style="padding:.6rem .75rem;border-radius:8px;border:1px solid rgba(240,58,74,.25);background:rgba(240,58,74,.04)">
-          <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.45rem">🔴 BEARISH CANDLE</div>
-          <div style="display:flex;gap:.75rem;align-items:center">
-            <svg width="36" height="80" viewBox="0 0 36 80" style="flex-shrink:0">
-              <line x1="18" y1="0" x2="18" y2="14" stroke="#4e6d88" stroke-width="2"/>
-              <text x="22" y="10" font-size="7" fill="#6b8299">HIGH</text>
-              <rect x="8" y="14" width="20" height="36" rx="2" fill="#f03a4a"/>
-              <text x="22" y="24" font-size="6.5" fill="#fff">UPPER WICK</text>
-              <text x="1" y="26" font-size="6.5" fill="#f03a4a">OPEN</text>
-              <text x="22" y="42" font-size="7" fill="#fff">BODY</text>
-              <text x="1" y="48" font-size="6.5" fill="#f03a4a">CLOSE</text>
-              <text x="22" y="58" font-size="6.5" fill="#4e6d88">LOWER WICK</text>
-              <line x1="18" y1="50" x2="18" y2="72" stroke="#f03a4a" stroke-width="2"/>
-              <text x="22" y="76" font-size="7" fill="#6b8299">LOW</text>
+          <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:.4rem">🔴 BEARISH CANDLE — Open &gt; Close</div>
+          <div style="display:flex;gap:.75rem;align-items:flex-start">
+            <svg width="52" height="88" viewBox="0 0 52 88" style="flex-shrink:0">
+              <line x1="18" y1="0" x2="18" y2="12" stroke="#6b8299" stroke-width="1.5"/>
+              <line x1="12" y1="2" x2="24" y2="2" stroke="#6b8299" stroke-width="1"/>
+              <rect x="8" y="12" width="20" height="40" rx="2" fill="#f03a4a"/>
+              <line x1="18" y1="52" x2="18" y2="72" stroke="#f03a4a" stroke-width="1.5"/>
+              <line x1="12" y1="70" x2="24" y2="70" stroke="#f03a4a" stroke-width="1"/>
+              <text x="30" y="5" font-size="7" fill="#6b8299">HIGH</text>
+              <text x="30" y="20" font-size="6.5" fill="#c43a4a">UPPER WICK</text>
+              <text x="30" y="30" font-size="6.5" fill="#f03a4a">OPEN</text>
+              <text x="30" y="44" font-size="7" fill="#c43a4a">BODY</text>
+              <text x="30" y="56" font-size="6.5" fill="#f03a4a">CLOSE ↓</text>
+              <text x="30" y="66" font-size="6.5" fill="#c43a4a">LOWER WICK</text>
+              <text x="30" y="76" font-size="7" fill="#6b8299">LOW</text>
             </svg>
-            <div style="display:flex;flex-direction:column;gap:.3rem;font-size:11px;color:var(--text)">
-              <div><span style="color:var(--red);font-weight:700">Open &gt; Close</span> — sellers won</div>
-              <div style="color:var(--dim);font-size:10px">• Close lebih rendah daripada open</div>
-              <div style="color:var(--dim);font-size:10px">• Seller lebih dominan</div>
-              <div style="color:var(--dim);font-size:10px">• Harga cenderung turun</div>
+            <div style="font-size:10.5px;color:var(--dim);display:flex;flex-direction:column;gap:.25rem;margin-top:.2rem">
+              <span>• Close lebih rendah daripada open</span>
+              <span>• Seller lebih dominan</span>
+              <span>• Harga cenderung turun</span>
+              <span style="color:var(--red);margin-top:.2rem">🔴 Semakin panjang body = semakin kuat sellers</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 4 key patterns -->
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.4rem">Candle Patterns Penting Untuk Trader Runcit</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem;margin-bottom:.55rem">
-
-        <!-- Doji -->
-        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(245,200,66,.25);background:rgba(245,200,66,.04)">
-          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
-            <svg width="16" height="40" viewBox="0 0 16 40">
-              <line x1="8" y1="2" x2="8" y2="36" stroke="#f5c842" stroke-width="1.5"/>
-              <rect x="2" y="17" width="12" height="3" rx="1" fill="#f5c842"/>
-            </svg>
-            <span style="font-size:11px;font-weight:700;color:var(--yellow)">DOJI ★★☆</span>
-          </div>
-          <div style="font-size:11px;color:var(--text)">Open dan close hampir sama. Menunjukkan keraguan pasaran (indecision).</div>
-          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Wait for next candle to confirm direction before entering</div>
-        </div>
+      <!-- Pattern grid -->
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:.45rem">Candle Patterns — 1-Bar, 2-Bar & 3-Bar</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:.5rem;margin-bottom:.6rem">
 
         <!-- Hammer -->
         <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(0,232,122,.25);background:rgba(0,232,122,.04)">
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
-            <svg width="16" height="40" viewBox="0 0 16 40">
-              <line x1="8" y1="0" x2="8" y2="8" stroke="#4e6d88" stroke-width="1.5"/>
-              <rect x="4" y="8" width="8" height="8" rx="1" fill="#00e87a"/>
-              <line x1="8" y1="16" x2="8" y2="40" stroke="#00e87a" stroke-width="1.5"/>
+            <svg width="18" height="44" viewBox="0 0 18 44">
+              <line x1="9" y1="0" x2="9" y2="8" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="4" y="8" width="10" height="8" rx="1" fill="#00e87a"/>
+              <line x1="9" y1="16" x2="9" y2="44" stroke="#00e87a" stroke-width="2"/>
             </svg>
-            <span style="font-size:11px;font-weight:700;color:var(--green)">HAMMER ★★★</span>
+            <div><div style="font-size:11px;font-weight:700;color:var(--green)">HAMMER ★★★</div><div style="font-size:9px;color:var(--dim)">1-bar bullish reversal</div></div>
           </div>
-          <div style="font-size:11px;color:var(--text)">Potential reversal bullish di kawasan support. Buyer mula ambil alih.</div>
-          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Long lower wick = sellers tried, buyers rejected hard. Enter on next green candle</div>
+          <div style="font-size:11px;color:var(--text)">Long lower wick ≥2× body. Sellers pushed down hard, buyers fully reclaimed. Di kawasan support = buy signal.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Confirm: next candle green + volume spike</div>
+        </div>
+
+        <!-- Inverted Hammer -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.03)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="18" height="44" viewBox="0 0 18 44">
+              <line x1="9" y1="0" x2="9" y2="28" stroke="#00c8f0" stroke-width="2"/>
+              <rect x="4" y="28" width="10" height="8" rx="1" fill="#00c8f0"/>
+              <line x1="9" y1="36" x2="9" y2="40" stroke="#4e6d88" stroke-width="1.5"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--accent)">INV. HAMMER ★★☆</div><div style="font-size:9px;color:var(--dim)">1-bar potential reversal</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Long upper wick, small body at bottom. Buyers tried, but sellers pushed back. Weaker than Hammer — needs confirmation.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Only valid after downtrend + at support</div>
         </div>
 
         <!-- Shooting Star -->
         <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(240,58,74,.25);background:rgba(240,58,74,.04)">
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
-            <svg width="16" height="40" viewBox="0 0 16 40">
-              <line x1="8" y1="0" x2="8" y2="22" stroke="#f03a4a" stroke-width="1.5"/>
-              <rect x="4" y="22" width="8" height="8" rx="1" fill="#f03a4a"/>
-              <line x1="8" y1="30" x2="8" y2="36" stroke="#4e6d88" stroke-width="1.5"/>
+            <svg width="18" height="44" viewBox="0 0 18 44">
+              <line x1="9" y1="0" x2="9" y2="24" stroke="#f03a4a" stroke-width="2"/>
+              <rect x="4" y="24" width="10" height="8" rx="1" fill="#f03a4a"/>
+              <line x1="9" y1="32" x2="9" y2="38" stroke="#4e6d88" stroke-width="1.5"/>
             </svg>
-            <span style="font-size:11px;font-weight:700;color:var(--red)">SHOOTING STAR ★★★</span>
+            <div><div style="font-size:11px;font-weight:700;color:var(--red)">SHOOTING STAR ★★★</div><div style="font-size:9px;color:var(--dim)">1-bar bearish reversal</div></div>
           </div>
-          <div style="font-size:11px;color:var(--text)">Potential reversal bearish di kawasan resistance. Seller mula ambil alih.</div>
-          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Long upper wick = buyers tried, sellers rejected hard. Exit longs immediately</div>
+          <div style="font-size:11px;color:var(--text)">Long upper wick ≥2× body at resistance. Buyers pushed up, sellers fully rejected. Harga cenderung turun selepas ini.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Exit longs. Confirm: next candle red + volume</div>
         </div>
 
-        <!-- Engulfing -->
-        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.04)">
+        <!-- Doji -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(245,200,66,.25);background:rgba(245,200,66,.04)">
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
-            <svg width="22" height="40" viewBox="0 0 22 40">
-              <line x1="6" y1="2" x2="6" y2="5" stroke="#4e6d88" stroke-width="1.5"/>
-              <rect x="3" y="5" width="6" height="10" rx="1" fill="#f03a4a"/>
-              <line x1="6" y1="15" x2="6" y2="18" stroke="#4e6d88" stroke-width="1.5"/>
-              <line x1="15" y1="20" x2="15" y2="24" stroke="#00e87a" stroke-width="1.5"/>
-              <rect x="11" y="24" width="8" height="14" rx="1" fill="#00e87a"/>
-              <line x1="15" y1="38" x2="15" y2="40" stroke="#00e87a" stroke-width="1.5"/>
+            <svg width="18" height="44" viewBox="0 0 18 44">
+              <line x1="9" y1="2" x2="9" y2="40" stroke="#f5c842" stroke-width="1.5"/>
+              <rect x="2" y="19" width="14" height="3" rx="1" fill="#f5c842"/>
             </svg>
-            <span style="font-size:11px;font-weight:700;color:var(--accent)">ENGULFING ★★★</span>
+            <div><div style="font-size:11px;font-weight:700;color:var(--yellow)">DOJI ★★☆</div><div style="font-size:9px;color:var(--dim)">1-bar indecision</div></div>
           </div>
-          <div style="font-size:11px;color:var(--text)">Bullish engulfing (hijau): Buyer kuat, potensi naik. Bearish engulfing (merah): Seller kuat, potensi turun.</div>
-          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Second candle body must completely cover first candle body — strongest 2-bar signal</div>
+          <div style="font-size:11px;color:var(--text)">Open ≈ Close. Buyer dan seller sama kuat. Menunjukkan keraguan pasaran (indecision). Alone = not enough to trade.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Wait for next candle direction before acting</div>
         </div>
+
+        <!-- Marubozu -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(0,232,122,.2);background:rgba(0,232,122,.03)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="28" height="44" viewBox="0 0 28 44">
+              <rect x="3" y="4" width="10" height="36" rx="1" fill="#00e87a"/>
+              <rect x="15" y="4" width="10" height="36" rx="1" fill="#f03a4a"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--green)">MARUBOZU ★★★</div><div style="font-size:9px;color:var(--dim)">1-bar full conviction</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Full body, NO wicks. Satu pihak menang sepenuhnya. Green = bulls 100% in control. Red = bears 100% in control.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Strongest single candle. Often starts a new trend</div>
+        </div>
+
+        <!-- Bullish Engulfing -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(0,232,122,.3);background:rgba(0,232,122,.06)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="28" height="44" viewBox="0 0 28 44">
+              <line x1="7" y1="4" x2="7" y2="8" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="3" y="8" width="8" height="14" rx="1" fill="#f03a4a"/>
+              <line x1="7" y1="22" x2="7" y2="26" stroke="#4e6d88" stroke-width="1.5"/>
+              <line x1="20" y1="2" x2="20" y2="6" stroke="#00e87a" stroke-width="1.5"/>
+              <rect x="15" y="6" width="10" height="32" rx="1" fill="#00e87a"/>
+              <line x1="20" y1="38" x2="20" y2="42" stroke="#00e87a" stroke-width="1.5"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--green)">BULL ENGULFING ★★★</div><div style="font-size:9px;color:var(--dim)">2-bar bullish reversal</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Green candle body FULLY covers the previous red candle body. Buyer kuat, potensi naik. Strongest 2-bar buy signal.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 At support + volume 2×+ = full size entry</div>
+        </div>
+
+        <!-- Bearish Engulfing -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(240,58,74,.3);background:rgba(240,58,74,.06)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="28" height="44" viewBox="0 0 28 44">
+              <line x1="7" y1="4" x2="7" y2="8" stroke="#00e87a" stroke-width="1.5"/>
+              <rect x="3" y="8" width="8" height="14" rx="1" fill="#00e87a"/>
+              <line x1="7" y1="22" x2="7" y2="26" stroke="#00e87a" stroke-width="1.5"/>
+              <line x1="20" y1="2" x2="20" y2="6" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="15" y="6" width="10" height="32" rx="1" fill="#f03a4a"/>
+              <line x1="20" y1="38" x2="20" y2="42" stroke="#f03a4a" stroke-width="1.5"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--red)">BEAR ENGULFING ★★★</div><div style="font-size:9px;color:var(--dim)">2-bar bearish reversal</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Red candle body FULLY covers the previous green candle body. Seller kuat, potensi turun. Strongest 2-bar sell signal.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 At resistance + high volume = exit all longs</div>
+        </div>
+
+        <!-- Harami Bullish -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(167,139,250,.2);background:rgba(167,139,250,.03)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="28" height="44" viewBox="0 0 28 44">
+              <line x1="7" y1="2" x2="7" y2="6" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="3" y="6" width="8" height="22" rx="1" fill="#f03a4a"/>
+              <line x1="7" y1="28" x2="7" y2="32" stroke="#4e6d88" stroke-width="1.5"/>
+              <line x1="20" y1="12" x2="20" y2="14" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="16" y="14" width="8" height="10" rx="1" fill="#00e87a"/>
+              <line x1="20" y1="24" x2="20" y2="26" stroke="#4e6d88" stroke-width="1.5"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:#a78bfa">BULL HARAMI ★☆☆</div><div style="font-size:9px;color:var(--dim)">2-bar weak reversal</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Small green candle inside large red candle body. Selling momentum slowing. Weak signal — needs strong confirmation before entry.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Half size max. Wait for breakout above red body</div>
+        </div>
+
+        <!-- Tweezer Bottom -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(0,200,240,.2);background:rgba(0,200,240,.03)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="28" height="44" viewBox="0 0 28 44">
+              <line x1="7" y1="2" x2="7" y2="8" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="3" y="8" width="8" height="16" rx="1" fill="#f03a4a"/>
+              <line x1="7" y1="24" x2="7" y2="36" stroke="#f03a4a" stroke-width="1.5"/>
+              <line x1="20" y1="6" x2="20" y2="10" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="16" y="10" width="8" height="16" rx="1" fill="#00e87a"/>
+              <line x1="20" y1="26" x2="20" y2="36" stroke="#00e87a" stroke-width="1.5"/>
+              <line x1="2" y1="36" x2="26" y2="36" stroke="#f5c842" stroke-width="1" stroke-dasharray="3,2"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--accent)">TWEEZER BOTTOM ★★☆</div><div style="font-size:9px;color:var(--dim)">2-bar support test</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Two candles with same LOW (dashed line). Sellers tried twice, rejected at same level = strong support confirmed. Bullish reversal signal.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 More powerful when at key S/R level or MA20</div>
+        </div>
+
+        <!-- Tweezer Top -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(245,200,66,.2);background:rgba(245,200,66,.03)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="28" height="44" viewBox="0 0 28 44">
+              <line x1="7" y1="8" x2="7" y2="2" stroke="#00e87a" stroke-width="1.5"/>
+              <rect x="3" y="8" width="8" height="16" rx="1" fill="#00e87a"/>
+              <line x1="7" y1="24" x2="7" y2="30" stroke="#4e6d88" stroke-width="1.5"/>
+              <line x1="20" y1="8" x2="20" y2="2" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="16" y="8" width="8" height="16" rx="1" fill="#f03a4a"/>
+              <line x1="20" y1="24" x2="20" y2="30" stroke="#f03a4a" stroke-width="1.5"/>
+              <line x1="2" y1="2" x2="26" y2="2" stroke="#f5c842" stroke-width="1" stroke-dasharray="3,2"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--yellow)">TWEEZER TOP ★★☆</div><div style="font-size:9px;color:var(--dim)">2-bar resistance test</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Two candles with same HIGH (dashed line). Buyers tried twice, rejected at same level = strong resistance. Bearish reversal signal.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Exit longs when confirmed at resistance level</div>
+        </div>
+
+        <!-- Morning Star -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(0,232,122,.2);background:rgba(0,232,122,.04)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="40" height="44" viewBox="0 0 40 44">
+              <line x1="6" y1="0" x2="6" y2="4" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="2" y="4" width="8" height="16" rx="1" fill="#f03a4a"/>
+              <line x1="6" y1="20" x2="6" y2="24" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="17" y="18" width="6" height="6" rx="1" fill="#f5c842"/>
+              <line x1="20" y1="14" x2="20" y2="18" stroke="#4e6d88" stroke-width="1"/>
+              <line x1="20" y1="24" x2="20" y2="28" stroke="#4e6d88" stroke-width="1"/>
+              <line x1="32" y1="0" x2="32" y2="4" stroke="#00e87a" stroke-width="1.5"/>
+              <rect x="28" y="4" width="8" height="20" rx="1" fill="#00e87a"/>
+              <line x1="32" y1="24" x2="32" y2="28" stroke="#4e6d88" stroke-width="1.5"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--green)">MORNING STAR ★★★</div><div style="font-size:9px;color:var(--dim)">3-bar bullish reversal</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Red → small Doji/body → Green. The "star" gap shows seller exhaustion. Green bar closes above midpoint of red bar = reversal confirmed.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Most reliable 3-bar pattern. Enter on 3rd candle close</div>
+        </div>
+
+        <!-- Evening Star -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="40" height="44" viewBox="0 0 40 44">
+              <line x1="6" y1="20" x2="6" y2="24" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="2" y="4" width="8" height="20" rx="1" fill="#00e87a"/>
+              <line x1="6" y1="4" x2="6" y2="0" stroke="#4e6d88" stroke-width="1.5"/>
+              <rect x="17" y="0" width="6" height="6" rx="1" fill="#f5c842"/>
+              <line x1="20" y1="6" x2="20" y2="10" stroke="#4e6d88" stroke-width="1"/>
+              <line x1="20" y1="0" x2="20" y2="0" stroke="#4e6d88" stroke-width="1"/>
+              <line x1="32" y1="4" x2="32" y2="0" stroke="#f03a4a" stroke-width="1.5"/>
+              <rect x="28" y="4" width="8" height="20" rx="1" fill="#f03a4a"/>
+              <line x1="32" y1="24" x2="32" y2="28" stroke="#4e6d88" stroke-width="1.5"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--red)">EVENING STAR ★★★</div><div style="font-size:9px;color:var(--dim)">3-bar bearish reversal</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">Green → small Doji/body → Red. Opposite of Morning Star. Buyer exhaustion at resistance. Red bar closes below midpoint of green = confirmed.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 Exit all longs on 3rd candle close. Strong reversal</div>
+        </div>
+
+        <!-- 3 White Soldiers -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(0,232,122,.15);background:rgba(0,232,122,.03)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="40" height="44" viewBox="0 0 40 44">
+              <rect x="2" y="28" width="8" height="14" rx="1" fill="#00e87a"/>
+              <line x1="6" y1="24" x2="6" y2="28" stroke="#00e87a" stroke-width="1.5"/>
+              <line x1="6" y1="42" x2="6" y2="44" stroke="#4e6d88" stroke-width="1"/>
+              <rect x="16" y="16" width="8" height="14" rx="1" fill="#00e87a"/>
+              <line x1="20" y1="12" x2="20" y2="16" stroke="#00e87a" stroke-width="1.5"/>
+              <line x1="20" y1="30" x2="20" y2="32" stroke="#4e6d88" stroke-width="1"/>
+              <rect x="30" y="4" width="8" height="14" rx="1" fill="#00e87a"/>
+              <line x1="34" y1="0" x2="34" y2="4" stroke="#00e87a" stroke-width="1.5"/>
+              <line x1="34" y1="18" x2="34" y2="20" stroke="#4e6d88" stroke-width="1"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--green)">3 WHITE SOLDIERS ★★★</div><div style="font-size:9px;color:var(--dim)">3-bar strong bull trend</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">3 consecutive green candles, each closing higher. Strong institutional buying. Trend reversal confirmed. Entry on 3rd candle or first pullback.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 After downtrend = very bullish. Mid-trend = continuation</div>
+        </div>
+
+        <!-- 3 Black Crows -->
+        <div style="padding:.5rem .65rem;border-radius:7px;border:1px solid rgba(240,58,74,.2);background:rgba(240,58,74,.04)">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+            <svg width="40" height="44" viewBox="0 0 40 44">
+              <rect x="2" y="2" width="8" height="14" rx="1" fill="#f03a4a"/>
+              <line x1="6" y1="0" x2="6" y2="2" stroke="#4e6d88" stroke-width="1"/>
+              <line x1="6" y1="16" x2="6" y2="20" stroke="#f03a4a" stroke-width="1.5"/>
+              <rect x="16" y="14" width="8" height="14" rx="1" fill="#f03a4a"/>
+              <line x1="20" y1="12" x2="20" y2="14" stroke="#4e6d88" stroke-width="1"/>
+              <line x1="20" y1="28" x2="20" y2="32" stroke="#f03a4a" stroke-width="1.5"/>
+              <rect x="30" y="26" width="8" height="14" rx="1" fill="#f03a4a"/>
+              <line x1="34" y1="24" x2="34" y2="26" stroke="#4e6d88" stroke-width="1"/>
+              <line x1="34" y1="40" x2="34" y2="44" stroke="#f03a4a" stroke-width="1.5"/>
+            </svg>
+            <div><div style="font-size:11px;font-weight:700;color:var(--red)">3 BLACK CROWS ★★★</div><div style="font-size:9px;color:var(--dim)">3-bar strong bear trend</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text)">3 consecutive red candles, each closing lower. Strong institutional selling. Distribution phase. Exit ALL longs immediately on 3rd candle.</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:.2rem">🔑 After uptrend = very bearish. Do not average down</div>
+        </div>
+
       </div>
 
       <!-- Key message -->
       <div style="padding:.45rem .7rem;border-radius:7px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);font-size:12px">
-        📢 <strong style="color:var(--yellow)">Key Message:</strong> <span style="color:var(--text)">Setiap candle cerita apa yang jadi antara buyer dan seller dalam satu tempoh masa. Baca cerita — bukan hanya warna.</span>
+        📢 <strong style="color:var(--yellow)">Key Message:</strong> <span style="color:var(--text)">Setiap candle cerita apa yang jadi antara buyer dan seller dalam satu tempoh masa. Baca cerita — bukan hanya warna. Combine dengan volume dan S/R untuk keputusan terbaik.</span>
       </div>
     </div>
         </div>
